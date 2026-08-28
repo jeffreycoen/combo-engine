@@ -39,7 +39,7 @@ One Sonnet 5 agent, one task, working tree. The brief: the two plan files as req
 
 ## 6. Land and close
 
-The task's final steps flip the records in the landing itself: phase status line to LANDED with commit and gate numbers, the earned README checklist boxes, and `docs/plans/STATE.md`. Report the landing: one line of outcome, gate lines verbatim, prior-gate tails, commit hash, push result, fixture seeds. Stop; the owner's word rules the next extraction.
+The task's final steps flip the records in the landing itself: phase status line to LANDED with commit and gate numbers, and the earned README checklist boxes. Report the landing: one line of outcome, gate lines verbatim, prior-gate tails, commit hash, push result, fixture seeds. Stop; the owner's word rules the next extraction.
 
 ## Invariants (also law in CLAUDE.md)
 

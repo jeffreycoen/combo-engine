@@ -37,7 +37,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - Every lift names its kind in the phase document: VERBATIM (file inventory with hashes), VERBATIM MATH (named substitutions, and only those — an unlisted difference stops the agent), or SHAPED (the law carried, the code new, said plainly). The kind decides the acceptance; arithmetic ratifies all three.
 - Demo files are source material, read-only, cited by line. No task ever edits a demo.
 - Every task is bracketed by the prior gates: asserted green as step 1, re-asserted before the commit. A moved number is a finding against the task, never something to fix in flight.
-- The record close rides the landing (owner, 2026-08-28): when every gate is green, the phase status line, the README checklist boxes, and `docs/plans/STATE.md` flip in the same landing, not on a later word.
+- The record close rides the landing (owner, 2026-08-28): when every gate is green, the phase status line and the README checklist boxes flip in the same landing, not on a later word.
 
 ## Versioning
 
