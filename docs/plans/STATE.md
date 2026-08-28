@@ -5,7 +5,7 @@
 
 Current phase: none active. Last landed: 0.0.7.
 
-Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`) · 0.0.5 weldstress (`e3fb9d6`) · 0.0.6 tape (`048b837`) · 0.0.7 physics-pb (pending).
+Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`) · 0.0.5 weldstress (`e3fb9d6`) · 0.0.6 tape (`048b837`) · 0.0.7 physics-pb (`0ca4186`).
 
 Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger · weldstress · tape · physics-pb. Pinned tails live in each phase document.
 

@@ -1,6 +1,6 @@
 # Phase 0.0.7 — the position-based physics core
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 11 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `0ca4186`, 2026-08-28. Gate: 11 PASS / 0 FAIL; prior gates unmoved.
 
 The first organ from outside deadweight: the mech demo's rigid-body core — substepped position-based dynamics with welds and hinges that carry a four-load structural envelope (pull, sideways, bending, twist; one utilization number; honest tearing), torque-limited joint servos, ground contact with correct static friction, and box-pair separation. This is the solver coldsnap's engine reserves the mech-island hook for. Source: `mech-mk1-live-opus-5.html` lines 159–789 — the whole `core/physics.mjs` section, which the demo's own header says was bundled from gated modules "unmodified except module syntax removal."
 
