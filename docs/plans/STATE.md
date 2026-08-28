@@ -1,16 +1,51 @@
 # STATE — where the work stands
 
-<!-- Ten lines, no more. Updated in every landing commit. A fresh session reads
-     CLAUDE.md, the last ~20 commit subjects, and this file, and is oriented. -->
+Updated in every landing commit. A fresh session reads CLAUDE.md, this file,
+and the last ~20 commit subjects, and is oriented.
 
-Current phase: none active. Last landed: 0.0.8.
+## Now
 
-Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`) · 0.0.5 weldstress (`e3fb9d6`) · 0.0.6 tape (`048b837`) · 0.0.7 physics-pb (`0ca4186`) · 0.0.8 rig (`6f45e61`)
+Nothing in flight. Last landed phase: 0.0.8.
 
-Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger · weldstress · tape · physics-pb · rig. Pinned tails live in each phase document.
+## Landed
 
-Next candidates, as last ruled: rig generalization — limb chains become spec data, the MK1 becomes fixture; equivalence gate must reproduce 8140 kg / 17 bodies / the bit-identical standing pelvis (owner ruling 2026-08-28) · mech leg kinematics onto the rig · deadweight grapple · frozen-time aiming. No ruling yet.
+| Phase | What | Commit |
+|-------|------|--------|
+| 0.0.1 | coldsnap engine, 42 files verbatim | `090f043` |
+| 0.0.2 | market pools + the module pattern | `8e72a5e` |
+| 0.0.3 | ship builder | `509d706` |
+| 0.0.4 | conservation ledger | `0fc9b18` |
+| 0.0.5 | weld stress | `e3fb9d6` |
+| 0.0.6 | input tape | `048b837` |
+| 0.0.7 | position-based physics core | `0ca4186` |
+| 0.0.8 | rig table + assembly | `6f45e61` |
 
-Standing rulings not in CLAUDE.md: plain copy at pin for coldsnap material; coldsnap keeps its own engine, never re-pointed; demos stay out of git.
+## Gates
 
-Loose ends: coldsnap reference docs (sound profiles, systems, test manifest) not yet copied over; the four demo maps live only in session scratchpad.
+All green: api, combat, accuracy, market, builder, ledger, weldstress, tape,
+physics-pb, rig. Run any with `node scripts/gate.mjs <name>`. Each phase
+document pins its gate's required numbers.
+
+## Next, as last ruled
+
+1. Rig generalization (ruled 2026-08-28): limb chains become spec data, the
+   MK1 becomes the gate's fixture. Acceptance: the data-driven assembly must
+   reproduce 8140 kg, 17 bodies, and the bit-identical standing pelvis.
+2. Mech leg kinematics, onto the rig.
+3. Deadweight grapple rope.
+4. Deadweight frozen-time aiming.
+
+No ruling on which is next.
+
+## Standing rulings not in CLAUDE.md
+
+- Coldsnap material arrives by plain copy at a pinned commit; coldsnap keeps
+  its own engine and is never re-pointed or touched.
+- The demo files stay out of git.
+
+## Loose ends
+
+- Coldsnap reference docs (sound profiles, systems, test manifest) not yet
+  copied over.
+- The four demo reuse-map documents were lost with the old session's
+  scratchpad; the README checklist carries their conclusions.

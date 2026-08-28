@@ -44,7 +44,7 @@ node scripts/gate.mjs <name>
 
 6. Assert the prior gates did not move (same required tails as step 1).
 
-7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit stamped below, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md` per its own format.
+7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit stamped below, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md`: set the Now section's last-landed to 0.0.N, add the table row `| 0.0.N | <what> | pending |`, add `<name>` to the Gates list, and remove the lifted item from the Next list.
 
 8. Commit and push the landing, then stamp the real hash in a second small commit — NEVER amend after stamping (an amend rewrites the commit and makes every stamped hash stale; phase 0.0.6 proved it):
 
@@ -58,7 +58,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 git push origin main
 H=$(git rev-parse --short HEAD)
 sed -i "s/commit stamped below/commit \`$H\`/" docs/plans/phase-0.0.N-<name>.md
-sed -i "s/0.0.N <name> (pending)/0.0.N <name> (\`$H\`)/" docs/plans/STATE.md
+sed -i "s/| 0.0.N | <what> | pending |/| 0.0.N | <what> | \`$H\` |/" docs/plans/STATE.md
 git add docs/plans && git commit -m "phase 0.0.N record stamped — $H
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
