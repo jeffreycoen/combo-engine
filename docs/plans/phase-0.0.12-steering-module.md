@@ -1,6 +1,6 @@
 # Phase 0.0.12 — steering behaviors
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `eab10a5`, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 12 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the fleet demo's motion: acceleration toward a desired speed with a braking window, turning as a fractional approach, banking into turns, strafe and guard orbits, and the idle drift. Source: `homeworld_fleet_command.jsx` lines 1339–1465 (the four movement branches) and 969–993 (the per-unit motion state). It composes with the landed orders module: `resolveMode` picks the branch, these functions move the unit.
