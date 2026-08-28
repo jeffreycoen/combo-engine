@@ -16,6 +16,7 @@ const GATES = {
   "market": ["scripts/market-test.mjs"],
   "builder": ["scripts/builder-test.mjs"],
   "ledger": ["scripts/ledger-test.mjs"],
+  "weldstress": ["scripts/weldstress-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
