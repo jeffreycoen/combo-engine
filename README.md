@@ -91,7 +91,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 ### From the fleet demo
 
-- [ ] The fleet order model: select, move, attack, guard — orders as data on units
+- [x] The fleet order model: select, move, attack, guard — orders as data on units
 - [ ] The 3-D movement disc: order movement in three dimensions with a flat pointer
 - [ ] Steering behaviors: acceleration, capped turning, banking, strafe and guard orbits
 - [ ] The selection and feedback layer: brackets, health ramps, order lines, formation links
