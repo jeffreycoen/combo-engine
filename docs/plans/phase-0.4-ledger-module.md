@@ -1,6 +1,6 @@
 # Phase 0.4 — the conservation ledger
 
-Status: PLANNED. No task dispatched.
+Status: LANDED, commit `0fc9b18`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 
 The third organ out of deadweight, and its crown: the conservation law. Every conserved unit declared at world start; every holder of value counted; the audit returns to zero drift forever, and deliberate destruction is a reason-carrying write-down, never a leak. Source: `deadweight-hangar.html` lines 254–344 (`GEN`, `genesis()`, `audit()`, and the write-down at line 2496 — "a star can eat money — genesis records it").
 
