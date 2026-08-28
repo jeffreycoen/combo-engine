@@ -1,6 +1,6 @@
 # Phase 0.0.8 — the rig table and assembly
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `6f45e61`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 
 The mech demo's machine-as-data layer, onto the physics core landed in 0.0.7: the whole MK1 as one table (mass, box size, joint anchors, hinge axes, torque caps, mount limits per link), limbs mirrored per side, assembled breadth-first into bodies, hinges, welds, and the two collision pairs — plus grounding, the balance-debt measure, and rig statistics. Source: `mech-mk1-live-opus-5.html` lines 860–1063, the whole `rig/mech.mjs` section.
 
