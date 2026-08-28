@@ -61,7 +61,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] The position-based physics core (the mech island coldsnap already reserves a hook for)
 - [ ] Mount failure envelopes: four load types, one utilization number, honest tearing
 - [ ] Torque-limited joint actuators with finite stiffness
-- [ ] The rig table: a whole machine as data, mirrored per side, assembled from the table
+- [x] The rig table: a whole machine as data, mirrored per side, assembled from the table
 - [ ] Leg inverse kinematics
 - [ ] The balance controller and the walking planner
 - [ ] Labeled-cheat presets: every relaxed rule named, with its measured consequence
