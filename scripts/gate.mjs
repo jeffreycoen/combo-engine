@@ -5,15 +5,14 @@
 // read which gates ran and what they returned without anyone's scrollback.
 // CI calls the gates directly and never writes this log.
 //
-// The table is the registry: every module that lands in the engine adds its
-// gate here. It starts empty on purpose — nothing has landed yet. The first
-// entry will be the api's own headless run:
-//   "api": ["src/api.js", "gate"],
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
 const GATES = {
+  "api": ["src/depot/api.js", "gate", "1", "90"],
+  "combat": ["scripts/combat-test.mjs"],
+  "accuracy": ["scripts/accuracy-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
