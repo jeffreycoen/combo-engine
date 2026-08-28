@@ -25,6 +25,7 @@ const GATES = {
   "orders": ["scripts/orders-test.mjs"],
   "steering": ["scripts/steering-test.mjs"],
   "voxel": ["scripts/voxel-test.mjs"],
+  "support": ["scripts/support-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

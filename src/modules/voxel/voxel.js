@@ -691,3 +691,35 @@ VoxWorld.prototype.damageTunnel = function (pr, ax, ay, az, bx, by, bz, ivx, ivy
   if (f.frac < 0.32) pr.gone = 1;
   return f.frac;
 };
+
+// dropPrimAsCluster: a whole unwounded prim leaves as one falling cluster —
+// the support layer's verb for an unsupported piece (demo 2569-2597). The
+// demo's Math.random tumble draws from the seeded stream; color is gone.
+VoxWorld.prototype.dropPrimAsCluster = function (pr) {
+  const c = pr.cc || pr.c, s = pr.s;
+  const q = this.sizeFor(pr);
+  const nx = Math.max(1, Math.min(8, Math.round(s[0] / q)));
+  const ny = Math.max(1, Math.min(8, Math.round(s[1] / q)));
+  const nz = Math.max(1, Math.min(8, Math.round(s[2] / q)));
+  const sx = s[0] / nx, sy = s[1] / ny, sz = s[2] / nz;
+  const n = nx * ny * nz;
+  if (this.clusters.length >= VOX.MAX_CLUSTERS) return 0;
+  const cells = [];
+  let rad = 0;
+  for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) for (let d = 0; d < nz; d++) {
+    const ox = -s[0] / 2 + sx * (a + 0.5);
+    const oy = -s[1] / 2 + sy * (b + 0.5);
+    const oz = -s[2] / 2 + sz * (d + 0.5);
+    cells.push(ox, oy, oz);
+    const rr = Math.hypot(ox, oy, oz); if (rr > rad) rad = rr;
+  }
+  const rho = MEDIA[pr.m] ? MEDIA[pr.m].rho : 1000;
+  this.clusters.push({
+    x: c[0], y: c[1], z: c[2], vx: 0, vy: 0, vz: 0,
+    ra: 0, rb: 0, wa: (this.rng() - 0.5) * 2.2, wb: (this.rng() - 0.5) * 1.4,
+    cells, nc: n, sx, sy, sz,
+    rad: rad + Math.max(sx, sy, sz) * 0.5,
+    mass: rho * sx * sy * sz * n, t: 0,
+  });
+  return n;
+};
