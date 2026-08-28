@@ -3,9 +3,9 @@
 <!-- Ten lines, no more. Updated in every landing commit. A fresh session reads
      CLAUDE.md, the last ~20 commit subjects, and this file, and is oriented. -->
 
-Current phase: none active. Last landed: 0.4.
+Current phase: 0.0.5 weldstress PLANNED, served for review. Last landed: 0.0.4.
 
-Landed: 0.1 coldsnap engine (`090f043`) · 0.2 market + module pattern (`8e72a5e`) · 0.3 builder (`509d706`) · 0.4 ledger (`0fc9b18`).
+Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`).
 
 Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger. Pinned tails live in each phase document.
 

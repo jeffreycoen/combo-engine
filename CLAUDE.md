@@ -41,7 +41,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 
 ## Versioning
 
-- Phases bump +0.1, tasks +0.01, sequential, never skipped. Every deploy bumps `src/version.js`; build AFTER the bump, never before.
+- Versions are three-part (owner, 2026-08-28). Phases bump the third part: 0.0.1, 0.0.2, ... sequential, never skipped. Tasks are suffixes: task 0.0.5-1. The middle digit marks eras — 0.1.0 when the described-world boot lands; 1.0.0 when the engine is general. `package.json` version tracks the last landed phase.
 
 ## Dispatch
 

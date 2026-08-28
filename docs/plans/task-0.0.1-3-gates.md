@@ -1,4 +1,4 @@
-# Task 0.13 — the gates
+# Task 0.0.1-3 — the gates
 
 One job: register the three gates, run them, match the pinned numbers, then land the whole phase as one commit and push it.
 
@@ -6,12 +6,12 @@ Suggested model: Sonnet 5 — mechanical.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.1-coldsnap-migration.md`, whole.
+2. `docs/plans/phase-0.0.1-coldsnap-migration.md`, whole.
 
-Precondition: tasks 0.11 and 0.12 landed. Assert:
+Precondition: tasks 0.0.1-1 and 0.0.1-2 landed. Assert:
 
 ```sh
-sha256sum -c docs/plans/task-0.11-inventory.txt --quiet && test -d node_modules && echo READY
+sha256sum -c docs/plans/task-0.0.1-1-inventory.txt --quiet && test -d node_modules && echo READY
 ```
 
 Must print `READY`.
@@ -66,7 +66,7 @@ node_modules/
 
 ```sh
 git add src scripts package.json package-lock.json .gitignore docs
-git commit -m "phase 0.1 — the coldsnap engine arrives, verbatim at 82b5524
+git commit -m "phase 0.0.1 — the coldsnap engine arrives, verbatim at 82b5524
 
 42 files, byte-identical to the pin. Gates green here:
 api worldHash 3367709165 runHash 2717846799, combat 7 PASS, accuracy 11/11.

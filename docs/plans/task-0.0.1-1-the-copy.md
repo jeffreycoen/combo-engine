@@ -1,4 +1,4 @@
-# Task 0.11 — the copy
+# Task 0.0.1-1 — the copy
 
 One job: bring 42 files from coldsnap commit `82b5524fb6c9acc258b9edb685c832f7465537f7` into this repo, byte-identical, paths unchanged. Nothing is edited, nothing is designed. Coldsnap is not touched.
 
@@ -6,7 +6,7 @@ Suggested model: Sonnet 5 — pure mechanical execution.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.1-coldsnap-migration.md`, whole.
+2. `docs/plans/phase-0.0.1-coldsnap-migration.md`, whole.
 
 ## Substitution table
 
@@ -47,12 +47,12 @@ git -C /home/batman/coldsnap archive 82b5524fb6c9acc258b9edb685c832f7465537f7 \
 5. The arithmetic. Verify every file against the inventory below. Must end `42 verified, 0 failed`.
 
 ```sh
-sha256sum -c docs/plans/task-0.11-inventory.txt && echo "$(grep -c . docs/plans/task-0.11-inventory.txt) verified, 0 failed"
+sha256sum -c docs/plans/task-0.0.1-1-inventory.txt && echo "$(grep -c . docs/plans/task-0.0.1-1-inventory.txt) verified, 0 failed"
 ```
 
 ## Inventory
 
-The file `docs/plans/task-0.11-inventory.txt` sits beside this plan and is the checklist step 5 runs against — 42 lines, sha256 then path, generated from the pin at plan-writing time. It is part of this plan; do not regenerate it.
+The file `docs/plans/task-0.0.1-1-inventory.txt` sits beside this plan and is the checklist step 5 runs against — 42 lines, sha256 then path, generated from the pin at plan-writing time. It is part of this plan; do not regenerate it.
 
 ## Acceptance
 
@@ -63,4 +63,4 @@ The file `docs/plans/task-0.11-inventory.txt` sits beside this plan and is the c
 
 ## Landing
 
-Do NOT commit. Report the three acceptance numbers and stop; the commit rides with task 0.13 after the gates prove the copy runs.
+Do NOT commit. Report the three acceptance numbers and stop; the commit rides with task 0.0.1-3 after the gates prove the copy runs.

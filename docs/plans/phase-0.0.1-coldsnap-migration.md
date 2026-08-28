@@ -1,4 +1,4 @@
-# Phase 0.1 — the coldsnap engine arrives
+# Phase 0.0.1 — the coldsnap engine arrives
 
 Status: LANDED, commit `090f043`, 2026-08-28. All three tasks executed clean, no nonconformities. Gates here match the pin: api worldHash 3367709165 / runHash 2717846799 (twice, identical), combat 7 PASS / 0 FAIL, accuracy 11/11.
 
@@ -31,8 +31,8 @@ The pin: coldsnap commit `82b5524fb6c9acc258b9edb685c832f7465537f7` (mk2.86, "th
 
 ## Tasks
 
-- 0.11 — the copy. Inventory-checked verbatim move of the 42 files. → `task-0.11-the-copy.md`
-- 0.12 — the scaffolding. package.json (module type, the three.js dependency), install, import proof. → `task-0.12-scaffolding.md`
-- 0.13 — the gates. Register api/combat/accuracy in scripts/gate.mjs, run all three, match the numbers above, commit and push. → `task-0.13-gates.md`
+- 0.0.1-1 — the copy. Inventory-checked verbatim move of the 42 files. → `task-0.0.1-1-the-copy.md`
+- 0.0.1-2 — the scaffolding. package.json (module type, the three.js dependency), install, import proof. → `task-0.0.1-2-scaffolding.md`
+- 0.0.1-3 — the gates. Register api/combat/accuracy in scripts/gate.mjs, run all three, match the numbers above, commit and push. → `task-0.0.1-3-gates.md`
 
 One agent, one task at a time, stop after each landing. Suggested model for all three: Sonnet 5 — every step is mechanical execution of listed commands; nothing is designed.

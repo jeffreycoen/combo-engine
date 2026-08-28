@@ -1,4 +1,4 @@
-# Task 0.21 — the market module
+# Task 0.0.2-1 — the market module
 
 One job: create the engine's first module — the market pools out of deadweight — with its contract, its gate, and the module pattern document, then land the phase as one commit and push. Every file's full content is below; you write exactly what is written here, run the listed gates, and report. You design nothing.
 
@@ -6,7 +6,7 @@ Suggested model: Sonnet 5.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.2-market-module.md`, whole.
+2. `docs/plans/phase-0.0.2-market-module.md`, whole.
 
 Source of the math (reference only — do not edit it): `deadweight-hangar.html` lines 247–253, the functions `poolBuy`, `poolSell`, `price1`. The code in step 2 carries that math verbatim.
 
@@ -170,8 +170,8 @@ The api line must end `worldHash 3367709165  runHash 2717846799`; combat `ALL PA
 8. Commit and push:
 
 ```sh
-git add src/modules scripts/market-test.mjs scripts/gate.mjs docs/modules docs/plans/phase-0.2-market-module.md docs/plans/task-0.21-market.md
-git commit -m "phase 0.2 — the market module lands, the module pattern minted
+git add src/modules scripts/market-test.mjs scripts/gate.mjs docs/modules docs/plans/phase-0.0.2-market-module.md docs/plans/task-0.0.2-1-market.md
+git commit -m "phase 0.0.2 — the market module lands, the module pattern minted
 
 Deadweight's constant-product pools, verbatim math, first occupant of
 src/modules/. Gate: 8 PASS / 0 FAIL, 10,000 seeded trades conserve exactly.

@@ -1,4 +1,4 @@
-# Task 0.31 — the builder module
+# Task 0.0.3-1 — the builder module
 
 One job: create the second module — the ship builder core out of deadweight — with its contract and gate, then land the phase as one commit and push. Every file's full content is below; you write exactly what is written, run the listed gates, and report. You design nothing.
 
@@ -6,7 +6,7 @@ Suggested model: Sonnet 5.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.3-builder-module.md`, whole.
+2. `docs/plans/phase-0.0.3-builder-module.md`, whole.
 
 Source of the math (reference only — do not edit it): `deadweight-hangar.html` lines 348–400 (`adjacencyOK`, `weldsOf`, `derive`, `connectedFrom`), spec rows lines 171–182, starter build line 346. The substitution rules are the phase document's three, and only those.
 
@@ -217,8 +217,8 @@ node scripts/gate.mjs market | tail -1
 7. Commit and push:
 
 ```sh
-git add src/modules/builder scripts/builder-test.mjs scripts/gate.mjs docs/plans/phase-0.3-builder-module.md docs/plans/task-0.31-builder.md
-git commit -m "phase 0.3 — the ship builder core lands
+git add src/modules/builder scripts/builder-test.mjs scripts/gate.mjs docs/plans/phase-0.0.3-builder-module.md docs/plans/task-0.0.3-1-builder.md
+git commit -m "phase 0.0.3 — the ship builder core lands
 
 Deadweight's grid builder: ports, welds, derive. Verbatim math, three
 named substitutions. Gate: 10 PASS / 0 FAIL on the demo's own numbers.

@@ -1,4 +1,4 @@
-# Phase 0.2 — the market module, and the module pattern it mints
+# Phase 0.0.2 — the market module, and the module pattern it mints
 
 Status: LANDED, commit `8e72a5e`, 2026-08-28. Gate: 8 PASS / 0 FAIL; prior gates unmoved.
 
@@ -16,6 +16,6 @@ This is not a verbatim move in the inventory-and-hash sense: the math is copied 
 
 ## Tasks
 
-- 0.21 — the market module: code, gate, pattern document, registration, commit, push. → `task-0.21-market.md`
+- 0.0.2-1 — the market module: code, gate, pattern document, registration, commit, push. → `task-0.0.2-1-market.md`
 
 Suggested model: Sonnet 5 — every file's full content is in the plan; the agent writes, runs, and reports.

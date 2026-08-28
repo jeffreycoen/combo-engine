@@ -1,4 +1,4 @@
-# Task 0.12 — the scaffolding
+# Task 0.0.1-2 — the scaffolding
 
 One job: give the copied engine the node footing it needs to run headless. Two new files' worth of work, nothing else.
 
@@ -6,12 +6,12 @@ Suggested model: Sonnet 5 — mechanical.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.1-coldsnap-migration.md`, whole.
+2. `docs/plans/phase-0.0.1-coldsnap-migration.md`, whole.
 
-Precondition: task 0.11 landed — `src/` holds the 42-file copy. Assert before starting:
+Precondition: task 0.0.1-1 landed — `src/` holds the 42-file copy. Assert before starting:
 
 ```sh
-sha256sum -c docs/plans/task-0.11-inventory.txt --quiet && echo COPY-OK
+sha256sum -c docs/plans/task-0.0.1-1-inventory.txt --quiet && echo COPY-OK
 ```
 
 Must print `COPY-OK`. Anything else stops the task.
@@ -51,4 +51,4 @@ node --input-type=module -e "const m = await import('./src/engine/core.js'); con
 
 ## Landing
 
-Do NOT commit; the commit rides with task 0.13. Report the two results and stop. `node_modules/` and `package-lock.json` will exist untracked — leave them; 0.13 handles ignore rules.
+Do NOT commit; the commit rides with task 0.0.1-3. Report the two results and stop. `node_modules/` and `package-lock.json` will exist untracked — leave them; 0.13 handles ignore rules.

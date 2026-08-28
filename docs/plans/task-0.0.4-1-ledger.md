@@ -1,4 +1,4 @@
-# Task 0.41 — the ledger module
+# Task 0.0.4-1 — the ledger module
 
 One job: create the third module — the conservation ledger shaped from deadweight — with its contract and gate, then land the phase as one commit and push. Every file's full content is below; write exactly what is written, run the listed gates, report. You design nothing.
 
@@ -6,7 +6,7 @@ Suggested model: Sonnet 5.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.4-ledger-module.md`, whole.
+2. `docs/plans/phase-0.0.4-ledger-module.md`, whole.
 
 Source of the law (reference only — do not edit it): `deadweight-hangar.html` lines 254–344 and 2496. The phase document states what is shaped versus carried; this task only writes the files below.
 
@@ -212,8 +212,8 @@ node scripts/gate.mjs builder | tail -1
 7. Commit and push:
 
 ```sh
-git add src/modules/ledger scripts/ledger-test.mjs scripts/gate.mjs docs/plans/phase-0.4-ledger-module.md docs/plans/task-0.41-ledger.md
-git commit -m "phase 0.4 — the conservation ledger lands
+git add src/modules/ledger scripts/ledger-test.mjs scripts/gate.mjs docs/plans/phase-0.0.4-ledger-module.md docs/plans/task-0.0.4-1-ledger.md
+git commit -m "phase 0.0.4 — the conservation ledger lands
 
 Deadweight's law, shaped: declare, seal, sources, audit to zero,
 reason-carrying write-offs. Gate: 9 PASS / 0 FAIL, and the sweep runs

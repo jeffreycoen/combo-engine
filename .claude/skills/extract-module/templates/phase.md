@@ -1,4 +1,4 @@
-# Phase 0.N — <the organ, plainly named>
+# Phase 0.0.N — <the organ, plainly named>
 
 Status: PLANNED. No task dispatched.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: <count> PASS / 0 FAIL; prior gates unmoved. -->
@@ -24,6 +24,6 @@ Every number below was produced by running the exact planned code at plan-writin
 
 ## Tasks
 
-- 0.N1 — <one line>. → `task-0.N1-<name>.md`
+- 0.0.N-1 — <one line>. → `task-0.0.N-1-<name>.md`
 
 Suggested model: Sonnet 5 — every file's full content is in the plan.

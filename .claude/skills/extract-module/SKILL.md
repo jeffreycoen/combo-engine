@@ -25,7 +25,7 @@ In the session scratchpad (never the repo), assemble the exact module file and t
 - Phase document from `templates/phase.md` — status PLANNED, lift kind, source anchors, acceptance arithmetic (the trial's outputs), task index.
 - Task document from `templates/task.md` — full file contents embedded byte-for-byte from the trial, atomic steps, failing asserts first, prior-gate brackets on both ends, the record-close step, the report format.
 
-File naming: `docs/plans/phase-0.N-<name>.md`, `docs/plans/task-0.N1-<name>.md`. Phases bump +0.1, tasks +0.01, never skipped.
+File naming: `docs/plans/phase-0.0.N-<name>.md`, `docs/plans/task-0.0.N-M-<name>.md`. Phases bump the third part, sequential, never skipped; tasks are -M suffixes.
 
 ## 4. Serve for review
 

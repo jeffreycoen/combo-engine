@@ -1,4 +1,4 @@
-# Phase 0.4 — the conservation ledger
+# Phase 0.0.4 — the conservation ledger
 
 Status: LANDED, commit `0fc9b18`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 
@@ -22,6 +22,6 @@ The gate's conservation sweep runs the MARKET module's own pools under the ledge
 
 ## Tasks
 
-- 0.41 — the ledger module: code, gate, registration, commit, push. → `task-0.41-ledger.md`
+- 0.0.4-1 — the ledger module: code, gate, registration, commit, push. → `task-0.0.4-1-ledger.md`
 
 Suggested model: Sonnet 5 — every file's full content is in the plan.

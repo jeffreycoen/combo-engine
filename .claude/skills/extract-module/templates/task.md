@@ -1,4 +1,4 @@
-# Task 0.N1 — <the module>
+# Task 0.0.N-1 — <the module>
 
 One job: <one sentence>. Every file's full content is below; write exactly what is written, run the listed gates, report. You design nothing.
 
@@ -6,7 +6,7 @@ Suggested model: Sonnet 5.
 
 Required reading, in order (confirm at the top of your report):
 1. This file, whole.
-2. `docs/plans/phase-0.N-<name>.md`, whole.
+2. `docs/plans/phase-0.0.N-<name>.md`, whole.
 
 Source of the math (reference only — do not edit it): `<demo file>` lines <a–b>.
 
@@ -44,13 +44,13 @@ node scripts/gate.mjs <name>
 
 6. Assert the prior gates did not move (same required tails as step 1).
 
-7. Close the records in this landing: in `docs/plans/phase-0.N-<name>.md` replace the status line with `Status: LANDED, commit pending, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md` per its own format.
+7. Close the records in this landing: in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit pending, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md` per its own format.
 
 8. Commit and push (then amend the phase status line's `commit pending` to the real hash and amend the commit):
 
 ```sh
 git add src/modules/<name> scripts/<name>-test.mjs scripts/gate.mjs README.md docs/plans
-git commit -m "phase 0.N — <one line>
+git commit -m "phase 0.0.N — <one line>
 
 <two lines: what carried, the gate numbers>
 

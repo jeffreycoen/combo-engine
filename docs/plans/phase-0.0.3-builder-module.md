@@ -1,4 +1,4 @@
-# Phase 0.3 — the ship builder core
+# Phase 0.0.3 — the ship builder core
 
 Status: LANDED, commit `509d706`, 2026-08-28. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
 
@@ -26,6 +26,6 @@ Every number above was produced by running the exact planned code at plan-writin
 
 ## Tasks
 
-- 0.31 — the builder module: code, gate, registration, commit, push. → `task-0.31-builder.md`
+- 0.0.3-1 — the builder module: code, gate, registration, commit, push. → `task-0.0.3-1-builder.md`
 
 Suggested model: Sonnet 5 — every file's full content is in the plan.
