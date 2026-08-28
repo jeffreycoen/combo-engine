@@ -27,9 +27,9 @@ In the session scratchpad (never the repo), assemble the exact module file and t
 
 File naming: `docs/plans/phase-0.0.N-<name>.md`, `docs/plans/task-0.0.N-M-<name>.md`. Phases bump the third part, sequential, never skipped; tasks are -M suffixes.
 
-## 4. Serve for review
+## 4. Rehearse, then serve for review
 
-Serve the phase document, then the task document ALONE, as rendered files. State the pre-serve checks performed: trial run green, anchors grepped, numbers are outputs.
+Before serving, REHEARSE the plan against its own text: extract the task document's shell blocks and run the file-producing steps in a fresh scratch directory; every hash check must print OK from the rehearsal alone. This has caught real plan defects twice (a truncated heredoc in 0.0.8, proven by a FAILED hash). Then serve the phase document and the task document ALONE, as rendered files, stating the pre-serve checks: trial green, anchors grepped, numbers are outputs, rehearsal passed.
 
 RULING: the owner's review rules the dispatch. Any amendment is re-served before dispatch.
 

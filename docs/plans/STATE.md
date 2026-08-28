@@ -9,7 +9,7 @@ Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e7
 
 Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger · weldstress · tape · physics-pb · rig. Pinned tails live in each phase document.
 
-Next candidates, as last ruled: mech leg kinematics onto the rig · deadweight grapple · frozen-time aiming. No ruling yet.
+Next candidates, as last ruled: rig generalization — limb chains become spec data, the MK1 becomes fixture; equivalence gate must reproduce 8140 kg / 17 bodies / the bit-identical standing pelvis (owner ruling 2026-08-28) · mech leg kinematics onto the rig · deadweight grapple · frozen-time aiming. No ruling yet.
 
 Standing rulings not in CLAUDE.md: plain copy at pin for coldsnap material; coldsnap keeps its own engine, never re-pointed; demos stay out of git.
 
