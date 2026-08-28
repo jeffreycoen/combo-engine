@@ -13,6 +13,7 @@ const GATES = {
   "api": ["src/depot/api.js", "gate", "1", "90"],
   "combat": ["scripts/combat-test.mjs"],
   "accuracy": ["scripts/accuracy-test.mjs"],
+  "market": ["scripts/market-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
