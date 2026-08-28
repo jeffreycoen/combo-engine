@@ -51,10 +51,10 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 ### From coldsnap (the spine)
 
-- [ ] The war engine core: bodies, terrain, craters, welds, projectiles, the determinism laws
-- [ ] The api surface and the roster contract pattern
-- [ ] The sound engine and its acoustics reference: spatial model, event vocabulary, continuous beds
-- [ ] The renderer
+- [x] The war engine core: bodies, terrain, craters, welds, projectiles, the determinism laws
+- [x] The api surface and the roster contract pattern
+- [x] The sound engine: spatial model, event vocabulary, continuous beds (its acoustics reference doc still to come over)
+- [x] The renderer
 
 ### From the mech demo
 
@@ -114,7 +114,7 @@ The intended workflow, for a person or an agent. Untested until the api lands â€
 
 ## Status
 
-At the very beginning. The coldsnap extraction is in flight in its own repository. The demos are not in this tree yet. Nothing on the checklist has landed.
+The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` â€” worldHash 3367709165, runHash 2717846799). The demos are not in this tree yet; their systems land per the checklist.
 
 ## License
 

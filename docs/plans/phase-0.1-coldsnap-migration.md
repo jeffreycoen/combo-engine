@@ -1,6 +1,6 @@
 # Phase 0.1 — the coldsnap engine arrives
 
-Status: PLANNED. No task dispatched.
+Status: LANDED, commit `090f043`, 2026-08-28. All three tasks executed clean, no nonconformities. Gates here match the pin: api worldHash 3367709165 / runHash 2717846799 (twice, identical), combat 7 PASS / 0 FAIL, accuracy 11/11.
 
 Rulings (owner, 2026-08-27): plain copy at a pinned commit; coldsnap keeps its engine untouched, no re-point; the depot game keeps shipping from its own tree.
 
