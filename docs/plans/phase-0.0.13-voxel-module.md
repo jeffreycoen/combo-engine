@@ -1,6 +1,6 @@
 # Phase 0.0.13 — voxel destruction
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 14 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `be4f371`, 2026-08-28. Gate: 14 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 14 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the shooting-range demo's destruction: a solid voxelizes on first wound, damage carves cells only where hit, a perforating shot bores a tunnel with entry and exit spall, unsupported cells leave as falling clusters that bake into rubble or shatter, and settled rubble stacks by a height map so later debris lands on the heap. Source: `holdover-greybox-range-r55-claude-opus-5.html` lines 1750–2470 (fields, damage, contacts, debris, ray, anchors, collapse, clusters) and 2457–2567 (the bored tunnel). Composes with solids (`raycastWorld`, the shared `hit`) and ballistics (`MEDIA`, `G`, and the gate's seeded stream from `mulberry32`).
