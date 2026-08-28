@@ -71,7 +71,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 - [x] The ballistics solver and the material table: drag, wind, ricochet, perforation, embed, energy receipts
 - [x] Plane-set solids: boxes, turned boxes, prisms, one ray routine for all of them
-- [ ] Voxel destruction: damage only where hit, bored tunnels, support collapse, rubble that stacks
+- [x] Voxel destruction: damage only where hit, bored tunnels, support collapse, rubble that stacks
 - [ ] Support propagation: unsupported structure falls; decoration goes with its host
 - [ ] The non-lethal opponent model: per-part thresholds, knockdown by impulse, a lethal line that fails the mission
 - [ ] Opponent senses and cover reasoning
