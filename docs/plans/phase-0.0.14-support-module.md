@@ -1,6 +1,6 @@
 # Phase 0.0.14 — support propagation
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `08fbabe`, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 12 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the shooting-range demo's structural honesty: support propagates up from the ground in passes, so two floating pieces can never hold each other up; decoration is paint — it never bears load, never falls as a body, and goes when its host goes; settling drops every unsupported structural piece as one falling voxel cluster. Source: `holdover-greybox-range-r55-claude-opus-5.html` lines 2940–3060 (`primBox`, `restsOn`, `linkDeco`, `findUnsupported`, `sweepDeco`, `settleWorld`) and 2569–2597 (`dropPrimAsCluster`, which this phase adds to the voxel module). This closes what phase 0.0.13 left behind on purpose.
