@@ -1,6 +1,6 @@
 # Phase 0.0.15 — the grapple rope
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 16 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `26986ad`, 2026-08-28. Gate: 16 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 16 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the deadweight demo's grapple: a cast head that recoils the ship, a tap grammar (fly calls it back, stuck starts the reel, reeling cuts), and the rope itself — rest length set at the bite, slack inside it, beyond it a constraint that pulls both ends by their masses, with the first-taut jerk, the commanded yank, and the snap that leaves the head embedded. Source: `deadweight-hangar.html` lines 1781–1936. What the head bites, and what a torn weld yields, stay with the game; the strain account is the module's, the tearing threshold is the caller's.
