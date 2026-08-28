@@ -85,7 +85,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [ ] Contracts with escrow, open races, and expiry
 - [x] The ship builder: parts on a grid, connection ports, derived mass, balance, and turn authority
 - [x] Weld stress with load-based breaking and honest ship splitting
-- [ ] The grapple rope: taut constraint, both ends pulled by their masses, yank, snap
+- [x] The grapple rope: taut constraint, both ends pulled by their masses, yank, snap
 - [ ] Frozen-time aiming: stop the sim, show the reach, predict with the sim's own step, commit or cancel
 - [ ] The 2-D canvas renderer, with the gravity-warped grid
 
