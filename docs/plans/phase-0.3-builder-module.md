@@ -1,6 +1,6 @@
 # Phase 0.3 — the ship builder core
 
-Status: PLANNED. No task dispatched.
+Status: LANDED, commit `509d706`, 2026-08-28. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
 
 The second organ out of deadweight: the grid-ship builder — parts on integer cells, connection ports gating placement, welds joining neighbors, and `derive()` turning a part list into flight properties (mass, balance point, rotational inertia, thrust, burn torque, turn authority, fuel capacity). Source: `deadweight-hangar.html` lines 348–400, with the spec rows at lines 171–182 and the starter build at line 346.
 
