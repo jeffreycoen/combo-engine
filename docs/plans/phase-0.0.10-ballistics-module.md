@@ -1,6 +1,6 @@
 # Phase 0.0.10 — the ballistics solver and the material table
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 14 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `fa53cae`, 2026-08-28. Gate: 14 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 14 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the shooting-range demo's projectile engine: rounds fly with drag, wind, and gravity at 120 ticks a second; against a solid the material table decides ricochet, perforation, or embedding, and every outcome lands in a typed event buffer with its energy receipts. Source: `holdover-greybox-range-r55-claude-opus-5.html`, lines 64–117 (constants, the seeded random maker, the material and round tables) and lines 218–443 (the `Ballistics` class). It composes with the landed solids module: the ray comes from `raycastWorld` and the shared `hit` record. This is the phase's composition proof — the first module that imports another lifted module.
