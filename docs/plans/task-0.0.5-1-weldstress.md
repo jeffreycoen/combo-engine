@@ -156,7 +156,7 @@ node scripts/gate.mjs weldstress
 7. Close the records in this landing:
    - In `docs/plans/phase-0.0.5-weldstress-module.md`, replace the status line with: `Status: LANDED, commit pending, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.`
    - In `README.md`, flip `- [ ] Weld stress with load-based breaking and honest ship splitting` to `- [x]`.
-   - In `docs/plans/STATE.md`: set the first line to `Current phase: none active. Last landed: 0.5.`; append ` · 0.5 weldstress (pending)` to the Landed line; add `weldstress` to the gates line; remove `deadweight weld stress (pairs with builder) · ` from the next-candidates line.
+   - In `docs/plans/STATE.md`: set the first line to `Current phase: none active. Last landed: 0.0.5.`; append ` · 0.0.5 weldstress (pending)` to the Landed line; add `weldstress` to the gates line; remove `deadweight weld stress (pairs with builder) · ` from the next-candidates line.
 
 8. Commit, stamp the real hash into both pending records, amend, push:
 
@@ -170,7 +170,7 @@ the split on a broken weld. Composes with the builder. Gate: 9 PASS / 0 FAIL.
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 H=$(git rev-parse --short HEAD)
 sed -i "s/commit pending/commit \\`$H\\`/" docs/plans/phase-0.0.5-weldstress-module.md
-sed -i "s/0.5 weldstress (pending)/0.5 weldstress (\\`$H\\`)/" docs/plans/STATE.md
+sed -i "s/0.0.5 weldstress (pending)/0.0.5 weldstress (\\`$H\\`)/" docs/plans/STATE.md
 git add docs/plans && git commit --amend --no-edit
 git push origin main
 ```
