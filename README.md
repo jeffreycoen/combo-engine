@@ -37,7 +37,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 - [ ] Boot from a world description object (seed, terrain, gravity and wind, spec tables, module choices, dials)
 - [ ] Module registry and the standard sockets (tick input, renderer flags, sound events)
-- [ ] The module pattern: skeleton, seam definitions, and the module-author's rule sheet
+- [x] The module pattern: skeleton, seam definitions, and the module-author's rule sheet (minted by the market module)
 - [ ] The manifest tool: a map of what every file imports from the engine, kept mechanically
 
 ### The harness layer (universal — these pay off in every game)
@@ -81,7 +81,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 ### From the space-hauler demo
 
 - [ ] The conservation ledger: every unit declared at world start, audited to zero drift forever
-- [ ] Market pools: prices that move with every trade, players and computer traders in the same pools
+- [x] Market pools: prices that move with every trade, players and computer traders in the same pools
 - [ ] Contracts with escrow, open races, and expiry
 - [ ] The ship builder: parts on a grid, connection ports, derived mass, balance, and turn authority
 - [ ] Weld stress with load-based breaking and honest ship splitting

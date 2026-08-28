@@ -1,6 +1,6 @@
 # Phase 0.2 — the market module, and the module pattern it mints
 
-Status: PLANNED. No task dispatched.
+Status: LANDED, commit `8e72a5e`, 2026-08-28. Gate: 8 PASS / 0 FAIL; prior gates unmoved.
 
 Scope ruling (owner, 2026-08-28): deconstruction of the deadweight demo begins, very small scope first.
 
