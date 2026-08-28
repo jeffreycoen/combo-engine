@@ -93,7 +93,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 - [x] The fleet order model: select, move, attack, guard — orders as data on units
 - [ ] The 3-D movement disc: order movement in three dimensions with a flat pointer
-- [ ] Steering behaviors: acceleration, capped turning, banking, strafe and guard orbits
+- [x] Steering behaviors: acceleration, capped turning, banking, strafe and guard orbits
 - [ ] The selection and feedback layer: brackets, health ramps, order lines, formation links
 - [ ] The touch command grammar: the right mouse button, solved for a phone
 - [ ] The space backdrop and effects kit: starfield, nebulae, trails, beams, explosion rings

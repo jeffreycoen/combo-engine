@@ -23,6 +23,7 @@ const GATES = {
   "solids": ["scripts/solids-test.mjs"],
   "ballistics": ["scripts/ballistics-test.mjs"],
   "orders": ["scripts/orders-test.mjs"],
+  "steering": ["scripts/steering-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
