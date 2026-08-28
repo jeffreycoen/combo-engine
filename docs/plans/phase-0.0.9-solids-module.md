@@ -1,6 +1,6 @@
 # Phase 0.0.9 — plane-set solids and the one ray routine
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `b3e552b`, 2026-08-28. Gate: 12 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 12 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the shooting-range demo's collision geometry: a solid is a set of planes `[nx,ny,nz,d]` plus a bounding box, and one clip routine serves every shape. Four makers (box, yawed box, n-gon prism, slab), the shared `hit` record, the single-solid ray clip, the world raycast, and the segment occlusion test. Source: `holdover-greybox-range-r55-claude-opus-5.html`, lines 118–216 (makers, `hit`, `raySolid`, `raycastWorld`) and lines 1139–1168 (`rayBlocked`). The demo's `makeWorldQuery` (lines 2224–2245) stays behind — it needs the voxel fields, which are a later phase.
