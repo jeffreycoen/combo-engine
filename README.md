@@ -58,7 +58,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 ### From the mech demo
 
-- [ ] The position-based physics core (the mech island coldsnap already reserves a hook for)
+- [x] The position-based physics core (the mech island coldsnap already reserves a hook for)
 - [ ] Mount failure envelopes: four load types, one utilization number, honest tearing
 - [ ] Torque-limited joint actuators with finite stiffness
 - [ ] The rig table: a whole machine as data, mirrored per side, assembled from the table
