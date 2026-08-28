@@ -1,6 +1,6 @@
 # Phase 0.0.6 — the input tape
 
-Status: LANDED, commit `4a49d32`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `048b837`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 
 The fifth organ out of deadweight: the input tape — every command recorded with the tick it happened on, so a seed plus the tape replays a run exactly. The save format that stores causes instead of state; a bug report becomes a seed and a tape; a scenario test becomes a tape with a pinned end state. Source: `deadweight-hangar.html` lines 446–447 (the recorder) and 2589–2626 (the headless driver — "the replay IS the save").
 

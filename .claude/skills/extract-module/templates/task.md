@@ -44,9 +44,9 @@ node scripts/gate.mjs <name>
 
 6. Assert the prior gates did not move (same required tails as step 1).
 
-7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit pending, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md` per its own format.
+7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit stamped below, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>; update `docs/plans/STATE.md` per its own format.
 
-8. Commit and push (then amend the phase status line's `commit pending` to the real hash and amend the commit):
+8. Commit and push the landing, then stamp the real hash in a second small commit — NEVER amend after stamping (an amend rewrites the commit and makes every stamped hash stale; phase 0.0.6 proved it):
 
 ```sh
 git add src/modules/<name> scripts/<name>-test.mjs scripts/gate.mjs README.md package.json docs/plans
@@ -55,8 +55,13 @@ git commit -m "phase 0.0.N — <one line>
 <two lines: what carried, the gate numbers>
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
-<sed the real hash into the phase status line and STATE.md>
-git add docs/plans && git commit --amend --no-edit
+git push origin main
+H=$(git rev-parse --short HEAD)
+sed -i "s/commit stamped below/commit \`$H\`/" docs/plans/phase-0.0.N-<name>.md
+sed -i "s/0.0.N <name> (pending)/0.0.N <name> (\`$H\`)/" docs/plans/STATE.md
+git add docs/plans && git commit -m "phase 0.0.N record stamped — $H
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 git push origin main
 ```
 
@@ -69,4 +74,4 @@ git push origin main
 
 ## Report
 
-Read-confirmation first, then one line of outcome, then bullets: the gate's count line and verdict line verbatim, every prior-gate tail, the commit hash, the push result. Every nonconformity its own labeled bullet. Fixture seeds: <list, or "none — seedless arithmetic">; no seed is special.
+Read-confirmation first, then one line of outcome, then bullets: the gate's count line and verdict line verbatim, every prior-gate tail, both commit hashes (landing and stamp), the push results. Every nonconformity its own labeled bullet. Fixture seeds: <list, or "none — seedless arithmetic">; no seed is special.

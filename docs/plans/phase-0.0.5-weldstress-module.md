@@ -1,6 +1,6 @@
 # Phase 0.0.5 — weld stress
 
-Status: LANDED, commit `2154ee6`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `e3fb9d6`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 
 The fourth organ out of deadweight: weld loading, joint rating, and the split when a weld lets go. A weld carries the acceleration of the smaller side of the ship it holds on — load = |accel| × smaller-side mass × 9; past its strength it breaks, and whichever side lost the root becomes debris. Source: `deadweight-hangar.html` lines 674–685 (in-flight loading), 747–768 (the split), 1484–1490 (the hangar's rated joint limit).
 
