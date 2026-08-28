@@ -45,7 +45,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [ ] Determinism kit: one seeded random stream for the sim, a second for effects, bit-exact state hashing
 - [ ] The contract pattern: tables declared as data, checked at boot, every problem reported at once
 - [ ] Headless gates and the boot self-test badge: fixed run from a seed, hashes printed, checks shown at start
-- [ ] The input tape: every action recorded with its tick, a seed plus the tape replays a run exactly
+- [x] The input tape: every action recorded with its tick, a seed plus the tape replays a run exactly
 - [ ] The receipt log: events stated as plain-language numbers
 - [ ] The phone-first page kit: touch hardening, safe-area layout, light and dark theme
 

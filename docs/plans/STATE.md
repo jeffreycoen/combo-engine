@@ -3,13 +3,13 @@
 <!-- Ten lines, no more. Updated in every landing commit. A fresh session reads
      CLAUDE.md, the last ~20 commit subjects, and this file, and is oriented. -->
 
-Current phase: none active. Last landed: 0.0.5.
+Current phase: none active. Last landed: 0.0.6.
 
-Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`) · 0.0.5 weldstress (`2154ee6`).
+Landed: 0.0.1 coldsnap engine (`090f043`) · 0.0.2 market + module pattern (`8e72a5e`) · 0.0.3 builder (`509d706`) · 0.0.4 ledger (`0fc9b18`) · 0.0.5 weldstress (`2154ee6`) · 0.0.6 tape (`4a49d32`).
 
-Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger · weldstress. Pinned tails live in each phase document.
+Gates on the wrapper (all green): api · combat · accuracy · market · builder · ledger · weldstress · tape. Pinned tails live in each phase document.
 
-Next candidates, as last ruled: the input tape · first non-deadweight organ. No ruling yet.
+Next candidates, as last ruled: first non-deadweight organ. No ruling yet.
 
 Standing rulings not in CLAUDE.md: plain copy at pin for coldsnap material; coldsnap keeps its own engine, never re-pointed; demos stay out of git.
 

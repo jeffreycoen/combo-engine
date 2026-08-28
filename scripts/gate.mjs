@@ -17,6 +17,7 @@ const GATES = {
   "builder": ["scripts/builder-test.mjs"],
   "ledger": ["scripts/ledger-test.mjs"],
   "weldstress": ["scripts/weldstress-test.mjs"],
+  "tape": ["scripts/tape-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
