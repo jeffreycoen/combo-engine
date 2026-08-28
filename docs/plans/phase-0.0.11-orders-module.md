@@ -1,6 +1,6 @@
 # Phase 0.0.11 — the fleet order model
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 13 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `064edc3`, 2026-08-28. Gate: 13 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 13 PASS / 0 FAIL; prior gates unmoved. -->
 
 The organ is the fleet demo's order model: orders live as data on each unit, commands are exclusive verbs over a selected set, and one priority chain resolves what a unit is doing each tick. Source: `homeworld_fleet_command.jsx` — the four order slots (line 979), the exclusive verbs (lines 1091, 1110, 1118), the branch priority and its transitions (lines 1343–1465), acquisition radii (lines 1408–1411, 1468–1473), the range drop (line 1503). Selection itself is the caller's array: every verb acts on the set handed in, which is the demo's `G.selected`.
