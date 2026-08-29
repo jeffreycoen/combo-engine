@@ -1,6 +1,6 @@
 # Phase 0.0.16 — OLD MASTER OM-1: the page and the walk
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `6c7ffb2`, 2026-08-28. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 9 PASS / 0 FAIL; prior gates unmoved. -->
 
 The first playable of the game planned in `docs/plans/game-old-master.md` (pitch: `docs/old-master-pitch.md`). One new body — the master — stands in the live coldsnap war, walks on keys or a touch stick, and the war's own renderer rides it as the camera focus. The page deploys to GitHub Pages so the owner can play the landing. No powers yet; OM-2 brings GRIP.
