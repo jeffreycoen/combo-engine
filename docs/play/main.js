@@ -4,7 +4,7 @@
 // aim. Keys or the left stick walk; the pointer or the right half of a
 // touch screen aims. The renderer's own reticle marks the aim point.
 import { bootWar, tickWar, defaultTickInput, makeRenderer } from "../../src/depot/api.js";
-import { spawnHero, stepHero, heroInput } from "../../src/games/old-master/hero.js";
+import { spawnHero, stepHero, heroInput, heroDown } from "../../src/games/old-master/hero.js";
 import { pickTarget, seize, stepGrip, hurl, strain } from "../../src/games/old-master/grip.js";
 
 const canvas = document.getElementById("cv");
@@ -93,8 +93,11 @@ function worldStick() {
 
 const title = document.getElementById("title");
 
-// the right touch stick: the aim, orbiting the master at a fixed reach
-const AIM_R = 28;
+// the right touch stick: the aim, orbiting the master — reach scales with
+// the stick's deflection, and the reticle CHASES the stick at a capped
+// speed instead of jumping (the owner's report: the raw stick was insanely
+// fast)
+const AIM_R = 28, AIM_SPD = 30;
 const astickEl = document.getElementById("astick"), anub = document.getElementById("anub");
 let aimVec = { x: 1, z: 0 }, astickId = null;
 function setAnub(dx, dz) { anub.style.transform = "translate(" + dx * 34 + "px," + dz * 34 + "px)"; }
@@ -151,12 +154,16 @@ function frame(now) {
     tickWar(war, STEP, input);
   }
   if (astickId !== null || matchMedia("(pointer: coarse)").matches) {
-    aim = { x: hero.pos.x + aimVec.x * AIM_R, z: hero.pos.z + aimVec.z * AIM_R };
+    const tx = hero.pos.x + aimVec.x * AIM_R, tz = hero.pos.z + aimVec.z * AIM_R;
+    let ddx = tx - aim.x, ddz = tz - aim.z;
+    const dl = Math.hypot(ddx, ddz), maxStep = AIM_SPD * dt;
+    if (dl > maxStep) { ddx = ddx / dl * maxStep; ddz = ddz / dl * maxStep; }
+    aim = { x: aim.x + ddx, z: aim.z + ddz };
   }
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
   hud.innerHTML = mkText + "<br>" + fpsText;
-  title.textContent = gripState ? "OLD MASTER · grip " + Math.round(strain(gripState)) : "OLD MASTER";
+  title.textContent = heroDown(hero) ? "OLD MASTER · DOWN" : gripState ? "OLD MASTER · grip " + Math.round(strain(gripState)) : "OLD MASTER";
   R.render(dt, hero.pos, aim);
 }
 requestAnimationFrame(frame);

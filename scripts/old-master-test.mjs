@@ -1,13 +1,13 @@
 // COMBO-ENGINE — old-master-test: the OLD MASTER game's gate — OM-1 (the
 // page and the walk, nine checks) plus OM-2 (GRIP, nine checks), eighteen
-// in all. Seed 1 boots the war; no seed is special. The grip's closed
+// twenty-one in all. Seed 1 boots the war; no seed is special. The grip's closed
 // forms run on plain fixture bodies; one integration rides the live sim
 // and pins the whole world.
 import { bootWar, tickWar, defaultTickInput, runHash } from "../src/depot/api.js";
 import { worldHash } from "../src/engine/core.js";
-import { spawnHero, stepHero, heroInput, HERO } from "../src/games/old-master/hero.js";
+import { spawnHero, stepHero, heroInput, heroDown, HERO } from "../src/games/old-master/hero.js";
 import { pickTarget, seize, stepGrip, hurl, strain, GRIP } from "../src/games/old-master/grip.js";
-import { addBody } from "../src/engine/core.js";
+import { addBody, explode } from "../src/engine/core.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -26,7 +26,7 @@ const bootWithHero = () => { const war = bootWar({ seed: 1 }); const hero = spaw
   for (let i = 0; i < 1200; i++) { stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
   check("ten idle seconds: the master is alive and near the ground in the live war",
     hero.alive === true && Math.abs(hero.pos.y - war.field.heightAt(hero.pos.x, hero.pos.z) - HERO.hy) < 2.0);
-  check("the world hash with the master in it holds its pin", worldHash(war.world) === 3344951042);
+  check("the world hash with the master in it holds its pin", worldHash(war.world) === 3344950406);
   check("the run hash holds its pin", runHash(war.run) === 997895256); }
 
 { const run = () => { const { war, hero } = bootWithHero();
@@ -120,7 +120,36 @@ const fakeWorld = (bodies) => ({ bodies });
   hurl(grip, hero, 60, 20);
   for (let i = 0; i < 120; i++) { stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
   check("live war: a crate reeled for a second and hurled east — the master stands, the world pins",
-    hero.alive === true && crate.pos.x > 14 && worldHash(war.world) === 1533508814 && runHash(war.run) === 3688031194); }
+    hero.alive === true && crate.pos.x > 14 && worldHash(war.world) === 1533505030 && runHash(war.run) === 3688031194); }
+
+
+// ================================================ OM-2 follow-up: righting
+{ const war = bootWar({ seed: 1 });
+  const hero = spawnHero(war, 0, 20);
+  const input = defaultTickInput();
+  let yawOnly = true;
+  for (let i = 0; i < 600; i++) {
+    const a = i / 600 * Math.PI * 2;
+    stepHero(war, hero, { vx: Math.cos(a), vz: Math.sin(a) }, STEP);
+    if (!heroDown(hero) && (Math.abs(hero.q.x) > 1e-9 || Math.abs(hero.q.z) > 1e-9)) yawOnly = false;
+    tickWar(war, STEP, input);
+  }
+  check("the master does not fall over: five hard-walked seconds, rotation held to yaw whenever he is not floored",
+    yawOnly && hero.alive === true); }
+
+{ const war = bootWar({ seed: 1 });
+  const hero = spawnHero(war, 0, 20);
+  const input = defaultTickInput();
+  for (let i = 0; i < 240; i++) { stepHero(war, hero, { vx: 1, vz: 0 }, STEP); tickWar(war, STEP, input); }
+  const hp0 = hero.hp;
+  explode(war.world, hero.pos.x, hero.pos.y, hero.pos.z, { r: 5, kv: 3e4, dmg: 40, crater: 0 });
+  stepHero(war, hero, { vx: 0, vz: 0 }, STEP);
+  check("a real blast breaks his footing: the hp ledger drops past floorDmg and the floor owns him",
+    hp0 - hero.hp >= HERO.floorDmg && heroDown(hero) === true);
+  let downTicks = 0;
+  while (heroDown(hero) && downTicks++ < 1000) { tickWar(war, STEP, input); stepHero(war, hero, { vx: 0, vz: 0 }, STEP); }
+  check("the will stands him up: floored for the dialed 1.6 seconds, then upright, alive, yaw-only",
+    downTicks === 192 && hero.alive === true && Math.abs(hero.q.x) < 1e-9 && Math.abs(hero.q.z) < 1e-9); }
 
 console.log(`old-master-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
