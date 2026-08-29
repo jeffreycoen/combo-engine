@@ -62,6 +62,7 @@ function screenToWorld(cx, cy) {
 // the aim: pointer on desktop; on touch, dragging the screen's right half
 // steers the reticle around the master
 let aim = { x: 0, z: 20 };
+let aimHold = { x: 10, z: 0 };
 let gripState = null, aimId = null;
 addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") aim = screenToWorld(e.clientX, e.clientY); });
 addEventListener("pointerdown", (e) => {
@@ -153,12 +154,18 @@ function frame(now) {
     stepHero(war, hero, hIn, STEP);
     tickWar(war, STEP, input);
   }
-  if (astickId !== null || matchMedia("(pointer: coarse)").matches) {
+  if (astickId !== null) {
+    // a thumb is steering: the reticle chases the stick's target, capped
     const tx = hero.pos.x + aimVec.x * AIM_R, tz = hero.pos.z + aimVec.z * AIM_R;
     let ddx = tx - aim.x, ddz = tz - aim.z;
     const dl = Math.hypot(ddx, ddz), maxStep = AIM_SPD * dt;
     if (dl > maxStep) { ddx = ddx / dl * maxStep; ddz = ddz / dl * maxStep; }
     aim = { x: aim.x + ddx, z: aim.z + ddz };
+    aimHold = { x: aim.x - hero.pos.x, z: aim.z - hero.pos.z };
+  } else if (matchMedia("(pointer: coarse)").matches) {
+    // untouched: the reticle keeps its held offset beside the master —
+    // it moves WITH him, never after him, and never on its own
+    aim = { x: hero.pos.x + aimHold.x, z: hero.pos.z + aimHold.z };
   }
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
