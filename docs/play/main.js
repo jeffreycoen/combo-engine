@@ -64,6 +64,6 @@ function frame(now) {
   hIn.vx = w.vx; hIn.vz = w.vz;
   let guard = 0;
   while (acc >= STEP && guard++ < 12) { acc -= STEP; stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
-  R.render(dt, hero.pos, null);
+  R.render(dt, hero.pos, hero.pos);
 }
 requestAnimationFrame(frame);
