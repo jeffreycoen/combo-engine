@@ -1,9 +1,11 @@
-// OLD MASTER — docs/play/main.js: OM-1, the page and the walk. Boots the
-// war from seed 1, spawns the master, and runs the loop: hero step, war
-// tick, render with the camera riding the master. Keys or the touch stick
-// walk; everything else is the live war exactly as the gate proved it.
+// OLD MASTER — docs/play/main.js: OM-2, the walk and GRIP. Boots the war
+// from seed 1, spawns the master, and runs the loop. The reticle is the
+// hand: hold to seize and reel what it covers, release to hurl it down the
+// aim. Keys or the left stick walk; the pointer or the right half of a
+// touch screen aims. The renderer's own reticle marks the aim point.
 import { bootWar, tickWar, defaultTickInput, makeRenderer } from "../../src/depot/api.js";
 import { spawnHero, stepHero, heroInput } from "../../src/games/old-master/hero.js";
+import { pickTarget, seize, stepGrip, hurl, strain } from "../../src/games/old-master/grip.js";
 
 const canvas = document.getElementById("cv");
 const war = bootWar({ seed: 1 });
@@ -12,8 +14,7 @@ const R = makeRenderer(canvas, war.world, {});
 const input = defaultTickInput();
 const hIn = heroInput();
 
-// keys: arrows or WASD, world-aligned; the camera yaw is fixed at boot so
-// screen-up is world-north enough for OM-1 (the camera policy phase refines it)
+// keys: arrows or WASD walk, world-aligned through the camera basis
 const held = new Set();
 addEventListener("keydown", (e) => { held.add(e.code); });
 addEventListener("keyup", (e) => { held.delete(e.code); });
@@ -26,7 +27,7 @@ function keyStick() {
   return { x, z };
 }
 
-// the touch stick: one floating nub, radius-normalized
+// the left touch stick: one floating nub, radius-normalized
 const stickEl = document.getElementById("stick"), nub = document.getElementById("nub");
 let stickVec = { x: 0, z: 0 }, stickId = null;
 function setNub(dx, dz) { nub.style.transform = "translate(" + dx * 34 + "px," + dz * 34 + "px)"; }
@@ -43,8 +44,44 @@ const stickEnd = (e) => { if (e.pointerId === stickId) { stickId = null; stickVe
 stickEl.addEventListener("pointerup", stickEnd);
 stickEl.addEventListener("pointercancel", stickEnd);
 
-// screen stick -> world: rotate by the camera's fixed yaw so up on the
-// stick walks away from the camera
+// screen -> world on the master's ground plane, through the orthographic
+// camera: point on the near plane plus the view direction to his height
+function screenToWorld(cx, cy) {
+  const nx = (cx / innerWidth) * 2 - 1;
+  const ny = -((cy / innerHeight) * 2 - 1);
+  const cp = R.cameraPos();
+  const rt = R.camBasis.right, up = R.camBasis.up, f = R.camBasis.fwd;
+  const hw = R.camBasis.halfW(), hh = R.camBasis.halfH();
+  const px = cp.x + rt.x * nx * hw + up.x * ny * hh;
+  const py = cp.y + rt.y * nx * hw + up.y * ny * hh;
+  const pz = cp.z + rt.z * nx * hw + up.z * ny * hh;
+  const t = (hero.pos.y - py) / f.y;
+  return { x: px + f.x * t, z: pz + f.z * t };
+}
+
+// the aim: pointer on desktop; on touch, dragging the screen's right half
+// steers the reticle around the master
+let aim = { x: 0, z: 20 };
+let gripState = null, aimId = null;
+addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") aim = screenToWorld(e.clientX, e.clientY); });
+addEventListener("pointerdown", (e) => {
+  if (e.target === stickEl || e.target === nub) return;
+  if (e.pointerType === "mouse" && e.button !== 0) return;
+  aimId = e.pointerId;
+  aim = screenToWorld(e.clientX, e.clientY);
+  const t = pickTarget(war.world, hero, aim.x, aim.z);
+  if (t) gripState = seize(hero, t);
+});
+addEventListener("pointermove", (e) => { if (e.pointerId === aimId && e.pointerType !== "mouse") aim = screenToWorld(e.clientX, e.clientY); });
+const gripEnd = (e) => {
+  if (e.pointerId !== aimId) return;
+  aimId = null;
+  if (gripState) { hurl(gripState, hero, aim.x, aim.z); gripState = null; }
+};
+addEventListener("pointerup", gripEnd);
+addEventListener("pointercancel", gripEnd);
+
+// stick -> world through the camera basis: stick-up walks away from the camera
 function worldStick() {
   const k = keyStick();
   const sx = Math.abs(k.x) + Math.abs(k.z) > 0 ? k.x : stickVec.x;
@@ -54,6 +91,7 @@ function worldStick() {
   return { vx: rt.x * sx + (fx / fl) * -sz, vz: rt.z * sx + (fz / fl) * -sz };
 }
 
+const title = document.getElementById("title");
 const STEP = 1 / 120;
 let last = performance.now(), acc = 0;
 function frame(now) {
@@ -63,7 +101,16 @@ function frame(now) {
   const w = worldStick();
   hIn.vx = w.vx; hIn.vz = w.vz;
   let guard = 0;
-  while (acc >= STEP && guard++ < 12) { acc -= STEP; stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
-  R.render(dt, hero.pos, hero.pos);
+  while (acc >= STEP && guard++ < 12) {
+    acc -= STEP;
+    if (gripState) {
+      const r = stepGrip(gripState, hero, STEP);
+      if (r.snapped || r.dead) gripState = null;
+    }
+    stepHero(war, hero, hIn, STEP);
+    tickWar(war, STEP, input);
+  }
+  title.textContent = gripState ? "OLD MASTER · grip " + Math.round(strain(gripState)) : "OLD MASTER";
+  R.render(dt, hero.pos, aim);
 }
 requestAnimationFrame(frame);
