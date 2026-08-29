@@ -1,6 +1,6 @@
 # Phase 0.0.17 — OLD MASTER OM-2: GRIP
 
-Status: LANDED, commit stamped below, 2026-08-28. Gate: 18 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `f2b34f4`, 2026-08-28. Gate: 18 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 18 PASS / 0 FAIL; prior gates unmoved. -->
 
 The second OM phase of `docs/plans/game-old-master.md`: the grapple module's rope law mounted on the master's hand. Hold the reticle on a body to seize and reel it; release to hurl it down the aim; the rope's own 260 snap is the grip ceiling. The page grows the aim (pointer on desktop, right-half touch drag on the phone) and the renderer's own reticle marks it. Deploys to the same Pages address at landing.
