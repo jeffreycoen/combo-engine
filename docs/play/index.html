@@ -14,13 +14,21 @@
     border-radius: 50%; border: 1.5px solid rgba(233,237,242,.35); background: rgba(13,17,23,.25); display: none; }
   #nub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
     border-radius: 50%; background: rgba(233,237,242,.5); }
-  @media (pointer: coarse) { #stick { display: block; } }
+  #astick { position: fixed; right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); width: 108px; height: 108px;
+    border-radius: 50%; border: 1.5px solid rgba(233,178,92,.45); background: rgba(23,17,13,.25); display: none; }
+  #anub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    border-radius: 50%; background: rgba(233,178,92,.55); }
+  #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; color: rgba(233,237,242,.75);
+    font: 500 11px/1.4 ui-monospace, monospace; pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,.5); text-align: right; }
+  @media (pointer: coarse) { #stick, #astick { display: block; } }
 </style>
 </head>
 <body>
 <canvas id="cv"></canvas>
 <div id="title">OLD&nbsp;MASTER</div>
 <div id="stick"><div id="nub"></div></div>
+<div id="astick"><div id="anub"></div></div>
+<div id="hud">mk -<br>- fps</div>
 <script type="importmap">{ "imports": { "three": "./three.module.js" } }</script>
 <script type="module" src="./main.js"></script>
 </body>

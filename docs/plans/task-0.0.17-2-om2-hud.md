@@ -1,3 +1,74 @@
+# Task 0.0.17-2 — OM-2 follow-up: the HUD and the right stick
+
+One job: re-sign the page's two files exactly as printed — the deployed version and frame rate shown live, and a visible right aim stick on touch — prove the numbers, smoke the page, deploy, stamp. The owner's playtest drove both: the shipped page showed no version (so a stale cache is invisible) and the touch aim had no widget (so the phone showed one lone stick). No sim code moves; the game's gate must not move.
+
+Suggested model: Sonnet 5.
+
+Required reading, in order (confirm at the top of your report):
+1. This file, whole.
+2. `docs/plans/phase-0.0.17-om2-grip.md`, whole (this task rides that phase; its status line is already LANDED and stays).
+
+Licensed re-teach, declared: both page files are REPLACED whole. `docs/play/index.html` old sha `06e5bd7c639992e9feeccd0a986242dc00f67476dad3b0f6fd33c2198fc7c5ae` → new printed at step 2; `docs/play/main.js` old sha `c7e51cdf95b4f7bb0619e5f7c12061e61a3abaf914f44ff94033255dfa153c28` → new printed at step 3. Report both as one re-teach bullet.
+
+## Steps
+
+Run from `/home/batman/combo-engine`. A failed assert stops the task; report the step and its verbatim output, run nothing further.
+
+1. Assert the ground: the game's gate green as landed.
+
+```sh
+node scripts/gate.mjs old-master   # tail: old-master-test PASS, count line old-master-test: 18 PASS / 0 FAIL
+```
+
+2. REPLACE `docs/play/index.html` whole, exactly as printed; the commands after each block set the file's exact ending mechanically:
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>OLD MASTER</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1117; touch-action: none; }
+  #cv { width: 100%; height: 100%; display: block; }
+  #title { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center;
+    color: #e9edf2; font: 600 13px/1.4 system-ui, sans-serif; letter-spacing: 0.35em; pointer-events: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,.5); }
+  #stick { position: fixed; left: 18px; bottom: max(18px, env(safe-area-inset-bottom)); width: 108px; height: 108px;
+    border-radius: 50%; border: 1.5px solid rgba(233,237,242,.35); background: rgba(13,17,23,.25); display: none; }
+  #nub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    border-radius: 50%; background: rgba(233,237,242,.5); }
+  #astick { position: fixed; right: 18px; bottom: max(18px, env(safe-area-inset-bottom)); width: 108px; height: 108px;
+    border-radius: 50%; border: 1.5px solid rgba(233,178,92,.45); background: rgba(23,17,13,.25); display: none; }
+  #anub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px;
+    border-radius: 50%; background: rgba(233,178,92,.55); }
+  #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; color: rgba(233,237,242,.75);
+    font: 500 11px/1.4 ui-monospace, monospace; pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,.5); text-align: right; }
+  @media (pointer: coarse) { #stick, #astick { display: block; } }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="title">OLD&nbsp;MASTER</div>
+<div id="stick"><div id="nub"></div></div>
+<div id="astick"><div id="anub"></div></div>
+<div id="hud">mk -<br>- fps</div>
+<script type="importmap">{ "imports": { "three": "./three.module.js" } }</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>
+```
+
+```sh
+truncate -s 2092 docs/play/index.html && printf '\n' >> docs/play/index.html
+wc -c docs/play/index.html       # must print 2093
+sha256sum docs/play/index.html   # must print c1329873cc7f809498ca58d83e811194549a8c4f82f0922ec2f7341adf95db56
+```
+
+3. REPLACE `docs/play/main.js` whole, exactly as printed:
+
+```js
 // OLD MASTER — docs/play/main.js: OM-2, the walk and GRIP. Boots the war
 // from seed 1, spawns the master, and runs the loop. The reticle is the
 // hand: hold to seize and reel what it covers, release to hurl it down the
@@ -160,3 +231,53 @@ function frame(now) {
   R.render(dt, hero.pos, aim);
 }
 requestAnimationFrame(frame);
+```
+
+```sh
+truncate -s 7340 docs/play/main.js && printf '\n' >> docs/play/main.js
+wc -c docs/play/main.js       # must print 7341
+sha256sum docs/play/main.js   # must print 5c87231dbdeb553e612f76da2fb1a539968dce0e70bb3e1d9f0bf2dd503d4ef9
+```
+
+4. Run the game's gate — it must not move: 18 PASS lines, `old-master-test: 18 PASS / 0 FAIL`, `old-master-test PASS`, exit 0.
+
+```sh
+node scripts/gate.mjs old-master
+```
+
+5. Browser smoke with the HUD assert — the scene must paint AND the HUD must carry the live version:
+
+```sh
+(python3 -m http.server 8941 >/dev/null 2>&1 &)
+sleep 1
+timeout 200 chromium --headless=new --no-sandbox --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --virtual-time-budget=90000 --screenshot=/tmp/claude-1000/om2b-landing-smoke.png --window-size=900,600 http://127.0.0.1:8941/docs/play/index.html 2>/dev/null
+SZ=$(wc -c < /tmp/claude-1000/om2b-landing-smoke.png); echo "smoke bytes $SZ"; test "$SZ" -gt 100000 && echo SMOKE-OK
+timeout 200 chromium --headless=new --no-sandbox --use-angle=swiftshader-webgl --enable-unsafe-swiftshader --virtual-time-budget=90000 --dump-dom http://127.0.0.1:8941/docs/play/index.html 2>/dev/null | grep -o '<div id="hud">[^<]*<br>[^<]*</div>'
+```
+
+`SMOKE-OK` must print, and the hud line must read `mk 0.0.17` with a numeric fps. Both go in the report verbatim.
+
+6. Commit and push (the push is the deploy):
+
+```sh
+git add docs/play/index.html docs/play/main.js docs/plans
+git commit -m "task 0.0.17-2 — the page tells the truth: live mk and fps, a real right stick
+
+The deployed version reads from package.json uncached, so a stale cache is
+visible at a glance; the touch aim gains its own stick beside the walk stick.
+old-master-test unmoved at 18 PASS / 0 FAIL; page smoked with the hud asserted.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
+git push origin main
+```
+
+## Acceptance
+
+- Steps 2–3: wc -c and sha256 match exactly.
+- Step 4: the gate unmoved at `old-master-test: 18 PASS / 0 FAIL`.
+- Step 5: `SMOKE-OK` and the hud line `mk 0.0.17` with numeric fps, verbatim in the report.
+- Push accepted. The owner's live check on the phone — two sticks visible, mk and fps on screen — is the acceptance the numbers cannot give.
+
+## Report
+
+Read-confirmation first, then one line of outcome, then bullets: the gate's count and verdict lines, both wc -c lines, both sha256 lines, the re-teach bullet (both old→new), the smoke bytes line and the hud line verbatim, the commit hash, the push result. Every nonconformity its own labeled bullet. Fixture seeds: 1.
