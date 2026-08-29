@@ -27,6 +27,7 @@ const GATES = {
   "voxel": ["scripts/voxel-test.mjs"],
   "support": ["scripts/support-test.mjs"],
   "grapple": ["scripts/grapple-test.mjs"],
+  "old-master": ["scripts/old-master-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
