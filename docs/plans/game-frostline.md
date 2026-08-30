@@ -22,7 +22,7 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 ## The phases
 
 - [LANDED] **FL-1 — the mission and the turns.** REACH THE FAR SIDE: rifle, gunner, and sniper squads put someone through the western exit past a droid patrol. Free time to contact; alternating turns; move / attack / hold with confirmations carrying the shield and the chance-to-hit; win and loss cards; deployed. Gate: boot and end-state world hashes, the exact contact tick, the turn machine pure, the cover and estimate arithmetic, the scripted crossing to won, twin-run identity.
-- **FL-2 — the fight's verbs.** Overwatch cones with point investment, focus fire, discipline per squad, target marking.
+- [LANDED] **FL-2 — the fight's verbs.** Overwatch cones with point investment, focus fire, discipline per squad, target marking.
 - **FL-3 — the estimate audited.** A fixed long tape fires at a fixed layout; the gate pins the measured hit rate inside a band around the displayed number.
 - **FL-4 — the purse.** Bounties per kill into the purse; the upgrade screen between contracts; upgrades as data through the roster contract (squad strength, weapon rows, new team types).
 - **FL-5 — the contract board.** Missions as data with a posted price and a legitimacy tag; clean jobs pay less, underground jobs pay more and raise the heat; the board is the campaign's spine.

@@ -575,6 +575,9 @@ export function squadFire(world, squad, dt, T, toUV = (x, z) => ({ u: x, v: z })
   if (squad.type === "engineers") return; // P1.5 T4: same rule, same reason — shovels, not rifles (draws nothing)
   if (squad.order === "move") return;   // mk0.28: MOVE travels, it does not fight (draws nothing)
   if (squad.order === "build") return;  // mk0.60: a building squad keeps quiet, exactly as a moving one does (draws nothing)
+  // FROSTLINE FL-2: the game layer's per-squad safety — unset everywhere in
+  // the depot game, so this line is inert outside FROSTLINE (draws nothing).
+  if (squad.holdFire) return;
   const spec = INFANTRY_ARMS[squad.type];
   if (!spec) return;
   // mk0.28: "move" is never a firing order — the men double-time with
@@ -613,6 +616,14 @@ export function squadFire(world, squad, dt, T, toUV = (x, z) => ({ u: x, v: z })
       let best = null, bd = eR * eR;
       for (const e of pool) {
         if ((e.kind !== "unit" && e.kind !== "vehicle" && e.kind !== "mech") || !e.alive || e.team !== enemyTeam) continue;
+        // FROSTLINE FL-2: the overwatch cone — a set fireArc {b, half} keeps
+        // every shot inside its bearing window; unset everywhere else (inert).
+        if (squad.fireArc) {
+          let da = Math.atan2(e.pos.x - u.pos.x, e.pos.z - u.pos.z) - squad.fireArc.b;
+          while (da > Math.PI) da -= Math.PI * 2;
+          while (da < -Math.PI) da += Math.PI * 2;
+          if (Math.abs(da) > squad.fireArc.half) continue;
+        }
         const dx = e.pos.x - u.pos.x, dz = e.pos.z - u.pos.z;
         const d2 = dx * dx + dz * dz;
         if (d2 >= bd) continue;
@@ -645,7 +656,20 @@ export function squadFire(world, squad, dt, T, toUV = (x, z) => ({ u: x, v: z })
       return best;
     };
     let best = null, bestIsStruct = false;
-    if (squad.prefStruct) {
+    // FROSTLINE FL-2: focus fire — a marked focusId that is alive, hostile,
+    // in range, seen, and clear of the arc outranks the nearest scan. The
+    // cone does not bind an explicit focus. Unset everywhere else (inert).
+    if (squad.focusId != null) {
+      const f = world.byId.get(squad.focusId);
+      if (f && f.alive && f.team === enemyTeam && (f.kind === "unit" || f.kind === "vehicle" || f.kind === "mech")) {
+        const fdx = f.pos.x - u.pos.x, fdz = f.pos.z - u.pos.z;
+        if (fdx * fdx + fdz * fdz < eR * eR) {
+          const fc = toUV(f.pos.x, f.pos.z);
+          if (fieldReaches(T, fc.u, fc.v, squad.team) && arcClears(world, muzzle, f.pos, spec, u.id)) best = f;
+        }
+      }
+    }
+    if (!best) if (squad.prefStruct) {
       best = scanStructs(); bestIsStruct = !!best;
       if (!best) { best = scanUnits(); }
     } else {
@@ -653,6 +677,7 @@ export function squadFire(world, squad, dt, T, toUV = (x, z) => ({ u: x, v: z })
       if (!best) { best = scanStructs(); bestIsStruct = !!best; }
     }
     if (!best) continue;
+    squad._lastTargetId = best.id; // FROSTLINE FL-2: gate observability — which body the trigger chose
     // T7: the corridor holds this man's shot if a live teammate stands
     // between his muzzle and the target — cooldown untouched, same rule
     // possessed fire follows; mortars are exempt (lofted).

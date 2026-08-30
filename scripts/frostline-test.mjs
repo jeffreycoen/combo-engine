@@ -11,6 +11,10 @@ import { orderMove, orderDone, pickSquad } from "../src/games/frostline/command.
 import { makeTriggerState, checkTriggers } from "../src/games/frostline/pause.js";
 import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../src/games/frostline/turns.js";
 import { coverAt, exposure, hitChance, knownThreats } from "../src/games/frostline/cover.js";
+import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggleDiscipline, markTarget, markedTarget, focusOrder, owPaths } from "../src/games/frostline/verbs.js";
+import { squadFire } from "../src/depot/state.js";
+import { arcClears } from "../src/depot/accuracy.js";
+import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -117,6 +121,68 @@ const STEP = 1 / 120;
     const s = missionState(war, mission);
     return worldHash(war.world) + ":" + s.friendlies + ":" + s.enemies; };
   check("determinism: twin missions land bit-identical worlds (the id-free hash)", run() === run()); }
+
+// ---- FL-2: the fight's verbs (overwatch cones, focus fire, discipline)
+{ const sq = { id: 1, anchor: { x: 0, z: 0 } };
+  setOverwatch(sq, 0, 10, 1);
+  const narrow = sq._ow.half;
+  setOverwatch(sq, 10, 0, 2);
+  check("overwatch prices its width: one point a 90 degree cone, two points 180, re-aimed on the new bearing",
+    narrow === OVERWATCH.half1 && sq._ow.half === OVERWATCH.half2 && near(sq._ow.b, Math.PI / 2) && sq.order === "defend" && sq.dest === null);
+  const arc = { b: 0, half: Math.PI / 4 };
+  check("the cone's own test: dead ahead is in, the flank is out, the wrap seam holds",
+    inArc(arc, 0, 0, 0, 10) && !inArc(arc, 0, 0, 10, 0) && inArc({ b: Math.PI, half: Math.PI / 4 }, 0, 0, 0.01, -10));
+  const ts = { phase: "enemy" };
+  const a = { id: 1, anchor: { x: 0, z: 0 } }, b = { id: 2, anchor: { x: 0, z: 0 } }, c = { id: 3, anchor: { x: 0, z: 0 } };
+  setOverwatch(b, 0, 10, 1);
+  c._disc = "free";
+  applyFireControl(ts, [a, b, c]);
+  const enemyHalf = a.holdFire === true && b.holdFire === false && !!b.fireArc && c.holdFire === false && !c.fireArc;
+  ts.phase = "exec";
+  applyFireControl(ts, [a, b, c]);
+  check("discipline rules the enemy half: careful holds, the cone and free fire on; your own half everyone fights",
+    enemyHalf && a.holdFire === false && c.holdFire === false && toggleDiscipline(a) === "free" && toggleDiscipline(a) === "careful"); }
+
+{ const { war } = bootMission(MISSION_R1);
+  const w = war.world;
+  const sq = war.run.squads[0];
+  const members = sq.memberIds.map((id) => w.byId.get(id)).filter((u) => u && u.alive);
+  // the stand: the first spot on a fixed scan where a rifle's arc clears to
+  // both fixture foes (terrain is bumpy; the fixture vets its own ground).
+  let ax = null, az = null;
+  outer: for (let x = -30; x <= 30; x += 3) for (let z = -20; z <= 30; z += 3) {
+    const m = { x, y: war.field.heightAt(x, z) + 1.2, z };
+    const t1 = { x, y: war.field.heightAt(x, z + 8) + 0.7, z: z + 8 };
+    const t2 = { x, y: war.field.heightAt(x, z + 14) + 0.7, z: z + 14 };
+    if (arcClears(w, m, t1, INFANTRY_ARMS.rifles, -1) && arcClears(w, m, t2, INFANTRY_ARMS.rifles, -1)) { ax = x; az = z; break outer; }
+  }
+  sq.anchor = { x: ax, z: az };
+  members.forEach((u, i) => { u.pos.x = ax + i * 0.8; u.pos.z = az; u.pos.y = war.field.heightAt(u.pos.x, u.pos.z) + 0.7; u.fireCd = 0; });
+  sq.order = "defend";
+  const mkFoe = (x, z) => addBody(w, { kind: "unit", x, y: war.field.heightAt(x, z) + 0.7, z, hx: 0.28, hy: 0.7, hz: 0.28, mass: 80, hp: 10, team: 2 });
+  const near1 = mkFoe(ax, az + 8), far1 = mkFoe(ax, az + 14);
+  const reset = () => { sq._lastTargetId = null; members.forEach((u) => { u.fireCd = 0; }); };
+  reset(); sq.holdFire = true; squadFire(w, sq, 1 / 120);
+  const held = sq._lastTargetId === null;
+  reset(); sq.holdFire = false; squadFire(w, sq, 1 / 120);
+  check("the safety is real: a holding squad never pulls, released it takes the nearest man", held && sq._lastTargetId === near1.id);
+  reset(); sq.fireArc = { b: Math.PI, half: Math.PI / 4 }; squadFire(w, sq, 1 / 120);
+  const coneAway = sq._lastTargetId === null;
+  reset(); sq.fireArc = { b: 0, half: Math.PI / 4 }; squadFire(w, sq, 1 / 120);
+  check("the cone binds the trigger: pointed away nothing fires, pointed on it fires", coneAway && sq._lastTargetId === near1.id);
+  reset(); sq.fireArc = null; sq.focusId = far1.id; squadFire(w, sq, 1 / 120);
+  const focused = sq._lastTargetId === far1.id;
+  reset(); far1.alive = false; squadFire(w, sq, 1 / 120);
+  check("focus fire outranks near: the marked far man takes the volley; dead, the trigger falls back to the scan",
+    focused && sq._lastTargetId === near1.id);
+  markTarget(war, far1);
+  const deadMark = markedTarget(war) === null;
+  markTarget(war, near1);
+  check("the mark is one shared target and a dead mark clears itself", deadMark && markedTarget(war) === near1);
+  sq._ow = { b: 0, half: Math.PI / 4 };
+  const paths = owPaths([sq], (x, z) => war.field.heightAt(x, z));
+  check("the cone draws itself: two edges and a five-point arc on the existing overlay",
+    paths.length === 3 && paths[0].length === 2 && paths[2].length === 5); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);

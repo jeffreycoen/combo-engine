@@ -7,16 +7,18 @@
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #0d1117; touch-action: none; }
   #cv { width: 100%; height: 100%; display: block; }
-  #title { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 0; right: 0; text-align: center;
-    color: #e9edf2; font: 600 13px/1.4 system-ui, sans-serif; letter-spacing: 0.35em; pointer-events: none;
-    text-shadow: 0 1px 4px rgba(0,0,0,.5); }
-  #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; color: rgba(233,237,242,.75);
-    font: 500 11px/1.4 ui-monospace, monospace; pointer-events: none; text-shadow: 0 1px 4px rgba(0,0,0,.5); text-align: right; }
-  #banner { position: fixed; top: 38%; left: 0; right: 0; text-align: center; pointer-events: none;
-    color: #e9b25c; font: 700 22px/1.3 system-ui, sans-serif; letter-spacing: 0.3em;
-    text-shadow: 0 2px 8px rgba(0,0,0,.6); display: none; }
-  #reason { position: fixed; top: calc(38% + 34px); left: 0; right: 0; text-align: center; pointer-events: none;
-    color: rgba(233,237,242,.8); font: 500 12px/1.4 system-ui, sans-serif; letter-spacing: 0.12em; display: none; }
+  #title { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+    text-align: center; color: #e9edf2; font: 600 13px/1.4 system-ui, sans-serif; letter-spacing: 0.35em;
+    pointer-events: none; background: rgba(13,17,23,.6); padding: 4px 12px; border-radius: 8px; white-space: nowrap; }
+  #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; color: rgba(233,237,242,.85);
+    font: 500 11px/1.4 ui-monospace, monospace; pointer-events: none; text-align: right;
+    background: rgba(13,17,23,.6); padding: 4px 8px; border-radius: 8px; }
+  #banner { position: fixed; top: 38%; left: 50%; transform: translateX(-50%); text-align: center;
+    pointer-events: none; color: #e9b25c; font: 700 22px/1.3 system-ui, sans-serif; letter-spacing: 0.3em;
+    background: rgba(13,17,23,.65); padding: 8px 18px; border-radius: 10px; white-space: nowrap; display: none; }
+  #reason { position: fixed; top: calc(38% + 50px); left: 50%; transform: translateX(-50%); text-align: center;
+    pointer-events: none; color: rgba(233,237,242,.9); font: 500 12px/1.4 system-ui, sans-serif; letter-spacing: 0.12em;
+    background: rgba(13,17,23,.6); padding: 5px 12px; border-radius: 8px; white-space: nowrap; display: none; }
   #pauseB { position: fixed; right: 14px; bottom: max(16px, env(safe-area-inset-bottom)); width: 74px; height: 44px;
     border-radius: 10px; border: 1.5px solid rgba(233,237,242,.4); background: rgba(13,17,23,.55);
     color: #e9edf2; font: 600 12px system-ui, sans-serif; letter-spacing: 0.15em; }
@@ -50,6 +52,9 @@
   <button class="act" id="actMove">MOVE</button>
   <button class="act" id="actAttack">ATTACK</button>
   <button class="act" id="actHold">HOLD</button>
+  <button class="act" id="actOw">OVERWATCH</button>
+  <button class="act" id="actMark">MARK</button>
+  <button class="act" id="actDisc">DISCIPLINE</button>
   <button class="act" id="actEnd">END TURN</button>
 </div>
 <div id="popup" style="display:none">

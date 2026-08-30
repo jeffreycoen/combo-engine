@@ -10,6 +10,7 @@ import { orderMove, orderDone, pickSquad, cycleSquad, orderPaths } from "../../s
 import { makeTriggerState, checkTriggers } from "../../src/games/frostline/pause.js";
 import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../../src/games/frostline/turns.js";
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
+import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
 const canvas = document.getElementById("cv");
@@ -41,6 +42,7 @@ const banner = document.getElementById("banner"), reason = document.getElementBy
 const popup = document.getElementById("popup"), popTitle = document.getElementById("popTitle"), popBody = document.getElementById("popBody");
 const actionsEl = document.getElementById("actions");
 const actMove = document.getElementById("actMove"), actAttack = document.getElementById("actAttack"), actHold = document.getElementById("actHold"), actEnd = document.getElementById("actEnd");
+const actOw = document.getElementById("actOw"), actMark = document.getElementById("actMark"), actDisc = document.getElementById("actDisc");
 function say(top, sub) {
   banner.style.display = top ? "block" : "none";
   banner.textContent = top || "";
@@ -64,12 +66,14 @@ function drawChips() {
   for (const { sq, el } of chips) {
     el.className = "chip" + (sq === selected ? " sel" : "");
     const ap = ts.phase === "free" ? "" : " · " + "●".repeat(apOf(ts, sq)) + "○".repeat(Math.max(0, TURNS.ap - apOf(ts, sq)));
-    el.textContent = label(sq) + " · " + liveCount(sq) + ap;
+    el.textContent = label(sq) + " · " + liveCount(sq) + " · " + (discOf(sq) === "careful" ? "C" : "F") + ap;
   }
   const inOrders = ts.phase === "orders" && !over;
   actionsEl.style.display = inOrders ? "flex" : "none";
   actMove.className = "act" + (mode === "move" ? " on" : "");
   actAttack.className = "act" + (mode === "attack" ? " on" : "");
+  actOw.className = "act" + (mode === "ow" ? " on" : "");
+  actMark.className = "act" + (mode === "mark" ? " on" : "");
 }
 
 // ---- the confirmation: every action prices itself before the point spends
@@ -86,16 +90,26 @@ document.getElementById("popOk").addEventListener("click", () => {
   const p = pending;
   dismiss();
   const free = ts.phase === "free";
-  if (!free && !spend(ts, p.sq)) return;
-  if (p.kind === "move") orderMove(p.sq, p.x, p.z);
-  else if (p.kind === "attack") { p.sq.order = "attack"; p.sq.dest = { x: p.target.pos.x, z: p.target.pos.z }; p.sq._route = null; p.sq._routeDest = null; }
-  else if (p.kind === "hold") { p.sq.order = "defend"; p.sq.dest = null; }
-  R.overlay.setOrderPaths(orderPaths(squads));
+  const priced = p.kind !== "mark" && p.kind !== "disc"; // information and doctrine are free
+  if (!free && priced && !spend(ts, p.sq)) return;
+  if (p.kind === "move") { p.sq.focusId = null; clearOverwatch(p.sq); orderMove(p.sq, p.x, p.z); }
+  else if (p.kind === "attack") { clearOverwatch(p.sq); focusOrder(p.sq, p.target); }
+  else if (p.kind === "hold") { p.sq.focusId = null; clearOverwatch(p.sq); p.sq.order = "defend"; p.sq.dest = null; }
+  else if (p.kind === "ow") { p.sq.focusId = null; setOverwatch(p.sq, p.x, p.z, p.pts); }
+  else if (p.kind === "mark") markTarget(war, p.target);
+  else if (p.kind === "disc") toggleDiscipline(p.sq);
+  R.overlay.setOrderPaths(allPaths());
   mode = null;
 });
 
 actMove.addEventListener("click", () => { mode = mode === "move" ? null : "move"; });
 actAttack.addEventListener("click", () => { mode = mode === "attack" ? null : "attack"; });
+actOw.addEventListener("click", () => { mode = mode === "ow" ? null : "ow"; });
+actMark.addEventListener("click", () => { mode = mode === "mark" ? null : "mark"; });
+actDisc.addEventListener("click", () => {
+  const next = discOf(selected) === "careful" ? "FREE — fires at anything seen, any half" : "CAREFUL — holds fire on the enemy half unless a cone covers it";
+  present({ kind: "disc", sq: selected, title: "DISCIPLINE — " + label(selected), body: next + "<br>free — no cost" });
+});
 actHold.addEventListener("click", () => {
   if (apOf(ts, selected) <= 0) return;
   const shield = destShield(war, selected.anchor.x, selected.anchor.z);
@@ -181,6 +195,23 @@ function tapAt(cx, cy) {
     aim = { x: best.pos.x, z: best.pos.z };
     return;
   }
+  if (mode === "ow") {
+    const pts = selected._ow ? 2 : 1;
+    const deg = pts >= 2 ? 180 : 90;
+    present({ kind: "ow", sq: selected, x: w.x, z: w.z, pts, title: "OVERWATCH — " + label(selected),
+      body: "a " + deg + "° cone on that bearing, enemy half only<br>" + (free ? "free time — no cost" : "cost 1 point · " + (apOf(ts, selected) - 1) + " after") + (pts === 1 ? "<br>overwatch again to widen" : "") });
+    aim = { x: w.x, z: w.z };
+    return;
+  }
+  if (mode === "mark") {
+    const threats = knownThreats(war);
+    let best = null, bd = 6;
+    for (const t of threats) { const d = Math.hypot(t.pos.x - w.x, t.pos.z - w.z); if (d < bd) { bd = d; best = t; } }
+    if (!best) return;
+    present({ kind: "mark", sq: selected, target: best, title: "MARK TARGET", body: "the mark is the whole side's<br>free — no cost" });
+    aim = { x: best.pos.x, z: best.pos.z };
+    return;
+  }
   // move — the default tap, and the MOVE button's tap
   const d = free ? { x: w.x, z: w.z } : clampMove(selected, w.x, w.z);
   const shield = destShield(war, d.x, d.z);
@@ -196,6 +227,19 @@ addEventListener("keydown", (e) => {
   else if (e.code === "KeyE") R.rotateStep(-1);
 });
 
+// ---- the overlay: order routes, overwatch cones, the mark's ring
+function allPaths() {
+  const hAt = (x, z) => war.field.heightAt(x, z);
+  const paths = orderPaths(squads).concat(owPaths(squads, hAt));
+  const m = markedTarget(war);
+  if (m) {
+    const ring = [];
+    for (let k = 0; k <= 10; k++) { const a = (k / 10) * Math.PI * 2; const x = m.pos.x + Math.sin(a) * 1.2, z = m.pos.z + Math.cos(a) * 1.2; ring.push({ x, y: hAt(x, z), z }); }
+    paths.push(ring);
+  }
+  return paths;
+}
+
 // ---- the loop
 const title = document.getElementById("title");
 const STEP = 1 / 120;
@@ -210,6 +254,8 @@ function frame(now) {
     let guard = 0;
     while (acc >= STEP && guard++ < 12) {
       acc -= STEP;
+      for (const sq of squads) { if (sq.focusId != null) { const f = war.world.byId.get(sq.focusId); if (!f || !f.alive) sq.focusId = null; } }
+      applyFireControl(ts, squads);
       heldInput(input, ts.phase === "exec");
       const { events, flags } = tickWar(war, STEP, input);
       if (ts.phase === "free") {
@@ -221,7 +267,7 @@ function frame(now) {
       } else if (ts.phase === "enemy") {
         if (stepEnemy(ts, STEP, squads)) say("YOUR TURN " + ts.turn, "3 POINTS A SQUAD");
       }
-      if (flags && flags.orderPaths) R.overlay.setOrderPaths(orderPaths(squads));
+      if (flags && flags.orderPaths) R.overlay.setOrderPaths(allPaths());
       const s = missionState(war, mission);
       if (s.won || s.lost) { over = true; say(s.won ? "THE FAR SIDE" : "THE LINE BROKE", s.won ? "mission complete" : "the side was wiped"); }
     }
