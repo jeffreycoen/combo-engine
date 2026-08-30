@@ -1,7 +1,6 @@
 # Phase 0.0.19 — FROSTLINE FL-2: the fight's verbs
 
-Status: PLANNED.
-<!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 24 PASS / 0 FAIL; prior gates unmoved. -->
+Status: LANDED, commit `4d867a6`, 2026-08-30. Gate: 24 PASS / 0 FAIL; prior gates unmoved.
 
 The second rung of `docs/plans/game-frostline.md`: overwatch cones priced in points, focus fire on a shared mark, careful/free discipline a squad at a time — and every floating word on the page made readable on snow, phone and desktop. Same mission, same map; the verbs are the phase.
 
