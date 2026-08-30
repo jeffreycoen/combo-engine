@@ -28,6 +28,7 @@ const GATES = {
   "support": ["scripts/support-test.mjs"],
   "grapple": ["scripts/grapple-test.mjs"],
   "old-master": ["scripts/old-master-test.mjs"],
+  "frostline": ["scripts/frostline-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
