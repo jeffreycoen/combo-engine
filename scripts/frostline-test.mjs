@@ -25,7 +25,7 @@ const STEP = 1 / 120;
   const s = missionState(war, mission);
   check("boot: three squads, eight friendlies, four blockers, nobody won, the world pins",
     war.run.squads.length === 3 && s.friendlies === 8 && s.enemies === 4
-    && !s.won && !s.lost && worldHash(war.world) === 230891517);
+    && !s.won && !s.lost && worldHash(war.world) === 1706678194);
   check("nothing is known at boot: the sight map has seen no enemy", knownThreats(war).length === 0);
   check("pick: a tap near the rifles takes them", pickSquad(war.run.squads, 8, 26) === war.run.squads[0]); }
 
@@ -90,7 +90,7 @@ const STEP = 1 / 120;
     const t = checkTriggers(war, trig, events);
     if (t.contact !== null) { contactAt = tick; startTurns(ts, squads); }
   }
-  check("free time ends at first sight: contact at tick 835 exactly", contactAt === 835);
+  check("free time ends at first sight: contact at tick 774 exactly", contactAt === 774);
   let guard = 0, end = null;
   while (guard++ < 40 && !end) {
     for (const sq of squads) {
@@ -110,9 +110,9 @@ const STEP = 1 / 120;
     if (s.won || s.lost) end = s;
   }
   const s = missionState(war, mission);
-  check("the mission crosses under fire: won on turn 3 at tick 4195, seven of eight standing",
-    ts.turn === 3 && tick === 4195 && s.won && !s.lost && s.friendlies === 7 && s.enemies === 3);
-  check("the end-state world pins", worldHash(war.world) === 1467228477); }
+  check("the mission crosses under fire: won on turn 4 at tick 5814, all eight standing",
+    ts.turn === 4 && tick === 5814 && s.won && !s.lost && s.friendlies === 8 && s.enemies === 3);
+  check("the end-state world pins", worldHash(war.world) === 244487066); }
 
 { const run = () => { const { war, mission } = bootMission(MISSION_R1);
     const input = defaultTickInput();
@@ -183,6 +183,15 @@ const STEP = 1 / 120;
   const paths = owPaths([sq], (x, z) => war.field.heightAt(x, z));
   check("the cone draws itself: two edges and a five-point arc on the existing overlay",
     paths.length === 3 && paths[0].length === 2 && paths[2].length === 5); }
+
+// ---- FL-2.5: nobody spawns in a tree, and nobody's survey bulldozes one
+{ const { war } = bootMission(MISSION_R1);
+  const trees0 = war.world.bodies.filter((b) => b.kind === "tree" && b.alive).map((b) => ({ id: b.id, x: b.pos.x, z: b.pos.z }));
+  const input = defaultTickInput();
+  for (let i = 0; i < 600; i++) tickWar(war, STEP, input);
+  let maxD = 0;
+  for (const t of trees0) { const b = war.world.byId.get(t.id); if (b) maxD = Math.max(maxD, Math.hypot(b.pos.x - t.x, b.pos.z - t.z)); }
+  check("the forest holds still: 600 idle ticks move no tree (spawns and survey goals are vetted ground)", maxD < 0.05); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);

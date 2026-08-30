@@ -198,6 +198,19 @@ function slotBlocked(world, x, z, clear) {
     if (!SOLID_KINDS.has(b.kind)) continue;
     if (Math.abs(x - b.pos.x) <= b.hx + clear && Math.abs(z - b.pos.z) <= b.hz + clear) return true;
   }
+  // FROSTLINE FL-2.5: TREES ARE GROUND TOO, on the game's word — a slot
+  // inside a dynamic tree or loose chunk ejects the man and bulldozes the
+  // trunk. Opt-in per world (world.slotTreesBlock, set only by FROSTLINE's
+  // mission boot; no depot code sets it), so every existing behavior pin
+  // holds. The solids pool already carries dynamic trees/chunks under the
+  // kind-not-mobility rule; the statics loop above has the rest.
+  if (world.slotTreesBlock) {
+    const tpool = world._L ? world._L.solids : world.bodies;
+    for (const b of tpool) {
+      if (!b.alive || !(b.invM > 0) || (b.kind !== "tree" && b.kind !== "chunk")) continue;
+      if (Math.abs(x - b.pos.x) <= b.hx + clear && Math.abs(z - b.pos.z) <= b.hz + clear) return true;
+    }
+  }
   // P7 T12: THE HULL IS GROUND TOO — a live vehicle blocks a slot exactly as
   // masonry does (same box + clearance test). The static pool above can never
   // carry one (a hull is dynamic, and the invM guard skips it), so hulls ride

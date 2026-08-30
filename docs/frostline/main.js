@@ -69,7 +69,7 @@ function drawChips() {
     el.textContent = label(sq) + " · " + liveCount(sq) + " · " + (discOf(sq) === "careful" ? "C" : "F") + ap;
   }
   const inOrders = ts.phase === "orders" && !over;
-  actionsEl.style.display = inOrders ? "flex" : "none";
+  actionsEl.style.display = inOrders ? "grid" : "none";
   actMove.className = "act" + (mode === "move" ? " on" : "");
   actAttack.className = "act" + (mode === "attack" ? " on" : "");
   actOw.className = "act" + (mode === "ow" ? " on" : "");
