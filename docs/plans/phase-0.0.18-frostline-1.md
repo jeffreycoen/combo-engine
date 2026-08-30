@@ -1,6 +1,6 @@
 # Phase 0.0.18 — FROSTLINE FL-1: the mission and the turns
 
-Status: LANDED, commit stamped below, 2026-08-30. Gate: 16 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `77a3717`, 2026-08-30. Gate: 16 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 16 PASS / 0 FAIL; prior gates unmoved. -->
 
 The first playable of `docs/plans/game-frostline.md`, built to the ruled design: MISSION_R1, REACH THE FAR SIDE. Rifles, gunners, and the sniper pair start by the town and must put someone through the western exit; a four-man enemy patrol blocks the ground — and marches east on its own law, so the block presses. Free time until first sighting; alternating turns from then on, three action points a squad, one point per confirmed order, moves capped in distance; every action — move included — prices itself in a confirmation carrying the cover shield and the chance-to-hit. Won on arrival with anyone alive; lost with the side wiped. Deploys to `docs/frostline/`.
