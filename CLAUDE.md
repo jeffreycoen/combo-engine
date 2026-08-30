@@ -14,6 +14,8 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 
 - Answer like a vending machine or an ATM: state, result, done. Minimal words, plain words, complete sentences. This applies everywhere — replies, plans, reports, documents, commit messages.
 - No jargon, no acronyms.
+- Never describe code in language terms — no "verbs", "grammar", "vocabulary", or the like. Say what the thing does: an order, a button, a rule. Speak plainly, write plainly.
+- Never tag a statement with an attribution or a date — no "(owner, ...)", no dated credits, and no workaround that smuggles the same thing in other words. The rule itself is the record.
 - Never "waiting on you", "ready when you are", "blocked on owner". State the state; he knows whose move it is.
 - The enemy is "it" or "the enemy", never "he".
 - Documents are served as the markdown FILE, sent rendered with the file-sending tool — never pasted whole into a reply, never a bare path.
