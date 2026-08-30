@@ -117,9 +117,53 @@ function screenToWorld(cx, cy) {
   return { x: px + f.x * t, z: pz + f.z * t };
 }
 
+// ---- gestures: a tap orders; two fingers are the camera (pinch zooms,
+// twist rotates) and never order. A tap is down-and-up under 9 px with no
+// second finger; orders moved from pointerdown to the release so the first
+// finger of a pinch never pops a confirmation.
+const clampZoom = (z) => Math.max(0.5, Math.min(2.6, z));
+const ptrs = new Map();
+let gesture = false, tapStart = null, pinchD = 0, twistA = 0;
 canvas.addEventListener("pointerdown", (e) => {
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 2) {
+    gesture = true; tapStart = null;
+    const [a, b] = [...ptrs.values()];
+    pinchD = Math.hypot(b.x - a.x, b.y - a.y);
+    twistA = Math.atan2(b.y - a.y, b.x - a.x);
+  } else if (ptrs.size === 1) tapStart = { id: e.pointerId, x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener("pointermove", (e) => {
+  const p = ptrs.get(e.pointerId);
+  if (!p) return;
+  p.x = e.clientX; p.y = e.clientY;
+  if (gesture && ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    const d = Math.hypot(b.x - a.x, b.y - a.y);
+    const ang = Math.atan2(b.y - a.y, b.x - a.x);
+    if (pinchD > 0) { zoom = clampZoom(zoom * (d / pinchD)); R.setZoom(zoom); }
+    let da = ang - twistA;
+    if (da > Math.PI) da -= 2 * Math.PI;
+    if (da < -Math.PI) da += 2 * Math.PI;
+    R.rotateBy(-da);
+    pinchD = d; twistA = ang;
+  }
+});
+canvas.addEventListener("pointerup", (e) => {
+  const wasTap = tapStart && tapStart.id === e.pointerId && !gesture &&
+    Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 9;
+  ptrs.delete(e.pointerId);
+  if (ptrs.size === 0) gesture = false;
+  tapStart = null;
+  if (wasTap) tapAt(e.clientX, e.clientY);
+});
+canvas.addEventListener("pointercancel", (e) => { ptrs.delete(e.pointerId); if (ptrs.size === 0) gesture = false; tapStart = null; });
+document.getElementById("rotL").addEventListener("click", () => R.rotateStep(1));
+document.getElementById("rotR").addEventListener("click", () => R.rotateStep(-1));
+
+function tapAt(cx, cy) {
   if (over || pending) return;
-  const w = screenToWorld(e.clientX, e.clientY);
+  const w = screenToWorld(cx, cy);
   const hit = pickSquad(squads, w.x, w.z);
   if (hit && mode === null) { selected = hit; return; }
   const free = ts.phase === "free";
@@ -144,9 +188,13 @@ canvas.addEventListener("pointerdown", (e) => {
   present({ kind: "move", sq: selected, x: d.x, z: d.z, title: "MOVE — " + label(selected),
     body: "cover there: " + shield + "<br>distance " + dist.toFixed(0) + " m" + (free ? "<br>free time — no cost" : " (cap " + TURNS.moveCap + ")<br>cost 1 point · " + (apOf(ts, selected) - 1) + " after") });
   aim = { x: d.x, z: d.z };
+}
+addEventListener("wheel", (e) => { zoom = clampZoom(zoom + (e.deltaY > 0 ? -0.12 : 0.12)); R.setZoom(zoom); }, { passive: true });
+addEventListener("keydown", (e) => {
+  if (e.code === "Tab") { e.preventDefault(); selected = cycleSquad(squads, selected); }
+  else if (e.code === "KeyQ") R.rotateStep(1);
+  else if (e.code === "KeyE") R.rotateStep(-1);
 });
-addEventListener("wheel", (e) => { zoom = Math.max(0.5, Math.min(2.6, zoom + (e.deltaY > 0 ? -0.12 : 0.12))); R.setZoom(zoom); }, { passive: true });
-addEventListener("keydown", (e) => { if (e.code === "Tab") { e.preventDefault(); selected = cycleSquad(squads, selected); } });
 
 // ---- the loop
 const title = document.getElementById("title");

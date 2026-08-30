@@ -34,6 +34,9 @@
   .chip { min-width: 70px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.3);
     background: rgba(13,17,23,.55); color: #e9edf2; font: 600 11px/1.5 system-ui, sans-serif; text-align: center; }
   .chip.sel { border-color: #6fbf73; color: #a9e0ac; }
+  #camBtns { position: fixed; left: 12px; top: max(48px, calc(env(safe-area-inset-top) + 38px)); display: flex; gap: 6px; }
+  #camBtns button { width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.4);
+    background: rgba(13,17,23,.55); color: #e9edf2; font: 600 18px system-ui, sans-serif; }
 </style>
 </head>
 <body>
@@ -41,6 +44,7 @@
 <div id="title">FROSTLINE</div>
 <div id="hud">mk -<br>- fps</div>
 <div id="banner">PAUSED</div>
+<div id="camBtns"><button id="rotL">⟲</button><button id="rotR">⟳</button></div>
 <div id="reason"></div>
 <div id="actions" style="display:none">
   <button class="act" id="actMove">MOVE</button>

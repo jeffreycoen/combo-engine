@@ -39,5 +39,6 @@ The landing push publishes `https://jeffreycoen.github.io/combo-engine/docs/fros
 ## Tasks
 
 - 0.0.18-1 — five game modules, gate, page, vendored three, smoke, deploy, records. → `task-0.0.18-1-frostline.md`
+- 0.0.18-1.5 — camera control wired: pinch zoom, twist and Q/E and buttons rotate, orders on release. → `task-0.0.18-1.5-camera.md`
 
 Suggested model: Sonnet 5 — every authored file's full content is in the plan; the one large file is a pinned copy.
