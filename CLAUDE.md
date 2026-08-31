@@ -63,6 +63,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - Test only what changed; run ONLY the gates the brief lists. No scripted playtesting, ever. The full suite rides CI.
 - No full-gameplay runs in gates or trials — a full mission replay is never a per-task test. Test the changed code functionally; long replays belong to CI alone.
 - The work process: the plan-writer writes the code and functionally tests every change in the trial, then hands it to Sonnet to implement. The assistant never plays the game and never takes screenshots unless directed.
+- Functionality only, never playability. The assistant and its agents test that code does what it claims — arithmetic, asserts, exit codes. Whether it plays well, reads well, or feels right is the owner's alone, at the live page.
 - The sweep license: a plan may pre-license re-teaching tests that pin literal text the task itself moves or re-signs — asserted content stays identical, every re-teach reported old→new. Any other failure stops the task. The license never covers behavior.
 - No multi-agent review passes; verification is inline (gates + smoke + screenshots).
 
