@@ -14,6 +14,7 @@ import { coverAt, exposure, hitChance, knownThreats } from "../src/games/frostli
 import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggleDiscipline, markTarget, markedTarget, focusOrder, owPaths } from "../src/games/frostline/verbs.js";
 import { squadFire } from "../src/depot/state.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse } from "../src/games/frostline/purse.js";
+import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS } from "../src/games/frostline/contracts.js";
 import { arcClears } from "../src/depot/accuracy.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -259,6 +260,29 @@ const STEP = 1 / 120;
   check("a bought team marches: the roster boots a fourth squad, its type kept, on open ground",
     war.run.squads.length === 4 && extra.type === "mg"
     && g && Math.hypot(g.x - extra.anchor.x, g.z - extra.anchor.z) < 1e-9); }
+
+// ---- FL-5: the contract board — jobs as data, the ruled trade, the heat
+{ const b7 = makeBoard(7);
+  check("a board is its seed: twin boards land byte-identical", JSON.stringify(makeBoard(7)) === JSON.stringify(b7));
+  check("the fixture board pins: three jobs, their seeds, prices, and tags exact",
+    b7.length === BOARD_JOBS
+    && b7[0].legit === "underground" && b7[0].price === 36 && b7[0].heat === 1 && b7[0].seed === 976907632 && b7[0].name === "CARGO UNDECLARED"
+    && b7[1].legit === "clean" && b7[1].price === 19 && b7[1].heat === 0 && b7[1].seed === 466232632
+    && b7[2].legit === "clean" && b7[2].price === 23 && b7[2].seed === 257815561);
+  let lawful = true;
+  for (const bs of [7, 11, 42]) for (const j of makeBoard(bs)) {
+    const [lo, hi] = j.legit === "underground" ? UNDER_PAY : CLEAN_PAY;
+    if (j.price < lo || j.price > hi) lawful = false;
+    if (j.legit === "underground" && j.heat < 1) lawful = false;
+    if (j.legit === "clean" && j.heat !== 0) lawful = false;
+  }
+  check("the ruled trade holds on every fixture board: clean pays its band, underground pays more and heats", lawful);
+  const p = makePurse();
+  const paid = completionPay(p, b7[0]);
+  check("the posted price pays and the heat lands on the books", paid === 36 && p.scrap === 36 && p.earned === 36 && p.heat === 1);
+  const mem = {}; const storage = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
+  savePurse(storage, p);
+  check("heat rides the vault: save then load round-trips it", loadPurse(storage).heat === 1); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);

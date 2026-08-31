@@ -39,10 +39,16 @@
   .chip { min-width: 70px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.3);
     background: rgba(13,17,23,.55); color: #e9edf2; font: 600 11px/1.5 system-ui, sans-serif; text-align: center; }
   .chip.sel { border-color: #6fbf73; color: #a9e0ac; }
-  #debrief { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 240px; max-width: 86vw;
+  #board, #debrief { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 240px; max-width: 86vw;
     padding: 14px 16px; border-radius: 12px; border: 1.5px solid rgba(233,178,92,.5); background: rgba(13,17,23,.92);
     color: #e9edf2; font: 500 12px/1.7 system-ui, sans-serif; }
-  #dbTitle { font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; color: #e9b25c; }
+  #board { padding: 14px 16px; border-radius: 12px; border: 1.5px solid rgba(233,178,92,.5); background: rgba(13,17,23,.92);
+    color: #e9edf2; font: 500 12px/1.7 system-ui, sans-serif; }
+  #bdTitle, #dbTitle { font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; color: #e9b25c; }
+  #bdJobs button { display: block; width: 100%; margin: 6px 0; padding: 9px 10px; border-radius: 8px; text-align: left;
+    border: 1.5px solid rgba(233,237,242,.4); background: rgba(13,17,23,.6); color: #e9edf2;
+    font: 600 11px/1.5 system-ui, sans-serif; letter-spacing: 0.06em; }
+  #bdJobs button .legit { color: #e9b25c; }
   #dbShop button { display: block; width: 100%; margin: 6px 0; padding: 8px 10px; border-radius: 8px;
     border: 1.5px solid rgba(233,237,242,.4); background: rgba(13,17,23,.6); color: #e9edf2;
     font: 600 11px system-ui, sans-serif; letter-spacing: 0.08em; }
@@ -68,11 +74,16 @@
   <button class="act" id="actDisc">DISCIPLINE</button>
   <button class="act" id="actEnd">END TURN</button>
 </div>
+<div id="board" style="display:none">
+  <div id="bdTitle">THE CONTRACT BOARD</div>
+  <div id="bdBody"></div>
+  <div id="bdJobs"></div>
+</div>
 <div id="debrief" style="display:none">
   <div id="dbTitle"></div>
   <div id="dbBody"></div>
   <div id="dbShop"></div>
-  <div><button class="act" id="dbNew">NEW BATTLE</button><button class="act" id="dbReset">RESET PURSE</button></div>
+  <div><button class="act" id="dbNew">THE BOARD</button><button class="act" id="dbReset">RESET PURSE</button></div>
 </div>
 <div id="popup" style="display:none">
   <div id="popTitle"></div>

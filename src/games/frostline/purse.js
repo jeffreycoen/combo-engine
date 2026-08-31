@@ -12,7 +12,7 @@ export const STORE_KEY = "frostline-purse";
 export const FOR_SALE = ["rifles", "mg", "sniper"];
 
 export function makePurse() {
-  return { scrap: 0, earned: 0, kills: 0, roster: [] };
+  return { scrap: 0, earned: 0, kills: 0, roster: [], heat: 0 };
 }
 
 // loadPurse(storage) -> a purse from the vault, or a fresh one. A broken
@@ -23,7 +23,7 @@ export function loadPurse(storage) {
     if (!raw) return makePurse();
     const p = JSON.parse(raw);
     if (typeof p.scrap !== "number" || !Array.isArray(p.roster)) return makePurse();
-    return { scrap: p.scrap, earned: p.earned || 0, kills: p.kills || 0, roster: p.roster.filter((t) => SQUAD_SPECS[t]) };
+    return { scrap: p.scrap, earned: p.earned || 0, kills: p.kills || 0, roster: p.roster.filter((t) => SQUAD_SPECS[t]), heat: p.heat || 0 };
   } catch { return makePurse(); }
 }
 

@@ -12,18 +12,45 @@ import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, ste
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY } from "../../src/games/frostline/purse.js";
+import { makeBoard, completionPay } from "../../src/games/frostline/contracts.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
 const canvas = document.getElementById("cv");
-// the seed: ?seed=N in the address replays a battle exactly; no seed asked
-// rolls a fresh valley. The seed that took is written back to the address
-// and shown on the hud, so any battle can be named, saved, and reported.
-const askSeed = (() => {
-  const q = parseInt(new URL(location.href).searchParams.get("seed") || "", 10);
-  return Number.isFinite(q) ? q : Math.floor(Math.random() * 1e9);
-})();
+// The address is the whole state: ?board=B lists that board's jobs; add
+// &job=K and that exact contract's battle boots; a bare ?seed=N stays the
+// old free skirmish. No address at all rolls a fresh board.
+const params = new URL(location.href).searchParams;
 const purse = loadPurse(localStorage);
+let boardSeed = parseInt(params.get("board") || "", 10);
+let jobIx = parseInt(params.get("job") || "", 10);
+const bareSeed = parseInt(params.get("seed") || "", 10);
+let contract = null;
+if (!Number.isFinite(boardSeed) && !Number.isFinite(bareSeed)) {
+  boardSeed = Math.floor(Math.random() * 1e9);
+  history.replaceState(null, "", "?board=" + boardSeed);
+}
+if (Number.isFinite(boardSeed) && Number.isFinite(jobIx)) contract = makeBoard(boardSeed)[jobIx] || null;
+const boardOnly = Number.isFinite(boardSeed) && !contract;
+if (boardOnly) {
+  // the board screen: jobs listed, nothing boots until one is taken
+  const bd = document.getElementById("board"), jobsEl = document.getElementById("bdJobs");
+  document.getElementById("bdBody").innerHTML = "the purse: " + purse.scrap + (purse.heat ? " · heat " + purse.heat : "") + "<br>roster: 3 + " + purse.roster.length + " bought";
+  for (const job of makeBoard(boardSeed)) {
+    const b = document.createElement("button");
+    b.innerHTML = job.name + "<br><span class=\"legit\">" + job.legit.toUpperCase() + "</span> · pays " + job.price + (job.heat ? " · +" + job.heat + " heat" : "");
+    b.addEventListener("click", () => { location.href = location.pathname + "?board=" + job.boardSeed + "&job=" + job.job; });
+    jobsEl.appendChild(b);
+  }
+  bd.style.display = "block";
+  document.getElementById("title").textContent = "FROSTLINE · THE BOARD";
+}
+// the battle: everything below runs only when a contract or a bare seed
+// asked for one — the board screen never boots a war.
+if (!boardOnly) startBattle();
+function startBattle() {
+const askSeed = contract ? contract.seed : (Number.isFinite(bareSeed) ? bareSeed : 3);
 const { war, mission, seed } = bootMission(MISSION_R1, askSeed, purse.roster);
+if (!contract) history.replaceState(null, "", "?seed=" + seed);
 let battleEarned = 0, bonusPaid = 0;
 history.replaceState(null, "", "?seed=" + seed);
 const R = makeRenderer(canvas, war.world, { camera: "tactical" });
@@ -255,9 +282,10 @@ function allPaths() {
 const debriefEl = document.getElementById("debrief");
 const dbTitle = document.getElementById("dbTitle"), dbBody = document.getElementById("dbBody"), dbShop = document.getElementById("dbShop");
 function showDebrief(won) {
-  dbTitle.textContent = won ? "THE FAR SIDE — CONTRACT COMPLETE" : "THE LINE BROKE";
+  dbTitle.textContent = won ? (contract ? contract.name + " — PAID" : "THE FAR SIDE — CONTRACT COMPLETE") : "THE LINE BROKE";
   dbBody.innerHTML = "bounties this battle: " + battleEarned +
-    (bonusPaid ? "<br>completion bonus: " + bonusPaid : "") +
+    (bonusPaid ? "<br>" + (contract ? "the posted price: " + bonusPaid : "completion bonus: " + bonusPaid) : "") +
+    (contract && won && contract.heat ? "<br>heat +" + contract.heat + " (now " + purse.heat + ")" : "") +
     "<br>the purse: " + purse.scrap + "<br>roster: 3 + " + purse.roster.length + " bought";
   dbShop.innerHTML = "";
   for (const type of FOR_SALE) {
@@ -271,7 +299,7 @@ function showDebrief(won) {
   debriefEl.style.display = "block";
 }
 document.getElementById("dbNew").addEventListener("click", () => {
-  location.href = location.pathname + "?seed=" + Math.floor(Math.random() * 1e9);
+  location.href = location.pathname + "?board=" + Math.floor(Math.random() * 1e9);
 });
 document.getElementById("dbReset").addEventListener("click", () => {
   localStorage.removeItem(STORE_KEY);
@@ -310,7 +338,7 @@ function frame(now) {
       const s = missionState(war, mission);
       if (s.won || s.lost) {
         over = true;
-        if (s.won) bonusPaid = winBonus(purse);
+        if (s.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
         savePurse(localStorage, purse);
         say("", "");
         showDebrief(s.won);
@@ -326,9 +354,10 @@ function frame(now) {
   R.overlay.setObjective(mission.exit.x, mission.exit.z, war.field.heightAt(mission.exit.x, mission.exit.z));
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
-  hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed + "<br>purse " + purse.scrap;
+  hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed + "<br>purse " + purse.scrap + (purse.heat ? "<br>heat " + purse.heat : "");
   drawChips();
   title.textContent = "FROSTLINE · " + mission.name + (ts.phase === "orders" ? " · TURN " + ts.turn : "");
   R.render(dt, focus, aim);
 }
 requestAnimationFrame(frame);
+}
