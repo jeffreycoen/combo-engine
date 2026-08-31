@@ -1,7 +1,6 @@
 # Phase 0.0.27 — FROSTLINE FL-7: casualties that matter
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 54 PASS / 0 FAIL; prior gates unmoved. -->
+Status: LANDED, commit `40f8679`, 2026-08-31. Gate: 54 PASS / 0 FAIL; prior gates unmoved.
 
 The seventh rung of `docs/plans/game-frostline.md`: the men persist between contracts and the dead stay dead. Survivors carry to the next battle; replacements cost scrap; the medic team joins the shop on the engine's own tend machinery; the score card tells the losses. One honest correction to the ladder's old text: the engine carries no revivable knockdown — "pinned" is a transport state — so wounded-and-downed is not in this phase; what the engine truly owns (hp, death, medics healing the hurt mid-battle) is what ships.
 
