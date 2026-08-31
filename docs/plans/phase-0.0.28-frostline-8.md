@@ -1,7 +1,6 @@
 # Phase 0.0.28 — FROSTLINE FL-8: the space theater
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 58 PASS / 0 FAIL. -->
+Status: LANDED, commit `6faf33d`, 2026-08-31. Gate: 58 PASS / 0 FAIL.
 
 The eighth rung of `docs/plans/game-frostline.md`, built to the rulings: the flat two-dimensional canvas is the drawing layer; the first landing is a minimal skirmish; and space battles enter by TRAVEL — some contracts fly through an ambush, deterministic from the contract's own seed and shown on the board; the space fight comes first, then the ground job. One purse across both theaters.
 
