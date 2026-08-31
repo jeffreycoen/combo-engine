@@ -1,8 +1,8 @@
-# Task 0.0.19-2 — the seed picks the valley: missions as rules, proven crossable
+# Task 0.0.21-1 — the seed picks the valley: missions as rules, proven crossable
 
 One job: a mission becomes RULES over any seeded map instead of coordinates on one map. The page rolls a fresh seed each load, shows it, and pins it in the address for exact replay; every valley proves its road before a single man spawns. Three files change: the mission module and the gate are printed whole; the page changes by two exact hunks. The final hashes are the acceptance. You design nothing.
 
-This document lives at `docs/plans/task-0.0.19-2-seeds.md` when the task lands. Ruled at the design discussion: seed variation only in this task — today's valley profile, map-type presets next on this machinery; seed random each load, shown, `?seed=N` replays; bolts and burn marks the task after.
+This document lives at `docs/plans/task-0.0.21-1-seeds.md` when the task lands. Ruled at the design discussion: seed variation only in this task — today's valley profile, map-type presets next on this machinery; seed random each load, shown, `?seed=N` replays; bolts and burn marks the task after.
 
 ## Required reading, verified in the tree
 
@@ -493,10 +493,10 @@ timeout 240 chromium --headless=new --no-sandbox --use-angle=swiftshader-webgl -
 
 `SMOKE-OK` must print; the hud grep must read `mk 0.0.19`, a numeric fps, and `seed 7` exactly — the asked seed took and the page says so. At trial the paint measured 314059 bytes; the threshold binds, the byte count may drift. Kill the server after.
 
-**Step 8 — records and deploy.** Move this document to `docs/plans/task-0.0.19-2-seeds.md`. In `docs/plans/phase-0.0.19-frostline-2.md`, under `## Tasks`, add after the 0.0.19-1.5 line:
+**Step 8 — records and deploy.** Move this document to `docs/plans/task-0.0.21-1-seeds.md`. In `docs/plans/phase-0.0.19-frostline-2.md`, under `## Tasks`, add after the 0.0.19-1.5 line:
 
 ```
-- 0.0.19-2 — the seed picks the valley: missions as rules, the road proven, the seed shown and pinned in the address. → `task-0.0.19-2-seeds.md`
+- 0.0.21-1 — the seed picks the valley: missions as rules, the road proven, the seed shown and pinned in the address. → `task-0.0.21-1-seeds.md`
 ```
 
 In `docs/plans/game-frostline.md`, under `## Standing facts, verified in the tree`, add at the end of the list:
@@ -508,7 +508,7 @@ In `docs/plans/game-frostline.md`, under `## Standing facts, verified in the tre
 Commit all five files with message:
 
 ```
-task 0.0.19-2 — the seed picks the valley: missions as rules, proven crossable
+task 0.0.21-1 — the seed picks the valley: missions as rules, proven crossable
 
 A mission is rules over any seeded map: the town anchors the line, the west
 holds the exit, every force stands on double-vetted ground, and a flood-fill

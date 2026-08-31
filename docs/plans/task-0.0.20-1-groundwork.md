@@ -1,8 +1,8 @@
-# Task 0.0.19-1.5 — nobody spawns in a tree, and the buttons keep their lanes
+# Task 0.0.20-1 — nobody spawns in a tree, and the buttons keep their lanes
 
 One job: close the two playtest defects — squads starting inside trees and bulldozing them, and the phone screen's overlapping text and buttons. One opt-in engine line, one rewritten mission boot, a re-taught gate, and page CSS. Two files are printed whole; two change by one exact hunk each; one is replaced whole. The final hashes are the acceptance. You design nothing.
 
-This document lives at `docs/plans/task-0.0.19-1.5-groundwork.md` when the task lands.
+This document lives at `docs/plans/task-0.0.20-1-groundwork.md` when the task lands.
 
 ## Required reading, verified in the tree
 
@@ -482,16 +482,16 @@ timeout 240 chromium --headless=new --no-sandbox --use-angle=swiftshader-webgl -
 
 `DESK-OK` and `PHONE-OK` must print; the hud line must read `mk 0.0.19` with a numeric fps. At trial the phone paint measured 225411 bytes and the layout was verified by eye: chips column left, no clipping, no overlap. Kill the server after.
 
-**Step 9 — records and deploy.** Move this document to `docs/plans/task-0.0.19-1.5-groundwork.md`. In `docs/plans/phase-0.0.19-frostline-2.md`, under `## Tasks`, add after the 0.0.19-1 line:
+**Step 9 — records and deploy.** Move this document to `docs/plans/task-0.0.20-1-groundwork.md`. In `docs/plans/phase-0.0.19-frostline-2.md`, under `## Tasks`, add after the 0.0.19-1 line:
 
 ```
-- 0.0.19-1.5 — spawns on vetted ground (trees block slots on the game's word), the phone layout kept in lanes, four pins re-taught. → `task-0.0.19-1.5-groundwork.md`
+- 0.0.20-1 — spawns on vetted ground (trees block slots on the game's word), the phone layout kept in lanes, four pins re-taught. → `task-0.0.20-1-groundwork.md`
 ```
 
 Commit all six files with message:
 
 ```
-task 0.0.19-1.5 — nobody spawns in a tree; the buttons keep their lanes
+task 0.0.20-1 — nobody spawns in a tree; the buttons keep their lanes
 
 Trees block slots on the game's word (one opt-in engine line, proven inert on
 every prior gate); mission forces boot on vetted ground; the forest holds still
