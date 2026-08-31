@@ -141,8 +141,14 @@ function placeMission(war, def) {
 // valley; a valley the rules refuse steps to the next seed, deterministically,
 // so the same asked seed always lands the same battle. The returned seed is
 // the one that took; the page shows it and the address bar pins it.
-export function bootMission(def, seed = 3, roster = []) {
+export function bootMission(def, seed = 3, roster = [], men = null) {
   const fielded = { ...def, friendlies: def.friendlies.concat(roster.map((t) => ({ type: t }))) };
+  // FL-7: men[i] heads per fielded slot; a zero-man slot fields no squad.
+  if (men) {
+    fielded.friendlies = fielded.friendlies
+      .map((f, i) => ({ ...f, n: men[i] }))
+      .filter((f) => f.n == null || f.n > 0);
+  }
   const def0 = def;
   def = fielded;
   for (let k = 0; k < (def0.tries || 24); k++) {
@@ -153,7 +159,7 @@ export function bootMission(def, seed = 3, roster = []) {
     if (!placed) continue;
     def.friendlies.forEach((f, i) => {
       const sq = makeSquad(war.run.nextSquadId++, f.type, 1, placed.squadAt[i].x, placed.squadAt[i].z);
-      spawnSquadMembers(war.world, sq);
+      spawnSquadMembers(war.world, sq, f.n);
       war.run.squads.push(sq);
     });
     for (const g of placed.foes) spawnEnemy(war.world, { x: g.x, z: g.z }, "");

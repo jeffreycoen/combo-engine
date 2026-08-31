@@ -1086,9 +1086,13 @@ export function teslaWouldCatchFriend(world, tower, target, map) {
 // physics — sees them for free. dress "human" (the player side reads human;
 // androids are the enemy's dress). squadId back-references the roster so
 // pruneSquads and the selection UI can walk body -> squad.
-export function spawnSquadMembers(world, squad) {
+// FROSTLINE FL-7: an optional head count — a squad that lost men between
+// contracts fields what it has. Every existing caller passes nothing and
+// spawns spec.n exactly as before (inert outside FROSTLINE).
+export function spawnSquadMembers(world, squad, n) {
   const spec = SQUAD_SPECS[squad.type];
-  for (let i = 0; i < spec.n; i++) {
+  const count = n != null ? Math.max(0, Math.min(n, spec.n)) : spec.n;
+  for (let i = 0; i < count; i++) {
     const a = (i / spec.n) * Math.PI * 2, r = 1.2;
     // clearSlot (squads.js smallfix): a ring point overlapping a static solid
     // gets the man depenetration-ejected and slam-killed on his first tick —

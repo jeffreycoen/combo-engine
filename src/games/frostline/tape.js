@@ -97,8 +97,8 @@ export function record(tape, ctx, op) {
 // same battle and drives the same step; each op lands before the tick it
 // was recorded at. Deterministic end to end: same seed, same tape, same
 // world, every time.
-export function replay(def, seed, roster, tape, capTicks = 200000) {
-  const { war, mission } = bootMission(def, seed, roster);
+export function replay(def, seed, roster, tape, capTicks = 200000, men = null) {
+  const { war, mission } = bootMission(def, seed, roster, men);
   const ctx = makeCtx(war, mission);
   let p = 0;
   while (!ctx.over && ctx.tick < capTicks) {

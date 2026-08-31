@@ -28,7 +28,7 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 - [LANDED] **FL-4 — the purse.** Bounties per kill into the purse; the upgrade screen between contracts; upgrades as data through the roster contract (squad strength, weapon rows, new team types).
 - [LANDED] **FL-5 — the contract board.** Missions as data with a posted price and a legitimacy tag; clean jobs pay less, underground jobs pay more and raise the heat; the board is the campaign's spine.
 - [LANDED] **FL-6 — the tape.** Orders recorded at their tick; a contract replays from seed plus tape; the replay is the campaign gate.
-- **FL-7 — casualties that matter.** Wounded states over the engine's knockdown, medic teams, rally, the score card.
+- [LANDED] **FL-7 — casualties that matter.** The men persist between contracts and the dead stay dead: survivors carry, a wiped squad fields nothing, replacements cost the table's own split price as a class, the medic team joins the shop on the engine's tend machinery, and the score card tells the losses. No revivable knockdown in the engine, so no wounded-and-downed state; rally not in this phase.
 - **FL-8 — the space theater.** Ship contracts on the orders and steering modules under the same turn machine: ships as operators, the drawing-layer choice ruled here, the purse shared.
 - **FL-9 — the hunter.** The bounty hunter as a commandable piece beside the squads — the armored, helmeted silhouette with the jetpack line; kit and role ruled when this phase opens.
 - **FL-10 — the ladder and closeout.** The contract board as campaign, persistence through the storage door, the game's README section, screenshots re-checked.

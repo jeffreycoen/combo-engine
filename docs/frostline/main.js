@@ -11,7 +11,7 @@ import { makeTriggerState, checkTriggers } from "../../src/games/frostline/pause
 import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../../src/games/frostline/turns.js";
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
-import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY } from "../../src/games/frostline/purse.js";
+import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill } from "../../src/games/frostline/purse.js";
 import { makeBoard, completionPay } from "../../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record } from "../../src/games/frostline/tape.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
@@ -50,9 +50,10 @@ if (boardOnly) {
 if (!boardOnly) startBattle();
 function startBattle() {
 const askSeed = contract ? contract.seed : (Number.isFinite(bareSeed) ? bareSeed : 3);
-const { war, mission, seed } = bootMission(MISSION_R1, askSeed, purse.roster);
+const men0 = menOf(purse); // heads per fielded slot; the dead stay dead until replaced
+const { war, mission, seed } = bootMission(MISSION_R1, askSeed, purse.roster, men0);
 if (!contract) history.replaceState(null, "", "?seed=" + seed);
-let battleEarned = 0, bonusPaid = 0;
+let battleEarned = 0, bonusPaid = 0, fellThisBattle = 0;
 // the tape: every confirmed order at its tick; saved with the battle's
 // address at the end so any fight can be reported and replayed bit-exact
 const ctx = makeCtx(war, mission);
@@ -289,12 +290,21 @@ function showDebrief(won) {
     (bonusPaid ? "<br>" + (contract ? "the posted price: " + bonusPaid : "completion bonus: " + bonusPaid) : "") +
     (contract && won && contract.heat ? "<br>heat +" + contract.heat + " (now " + purse.heat + ")" : "") +
     "<br>the purse: " + purse.scrap + "<br>roster: 3 + " + purse.roster.length + " bought" +
+    "<br>the fallen this battle: " + fellThisBattle + " · the campaign's dead: " + purse.fallen +
     "<br>the tape: " + tape.length + " orders, saved";
   dbShop.innerHTML = "";
+  const bill = refillCost(purse);
+  if (bill > 0) {
+    const rb = document.createElement("button");
+    rb.textContent = "REPLACEMENTS — bring every squad to strength — " + bill;
+    rb.disabled = purse.scrap < bill;
+    rb.addEventListener("click", () => { if (buyRefill(purse)) { savePurse(localStorage, purse); showDebrief(won); } });
+    dbShop.appendChild(rb);
+  }
   for (const type of FOR_SALE) {
     const b = document.createElement("button");
     const price = teamPrice(type);
-    b.textContent = "BUY " + (type === "mg" ? "GUNNERS" : type === "sniper" ? "SNIPER PAIR" : "RIFLE SQUAD") + " — " + price;
+    b.textContent = "BUY " + (type === "mg" ? "GUNNERS" : type === "sniper" ? "SNIPER PAIR" : type === "medics" ? "MEDIC TEAM" : "RIFLE SQUAD") + " — " + price;
     b.disabled = purse.scrap < price;
     b.addEventListener("click", () => { if (buyTeam(purse, type)) { savePurse(localStorage, purse); showDebrief(won); } });
     dbShop.appendChild(b);
@@ -332,8 +342,13 @@ function frame(now) {
       battleEarned += earnFromEvents(purse, war, events);
       if (ctx.over) {
         if (ctx.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
+        // the score card's arithmetic: survivors per fielded slot, in boot order
+        const types = fieldedTypes(purse);
+        let si = 0;
+        const standing = types.map((t, i2) => (men0[i2] <= 0 ? 0 : liveCount(squads[si++])));
+        fellThisBattle = recordCasualties(purse, standing);
         savePurse(localStorage, purse);
-        localStorage.setItem("frostline-tape", JSON.stringify({ seed, board: contract ? contract.boardSeed : null, job: contract ? contract.job : null, roster: purse.roster.slice(), tape }));
+        localStorage.setItem("frostline-tape", JSON.stringify({ seed, board: contract ? contract.boardSeed : null, job: contract ? contract.job : null, roster: purse.roster.slice(), men: men0, tape }));
         say("", "");
         showDebrief(ctx.won);
       }

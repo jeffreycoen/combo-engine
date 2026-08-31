@@ -9,10 +9,12 @@ import { SQUAD_SPECS } from "../../depot/squads.js";
 export const WIN_BONUS = 25;            // provisional (F5)
 export const STORE_KEY = "frostline-purse";
 // The teams the debrief sells, priced by the engine's own squad table.
-export const FOR_SALE = ["rifles", "mg", "sniper"];
+export const FOR_SALE = ["rifles", "mg", "sniper", "medics"];
 
 export function makePurse() {
-  return { scrap: 0, earned: 0, kills: 0, roster: [], heat: 0 };
+  // men: heads per fielded squad slot (base three first, bought teams after);
+  // null means every squad at full strength. fallen: the campaign's dead.
+  return { scrap: 0, earned: 0, kills: 0, roster: [], heat: 0, men: null, fallen: 0 };
 }
 
 // loadPurse(storage) -> a purse from the vault, or a fresh one. A broken
@@ -23,7 +25,8 @@ export function loadPurse(storage) {
     if (!raw) return makePurse();
     const p = JSON.parse(raw);
     if (typeof p.scrap !== "number" || !Array.isArray(p.roster)) return makePurse();
-    return { scrap: p.scrap, earned: p.earned || 0, kills: p.kills || 0, roster: p.roster.filter((t) => SQUAD_SPECS[t]), heat: p.heat || 0 };
+    return { scrap: p.scrap, earned: p.earned || 0, kills: p.kills || 0, roster: p.roster.filter((t) => SQUAD_SPECS[t]), heat: p.heat || 0,
+      men: Array.isArray(p.men) ? p.men.map((v) => Math.max(0, v | 0)) : null, fallen: p.fallen || 0 };
   } catch { return makePurse(); }
 }
 
@@ -69,5 +72,43 @@ export function buyTeam(purse, type) {
   if (!SQUAD_SPECS[type] || purse.scrap < price) return false;
   purse.scrap -= price;
   purse.roster.push(type);
+  if (purse.men) purse.men.push(SQUAD_SPECS[type].n); // a bought team arrives at full strength
+  return true;
+}
+
+// ---- FL-7: the men persist; the dead stay dead; replacements cost scrap.
+export const BASE_TYPES = ["rifles", "mg", "sniper"];
+export function fieldedTypes(purse) { return BASE_TYPES.concat(purse.roster); }
+export function menOf(purse) {
+  const types = fieldedTypes(purse);
+  if (purse.men && purse.men.length === types.length) return purse.men.slice();
+  return types.map((t) => SQUAD_SPECS[t].n);
+}
+// a man's price: his squad's own table price split by heads, rounded up
+export const manPrice = (type) => Math.ceil(SQUAD_SPECS[type].cost / SQUAD_SPECS[type].n);
+// recordCasualties(purse, standing): the battle's survivors onto the books;
+// returns how many fell. `standing` aligns with fieldedTypes order.
+export function recordCasualties(purse, standing) {
+  const before = menOf(purse);
+  let fell = 0;
+  for (let i = 0; i < before.length; i++) fell += Math.max(0, before[i] - (standing[i] | 0));
+  purse.men = standing.map((v) => Math.max(0, v | 0));
+  purse.fallen += fell;
+  return fell;
+}
+// refillCost(purse) -> the bill to bring every squad back to strength.
+export function refillCost(purse) {
+  const types = fieldedTypes(purse), men = menOf(purse);
+  let cost = 0;
+  for (let i = 0; i < types.length; i++) cost += Math.max(0, SQUAD_SPECS[types[i]].n - men[i]) * manPrice(types[i]);
+  return cost;
+}
+// buyRefill(purse) -> true when the whole bill was met: every squad refills.
+// A short purse refuses and changes nothing — replacements come as a class.
+export function buyRefill(purse) {
+  const bill = refillCost(purse);
+  if (bill <= 0 || purse.scrap < bill) return false;
+  purse.scrap -= bill;
+  purse.men = null; // full strength across the board
   return true;
 }

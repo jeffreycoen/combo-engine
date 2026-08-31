@@ -13,7 +13,9 @@ import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, ste
 import { coverAt, exposure, hitChance, knownThreats } from "../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggleDiscipline, markTarget, markedTarget, focusOrder, owPaths } from "../src/games/frostline/verbs.js";
 import { squadFire } from "../src/depot/state.js";
-import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse } from "../src/games/frostline/purse.js";
+import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse, fieldedTypes, menOf, manPrice, recordCasualties, refillCost, buyRefill } from "../src/games/frostline/purse.js";
+import { makeSquad } from "../src/depot/squads.js";
+import { spawnSquadMembers } from "../src/depot/state.js";
 import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS } from "../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record, replay, nearestThreat } from "../src/games/frostline/tape.js";
 import { arcClears } from "../src/depot/accuracy.js";
@@ -324,6 +326,44 @@ const STEP = 1 / 120;
   const refused = !applyOp(c3, { op: "attack", i: 0, x: 0, z: 0 });
   check("a refused order costs nothing: no known target, no point spent",
     refused && c3.ts.ap[w3.run.squads[0].id] === 3); }
+
+// ---- FL-7: casualties that matter — the men persist, the dead stay dead
+{ const { war } = bootMission(MISSION_R1, 3, [], [2, 1, 2]);
+  const counts = war.run.squads.map((sq) => sq.memberIds.map((id) => war.world.byId.get(id)).filter((u) => u && u.alive).length);
+  check("a battered roster fields what it has: head counts through the boot", counts.join() === "2,1,2");
+  const { war: w2 } = bootMission(MISSION_R1, 3, [], [0, 2, 2]);
+  check("a wiped squad fields nothing: the zero slot is skipped, the rest march",
+    w2.run.squads.length === 2 && w2.run.squads[0].type === "mg"); }
+
+{ const p = makePurse();
+  check("full strength by default: three squads at the table's own heads", menOf(p).join() === "4,2,2");
+  const fell = recordCasualties(p, [2, 2, 1]);
+  check("the score card's arithmetic: three fell, the books remember", fell === 3 && p.fallen === 3 && menOf(p).join() === "2,2,1");
+  check("a man has a price: his squad's table price split by heads, rounded up",
+    manPrice("rifles") === 8 && manPrice("mg") === 19 && manPrice("sniper") === 34 && manPrice("medics") === 28);
+  const bill = refillCost(p);
+  check("the bill adds up: two riflemen and a sniper", bill === 2 * 8 + 34);
+  const refused = !buyRefill(p);
+  p.scrap = 100;
+  check("replacements come as a class: a short purse refuses whole, a full one refills whole",
+    refused && buyRefill(p) && p.scrap === 100 - bill && menOf(p).join() === "4,2,2" && refillCost(p) === 0);
+  const mem = {}; const st = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
+  recordCasualties(p, [3, 2, 2]);
+  savePurse(st, p);
+  const q = loadPurse(st);
+  check("the dead ride the vault: men and fallen round-trip", q.fallen === 4 && menOf(q).join() === "3,2,2"); }
+
+{ const { war } = bootMission(MISSION_R1, 3);
+  const w = war.world;
+  const hurt = w.byId.get(war.run.squads[0].memberIds[0]);
+  hurt.hp = 3;
+  const g = openGround(war, hurt.pos.x + 3, hurt.pos.z, 2.0);
+  const med = makeSquad(war.run.nextSquadId++, "medics", 1, g.x, g.z);
+  spawnSquadMembers(w, med);
+  war.run.squads.push(med);
+  const input = defaultTickInput(); input.devDummies = true;
+  for (let i = 0; i < 120 * 20; i++) tickWar(war, STEP, input);
+  check("the medic team tends on this ground: a 3 hp man stands near full inside twenty seconds", hurt.hp > 50); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
