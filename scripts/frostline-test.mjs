@@ -6,7 +6,7 @@
 // while the sim itself stays bit-identical.
 import { tickWar, defaultTickInput } from "../src/depot/api.js";
 import { worldHash, addBody } from "../src/engine/core.js";
-import { bootMission, missionState, MISSION_R1 } from "../src/games/frostline/mission.js";
+import { bootMission, missionState, MISSION_R1, openGround, connected } from "../src/games/frostline/mission.js";
 import { orderMove, orderDone, pickSquad } from "../src/games/frostline/command.js";
 import { makeTriggerState, checkTriggers } from "../src/games/frostline/pause.js";
 import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../src/games/frostline/turns.js";
@@ -25,9 +25,9 @@ const STEP = 1 / 120;
   const s = missionState(war, mission);
   check("boot: three squads, eight friendlies, four blockers, nobody won, the world pins",
     war.run.squads.length === 3 && s.friendlies === 8 && s.enemies === 4
-    && !s.won && !s.lost && worldHash(war.world) === 1706678194);
+    && !s.won && !s.lost && worldHash(war.world) === 2024034825);
   check("nothing is known at boot: the sight map has seen no enemy", knownThreats(war).length === 0);
-  check("pick: a tap near the rifles takes them", pickSquad(war.run.squads, 8, 26) === war.run.squads[0]); }
+  check("pick: a tap on the rifles takes them", pickSquad(war.run.squads, war.run.squads[0].anchor.x, war.run.squads[0].anchor.z) === war.run.squads[0]); }
 
 { const ts = makeTurns();
   check("the war starts in free time", ts.phase === "free" && ts.turn === 0);
@@ -90,7 +90,7 @@ const STEP = 1 / 120;
     const t = checkTriggers(war, trig, events);
     if (t.contact !== null) { contactAt = tick; startTurns(ts, squads); }
   }
-  check("free time ends at first sight: contact at tick 774 exactly", contactAt === 774);
+  check("free time ends at first sight: contact at tick 584 exactly", contactAt === 584);
   let guard = 0, end = null;
   while (guard++ < 40 && !end) {
     for (const sq of squads) {
@@ -110,9 +110,9 @@ const STEP = 1 / 120;
     if (s.won || s.lost) end = s;
   }
   const s = missionState(war, mission);
-  check("the mission crosses under fire: won on turn 4 at tick 5814, all eight standing",
-    ts.turn === 4 && tick === 5814 && s.won && !s.lost && s.friendlies === 8 && s.enemies === 3);
-  check("the end-state world pins", worldHash(war.world) === 244487066); }
+  check("the mission crosses under fire: won on turn 5 at tick 7304, seven of eight standing",
+    ts.turn === 5 && tick === 7304 && s.won && !s.lost && s.friendlies === 7 && s.enemies === 2);
+  check("the end-state world pins", worldHash(war.world) === 1467655505); }
 
 { const run = () => { const { war, mission } = bootMission(MISSION_R1);
     const input = defaultTickInput();
@@ -192,6 +192,23 @@ const STEP = 1 / 120;
   let maxD = 0;
   for (const t of trees0) { const b = war.world.byId.get(t.id); if (b) maxD = Math.max(maxD, Math.hypot(b.pos.x - t.x, b.pos.z - t.z)); }
   check("the forest holds still: 600 idle ticks move no tree (spawns and survey goals are vetted ground)", maxD < 0.05); }
+
+// ---- seeded generation: the rules place any valley, proven
+{ let placed = 0, asAsked = 0, walkable = 0, roads = 0;
+  for (const s of [7, 11, 42]) {
+    const { war, mission, seed } = bootMission(MISSION_R1, s);
+    placed++;
+    if (seed === s) asAsked++;
+    if (war.run.squads.every((sq) => {
+      const g = openGround(war, sq.anchor.x, sq.anchor.z, 0.6);
+      return g && Math.hypot(g.x - sq.anchor.x, g.z - sq.anchor.z) < 1e-9;
+    })) walkable++;
+    if (connected(war, war.run.squads[0].anchor, mission.exit)) roads++;
+  }
+  check("three more valleys place by rule: forces on open ground, every seed as asked", placed === 3 && asAsked === 3 && walkable === 3);
+  check("every placed valley proves its road: spawn to exit connects on the movement grid", roads === 3);
+  const twin = () => { const { war } = bootMission(MISSION_R1, 7); return worldHash(war.world); };
+  check("a seed is a battle: twin boots of seed 7 land bit-identical worlds", twin() === twin()); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);

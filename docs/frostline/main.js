@@ -14,7 +14,15 @@ import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discO
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
 const canvas = document.getElementById("cv");
-const { war, mission } = bootMission(MISSION_R1);
+// the seed: ?seed=N in the address replays a battle exactly; no seed asked
+// rolls a fresh valley. The seed that took is written back to the address
+// and shown on the hud, so any battle can be named, saved, and reported.
+const askSeed = (() => {
+  const q = parseInt(new URL(location.href).searchParams.get("seed") || "", 10);
+  return Number.isFinite(q) ? q : Math.floor(Math.random() * 1e9);
+})();
+const { war, mission, seed } = bootMission(MISSION_R1, askSeed);
+history.replaceState(null, "", "?seed=" + seed);
 const R = makeRenderer(canvas, war.world, { camera: "tactical" });
 let zoom = 1.5;
 R.setZoom(zoom);
@@ -281,7 +289,7 @@ function frame(now) {
   R.overlay.setObjective(mission.exit.x, mission.exit.z, war.field.heightAt(mission.exit.x, mission.exit.z));
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
-  hud.innerHTML = mkText + "<br>" + fpsText;
+  hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed;
   drawChips();
   title.textContent = "FROSTLINE · " + mission.name + (ts.phase === "orders" ? " · TURN " + ts.turn : "");
   R.render(dt, focus, aim);

@@ -18,6 +18,7 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 - The world hash is id-free and bit-stable across twin boots; the run hash is polluted by module-global body ids — game gates pin the world hash and mission facts, never the run hash.
 - Enemy specs carry bounty prices and the sim scores every kill — the money is already arithmetic.
 - OLD MASTER is parked intact at `docs/play/`; FROSTLINE lives at `docs/frostline/` and `src/games/frostline/`.
+- A mission is rules over a seeded map: forces place on double-vetted ground (solids and the movement grid's foot rule), every valley proves its spawn-to-exit road before a man spawns, and a refused valley steps deterministically to the next seed. A saved battle is its seed; the page pins it in the address.
 
 ## The phases
 

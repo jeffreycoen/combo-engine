@@ -38,5 +38,6 @@ The landing push publishes `https://jeffreycoen.github.io/combo-engine/docs/fros
 
 - 0.0.19-1 — the engine hooks, the verbs module, the page, the gate, smoke, deploy, records. → `task-0.0.19-1-verbs.md`
 - 0.0.19-1.5 — spawns on vetted ground (trees block slots on the game's word), the phone layout kept in lanes, four pins re-taught. → `task-0.0.19-1.5-groundwork.md`
+- 0.0.19-2 — the seed picks the valley: missions as rules, the road proven, the seed shown and pinned in the address. → `task-0.0.19-2-seeds.md`
 
 Suggested model: Sonnet 5 — every changed byte is printed in the task document; hashes ratify the outcome.
