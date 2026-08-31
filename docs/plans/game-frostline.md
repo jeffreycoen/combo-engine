@@ -32,5 +32,7 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 - **FL-8 — the space theater.** Ship contracts on the orders and steering modules under the same turn machine: ships as operators, the drawing-layer choice ruled here, the purse shared.
 - **FL-9 — the hunter.** The bounty hunter as a commandable piece beside the squads — the armored, helmeted silhouette with the jetpack line; kit and role ruled when this phase opens.
 - **FL-10 — the ladder and closeout.** The contract board as campaign, persistence through the storage door, the game's README section, screenshots re-checked.
+- **FL-11 — map types.** The generator's internal dials exposed as named profiles (city, forest, tundra, mountain and the rest); the passability proof extended to the craggy family; the placement anchor revisited for townless ground. Moved to the ladder's end on the owner's word after the seeded-valley landing.
+- **FL-12 — bolts and burn marks.** Rounds drawn as energy bolts in each side's color; scorch marks through the ground-mark machinery. Moved to the ladder's end with FL-11.
 
 Look, feel, and sound are decided at the deployed page at every landing; tuning numbers move only on playtest word.
