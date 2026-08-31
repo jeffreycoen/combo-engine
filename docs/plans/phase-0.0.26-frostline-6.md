@@ -1,7 +1,6 @@
 # Phase 0.0.26 — FROSTLINE FL-6: the tape
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 45 PASS / 0 FAIL. -->
+Status: LANDED, commit `6288df7`, 2026-08-31. Gate: 45 PASS / 0 FAIL.
 
 The sixth rung of `docs/plans/game-frostline.md`: every order is recorded at its tick, and a contract replays bit-exact from seed plus tape. A bug report is a saved battle; the replay is the campaign gate.
 
