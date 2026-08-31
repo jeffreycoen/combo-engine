@@ -1,7 +1,6 @@
 # Phase 0.0.23 — FROSTLINE FL-3: the estimate audited
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 29 PASS / 0 FAIL; audit 6 PASS / 0 FAIL. -->
+Status: LANDED, commit `92572e8`, 2026-08-31. Gate: 29 PASS / 0 FAIL; audit 6 PASS / 0 FAIL.
 
 The third rung of `docs/plans/game-frostline.md`: the chance-to-hit the page displays is now measured against live fire and corrected. The audit found the shipped formula wrong twice over — a straight bell-curve where the engine's deflection is a radial Rayleigh draw, and no accounting for blast splash: at 8 m it displayed 35% where the range measured 90%.
 
