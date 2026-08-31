@@ -1,7 +1,6 @@
 # Phase 0.0.25 — FROSTLINE FL-5: the contract board
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 41 PASS / 0 FAIL. -->
+Status: LANDED, commit `fd45f72`, 2026-08-31. Gate: 41 PASS / 0 FAIL.
 
 The fifth rung of `docs/plans/game-frostline.md`: missions become posted jobs. A contract is data — a name, a battle seed, a posted price, a legitimacy tag; clean jobs pay less, underground jobs pay more and raise the heat. The board is the campaign's spine.
 
