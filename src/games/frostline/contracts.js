@@ -8,7 +8,7 @@
 
 // The same 32-bit stream shape the engine's own maps grow from — local,
 // seeded, and free of Math.random.
-function stream(seed) {
+export function stream(seed) {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
@@ -25,6 +25,9 @@ export const BOARD_JOBS = 3;
 export const CLEAN_PAY = [15, 25];
 export const UNDER_PAY = [35, 60];
 export const UNDER_HEAT = 1;
+// The route: some jobs fly through an ambush — the space fight comes first,
+// then the ground job. Underground routes run hotter. Provisional (F5).
+export const HOT_CLEAN = 0.2, HOT_UNDER = 0.55;
 
 const CLEAN_NAMES = ["ESCORT THE SURVEY", "CLEAR THE PASS", "HOLD FOR THE CONVOY"];
 const UNDER_NAMES = ["NO QUESTIONS ASKED", "THE QUIET JOB", "CARGO UNDECLARED"];
@@ -41,14 +44,22 @@ export function makeBoard(boardSeed) {
     const payHi = under ? UNDER_PAY[1] : CLEAN_PAY[1];
     const price = payLo + Math.floor(r() * (payHi - payLo + 1));
     const names = under ? UNDER_NAMES : CLEAN_NAMES;
+    const seed = Math.floor(r() * 1e9);
+    const name = names[Math.floor(r() * names.length)];
+    // two draws ride at the end of each job so every earlier draw keeps its
+    // place: is the route hot, and the ambush's own battle seed
+    const hot = r() < (under ? HOT_UNDER : HOT_CLEAN);
+    const spaceSeed = Math.floor(r() * 1e9);
     jobs.push({
       job: i,
       boardSeed,
-      seed: Math.floor(r() * 1e9),
-      name: names[Math.floor(r() * names.length)],
+      seed,
+      name,
       legit: under ? "underground" : "clean",
       price,
       heat: under ? UNDER_HEAT : 0,
+      hot,
+      spaceSeed,
     });
   }
   return jobs;

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>FROSTLINE — THE ROUTE</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #05070d; touch-action: none; }
+  #cv { width: 100%; height: 100%; display: block; }
+  #title { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
+    text-align: center; color: #e9edf2; font: 600 12px/1.4 system-ui, sans-serif; letter-spacing: 0.2em;
+    pointer-events: none; background: rgba(13,17,23,.6); padding: 4px 12px; border-radius: 8px; white-space: nowrap;
+    max-width: calc(100vw - 170px); overflow: hidden; text-overflow: ellipsis; }
+  #hud { position: fixed; top: max(10px, env(safe-area-inset-top)); right: 12px; color: rgba(233,237,242,.85);
+    font: 500 11px/1.4 ui-monospace, monospace; pointer-events: none; text-align: right;
+    background: rgba(13,17,23,.6); padding: 4px 8px; border-radius: 8px; }
+  #banner { position: fixed; top: 38%; left: 50%; transform: translateX(-50%); text-align: center;
+    pointer-events: none; color: #e9b25c; font: 700 22px/1.3 system-ui, sans-serif; letter-spacing: 0.3em;
+    background: rgba(13,17,23,.65); padding: 8px 18px; border-radius: 10px; white-space: nowrap; max-width: 92vw; display: none; }
+  #reason { position: fixed; top: calc(38% + 50px); left: 50%; transform: translateX(-50%); text-align: center;
+    pointer-events: none; color: rgba(233,237,242,.9); font: 500 12px/1.4 system-ui, sans-serif; letter-spacing: 0.12em;
+    background: rgba(13,17,23,.6); padding: 5px 12px; border-radius: 8px; max-width: 86vw; display: none; }
+  #ships { position: fixed; left: 12px; bottom: max(16px, env(safe-area-inset-bottom)); display: flex;
+    flex-direction: column; gap: 6px; max-width: 44vw; align-items: flex-start; }
+  #actions { position: fixed; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); display: grid;
+    grid-template-columns: repeat(2, minmax(92px, 1fr)); gap: 6px; max-width: 48vw; }
+  .act { min-width: 92px; padding: 9px 10px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.4);
+    background: rgba(13,17,23,.6); color: #e9edf2; font: 600 11px system-ui, sans-serif; letter-spacing: 0.12em; }
+  .act.on { border-color: #e9b25c; color: #e9b25c; }
+  .chip { min-width: 70px; padding: 8px 10px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.3);
+    background: rgba(13,17,23,.55); color: #e9edf2; font: 600 11px/1.5 system-ui, sans-serif; text-align: center; }
+  .chip.sel { border-color: #6fbf73; color: #a9e0ac; }
+  #popup { position: fixed; left: 50%; bottom: 26%; transform: translateX(-50%); min-width: 220px;
+    padding: 12px 14px; border-radius: 12px; border: 1.5px solid rgba(233,178,92,.5); background: rgba(13,17,23,.85);
+    color: #e9edf2; font: 500 12px/1.6 system-ui, sans-serif; }
+  #popTitle { font-weight: 700; letter-spacing: 0.12em; margin-bottom: 4px; color: #e9b25c; }
+  #popup button { margin: 8px 8px 0 0; padding: 7px 12px; border-radius: 8px; border: 1.5px solid rgba(233,237,242,.4);
+    background: rgba(13,17,23,.6); color: #e9edf2; font: 600 11px system-ui, sans-serif; }
+  #card { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 240px; max-width: 86vw;
+    padding: 14px 16px; border-radius: 12px; border: 1.5px solid rgba(233,178,92,.5); background: rgba(13,17,23,.92);
+    color: #e9edf2; font: 500 12px/1.7 system-ui, sans-serif; display: none; }
+  #cardTitle { font-weight: 700; letter-spacing: 0.12em; margin-bottom: 6px; color: #e9b25c; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="title">THE ROUTE</div>
+<div id="hud">mk -<br>- fps</div>
+<div id="banner"></div>
+<div id="reason"></div>
+<div id="actions" style="display:none">
+  <button class="act" id="actMove">MOVE</button>
+  <button class="act" id="actAttack">ATTACK</button>
+  <button class="act" id="actEnd">END TURN</button>
+</div>
+<div id="popup" style="display:none">
+  <div id="popTitle"></div>
+  <div id="popBody"></div>
+  <div><button id="popOk">CONFIRM</button><button id="popNo">CANCEL</button></div>
+</div>
+<div id="card">
+  <div id="cardTitle"></div>
+  <div id="cardBody"></div>
+  <div><button class="act" id="cardGo"></button></div>
+</div>
+<div id="ships"></div>
+<script type="module" src="./space-main.js"></script>
+</body>
+</html>

@@ -38,8 +38,12 @@ if (boardOnly) {
   document.getElementById("bdBody").innerHTML = "the purse: " + purse.scrap + (purse.heat ? " · heat " + purse.heat : "") + "<br>roster: 3 + " + purse.roster.length + " bought";
   for (const job of makeBoard(boardSeed)) {
     const b = document.createElement("button");
-    b.innerHTML = job.name + "<br><span class=\"legit\">" + job.legit.toUpperCase() + "</span> · pays " + job.price + (job.heat ? " · +" + job.heat + " heat" : "");
-    b.addEventListener("click", () => { location.href = location.pathname + "?board=" + job.boardSeed + "&job=" + job.job; });
+    b.innerHTML = job.name + "<br><span class=\"legit\">" + job.legit.toUpperCase() + "</span> · pays " + job.price
+      + (job.heat ? " · +" + job.heat + " heat" : "") + (job.hot ? " · <span class=\"legit\">HOT ROUTE</span>" : "");
+    // a hot route flies its ambush first; the ground job waits past it
+    b.addEventListener("click", () => {
+      location.href = (job.hot ? "space.html" : location.pathname) + "?board=" + job.boardSeed + "&job=" + job.job;
+    });
     jobsEl.appendChild(b);
   }
   bd.style.display = "block";

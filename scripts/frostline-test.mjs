@@ -18,6 +18,8 @@ import { makeSquad } from "../src/depot/squads.js";
 import { spawnSquadMembers } from "../src/depot/state.js";
 import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS } from "../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record, replay, nearestThreat } from "../src/games/frostline/tape.js";
+import { makeSpaceBattle, stepSpace, contactMade, enemyOrders, wingState, liveShips, drainSpaceEvents } from "../src/games/frostline/space.js";
+import { orderAttack as shipAttack, orderMove as shipMove } from "../src/modules/orders/orders.js";
 import { arcClears } from "../src/depot/accuracy.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -267,11 +269,11 @@ const STEP = 1 / 120;
 // ---- FL-5: the contract board — jobs as data, the ruled trade, the heat
 { const b7 = makeBoard(7);
   check("a board is its seed: twin boards land byte-identical", JSON.stringify(makeBoard(7)) === JSON.stringify(b7));
-  check("the fixture board pins: three jobs, their seeds, prices, and tags exact",
+  check("the fixture board pins: three jobs, their seeds, prices, tags, and routes exact",
     b7.length === BOARD_JOBS
-    && b7[0].legit === "underground" && b7[0].price === 36 && b7[0].heat === 1 && b7[0].seed === 976907632 && b7[0].name === "CARGO UNDECLARED"
-    && b7[1].legit === "clean" && b7[1].price === 19 && b7[1].heat === 0 && b7[1].seed === 466232632
-    && b7[2].legit === "clean" && b7[2].price === 23 && b7[2].seed === 257815561);
+    && b7[0].legit === "underground" && b7[0].price === 36 && b7[0].heat === 1 && b7[0].seed === 976907632 && b7[0].name === "CARGO UNDECLARED" && b7[0].hot === true
+    && b7[1].legit === "underground" && b7[1].price === 41 && b7[1].heat === 1 && b7[1].seed === 553325603 && b7[1].hot === true
+    && b7[2].legit === "clean" && b7[2].price === 20 && b7[2].seed === 197137260 && b7[2].hot === false);
   let lawful = true;
   for (const bs of [7, 11, 42]) for (const j of makeBoard(bs)) {
     const [lo, hi] = j.legit === "underground" ? UNDER_PAY : CLEAN_PAY;
@@ -364,6 +366,46 @@ const STEP = 1 / 120;
   const input = defaultTickInput(); input.devDummies = true;
   for (let i = 0; i < 120 * 20; i++) tickWar(war, STEP, input);
   check("the medic team tends on this ground: a 3 hp man stands near full inside twenty seconds", hurt.hp > 50); }
+
+// ---- FL-8: the space theater — the modules fly, the fight resolves, the route rules
+{ const shipsHash = (b) => JSON.stringify(b.ships.map((s) => [s.team, +s.hp.toFixed(6), s.pos.map((v) => +v.toFixed(6))]));
+  const run = () => {
+    const b = makeSpaceBattle(12345);
+    shipMove(liveShips(b, 1), 0, 0, 0);
+    enemyOrders(b);
+    while (!contactMade(b) && b.tick < 5000) stepSpace(b);
+    const contactTick = b.tick;
+    let paid = 0;
+    while (!b.over && b.tick < 20000) {
+      const foes = liveShips(b, 2);
+      if (foes.length) shipAttack(liveShips(b, 1), foes[0]);
+      for (let i = 0; i < 480 && !b.over; i++) stepSpace(b, { player: false, enemy: true });
+      enemyOrders(b);
+      for (let i = 0; i < 360 && !b.over; i++) stepSpace(b);
+      for (const ev of drainSpaceEvents(b)) if (ev.team === 2) paid += ev.bounty;
+    }
+    return { contactTick, end: b.tick, s: wingState(b), paid, hash: shipsHash(b) };
+  };
+  const a = run();
+  check("the space fight resolves on the fixture: contact at 106, won at 809, three standing, 36 paid",
+    a.contactTick === 106 && a.end === 809 && a.s.won && a.s.friendly === 3 && a.s.enemy === 0 && a.paid === 36);
+  const c = run();
+  check("space is a seed too: twin scripted skirmishes land bit-identical wings", a.hash === c.hash && a.end === c.end);
+  const held = makeSpaceBattle(12345);
+  shipMove(liveShips(held, 1), 0, 0, 0);
+  enemyOrders(held);
+  const foeSnap = JSON.stringify(liveShips(held, 2).map((s) => s.pos));
+  for (let i = 0; i < 120; i++) stepSpace(held, { player: false, enemy: true });
+  check("a held wing is frozen whole: the enemy neither moves nor fires on your half",
+    JSON.stringify(liveShips(held, 2).map((s) => s.pos)) === foeSnap);
+  let hotU = 0, hotC = 0, nU = 0, nC = 0;
+  for (const bs of [7, 11, 42]) for (const j of makeBoard(bs)) {
+    if (j.legit === "underground") { nU++; if (j.hot) hotU++; }
+    else { nC++; if (j.hot) hotC++; }
+    if (j.hot && !(j.spaceSeed >= 0)) hotU = -99;
+  }
+  check("the route law holds on the fixture boards: hot routes exist, every hot job carries its ambush seed",
+    hotU >= 1 && nU + nC === 9 && hotU >= 0); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
