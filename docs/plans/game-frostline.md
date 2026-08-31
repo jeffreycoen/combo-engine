@@ -27,7 +27,7 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 - [LANDED] **FL-3 — the estimate audited.** A fixed long tape fires at a fixed layout; the gate pins the measured hit rate inside a band around the displayed number.
 - [LANDED] **FL-4 — the purse.** Bounties per kill into the purse; the upgrade screen between contracts; upgrades as data through the roster contract (squad strength, weapon rows, new team types).
 - [LANDED] **FL-5 — the contract board.** Missions as data with a posted price and a legitimacy tag; clean jobs pay less, underground jobs pay more and raise the heat; the board is the campaign's spine.
-- **FL-6 — the tape.** Orders recorded at their tick; a contract replays from seed plus tape; the replay is the campaign gate.
+- [LANDED] **FL-6 — the tape.** Orders recorded at their tick; a contract replays from seed plus tape; the replay is the campaign gate.
 - **FL-7 — casualties that matter.** Wounded states over the engine's knockdown, medic teams, rally, the score card.
 - **FL-8 — the space theater.** Ship contracts on the orders and steering modules under the same turn machine: ships as operators, the drawing-layer choice ruled here, the purse shared.
 - **FL-9 — the hunter.** The bounty hunter as a commandable piece beside the squads — the armored, helmeted silhouette with the jetpack line; kit and role ruled when this phase opens.

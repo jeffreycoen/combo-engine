@@ -13,6 +13,7 @@ import { destShield, hitChance, knownThreats } from "../../src/games/frostline/c
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY } from "../../src/games/frostline/purse.js";
 import { makeBoard, completionPay } from "../../src/games/frostline/contracts.js";
+import { makeCtx, stepBattle, applyOp, record } from "../../src/games/frostline/tape.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
 const canvas = document.getElementById("cv");
@@ -52,19 +53,22 @@ const askSeed = contract ? contract.seed : (Number.isFinite(bareSeed) ? bareSeed
 const { war, mission, seed } = bootMission(MISSION_R1, askSeed, purse.roster);
 if (!contract) history.replaceState(null, "", "?seed=" + seed);
 let battleEarned = 0, bonusPaid = 0;
+// the tape: every confirmed order at its tick; saved with the battle's
+// address at the end so any fight can be reported and replayed bit-exact
+const ctx = makeCtx(war, mission);
+const tape = [];
+function confirmOp(op) { if (applyOp(ctx, op)) { record(tape, ctx, op); return true; } return false; }
 history.replaceState(null, "", "?seed=" + seed);
 const R = makeRenderer(canvas, war.world, { camera: "tactical" });
 let zoom = 1.5;
 R.setZoom(zoom);
-const input = defaultTickInput();
-const trig = makeTriggerState();
-const ts = makeTurns();
+const ts = ctx.ts;
 const squads = war.run.squads;
 
 let selected = squads[0];
 let focus = { x: selected.anchor.x, y: war.field.heightAt(selected.anchor.x, selected.anchor.z), z: selected.anchor.z };
 let aim = { x: mission.exit.x, z: mission.exit.z };
-let over = false;
+
 let mode = null;            // "move" | "attack" | null — the armed action awaiting its tap
 let pending = null;         // the confirmation on screen: {kind, sq, x, z, target, label}
 
@@ -106,7 +110,7 @@ function drawChips() {
     const ap = ts.phase === "free" ? "" : " · " + "●".repeat(apOf(ts, sq)) + "○".repeat(Math.max(0, TURNS.ap - apOf(ts, sq)));
     el.textContent = label(sq) + " · " + liveCount(sq) + " · " + (discOf(sq) === "careful" ? "C" : "F") + ap;
   }
-  const inOrders = ts.phase === "orders" && !over;
+  const inOrders = ts.phase === "orders" && !ctx.over;
   actionsEl.style.display = inOrders ? "grid" : "none";
   actMove.className = "act" + (mode === "move" ? " on" : "");
   actAttack.className = "act" + (mode === "attack" ? " on" : "");
@@ -127,15 +131,13 @@ document.getElementById("popOk").addEventListener("click", () => {
   if (!pending) return;
   const p = pending;
   dismiss();
-  const free = ts.phase === "free";
-  const priced = p.kind !== "mark" && p.kind !== "disc"; // information and doctrine are free
-  if (!free && priced && !spend(ts, p.sq)) return;
-  if (p.kind === "move") { p.sq.focusId = null; clearOverwatch(p.sq); orderMove(p.sq, p.x, p.z); }
-  else if (p.kind === "attack") { clearOverwatch(p.sq); focusOrder(p.sq, p.target); }
-  else if (p.kind === "hold") { p.sq.focusId = null; clearOverwatch(p.sq); p.sq.order = "defend"; p.sq.dest = null; }
-  else if (p.kind === "ow") { p.sq.focusId = null; setOverwatch(p.sq, p.x, p.z, p.pts); }
-  else if (p.kind === "mark") markTarget(war, p.target);
-  else if (p.kind === "disc") toggleDiscipline(p.sq);
+  const i = squads.indexOf(p.sq);
+  if (p.kind === "move") confirmOp({ op: "move", i, x: p.x, z: p.z });
+  else if (p.kind === "attack") confirmOp({ op: "attack", i, x: p.target.pos.x, z: p.target.pos.z });
+  else if (p.kind === "hold") confirmOp({ op: "hold", i });
+  else if (p.kind === "ow") confirmOp({ op: "ow", i, x: p.x, z: p.z, pts: p.pts });
+  else if (p.kind === "mark") confirmOp({ op: "mark", i, x: p.target.pos.x, z: p.target.pos.z });
+  else if (p.kind === "disc") confirmOp({ op: "disc", i });
   R.overlay.setOrderPaths(allPaths());
   mode = null;
 });
@@ -153,7 +155,7 @@ actHold.addEventListener("click", () => {
   const shield = destShield(war, selected.anchor.x, selected.anchor.z);
   present({ kind: "hold", sq: selected, title: "HOLD — " + label(selected), body: "cover here: " + shield + "<br>cost 1 point · " + (apOf(ts, selected) - 1) + " after" });
 });
-actEnd.addEventListener("click", () => { if (ts.phase === "orders") { beginExec(ts); say("", ""); } });
+actEnd.addEventListener("click", () => { if (ts.phase === "orders") { confirmOp({ op: "end", i: -1 }); say("", ""); } });
 
 // ---- screen to world
 function screenToWorld(cx, cy) {
@@ -214,7 +216,7 @@ document.getElementById("rotL").addEventListener("click", () => R.rotateStep(1))
 document.getElementById("rotR").addEventListener("click", () => R.rotateStep(-1));
 
 function tapAt(cx, cy) {
-  if (over || pending) return;
+  if (ctx.over || pending) return;
   const w = screenToWorld(cx, cy);
   const hit = pickSquad(squads, w.x, w.z);
   if (hit && mode === null) { selected = hit; return; }
@@ -286,7 +288,8 @@ function showDebrief(won) {
   dbBody.innerHTML = "bounties this battle: " + battleEarned +
     (bonusPaid ? "<br>" + (contract ? "the posted price: " + bonusPaid : "completion bonus: " + bonusPaid) : "") +
     (contract && won && contract.heat ? "<br>heat +" + contract.heat + " (now " + purse.heat + ")" : "") +
-    "<br>the purse: " + purse.scrap + "<br>roster: 3 + " + purse.roster.length + " bought";
+    "<br>the purse: " + purse.scrap + "<br>roster: 3 + " + purse.roster.length + " bought" +
+    "<br>the tape: " + tape.length + " orders, saved";
   dbShop.innerHTML = "";
   for (const type of FOR_SALE) {
     const b = document.createElement("button");
@@ -314,34 +317,25 @@ say("", "TAP THE SNOW TO MOVE OUT — TIME STOPS AT FIRST CONTACT");
 function frame(now) {
   requestAnimationFrame(frame);
   let dt = Math.min(0.1, (now - last) / 1000); last = now;
-  const ticking = !over && !pending && (ts.phase === "free" || ts.phase === "exec" || ts.phase === "enemy");
+  const ticking = !ctx.over && !pending && (ts.phase === "free" || ts.phase === "exec" || ts.phase === "enemy");
   if (ticking) {
     acc += dt;
     let guard = 0;
-    while (acc >= STEP && guard++ < 12) {
+    while (acc >= STEP && guard++ < 12 && !ctx.over) {
       acc -= STEP;
-      for (const sq of squads) { if (sq.focusId != null) { const f = war.world.byId.get(sq.focusId); if (!f || !f.alive) sq.focusId = null; } }
-      applyFireControl(ts, squads);
-      heldInput(input, ts.phase === "exec");
-      const { events, flags } = tickWar(war, STEP, input);
-      if (ts.phase === "free") {
-        const t = checkTriggers(war, trig, events);
-        if (t.contact !== null) { startTurns(ts, squads); say("CONTACT", "YOUR TURN — 3 POINTS A SQUAD"); }
-      } else if (ts.phase === "exec") {
-        const allDone = squads.every((sq) => orderDone(sq) || liveCount(sq) === 0);
-        if (stepExec(ts, STEP, allDone)) say("ENEMY TURN", "");
-      } else if (ts.phase === "enemy") {
-        if (stepEnemy(ts, STEP, squads)) say("YOUR TURN " + ts.turn, "3 POINTS A SQUAD");
-      }
+      const before = ts.phase;
+      const { events, flags } = stepBattle(ctx);
+      if (before === "free" && ts.phase === "orders") say("CONTACT", "YOUR TURN — 3 POINTS A SQUAD");
+      else if (before === "exec" && ts.phase === "enemy") say("ENEMY TURN", "");
+      else if (before === "enemy" && ts.phase === "orders") say("YOUR TURN " + ts.turn, "3 POINTS A SQUAD");
       if (flags && flags.orderPaths) R.overlay.setOrderPaths(allPaths());
       battleEarned += earnFromEvents(purse, war, events);
-      const s = missionState(war, mission);
-      if (s.won || s.lost) {
-        over = true;
-        if (s.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
+      if (ctx.over) {
+        if (ctx.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
         savePurse(localStorage, purse);
+        localStorage.setItem("frostline-tape", JSON.stringify({ seed, board: contract ? contract.boardSeed : null, job: contract ? contract.job : null, roster: purse.roster.slice(), tape }));
         say("", "");
-        showDebrief(s.won);
+        showDebrief(ctx.won);
       }
     }
   } else { acc = 0; }

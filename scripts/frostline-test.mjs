@@ -15,6 +15,7 @@ import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggl
 import { squadFire } from "../src/depot/state.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse } from "../src/games/frostline/purse.js";
 import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS } from "../src/games/frostline/contracts.js";
+import { makeCtx, stepBattle, applyOp, record, replay, nearestThreat } from "../src/games/frostline/tape.js";
 import { arcClears } from "../src/depot/accuracy.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -283,6 +284,46 @@ const STEP = 1 / 120;
   const mem = {}; const storage = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
   savePurse(storage, p);
   check("heat rides the vault: save then load round-trips it", loadPurse(storage).heat === 1); }
+
+// ---- FL-6: the tape — a battle recorded through the shared step replays bit-exact
+{ const CAP = 4600;
+  const drive = () => {
+    const { war, mission } = bootMission(MISSION_R1, 3);
+    const ctx = makeCtx(war, mission);
+    const tape = [];
+    const rec = (op) => { if (applyOp(ctx, op)) record(tape, ctx, op); };
+    for (let i = 0; i < 3; i++) rec({ op: "move", i, x: mission.exit.x + 6, z: mission.exit.z + 4 });
+    while (!ctx.over && ctx.tick < CAP) {
+      if (ctx.ts.phase === "orders") {
+        for (let i = 0; i < 3; i++) rec({ op: "move", i, x: mission.exit.x, z: mission.exit.z });
+        rec({ op: "disc", i: 0 });
+        rec({ op: "ow", i: 1, x: mission.exit.x, z: mission.exit.z, pts: 1 });
+        rec({ op: "end", i: -1 });
+      }
+      stepBattle(ctx);
+    }
+    const s = missionState(war, mission);
+    return { ctx, tape, hash: worldHash(war.world), s };
+  };
+  const live = drive();
+  const rep1 = replay(MISSION_R1, 3, [], live.tape, CAP);
+  const rs1 = missionState(rep1.war, rep1.mission);
+  check("the tape replays the battle bit-exact: same world, same tick, same contact, same count of the living",
+    worldHash(rep1.war.world) === live.hash && rep1.tick === live.ctx.tick
+    && rep1.contactTick === live.ctx.contactTick
+    && rs1.friendlies === live.s.friendlies && rs1.enemies === live.s.enemies);
+  const rep2 = replay(MISSION_R1, 3, [], JSON.parse(JSON.stringify(live.tape)), CAP);
+  check("the tape survives its own storage: a JSON round-trip replays to the identical world",
+    worldHash(rep2.war.world) === live.hash && rep2.tick === live.ctx.tick);
+  const empty = replay(MISSION_R1, 3, [], [], 1000);
+  check("a spent tape never strands the war frozen: an orderless replay still runs its ticks",
+    empty.over || empty.tick === 1000);
+  const { war: w3, mission: m3 } = bootMission(MISSION_R1, 3);
+  const c3 = makeCtx(w3, m3);
+  c3.ts.phase = "orders"; c3.ts.ap = {}; c3.ts.ap[w3.run.squads[0].id] = 3;
+  const refused = !applyOp(c3, { op: "attack", i: 0, x: 0, z: 0 });
+  check("a refused order costs nothing: no known target, no point spent",
+    refused && c3.ts.ap[w3.run.squads[0].id] === 3); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
