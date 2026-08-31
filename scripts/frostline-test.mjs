@@ -13,6 +13,7 @@ import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, ste
 import { coverAt, exposure, hitChance, knownThreats } from "../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggleDiscipline, markTarget, markedTarget, focusOrder, owPaths } from "../src/games/frostline/verbs.js";
 import { squadFire } from "../src/depot/state.js";
+import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse } from "../src/games/frostline/purse.js";
 import { arcClears } from "../src/depot/accuracy.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -211,6 +212,53 @@ const STEP = 1 / 120;
   check("every placed valley proves its road: spawn to exit connects on the movement grid", roads === 3);
   const twin = () => { const { war } = bootMission(MISSION_R1, 7); return worldHash(war.world); };
   check("a seed is a battle: twin boots of seed 7 land bit-identical worlds", twin() === twin()); }
+
+// ---- FL-4: the purse — every kill pays, the vault holds, the roster marches
+{ const mem = {}; const storage = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
+  const p = loadPurse(storage);
+  check("a fresh vault opens broke, an empty roster", p.scrap === 0 && p.kills === 0 && p.roster.length === 0);
+  const { war } = bootMission(MISSION_R1, 3);
+  const w = war.world;
+  const sq = war.run.squads[0];
+  let ax = null, az = null;
+  outer: for (let x = -30; x <= 30; x += 3) for (let z = -20; z <= 30; z += 3) {
+    const m = { x, y: war.field.heightAt(x, z) + 1.2, z };
+    const t = { x, y: war.field.heightAt(x, z + 6) + 0.7, z: z + 6 };
+    if (arcClears(w, m, t, INFANTRY_ARMS.rifles, -1)) { ax = x; az = z; break outer; }
+  }
+  const members = sq.memberIds.map((id) => w.byId.get(id)).filter((u) => u && u.alive);
+  members.forEach((u, i) => { u.pos.x = ax + i * 0.8; u.pos.z = az; u.pos.y = war.field.heightAt(u.pos.x, u.pos.z) + 0.7; u.fireCd = 0; });
+  sq.anchor = { x: ax, z: az }; sq.order = "defend";
+  const foe = addBody(w, { kind: "unit", x: ax, y: war.field.heightAt(ax, az + 6) + 0.7, z: az + 6, hx: 0.28, hy: 0.7, hz: 0.28, mass: 80, hp: 10, team: 2 });
+  foe.bounty = 4;
+  const input = defaultTickInput(); input.devDummies = true;
+  let paid = 0, ticks = 0;
+  while (foe.alive && ticks++ < 4800) {
+    const { events } = tickWar(war, STEP, input);
+    paid += earnFromEvents(p, war, events);
+  }
+  check("a live-fire kill surfaces in the tick's own events and pays its bounty into the purse",
+    !foe.alive && paid === 4 && p.scrap === 4 && p.kills === 1);
+  check("the won contract pays its bonus and the books add up",
+    winBonus(p) === WIN_BONUS && p.scrap === 4 + WIN_BONUS && p.earned === p.scrap);
+  const refused = !buyTeam(p, "mg");
+  p.scrap += 100;
+  const bought = buyTeam(p, "mg");
+  check("the shop refuses a dry purse and sells to a full one at the squad table's own price",
+    refused && bought && teamPrice("mg") === 38 && p.scrap === 4 + WIN_BONUS + 100 - 38 && p.roster.join() === "mg");
+  savePurse(storage, p);
+  const q = loadPurse(storage);
+  check("the vault holds: save then load round-trips scrap, kills, and roster",
+    q.scrap === p.scrap && q.kills === p.kills && q.earned === p.earned && q.roster.join() === p.roster.join());
+  const junk = { getItem: () => "{broken", setItem: () => {} };
+  check("a broken record never throws: the war starts broke, not crashed", loadPurse(junk).scrap === 0); }
+
+{ const { war } = bootMission(MISSION_R1, 3, ["mg"]);
+  const extra = war.run.squads[3];
+  const g = openGround(war, extra.anchor.x, extra.anchor.z, 0.6);
+  check("a bought team marches: the roster boots a fourth squad, its type kept, on open ground",
+    war.run.squads.length === 4 && extra.type === "mg"
+    && g && Math.hypot(g.x - extra.anchor.x, g.z - extra.anchor.z) < 1e-9); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);

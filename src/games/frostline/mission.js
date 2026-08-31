@@ -115,7 +115,9 @@ function placeMission(war, def) {
   const exit = westExit(war, ta.z);
   if (!exit) return null;
   const squadAt = [];
-  const offs = [[10, 0], [14, -5], [12, 7]]; // east of the town, a loose line // provisional (F5)
+  // east of the town, a loose line; bought teams extend it eastward so the
+  // ring sweep never has to resolve two squads asking for one spot
+  const offs = [[10, 0], [14, -5], [12, 7], [18, 0], [20, -6], [19, 8], [24, 2], [26, -4]];
   for (let i = 0; i < def.friendlies.length; i++) {
     const g = openGround(war, ta.x + offs[i % offs.length][0], ta.z + offs[i % offs.length][1], SQUAD_PAD);
     if (!g) return null;
@@ -139,8 +141,11 @@ function placeMission(war, def) {
 // valley; a valley the rules refuse steps to the next seed, deterministically,
 // so the same asked seed always lands the same battle. The returned seed is
 // the one that took; the page shows it and the address bar pins it.
-export function bootMission(def, seed = 3) {
-  for (let k = 0; k < (def.tries || 24); k++) {
+export function bootMission(def, seed = 3, roster = []) {
+  const fielded = { ...def, friendlies: def.friendlies.concat(roster.map((t) => ({ type: t }))) };
+  const def0 = def;
+  def = fielded;
+  for (let k = 0; k < (def0.tries || 24); k++) {
     const s = seed + k;
     const war = bootWar({ seed: s, dev: true });
     war.world.slotTreesBlock = true; // trees are ground here: no slot, spawn, or survey goal ever lands in a trunk
@@ -154,7 +159,7 @@ export function bootMission(def, seed = 3) {
     for (const g of placed.foes) spawnEnemy(war.world, { x: g.x, z: g.z }, "");
     return { war, mission: { name: def.name, exit: placed.exit }, seed: s };
   }
-  throw new Error("no placeable valley within " + (def.tries || 24) + " seeds of " + seed);
+  throw new Error("no placeable valley within " + (def0.tries || 24) + " seeds of " + seed);
 }
 
 // missionState(war, def) -> { friendlies, enemies, won, lost }. Won: any
