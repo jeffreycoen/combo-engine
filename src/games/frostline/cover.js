@@ -100,19 +100,17 @@ export function destShield(war, x, z) {
   return "full";
 }
 
-// erf approximation (Abramowitz-Stegun 7.1.26), for the aim-cone integral.
-function erf(v) {
-  const s = v < 0 ? -1 : 1, a = Math.abs(v);
-  const t = 1 / (1 + 0.3275911 * a);
-  const y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a);
-  return s * y;
-}
-
-// hitChance(war, shooter, target, armsRow) -> 0..1 estimate: the engine's
-// own scatterSigma (range, elevation, grazing cover, bracing) makes the
-// cone; the target's half-width against the lateral spread at that range
-// makes the geometry; the silhouette exposure scales what the cone can
-// touch. Clamped to [0.02, 0.98] — war never promises certainty.
+// hitChance(war, shooter, target, armsRow) -> 0..1 estimate, audited
+// against live fire (FL-3). The engine deflects each round by a radial
+// angle whose magnitude is Rayleigh-shaped (applyScatter: sqrt(-2 ln U)
+// times 0.6*sigma, uniform direction), and a round landing within
+// HIT_REACH of the aim still tells — silhouette half-width plus blast
+// radius plus splash. So P(hit) = 1 - exp(-theta^2 / (2 s^2)) with
+// theta = HIT_REACH/dist and s = 0.6*sigma; silhouette exposure scales
+// it; clamped to [0.02, 0.98] — war never promises certainty. HIT_REACH
+// is the audit's own fit: the measured rates at 8, 14, and 20 m imply
+// 0.79-0.84 m; 0.82 sits inside every band. // provisional (F5)
+const HIT_REACH = 0.82;
 export function hitChance(war, shooter, target, armsRow) {
   const spec = armsRow || INFANTRY_ARMS.rifles;
   const m = muzzleOf(war.world, shooter);
@@ -120,8 +118,9 @@ export function hitChance(war, shooter, target, armsRow) {
   const dist = Math.hypot(aim.x - m.x, aim.z - m.z);
   if (dist < 0.5) return 0.98;
   const sigma = scatterSigma(war.world, m, aim, spec);
-  const lateral = Math.max(1e-6, sigma * dist);
-  const pGeom = erf((target.hx || 0.28) / (lateral * Math.SQRT2));
+  const s = Math.max(1e-6, 0.6 * sigma);
+  const theta = HIT_REACH / dist;
+  const pGeom = 1 - Math.exp(-(theta * theta) / (2 * s * s));
   const e = exposure(war.world, m, target.pos.x, target.pos.z, shooter.id);
   return Math.min(0.98, Math.max(0.02, pGeom * e));
 }

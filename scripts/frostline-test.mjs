@@ -75,7 +75,9 @@ const STEP = 1 / 120;
   put(X - 6); const pFar = hitChance(war, shooter, mkT(X - 6, tgtZ + 10));
   check("the estimate orders itself: open beats the low wall beats the tall wall; near beats far; all inside [0.02, 0.98]",
     pOpen > pLow && pLow >= pTall && pTall >= 0.02 && pOpen > pFar
-    && pOpen <= 0.98 && [pOpen, pLow, pTall, pFar].every((p) => p >= 0.02 && p <= 0.98)); }
+    && pOpen <= 0.98 && [pOpen, pLow, pTall, pFar].every((p) => p >= 0.02 && p <= 0.98));
+  check("the audited formula pins its numbers (FL-3: the live-fire fit, HIT_REACH 0.82)",
+    near(pOpen, 0.594733, 5e-7) && near(pLow, 0.050096, 5e-7) && near(pTall, 0.02, 5e-7) && near(pFar, 0.150843, 5e-7)); }
 
 { const { war, mission } = bootMission(MISSION_R1);
   const input = defaultTickInput();
