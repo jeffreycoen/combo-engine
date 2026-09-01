@@ -102,3 +102,19 @@ Confirms every finding in the game plan's repair record, and adds four not yet w
 Also for the record: the mark draws a ring no rule reads; man-down and orders-done triggers are computed and consumed by nothing; and the two other pages of the plan's record (point economy, one mission, heat, no replay door, exit pointer, hunter silhouette, sniper's priced shot, thin space, RESET PURSE) are all confirmed in the code exactly as the playtest found them.
 
 Repair order stays as ruled: the point economy made real; the path closed (board door, exit pointer, replay door); words squared with code (job names to real missions, heat priced or removed, the mark given a rule or removed); space to the ground's standard.
+
+---
+
+## The second pass — found after the first roll-up
+
+5. **Overwatch's widen price breaks across turns** — main.js:244 prices the cone by whether the squad already has one (`selected._ow ? 2 : 1`), not by points sunk this turn. Nothing clears the cone at turn end (refill touches only points; only a move, attack, or hold clears it). After the first cone, every later overwatch costs 1 point and delivers the 180° width. The first roll-up marked overwatch TRUE.
+
+6. **"ENEMY TURN" never holds your side** — turns.js states the law: the enemy runs while the player holds. No code holds the player. `heldInput(ctx.input, ts.phase === "exec")` (tape.js:35) freezes only the enemy on your half; through the enemy's 6 seconds your squads keep marching and firing their standing orders. Space is the same. The banner says one side moves; the code runs both.
+
+7. **The version line reads from outside the served pages** — both pages fetch `../../package.json` (main.js:83, space-main.js:39). A deploy that serves only `docs/` fails the fetch and shows "mk ?" forever. Unverified against the live deploy.
+
+8. **The board is unreachable from any played address** — a consequence of finding 1, stated in full: every battle rewrites the address to `?seed=N`, and a `?seed=` address boots a free skirmish (main.js:29). After one battle, reload, bookmark, back, and tab restore all skip the board forever; only a hand-stripped address or a finished battle's debrief button reaches it.
+
+Smaller, for the record: a won free skirmish's card reads "THE FAR SIDE — CONTRACT COMPLETE" with no contract in play (main.js:292); a lost hot route says "the contract is lost" (space-main.js:119) while nothing consumes the job — the same ambush can be re-flown at once; a squad on hold or overwatch counts as done instantly (`orderDone`: defend with no destination), so a turn of only holds skips your execute half whole and hands the enemy its window at once.
+
+**The goal, ruled:** the finished repair is a fully playable demo — the whole path from a bare load through board, route, battle, and debrief, with no dead door, no hollow number, and no crash ending. The repair order's rungs are measured against that bar. Board turnover (a job taken is a job gone) is load-bearing for it and rides the closed-path rung.
