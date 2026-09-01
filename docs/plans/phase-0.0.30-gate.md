@@ -1,7 +1,6 @@
 # Phase 0.0.30 — the gate obeys the testing law
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 57 PASS / 0 FAIL in seconds. -->
+Status: LANDED, commit `1162b49`, 2026-08-31. Gate: 57 PASS / 0 FAIL in seconds.
 
 Records and tests only, no game code. The frostline gate is rebuilt to the standing testing law: NEVER a timed simulation — every check proves a call fires (one call, one tick, direct asserts); checks are grouped by AREA and a task's brief runs only the areas its diff touched. The old gate had grown to 63 checks carrying full crossings, three bit-exact battle replays, space fights to the kill, and a twenty-second healing watch — over half an hour a run, run twice per task. The rebuilt gate: 57 checks, 11 seconds whole, about a second per area.
 
