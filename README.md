@@ -112,6 +112,17 @@ The intended workflow, for a person or an agent. Untested until the api lands �
 7. **Attach blades and look.** Choose the renderer and sound module in the description, boot in a browser, screenshot at fixed ticks. Mechanics are verified by numbers; look, feel, and sound are judged by a person.
 8. **Hand over a reproducible thing.** The deliverable is the description, the tables, the tapes, and the gate numbers. Same seed, same hashes, for anyone. A bug report is a seed plus a tape.
 
+## FROSTLINE — the playable game
+
+A fan-fiction tactics campaign in the clone-war shape, live at `docs/frostline/` on the published pages. Ten phases landed (0.0.18 through 0.0.29, records in `docs/plans/`); every claim below is checkable at the page and in the gate.
+
+- **The board is the spine.** Every load deals a contract board — posted jobs with a name, a price, a legitimacy tag, and sometimes a HOT ROUTE. Clean jobs pay less; underground jobs pay more and heat the hunter. One address names one exact job forever (`?board=B&job=K`).
+- **Travel can be contested.** A hot route flies its ambush first: wings of fighters on the flat black, the same points and confirmations as the ground, on the landed fleet orders and steering modules. Won, the ground job waits past it.
+- **The ground fight:** free time until first contact, then alternating halves — three points a squad, every action priced in a confirmation carrying the cover shield and an audited chance-to-hit (measured against live fire, inside a ten-point band). Overwatch cones, focus fire on a shared mark, discipline a squad at a time.
+- **A battle is its seed.** Missions are rules over any seeded valley — forces on vetted ground, the spawn-to-exit road proven before a man spawns. Every order records to a tape at its tick; seed plus tape replays a battle bit-exact. A bug report is a saved battle.
+- **The purse remembers.** Kills pay bounties win or lose; contracts pay their posted price; the shop sells squads, medics, and the hunter — one armored man, twin sidearms, a 35-meter jetpack line, one of a kind. The men persist between contracts and the dead stay dead until replaced at the table's own split price. Purse, roster, heat, and casualties ride the browser's storage with a reset.
+- **The gate:** `node scripts/gate.mjs frostline` — one-call asserts grouped by area, seconds to run; long-run truths are the owner's playtest at the page, by standing ruling.
+
 ## Status
 
 The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). The demos are not in this tree yet; their systems land per the checklist.
