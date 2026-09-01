@@ -34,6 +34,8 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - **NO QUESTION UNTIL THE OWNER IS READY FOR QUESTIONS.** A question is served only when the owner has said he is ready to decide — never in reply to a playtest report, a defect, or a mid-work message. A report gets the diagnosis and the state, full stop; the decision waits until he asks for it. A question with a short option list is never a substitute for stating the whole picture first (owner, 2026-08-21).
 - Question options state their mechanism in the owner's own terms, never buried in jargon or a recommended label; if the owner asked for a thing, that thing is one of the options, verbatim, or the question says plainly why it cannot be (owner, 2026-08-21 — the mortar-root lob shipped inside a "recommended" option while the asked-for gradual elevation was never offered).
 - "No code yet" covers the whole message it appears in.
+- **The walk:** every plan carries a written walk of the player's path it touches — each screen, button, spend, and displayed number traced to the code behind it. A plan that adds a display without a mechanism, or a spend without an effect, is never served.
+- **Words never outrun code:** nothing is named, displayed, or priced on a page unless the mechanism exists — no hollow numbers, no promising names. Fiction ships with its machinery or not at all.
 
 ## Module extraction
 
@@ -86,6 +88,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 ## Process
 
 - No momentum: stop and check before each next step.
+- **The cadence:** no new rung lands on an unplayed one. A landing waits for the owner's playtest word on the last before the next plan is served.
 
 - Phase closeout re-checks the README's claims and screenshots against the shipped game.
 - Deferred items collect in the polish queue, never folded in opportunistically.
