@@ -1,7 +1,6 @@
 # Phase 0.0.31 — FROSTLINE FL-10: the closeout
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 57 PASS / 0 FAIL. -->
+Status: LANDED, commit `cfe8423`, 2026-08-31. Gate: 57 PASS / 0 FAIL.
 
 The tenth rung of `docs/plans/game-frostline.md` — the closeout. The campaign machinery the rung named is already landed and gated (the board as spine, persistence through the browser's storage); what remains is the record: the game's README section, every claim in it checkable at the page and in the gate, and the ladder's core marked complete. Screenshots are the owner's alone by standing ruling — the section ships without them, and the owner adds his own on his word.
 
