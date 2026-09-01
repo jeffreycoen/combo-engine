@@ -272,6 +272,11 @@ export const INFANTRY_ARMS = {
   // ±10% replaces-not-adds calibration above is superseded.
   rifles: { projSpeed: 90, kind: "mg", weapon: "rifle", dmg: 5, dirDmg: 15, fireRate: 1.3, range: 15,
             acc: 0.090, occl: "arc", windF: 0.06, windComp: 0.6 },
+  // FROSTLINE FL-9 (owner): THE TWIN SIDEARMS — the hunter's own irons. A
+  // two-round pull (one from each hand), short reach, quick cadence, real
+  // hurt up close. Additive row: no depot code names it. // provisional (F5)
+  hunter: { projSpeed: 80, kind: "mg", weapon: "sidearms", dmg: 5, dirDmg: 11, burst: 2, burstGap: 0.10,
+            fireRate: 0.8, range: 12, acc: 0.075, occl: "arc", windF: 0.06, windComp: 0.6 },
   // mk0.99 (owner's lethality ruling): 3.6 -> 8 — the MG family rises
   // flatter than rifles; a six-round burst kills roughly one conscript.
   mg:     { projSpeed: 100, kind: "mg", weapon: "mg", dmg: 5, dirDmg: 8, burst: 6, burstGap: 0.17, fireRate: 2.2,

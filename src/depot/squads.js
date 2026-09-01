@@ -58,6 +58,9 @@ export const SQUAD_SPECS = {           // costs are scrap; members spawn as unit
   // the wounded and kneel to treat. Tools, not shooters: no INFANTRY_ARMS
   // row, so squadFire skips them by membership. // provisional (F5)
   medics: { n: 2, cost: 55, label: "MEDIC TEAM" },
+  // FROSTLINE FL-9 (owner): THE HUNTER — one armored man, twin sidearms,
+  // the jetpack line. Additive row: no depot code names it. // provisional (F5)
+  hunter: { n: 1, cost: 120, speed: 3.6, label: "THE HUNTER" },
   // P7.2 T7 (owner): THE MECHANIC TEAM — two mechanics with a toolbox. Tools,
   // not shooters: no INFANTRY_ARMS row, so squadFire skips them by
   // membership. // provisional (F5)

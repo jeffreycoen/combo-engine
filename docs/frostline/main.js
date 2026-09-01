@@ -8,7 +8,7 @@ import { tickWar, defaultTickInput, makeRenderer } from "../../src/depot/api.js"
 import { bootMission, missionState, MISSION_R1 } from "../../src/games/frostline/mission.js";
 import { orderMove, orderDone, pickSquad, cycleSquad, orderPaths } from "../../src/games/frostline/command.js";
 import { makeTriggerState, checkTriggers } from "../../src/games/frostline/pause.js";
-import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../../src/games/frostline/turns.js";
+import { makeTurns, startTurns, apOf, spend, clampMove, capOf, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../../src/games/frostline/turns.js";
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill } from "../../src/games/frostline/purse.js";
@@ -108,7 +108,7 @@ const chips = squads.map((sq) => {
   el.addEventListener("click", () => { selected = sq; mode = null; });
   return { sq, el };
 });
-const label = (sq) => sq.type === "mg" ? "MG" : sq.type === "sniper" ? "SNIPERS" : "RIFLES";
+const label = (sq) => sq.type === "mg" ? "MG" : sq.type === "sniper" ? "SNIPERS" : sq.type === "medics" ? "MEDICS" : sq.type === "hunter" ? "THE HUNTER" : "RIFLES";
 function drawChips() {
   for (const { sq, el } of chips) {
     el.className = "chip" + (sq === selected ? " sel" : "");
@@ -262,7 +262,7 @@ function tapAt(cx, cy) {
   const shield = destShield(war, d.x, d.z);
   const dist = Math.hypot(d.x - selected.anchor.x, d.z - selected.anchor.z);
   present({ kind: "move", sq: selected, x: d.x, z: d.z, title: "MOVE — " + label(selected),
-    body: "cover there: " + shield + "<br>distance " + dist.toFixed(0) + " m" + (free ? "<br>free time — no cost" : " (cap " + TURNS.moveCap + ")<br>cost 1 point · " + (apOf(ts, selected) - 1) + " after") });
+    body: "cover there: " + shield + "<br>distance " + dist.toFixed(0) + " m" + (free ? "<br>free time — no cost" : " (cap " + capOf(selected) + ")<br>cost 1 point · " + (apOf(ts, selected) - 1) + " after") });
   aim = { x: d.x, z: d.z };
 }
 addEventListener("wheel", (e) => { zoom = clampZoom(zoom + (e.deltaY > 0 ? -0.12 : 0.12)); R.setZoom(zoom); }, { passive: true });
@@ -308,7 +308,8 @@ function showDebrief(won) {
   for (const type of FOR_SALE) {
     const b = document.createElement("button");
     const price = teamPrice(type);
-    b.textContent = "BUY " + (type === "mg" ? "GUNNERS" : type === "sniper" ? "SNIPER PAIR" : type === "medics" ? "MEDIC TEAM" : "RIFLE SQUAD") + " — " + price;
+    b.textContent = "BUY " + (type === "mg" ? "GUNNERS" : type === "sniper" ? "SNIPER PAIR" : type === "medics" ? "MEDIC TEAM" : type === "hunter" ? "THE HUNTER — one of a kind" : "RIFLE SQUAD") + " — " + price;
+    if (type === "hunter" && purse.roster.includes("hunter")) b.disabled = true;
     b.disabled = purse.scrap < price;
     b.addEventListener("click", () => { if (buyTeam(purse, type)) { savePurse(localStorage, purse); showDebrief(won); } });
     dbShop.appendChild(b);

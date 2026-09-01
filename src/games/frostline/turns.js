@@ -9,6 +9,7 @@
 export const TURNS = {
   ap: 3,          // points per squad per turn (owner's ruling)
   moveCap: 22,    // meters one move order may reach // provisional (F5)
+  jetCap: 35,     // the hunter's jetpack line — his move flies farther // provisional (F5)
   execCapS: 8,    // seconds the player half may run before it yields // provisional (F5)
   enemyS: 6,      // seconds the enemy half runs // provisional (F5)
 };
@@ -41,13 +42,17 @@ export function spend(ts, sq) {
   return true;
 }
 
+// capOf(sq): the hunter flies his jetpack line; everyone else marches.
+export function capOf(sq) { return sq.type === "hunter" ? TURNS.jetCap : TURNS.moveCap; }
+
 // clampMove(sq, x, z): the move cap — a destination past the cap lands ON
 // the cap along the same line. Returns the priced destination.
 export function clampMove(sq, x, z) {
+  const cap = capOf(sq);
   const ax = sq.anchor.x, az = sq.anchor.z;
   const d = Math.hypot(x - ax, z - az);
-  if (d <= TURNS.moveCap) return { x, z };
-  const s = TURNS.moveCap / d;
+  if (d <= cap) return { x, z };
+  const s = cap / d;
   return { x: ax + (x - ax) * s, z: az + (z - az) * s };
 }
 

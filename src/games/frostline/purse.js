@@ -9,7 +9,7 @@ import { SQUAD_SPECS } from "../../depot/squads.js";
 export const WIN_BONUS = 25;            // provisional (F5)
 export const STORE_KEY = "frostline-purse";
 // The teams the debrief sells, priced by the engine's own squad table.
-export const FOR_SALE = ["rifles", "mg", "sniper", "medics"];
+export const FOR_SALE = ["rifles", "mg", "sniper", "medics", "hunter"];
 
 export function makePurse() {
   // men: heads per fielded squad slot (base three first, bought teams after);
@@ -69,6 +69,7 @@ export function teamPrice(type) {
 // roster and the purse pays. A dry purse refuses and changes nothing.
 export function buyTeam(purse, type) {
   const price = teamPrice(type);
+  if (type === "hunter" && purse.roster.includes("hunter")) return false; // one of a kind
   if (!SQUAD_SPECS[type] || purse.scrap < price) return false;
   purse.scrap -= price;
   purse.roster.push(type);

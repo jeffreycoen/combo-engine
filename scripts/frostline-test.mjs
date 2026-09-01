@@ -9,7 +9,7 @@ import { worldHash, addBody } from "../src/engine/core.js";
 import { bootMission, missionState, MISSION_R1, openGround, connected } from "../src/games/frostline/mission.js";
 import { orderMove, orderDone, pickSquad } from "../src/games/frostline/command.js";
 import { makeTriggerState, checkTriggers } from "../src/games/frostline/pause.js";
-import { makeTurns, startTurns, apOf, spend, clampMove, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../src/games/frostline/turns.js";
+import { makeTurns, startTurns, apOf, spend, clampMove, capOf, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../src/games/frostline/turns.js";
 import { coverAt, exposure, hitChance, knownThreats } from "../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, OVERWATCH, inArc, applyFireControl, toggleDiscipline, markTarget, markedTarget, focusOrder, owPaths } from "../src/games/frostline/verbs.js";
 import { squadFire } from "../src/depot/state.js";
@@ -406,6 +406,42 @@ const STEP = 1 / 120;
   }
   check("the route law holds on the fixture boards: hot routes exist, every hot job carries its ambush seed",
     hotU >= 1 && nU + nC === 9 && hotU >= 0); }
+
+// ---- FL-9: the hunter — one armored man, twin sidearms, the jetpack line
+{ const { war } = bootMission(MISSION_R1, 3, ["hunter"]);
+  const h = war.run.squads[3];
+  const men = h.memberIds.map((id) => war.world.byId.get(id)).filter((u) => u && u.alive);
+  check("the hunter fields as one man, his own row on his back",
+    h.type === "hunter" && men.length === 1 && men[0].utype === "hunter" && INFANTRY_ARMS.hunter.burst === 2 && INFANTRY_ARMS.hunter.range === 12);
+  check("the jetpack line: his move flies 35 where a squad marches 22",
+    capOf(h) === 35 && capOf(war.run.squads[0]) === 22
+    && Math.hypot(clampMove(h, h.anchor.x + 100, h.anchor.z).x - h.anchor.x, 0) - 35 < 1e-9
+    && Math.abs(Math.hypot(clampMove(war.run.squads[0], war.run.squads[0].anchor.x + 100, war.run.squads[0].anchor.z).x - war.run.squads[0].anchor.x) - 22) < 1e-9);
+  // his irons pull: the FL-2 fixture ground, a weak foe in his short reach
+  const w = war.world;
+  let ax = null, az = null;
+  outer: for (let x = -30; x <= 30 && ax === null; x += 3) for (let z = -20; z <= 30; z += 3) {
+    const m = { x, y: war.field.heightAt(x, z) + 1.2, z };
+    const t = { x, y: war.field.heightAt(x, z + 8) + 0.7, z: z + 8 };
+    if (arcClears(w, m, t, INFANTRY_ARMS.hunter, -1)) { ax = x; az = z; break outer; }
+  }
+  const u = men[0];
+  u.pos.x = ax; u.pos.z = az; u.pos.y = war.field.heightAt(ax, az) + 0.7; u.fireCd = 0;
+  h.anchor = { x: ax, z: az }; h.order = "defend";
+  const foe = addBody(w, { kind: "unit", x: ax, y: war.field.heightAt(ax, az + 8) + 0.7, z: az + 8, hx: 0.28, hy: 0.7, hz: 0.28, mass: 80, hp: 10, team: 2 });
+  h._lastTargetId = null;
+  squadFire(w, h, 1 / 120);
+  check("the twin sidearms pull on his own trigger law", h._lastTargetId === foe.id); }
+
+{ const p = makePurse();
+  p.scrap = 300;
+  const first = buyTeam(p, "hunter");
+  const second = buyTeam(p, "hunter");
+  check("one of a kind: the first purchase takes, the second refuses, the price is 120",
+    first && !second && teamPrice("hunter") === 120 && p.scrap === 180 && p.roster.join() === "hunter");
+  recordCasualties(p, [4, 2, 2, 0]);
+  check("the hunter can fall, and hiring him back is the whole of his price",
+    p.fallen === 1 && refillCost(p) === 120); }
 
 console.log(`frostline-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
