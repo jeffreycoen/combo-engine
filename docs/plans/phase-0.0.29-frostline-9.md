@@ -1,7 +1,6 @@
 # Phase 0.0.29 — FROSTLINE FL-9: the hunter
 
-Status: PLANNED.
-<!-- At landing: Status: LANDED, commit `<hash>`, <date>. Gate: 63 PASS / 0 FAIL; prior gates unmoved. -->
+Status: LANDED, commit `d98964e`, 2026-08-31. Gate: 63 PASS / 0 FAIL; prior gates unmoved.
 
 The ninth rung of `docs/plans/game-frostline.md`, built to the rulings made at phase open: the hunter is BOUGHT LIKE A TEAM — once, one of a kind, permanent on the roster, and if he falls, hiring him back is the whole of his price; the jetpack is a real move — 35 meters where a squad marches 22; and he carries TWIN SIDEARMS — a two-round pull, short reach, quick cadence, real hurt up close.
 
