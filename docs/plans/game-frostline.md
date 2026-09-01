@@ -36,3 +36,21 @@ A fan-fiction tactics game in the clone-war shape: a bounty hunter and clone squ
 - **FL-12 — bolts and burn marks.** Rounds drawn as energy bolts in each side's color; scorch marks through the ground-mark machinery. Moved to the ladder's end with FL-11.
 
 Look, feel, and sound are decided at the deployed page at every landing; tuning numbers move only on playtest word.
+
+## The repair — the state after the first full playtest
+
+The core ladder (FL-1 through FL-10) is landed and gated, and the owner's playtest found the game hollow in places the gates cannot see. The record of what stands open, written before the repair begins:
+
+- **The point economy is fiction.** A squad carries ONE order (the slots are exclusive by engine law — a new order overwrites the last), so three points buy three overwrites and only the final order plays. Overwatch's second point is the lone real multi-spend. Fix directions awaiting the owner's ruling: an order queue (points buy a sequence, executed in order on the player's half — the deep fix); reprice to one point per squad per turn (cheap truth); points as mid-half interrupts.
+- **Every contract boots the same mission.** Job names (escort, hold, convoy) promise mission shapes that do not exist; only the valley and the pay change.
+- **Heat is kept and displayed and spends nothing.**
+- **The tape records and saves every battle; nothing can play one back.**
+- **A finished free skirmish strands its address** — no path back to the board; a reloaded `?seed=` address never shows a board.
+- **The exit marker draws off-screen** at mission start with no edge pointer — the mission opens with no visible goal.
+- **The hunter draws as an ordinary trooper** — no silhouette, no flight visual.
+- **The sniper's long shot:** the display prices a shot the territory doctrine will never allow.
+- **Space is thin:** move and attack only, one hull, no tape, no camera control, the wing free to lose.
+- **Small:** RESET PURSE wipes without confirmation; the board never scales to the purse.
+
+**The repair order, ruled:** FIRST an audit document — the player's whole path traced against the code, every screen, button, spend, and displayed number marked TRUE, HOLLOW, or MISSING — so the repair is planned once, completely. Then repairs in truth order: the point economy made real; the path closed (board door, exit pointer, replay door); words squared with code (job names mapped to missions that exist, heat priced or removed from display); space to the same standard. One rung per playtest, per the standing cadence. FL-11 (map types) and FL-12 (bolts and burn marks) stay the parked tail behind the repair.
+
