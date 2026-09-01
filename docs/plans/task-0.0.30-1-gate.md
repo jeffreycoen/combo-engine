@@ -1,3 +1,24 @@
+# Task 0.0.30-1 — the gate obeys the testing law: one call, one tick, areas
+
+One job: land the rebuilt gate exactly as printed — the test file whole, one pass-through line in the runner, records. No game code moves. The final hashes are the acceptance. You design nothing.
+
+This document lives at `docs/plans/task-0.0.30-1-gate.md` when the task lands; the phase frame `docs/plans/phase-0.0.30-gate.md` is served with it and copied in at landing.
+
+## Required reading, verified in the tree
+
+1. This document, whole.
+2. The phase frame, whole — it carries the deletion license.
+3. `scripts/gate.mjs`, whole (48 lines).
+
+Your report opens with a read-confirmation naming these.
+
+## Steps
+
+**Step 1 — green before anything moves.** `node scripts/gate.mjs frostline` must print `frostline-test: 63 PASS / 0 FAIL`, `frostline-test PASS`, exit 0. This is the LAST run of the old slow gate — many minutes; the verdict PRINTS before any file is touched.
+
+**Step 2 — the rebuilt gate.** Replace `scripts/frostline-test.mjs` whole with:
+
+```js
 // COMBO-ENGINE — frostline-test: the game's gate, restructured to the
 // owner's testing law: NEVER a timed simulation — a check proves a call
 // fires correctly (one call, one tick, direct asserts) and nothing plays
@@ -330,3 +351,53 @@ for (const a of run) AREAS[a]();
 console.log(`frostline-test [${run.join(" ")}]: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
 console.log("frostline-test PASS");
+```
+
+**Step 3 — the pass-through.** In `scripts/gate.mjs`, the line:
+
+```js
+const r = spawnSync(process.execPath, GATES[name], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: process.env });
+```
+
+becomes:
+
+```js
+const r = spawnSync(process.execPath, GATES[name].concat(process.argv.slice(3)), { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: process.env }); // extra args pass through: area-split gates run only what a brief names
+```
+
+**Step 4 — file identity.** `node --check` on both files (each prints nothing, exit 0), then `wc -c` and `sha256sum`, compared mechanically:
+
+- `scripts/frostline-test.mjs` — 21129 bytes, sha256 `d99c841a0eb85bd47a3e0ff6a3101d8a93598669f2f50a057ec560e54b1de0d3`
+- `scripts/gate.mjs` — 2613 bytes, sha256 `5ca2df21df9c49f7c020fdbf00e2ddc18c676e6f445902e058e60a00b52add6f`
+
+A mismatch stops the task: report it, change nothing else.
+
+**Step 5 — the gate proves itself.** `node scripts/gate.mjs frostline` must print `frostline-test [mission turns cover fire purse board tape space hunter]: 57 PASS / 0 FAIL`, `frostline-test PASS`, exit 0 — in seconds. Then `node scripts/gate.mjs frostline turns purse` must print `frostline-test [turns purse]: 18 PASS / 0 FAIL`, `frostline-test PASS`. No suite loop — no engine file changes.
+
+**Step 6 — records and deploy.** Move this document and the phase frame into `docs/plans/`. Stamp the phase status in a second record commit; the stamp subject is exactly `phase 0.0.30 record stamped — <first commit's 7-character short hash>`. Bump `package.json` 0.0.29 to 0.0.30. Commit with message:
+
+```
+phase 0.0.30 — the gate obeys the testing law
+
+Never a timed simulation: every check proves a call fires — one call, one
+tick, direct asserts — grouped by area so a task runs only what it touched.
+Fifty-seven checks in eleven seconds where sixty-three took half an hour;
+the crossings, replays, and watches belong to the owner's playtest now.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+```
+
+Push.
+
+## Known limits, said plainly
+
+- Long-run truths (a mission crosses, a replay matches, a wing dies on schedule, a man heals to full) are no longer machine-checked anywhere — the owner's playtest is their whole verification, by his own ruling.
+- The other module gates (orders, steering, physics and the rest) were not audited for timed simulations in this task; they are the engine's landed gates and their restructure, if wanted, is its own ruling.
+
+## Report shape
+
+Read-confirmation first, then one line of outcome, then bullets: the step-1 old-gate verdict verbatim, both new-gate verdicts verbatim with their real durations, both wc -c lines, both sha256 lines, both commit hashes, push result. Every nonconformity its own labeled bullet. Fixture seeds: 3, boards 7, 11, 42, space 12345; no seed is special.
+
+## Suggested model
+
+Sonnet 5 — two files printed whole and one hunk, hashes ratify.

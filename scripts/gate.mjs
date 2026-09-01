@@ -39,7 +39,7 @@ if (!GATES[name]) {
   process.exit(2);
 }
 const t0 = Date.now();
-const r = spawnSync(process.execPath, GATES[name], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: process.env });
+const r = spawnSync(process.execPath, GATES[name].concat(process.argv.slice(3)), { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, env: process.env }); // extra args pass through: area-split gates run only what a brief names
 process.stdout.write(r.stdout || "");
 process.stderr.write(r.stderr || "");
 const secs = ((Date.now() - t0) / 1000).toFixed(1);
