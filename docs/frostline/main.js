@@ -11,7 +11,7 @@ import { makeTriggerState, checkTriggers } from "../../src/games/frostline/pause
 import { makeTurns, startTurns, apOf, spend, clampMove, capOf, beginExec, stepExec, stepEnemy, heldInput, TURNS } from "../../src/games/frostline/turns.js";
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
-import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill } from "../../src/games/frostline/purse.js";
+import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill, campaignOver } from "../../src/games/frostline/purse.js";
 import { makeBoard, completionPay, doneOf, markJobDone } from "../../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record } from "../../src/games/frostline/tape.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
@@ -33,7 +33,7 @@ if (!Number.isFinite(boardSeed) && !Number.isFinite(bareSeed)) {
 if (Number.isFinite(boardSeed) && Number.isFinite(jobIx)) contract = makeBoard(boardSeed)[jobIx] || null;
 if (contract && doneOf(purse, contract.boardSeed).includes(contract.job)) contract = null;
 const boardOnly = Number.isFinite(boardSeed) && !contract;
-if (boardOnly) {
+if (boardOnly && !campaignOver(purse)) {
   // the board screen: jobs listed, nothing boots until one is taken
   const bd = document.getElementById("board"), jobsEl = document.getElementById("bdJobs");
   if (!purse.board) { purse.board = { seed: boardSeed, done: [] }; savePurse(localStorage, purse); }
@@ -54,9 +54,25 @@ if (boardOnly) {
   bd.style.display = "block";
   document.getElementById("title").textContent = "FROSTLINE · THE BOARD";
 }
+// the ending: a finished company never boots and never crashes — the card
+// tells the record and offers the fresh start.
+function showEnding() {
+  const bd = document.getElementById("board");
+  document.getElementById("bdTitle").textContent = "THE COMPANY IS FINISHED";
+  document.getElementById("bdBody").innerHTML = "no man standing, no money for men<br>earned this campaign: " + purse.earned
+    + "<br>kills: " + purse.kills + " · the dead: " + purse.fallen;
+  const jobsEl = document.getElementById("bdJobs");
+  const nb = document.createElement("button");
+  nb.textContent = "NEW CAMPAIGN";
+  nb.addEventListener("click", () => { localStorage.removeItem(STORE_KEY); location.href = location.pathname; });
+  jobsEl.appendChild(nb);
+  bd.style.display = "block";
+  document.getElementById("title").textContent = "FROSTLINE";
+}
 // the battle: everything below runs only when a contract or a bare seed
 // asked for one — the board screen never boots a war.
-if (!boardOnly) startBattle();
+if (campaignOver(purse)) showEnding();
+else if (!boardOnly) startBattle();
 function startBattle() {
 const askSeed = contract ? contract.seed : (Number.isFinite(bareSeed) ? bareSeed : 3);
 const men0 = menOf(purse); // heads per fielded slot; the dead stay dead until replaced
@@ -333,17 +349,24 @@ function showDebrief(won) {
     const b = document.createElement("button");
     const price = teamPrice(type);
     b.textContent = "BUY " + (type === "mg" ? "GUNNERS" : type === "sniper" ? "SNIPER PAIR" : type === "medics" ? "MEDIC TEAM" : type === "hunter" ? "THE HUNTER — one of a kind" : "RIFLE SQUAD") + " — " + price;
-    if (type === "hunter" && purse.roster.includes("hunter")) b.disabled = true;
-    b.disabled = purse.scrap < price;
+    b.disabled = purse.scrap < price || (type === "hunter" && purse.roster.includes("hunter"));
     b.addEventListener("click", () => { if (buyTeam(purse, type)) { savePurse(localStorage, purse); showDebrief(won); } });
     dbShop.appendChild(b);
   }
   debriefEl.style.display = "block";
+  if (campaignOver(purse)) {
+    dbShop.innerHTML = "";
+    const eb = document.createElement("button");
+    eb.textContent = "THE COMPANY IS FINISHED — THE RECORD";
+    eb.addEventListener("click", () => { debriefEl.style.display = "none"; showEnding(); });
+    dbShop.appendChild(eb);
+  }
 }
 document.getElementById("dbNew").addEventListener("click", () => {
   location.href = location.pathname + "?board=" + (purse.board ? purse.board.seed : Math.floor(Math.random() * 1e9));
 });
 document.getElementById("dbReset").addEventListener("click", () => {
+  if (!confirm("Wipe the whole campaign — purse, roster, board, the dead? This cannot be undone.")) return;
   localStorage.removeItem(STORE_KEY);
   location.href = location.pathname;
 });

@@ -99,6 +99,19 @@ export function recordCasualties(purse, standing) {
   purse.fallen += fell;
   return fell;
 }
+// campaignOver(purse) -> true when the company is finished: no man standing
+// in any slot, and the purse cannot buy a refill or any new team. The one
+// honest ending — checked at the debrief and before any boot.
+export function campaignOver(purse) {
+  if (menOf(purse).some((n) => n > 0)) return false;
+  if (purse.scrap >= refillCost(purse)) return false;
+  for (const type of FOR_SALE) {
+    if (type === "hunter" && purse.roster.includes("hunter")) continue;
+    if (purse.scrap >= teamPrice(type)) return false;
+  }
+  return true;
+}
+
 // refillCost(purse) -> the bill to bring every squad back to strength.
 export function refillCost(purse) {
   const types = fieldedTypes(purse), men = menOf(purse);
