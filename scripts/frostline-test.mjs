@@ -100,10 +100,10 @@ const AREAS = {
     check("turns: the war starts in free time", ts.phase === "free" && ts.turn === 0);
     const squads = [{ id: 7, anchor: { x: 0, z: 0 } }, { id: 9, anchor: { x: 5, z: 0 } }];
     startTurns(ts, squads);
-    check("turns: first contact opens the orders phase, three points a squad",
+    check("turns: first contact opens the orders phase, one point a squad",
       ts.phase === "orders" && ts.turn === 1 && apOf(ts, squads[0]) === TURNS.ap && apOf(ts, squads[1]) === TURNS.ap);
-    check("turns: one point per order, a dry pool refuses",
-      spend(ts, squads[0]) && spend(ts, squads[0]) && spend(ts, squads[0]) && !spend(ts, squads[0]) && apOf(ts, squads[1]) === 3);
+    check("turns: one point buys one order, a dry pool refuses",
+      spend(ts, squads[0]) && !spend(ts, squads[0]) && apOf(ts, squads[1]) === 1);
     const c = clampMove(squads[0], 100, 0);
     check("turns: the cap prices distance — a 100 m ask lands on 22 along the same line",
       near(c.x, TURNS.moveCap) && near(c.z, 0) && clampMove(squads[0], 4, 0).x === 4);
@@ -111,7 +111,7 @@ const AREAS = {
     check("turns: the player half yields on done or its cap, then the enemy half",
       ts.phase === "exec" && !stepExec(ts, 1, false) && stepExec(ts, 0, true) && ts.phase === "enemy");
     check("turns: the enemy half closes on its window and the pools refill",
-      stepEnemy(ts, TURNS.enemyS, squads) && ts.phase === "orders" && ts.turn === 2 && apOf(ts, squads[0]) === 3);
+      stepEnemy(ts, TURNS.enemyS, squads) && ts.phase === "orders" && ts.turn === 2 && apOf(ts, squads[0]) === 1);
     const input = defaultTickInput();
     check("turns: the engine's own switch holds the enemy side",
       heldInput(input, true).devDummies === true && heldInput(input, false).devDummies === false);

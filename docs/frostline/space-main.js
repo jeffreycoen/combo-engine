@@ -139,13 +139,13 @@ function frame(now) {
       acc -= SPACE_STEP;
       if (ts.phase === "free") {
         stepSpace(battle);
-        if (contactMade(battle)) { startTurns(ts, wingOps()); say("CONTACT", "YOUR TURN — 3 POINTS A SHIP"); }
+        if (contactMade(battle)) { startTurns(ts, wingOps()); say("CONTACT", "YOUR TURN — ONE POINT A SHIP"); }
       } else if (ts.phase === "exec") {
         stepSpace(battle, { player: false, enemy: true });
         if (stepExec(ts, SPACE_STEP, false)) { enemyOrders(battle); say("ENEMY TURN", ""); }
       } else if (ts.phase === "enemy") {
         stepSpace(battle);
-        if (stepEnemy(ts, SPACE_STEP, wingOps())) say("YOUR TURN " + ts.turn, "3 POINTS A SHIP");
+        if (stepEnemy(ts, SPACE_STEP, wingOps())) say("YOUR TURN " + ts.turn, "ONE POINT A SHIP");
       }
       for (const ev of drainSpaceEvents(battle)) {
         if (ev.team === 2) { paid += ev.bounty; purse.scrap += ev.bounty; purse.earned += ev.bounty; purse.kills++; }

@@ -7,7 +7,7 @@
 // moves capped in distance. Pure state over plain data; the page drives
 // the ticks.
 export const TURNS = {
-  ap: 3,          // points per squad per turn (owner's ruling)
+  ap: 1,          // one point, one order, per squad per turn (owner's ruling)
   moveCap: 22,    // meters one move order may reach // provisional (F5)
   jetCap: 35,     // the hunter's jetpack line — his move flies farther // provisional (F5)
   execCapS: 8,    // seconds the player half may run before it yields // provisional (F5)

@@ -340,9 +340,9 @@ function frame(now) {
       acc -= STEP;
       const before = ts.phase;
       const { events, flags } = stepBattle(ctx);
-      if (before === "free" && ts.phase === "orders") say("CONTACT", "YOUR TURN — 3 POINTS A SQUAD");
+      if (before === "free" && ts.phase === "orders") say("CONTACT", "YOUR TURN — ONE POINT A SQUAD");
       else if (before === "exec" && ts.phase === "enemy") say("ENEMY TURN", "");
-      else if (before === "enemy" && ts.phase === "orders") say("YOUR TURN " + ts.turn, "3 POINTS A SQUAD");
+      else if (before === "enemy" && ts.phase === "orders") say("YOUR TURN " + ts.turn, "ONE POINT A SQUAD");
       if (flags && flags.orderPaths) R.overlay.setOrderPaths(allPaths());
       battleEarned += earnFromEvents(purse, war, events);
       if (ctx.over) {
