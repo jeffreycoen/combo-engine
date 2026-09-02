@@ -25,6 +25,7 @@ import { makeSquad, stepMedicTend, MEDIC_TEND_M } from "../src/depot/squads.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse, fieldedTypes, menOf, manPrice, recordCasualties, refillCost, buyRefill } from "../src/games/frostline/purse.js";
 import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS, nextBoardSeed, doneOf, markJobDone } from "../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record } from "../src/games/frostline/tape.js";
+import { checkTriggers } from "../src/games/frostline/pause.js";
 import { makeSpaceBattle, stepSpace, enemyOrders, wingState, liveShips } from "../src/games/frostline/space.js";
 import { orderAttack as shipAttack } from "../src/modules/orders/orders.js";
 
@@ -295,6 +296,27 @@ const AREAS = {
     const out = stepBattle(ctx);
     check("tape: one battle step is one tick with the tick's own events returned",
       ctx.tick === t0 + 1 && Array.isArray(out.events));
+    // the hold: one enemy-half tick — the ordered squad stands, the order kept
+    const sq2 = war.run.squads[1];
+    sq2.order = "move"; sq2.dest = { x: sq2.anchor.x + 20, z: sq2.anchor.z }; sq2._route = null; sq2._routeDest = null;
+    ctx.ts.phase = "enemy"; ctx.ts.enemyT = 0;
+    const a0 = { x: sq2.anchor.x, z: sq2.anchor.z };
+    stepBattle(ctx);
+    const stood = sq2.anchor.x === a0.x && sq2.anchor.z === a0.z && sq2.order === "move" && !!sq2.dest;
+    ctx.ts.phase = "exec"; ctx.ts.execT = 0;
+    stepBattle(ctx);
+    check("tape: on the enemy half an ordered squad stands, order kept; on your own half it marches",
+      stood && (sq2.anchor.x !== a0.x || sq2.anchor.z !== a0.z));
+    // the pauses: orders done and man down ride the tick's flags
+    ctx.ts.phase = "free";
+    sq2.order = "defend"; sq2.dest = null;
+    ctx.trig.moving.add(sq2.id);
+    const outOD = stepBattle(ctx);
+    const odFlag = outOD.flags && outOD.flags.pause === "ORDERS DONE";
+    const ownId = war.run.squads[0].memberIds[0];
+    const md = checkTriggers(war, ctx.trig, [{ type: "kill", id: ownId }]);
+    check("tape: orders done flags its tick; a friendly kill event trips the man-down trigger",
+      odFlag && md.manDown === ownId);
   },
 
   space() {

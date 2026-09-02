@@ -79,6 +79,7 @@ let focus = { x: selected.anchor.x, y: war.field.heightAt(selected.anchor.x, sel
 let aim = { x: mission.exit.x, z: mission.exit.z };
 
 let mode = null;            // "move" | "attack" | null — the armed action awaiting its tap
+let freezeMsg = null;       // a fired pause: the war waits until the next tap
 let pending = null;         // the confirmation on screen: {kind, sq, x, z, target, label}
 
 // ---- HUD
@@ -225,6 +226,7 @@ document.getElementById("rotL").addEventListener("click", () => R.rotateStep(1))
 document.getElementById("rotR").addEventListener("click", () => R.rotateStep(-1));
 
 function tapAt(cx, cy) {
+  if (freezeMsg) { freezeMsg = null; say("", ""); return; }
   if (ctx.over || pending) return;
   const w = screenToWorld(cx, cy);
   const hit = pickSquad(squads, w.x, w.z);
@@ -354,7 +356,7 @@ say("", "TAP THE SNOW TO MOVE OUT — TIME STOPS AT FIRST CONTACT");
 function frame(now) {
   requestAnimationFrame(frame);
   let dt = Math.min(0.1, (now - last) / 1000); last = now;
-  const ticking = !ctx.over && !pending && (ts.phase === "free" || ts.phase === "exec" || ts.phase === "enemy");
+  const ticking = !ctx.over && !pending && !freezeMsg && (ts.phase === "free" || ts.phase === "exec" || ts.phase === "enemy");
   if (ticking) {
     acc += dt;
     let guard = 0;
@@ -367,6 +369,7 @@ function frame(now) {
       else if (before === "enemy" && ts.phase === "orders") say("YOUR TURN " + ts.turn, "ONE POINT A SQUAD");
       if (flags && flags.orderPaths) R.overlay.setOrderPaths(allPaths());
       battleEarned += earnFromEvents(purse, war, events);
+      if (flags && flags.pause && !ctx.over) { freezeMsg = flags.pause; say(freezeMsg, "TAP TO GO ON"); break; }
       if (ctx.over) {
         if (ctx.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
         if (ctx.won && contract) markJobDone(purse, contract.boardSeed, contract.job);

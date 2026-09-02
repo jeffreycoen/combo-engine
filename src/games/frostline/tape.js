@@ -33,11 +33,19 @@ export function stepBattle(ctx) {
   }
   applyFireControl(ts, squads);
   heldInput(ctx.input, ts.phase === "exec");
+  // the hold, your side: on the enemy half every squad stands — the move
+  // stashed for this tick and restored after, so the march resumes on your
+  // own half; the trigger stays live under discipline and the cones.
+  const stood = ts.phase === "enemy" ? squads.map((sq) => ({ sq, order: sq.order, dest: sq.dest })) : null;
+  if (stood) for (const h of stood) { h.sq.order = "defend"; h.sq.dest = null; }
   const out = tickWar(war, STEP, ctx.input);
+  if (stood) for (const h of stood) { h.sq.order = h.order; h.sq.dest = h.dest; }
   ctx.tick++;
   if (ts.phase === "free") {
     const t = checkTriggers(war, ctx.trig, out.events);
     if (t.contact !== null) { startTurns(ts, squads); ctx.contactTick = ctx.tick; }
+    else if (t.manDown !== null) { out.flags = out.flags || {}; out.flags.pause = "MAN DOWN"; }
+    else if (t.ordersDone !== null) { out.flags = out.flags || {}; out.flags.pause = "ORDERS DONE"; }
   } else if (ts.phase === "exec") {
     const allDone = squads.every((sq) => orderDone(sq) || !sq.memberIds.some((id) => { const b = war.world.byId.get(id); return b && b.alive; }));
     stepExec(ts, STEP, allDone);
