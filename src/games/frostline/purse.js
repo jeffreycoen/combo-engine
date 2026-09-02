@@ -14,7 +14,7 @@ export const FOR_SALE = ["rifles", "mg", "sniper", "medics", "hunter"];
 export function makePurse() {
   // men: heads per fielded squad slot (base three first, bought teams after);
   // null means every squad at full strength. fallen: the campaign's dead.
-  return { scrap: 0, earned: 0, kills: 0, roster: [], heat: 0, men: null, fallen: 0 };
+  return { scrap: 0, earned: 0, kills: 0, roster: [], heat: 0, men: null, fallen: 0, board: null };
 }
 
 // loadPurse(storage) -> a purse from the vault, or a fresh one. A broken
@@ -26,7 +26,9 @@ export function loadPurse(storage) {
     const p = JSON.parse(raw);
     if (typeof p.scrap !== "number" || !Array.isArray(p.roster)) return makePurse();
     return { scrap: p.scrap, earned: p.earned || 0, kills: p.kills || 0, roster: p.roster.filter((t) => SQUAD_SPECS[t]), heat: p.heat || 0,
-      men: Array.isArray(p.men) ? p.men.map((v) => Math.max(0, v | 0)) : null, fallen: p.fallen || 0 };
+      men: Array.isArray(p.men) ? p.men.map((v) => Math.max(0, v | 0)) : null, fallen: p.fallen || 0,
+      board: p.board && typeof p.board.seed === "number" && Array.isArray(p.board.done)
+        ? { seed: p.board.seed, done: p.board.done.map((v) => v | 0) } : null };
   } catch { return makePurse(); }
 }
 

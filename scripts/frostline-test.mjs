@@ -23,7 +23,7 @@ import { arcClears } from "../src/depot/accuracy.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 import { makeSquad, stepMedicTend, MEDIC_TEND_M } from "../src/depot/squads.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, WIN_BONUS, makePurse, fieldedTypes, menOf, manPrice, recordCasualties, refillCost, buyRefill } from "../src/games/frostline/purse.js";
-import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS } from "../src/games/frostline/contracts.js";
+import { makeBoard, completionPay, CLEAN_PAY, UNDER_PAY, BOARD_JOBS, nextBoardSeed, doneOf, markJobDone } from "../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record } from "../src/games/frostline/tape.js";
 import { makeSpaceBattle, stepSpace, enemyOrders, wingState, liveShips } from "../src/games/frostline/space.js";
 import { orderAttack as shipAttack } from "../src/modules/orders/orders.js";
@@ -228,6 +228,10 @@ const AREAS = {
     check("purse: the vault round-trips scrap, kills, roster, heat, men",
       q.scrap === p.scrap && q.kills === p.kills && q.roster.join() === p.roster.join());
     check("purse: a broken record loads broke, never crashed", loadPurse({ getItem: () => "{broken", setItem: () => {} }).scrap === 0);
+    p.board = { seed: 7, done: [1] };
+    savePurse(storage, p);
+    const qb = loadPurse(storage);
+    check("purse: the vault carries the campaign's board", qb.board.seed === 7 && qb.board.done.join() === "1");
     const p2 = makePurse();
     const fell = recordCasualties(p2, [2, 2, 1]);
     check("purse: the score card's arithmetic — three fell, the books remember", fell === 3 && p2.fallen === 3 && menOf(p2).join() === "2,2,1");
@@ -263,6 +267,13 @@ const AREAS = {
     check("board: the ruled trade holds on every fixture board; every hot job carries its ambush seed", lawful && hotJobs >= 1);
     const p = makePurse();
     check("board: the posted price pays and the heat lands", completionPay(p, b7[0]) === 36 && p.scrap === 36 && p.heat === 1);
+    const p4 = makePurse();
+    check("board: the won job leaves the board and the books remember",
+      markJobDone(p4, 7, 0) === 7 && doneOf(p4, 7).join() === "0" && doneOf(p4, 11).join() === "");
+    markJobDone(p4, 7, 1);
+    const rolled = markJobDone(p4, 7, 2);
+    check("board: the emptied board rolls its next three jobs, deterministically",
+      rolled === nextBoardSeed(7) && rolled !== 7 && doneOf(p4, rolled).join() === "" && nextBoardSeed(7) === nextBoardSeed(7));
   },
 
   tape() {

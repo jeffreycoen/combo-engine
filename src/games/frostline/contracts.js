@@ -65,6 +65,27 @@ export function makeBoard(boardSeed) {
   return jobs;
 }
 
+// nextBoardSeed(boardSeed) -> the seed the emptied board refreshes to.
+// Deterministic: the chain of boards is part of the address law.
+export function nextBoardSeed(boardSeed) {
+  return Math.floor(stream((boardSeed ^ 0x9e3779b9) >>> 0)() * 1e9);
+}
+
+// doneOf(purse, boardSeed) -> the completed job indexes on this board; a
+// board the purse has never seen starts clean.
+export function doneOf(purse, boardSeed) {
+  return purse.board && purse.board.seed === boardSeed ? purse.board.done : [];
+}
+
+// markJobDone(purse, boardSeed, jobIx): the won job leaves the board; an
+// emptied board rolls the next one. Returns the board seed now current.
+export function markJobDone(purse, boardSeed, jobIx) {
+  if (!purse.board || purse.board.seed !== boardSeed) purse.board = { seed: boardSeed, done: [] };
+  if (!purse.board.done.includes(jobIx)) purse.board.done.push(jobIx);
+  if (purse.board.done.length >= BOARD_JOBS) purse.board = { seed: nextBoardSeed(boardSeed), done: [] };
+  return purse.board.seed;
+}
+
 // completionPay(purse, contract) -> the posted price into the purse, plus
 // the job's heat onto the books. The caller owns the once.
 export function completionPay(purse, contract) {

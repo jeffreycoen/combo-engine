@@ -12,7 +12,7 @@ import { makeTurns, startTurns, apOf, spend, clampMove, capOf, beginExec, stepEx
 import { destShield, hitChance, knownThreats } from "../../src/games/frostline/cover.js";
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill } from "../../src/games/frostline/purse.js";
-import { makeBoard, completionPay } from "../../src/games/frostline/contracts.js";
+import { makeBoard, completionPay, doneOf, markJobDone } from "../../src/games/frostline/contracts.js";
 import { makeCtx, stepBattle, applyOp, record } from "../../src/games/frostline/tape.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
@@ -27,16 +27,21 @@ let jobIx = parseInt(params.get("job") || "", 10);
 const bareSeed = parseInt(params.get("seed") || "", 10);
 let contract = null;
 if (!Number.isFinite(boardSeed) && !Number.isFinite(bareSeed)) {
-  boardSeed = Math.floor(Math.random() * 1e9);
+  boardSeed = purse.board ? purse.board.seed : Math.floor(Math.random() * 1e9);
   history.replaceState(null, "", "?board=" + boardSeed);
 }
 if (Number.isFinite(boardSeed) && Number.isFinite(jobIx)) contract = makeBoard(boardSeed)[jobIx] || null;
+if (contract && doneOf(purse, contract.boardSeed).includes(contract.job)) contract = null;
 const boardOnly = Number.isFinite(boardSeed) && !contract;
 if (boardOnly) {
   // the board screen: jobs listed, nothing boots until one is taken
   const bd = document.getElementById("board"), jobsEl = document.getElementById("bdJobs");
+  if (!purse.board) { purse.board = { seed: boardSeed, done: [] }; savePurse(localStorage, purse); }
+  if (purse.board.seed !== boardSeed) { boardSeed = purse.board.seed; history.replaceState(null, "", "?board=" + boardSeed); }
+  const done = doneOf(purse, boardSeed);
   document.getElementById("bdBody").innerHTML = "the purse: " + purse.scrap + (purse.heat ? " · heat " + purse.heat : "") + "<br>roster: 3 + " + purse.roster.length + " bought";
   for (const job of makeBoard(boardSeed)) {
+    if (done.includes(job.job)) continue; // a won job is gone
     const b = document.createElement("button");
     b.innerHTML = job.name + "<br><span class=\"legit\">" + job.legit.toUpperCase() + "</span> · pays " + job.price
       + (job.heat ? " · +" + job.heat + " heat" : "") + (job.hot ? " · <span class=\"legit\">HOT ROUTE</span>" : "");
@@ -63,7 +68,6 @@ let battleEarned = 0, bonusPaid = 0, fellThisBattle = 0;
 const ctx = makeCtx(war, mission);
 const tape = [];
 function confirmOp(op) { if (applyOp(ctx, op)) { record(tape, ctx, op); return true; } return false; }
-history.replaceState(null, "", "?seed=" + seed);
 const R = makeRenderer(canvas, war.world, { camera: "tactical" });
 let zoom = 1.5;
 R.setZoom(zoom);
@@ -272,6 +276,24 @@ addEventListener("keydown", (e) => {
   else if (e.code === "KeyE") R.rotateStep(-1);
 });
 
+// ---- the exit arrow: points at the objective whenever it is off-screen
+const exitArrow = document.getElementById("exitArrow");
+function exitOnScreen() {
+  const ex = mission.exit.x, ez = mission.exit.z;
+  const ey = war.field.heightAt(ex, ez);
+  const cp = R.cameraPos(), rt = R.camBasis.right, up = R.camBasis.up;
+  const dx = ex - cp.x, dy = ey - cp.y, dz = ez - cp.z;
+  const nx = (dx * rt.x + dy * rt.y + dz * rt.z) / R.camBasis.halfW();
+  const ny = (dx * up.x + dy * up.y + dz * up.z) / R.camBasis.halfH();
+  if (Math.abs(nx) <= 0.92 && Math.abs(ny) <= 0.92) { exitArrow.style.display = "none"; return; }
+  const s = 0.92 / Math.max(Math.abs(nx), Math.abs(ny));
+  const px = (nx * s * 0.5 + 0.5) * innerWidth, py = (0.5 - ny * s * 0.5) * innerHeight;
+  exitArrow.style.display = "block";
+  exitArrow.style.left = px + "px";
+  exitArrow.style.top = py + "px";
+  exitArrow.style.transform = "translate(-50%, -50%) rotate(" + Math.atan2(-ny, nx) + "rad)";
+}
+
 // ---- the overlay: order routes, overwatch cones, the mark's ring
 function allPaths() {
   const hAt = (x, z) => war.field.heightAt(x, z);
@@ -317,7 +339,7 @@ function showDebrief(won) {
   debriefEl.style.display = "block";
 }
 document.getElementById("dbNew").addEventListener("click", () => {
-  location.href = location.pathname + "?board=" + Math.floor(Math.random() * 1e9);
+  location.href = location.pathname + "?board=" + (purse.board ? purse.board.seed : Math.floor(Math.random() * 1e9));
 });
 document.getElementById("dbReset").addEventListener("click", () => {
   localStorage.removeItem(STORE_KEY);
@@ -347,6 +369,7 @@ function frame(now) {
       battleEarned += earnFromEvents(purse, war, events);
       if (ctx.over) {
         if (ctx.won) bonusPaid = contract ? completionPay(purse, contract) : winBonus(purse);
+        if (ctx.won && contract) markJobDone(purse, contract.boardSeed, contract.job);
         // the score card's arithmetic: survivors per fielded slot, in boot order
         const types = fieldedTypes(purse);
         let si = 0;
@@ -366,6 +389,7 @@ function frame(now) {
     R.overlay.setHover(true, selected.anchor.x, selected.anchor.z, war.field.heightAt(selected.anchor.x, selected.anchor.z), 2.2, true, 2);
   }
   R.overlay.setObjective(mission.exit.x, mission.exit.z, war.field.heightAt(mission.exit.x, mission.exit.z));
+  if (ctx.over) exitArrow.style.display = "none"; else exitOnScreen();
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
   hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed + "<br>purse " + purse.scrap + (purse.heat ? "<br>heat " + purse.heat : "");

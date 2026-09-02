@@ -53,6 +53,8 @@
     border: 1.5px solid rgba(233,237,242,.4); background: rgba(13,17,23,.6); color: #e9edf2;
     font: 600 11px system-ui, sans-serif; letter-spacing: 0.08em; }
   #dbShop button:disabled { opacity: 0.4; }
+  #exitArrow { position: fixed; display: none; pointer-events: none; color: #6fbf73;
+    font: 700 22px system-ui, sans-serif; text-shadow: 0 0 6px rgba(13,17,23,.9); z-index: 3; }
   #camBtns { position: fixed; left: 12px; top: max(48px, calc(env(safe-area-inset-top) + 38px)); display: flex; gap: 6px; }
   #camBtns button { width: 44px; height: 44px; border-radius: 10px; border: 1.5px solid rgba(233,237,242,.4);
     background: rgba(13,17,23,.55); color: #e9edf2; font: 600 18px system-ui, sans-serif; }
@@ -63,6 +65,7 @@
 <div id="title">FROSTLINE</div>
 <div id="hud">mk -<br>- fps</div>
 <div id="banner">PAUSED</div>
+<div id="exitArrow">➤</div>
 <div id="camBtns"><button id="rotL">⟲</button><button id="rotR">⟳</button></div>
 <div id="reason"></div>
 <div id="actions" style="display:none">
