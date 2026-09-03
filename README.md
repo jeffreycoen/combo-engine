@@ -166,7 +166,7 @@ From the depot, carved out whole behind unchanged depot front doors (hash-identi
 
 In flight (batch 3, `docs/plans/batch-extractions-3.md`):
 
-- [ ] specs — 0.0.53
+- [x] specs — 0.0.53
 - [ ] ai — 0.0.54
 - [ ] save — 0.0.55
 - [ ] accuracy — 0.0.56
