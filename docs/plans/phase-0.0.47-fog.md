@@ -1,6 +1,6 @@
 # Phase 0.0.47 — fog carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `220e227`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-2.md`. `src/depot/fog.js` moves whole into `src/modules/fog/fog.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
