@@ -1,6 +1,6 @@
 # Phase 0.0.60 — the contract pattern
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 6 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `02359b5`, 2026-09-03. Gate: 6 PASS / 0 FAIL; prior gates unmoved.
 
 Harness batch rung of `batch-harness-1.md`. Checklist item served: "The contract pattern: tables declared as data, checked at boot, every problem reported at once" — the box flips in this landing.
 
