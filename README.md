@@ -44,7 +44,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 - [x] Determinism kit: one seeded random stream for the sim, a second for effects, bit-exact state hashing
 - [x] The contract pattern: tables declared as data, checked at boot, every problem reported at once
-- [ ] Headless gates and the boot self-test badge: fixed run from a seed, hashes printed, checks shown at start
+- [x] Headless gates and the boot self-test badge: fixed run from a seed, hashes printed, checks shown at start
 - [x] The input tape: every action recorded with its tick, a seed plus the tape replays a run exactly
 - [ ] The receipt log: events stated as plain-language numbers
 - [ ] The phone-first page kit: touch hardening, safe-area layout, light and dark theme
@@ -147,6 +147,7 @@ Serving checklist items:
 - [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38
 - [x] determinism — the determinism kit — 0.0.59
 - [x] contract — the contract pattern — 0.0.60
+- [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 

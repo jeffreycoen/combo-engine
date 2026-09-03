@@ -5,6 +5,7 @@
 // walks, and fights on its own laws; the enemy side is held by its own
 // switch during your half.
 import { tickWar, defaultTickInput, makeRenderer } from "../../src/depot/api.js";
+import { worldHash } from "../../src/modules/determinism/determinism.js";
 import { bootMission, missionState, MISSION_R1 } from "../../src/games/frostline/mission.js";
 import { orderMove, orderDone, pickSquad, cycleSquad, orderPaths } from "../../src/games/frostline/command.js";
 import { makeTriggerState, checkTriggers } from "../../src/games/frostline/pause.js";
@@ -84,6 +85,9 @@ let battleEarned = 0, bonusPaid = 0, fellThisBattle = 0;
 const ctx = makeCtx(war, mission);
 const tape = [];
 function confirmOp(op) { if (applyOp(ctx, op)) { record(tape, ctx, op); return true; } return false; }
+// the boot self-test badge: the booted world's own hash, shown from the
+// first frame — same seed, same number, any device, or something is wrong
+const bootHash = worldHash(war.world);
 const R = makeRenderer(canvas, war.world, { camera: "tactical" });
 let zoom = 1.5;
 R.setZoom(zoom);
@@ -418,7 +422,7 @@ function frame(now) {
   if (ctx.over) exitArrow.style.display = "none"; else exitOnScreen();
   fpsFrames++; fpsT += dt;
   if (fpsT >= 0.5) { fpsText = Math.round(fpsFrames / fpsT) + " fps"; fpsFrames = 0; fpsT = 0; }
-  hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed + "<br>purse " + purse.scrap + (purse.heat ? "<br>heat " + purse.heat : "");
+  hud.innerHTML = mkText + "<br>" + fpsText + "<br>seed " + seed + "<br>world " + bootHash + "<br>purse " + purse.scrap + (purse.heat ? "<br>heat " + purse.heat : "");
   drawChips();
   title.textContent = "FROSTLINE · " + mission.name + (ts.phase === "orders" ? " · TURN " + ts.turn : "");
   R.render(dt, focus, aim);

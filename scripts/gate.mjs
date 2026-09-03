@@ -33,6 +33,7 @@ const GATES = {
   "wells": ["scripts/wells-test.mjs"],
   "determinism": ["scripts/determinism-test.mjs"],
   "contract": ["scripts/contract-test.mjs"],
+  "badge": ["scripts/badge-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
