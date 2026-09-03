@@ -169,7 +169,7 @@ In flight (batch 3, `docs/plans/batch-extractions-3.md`):
 - [x] specs — 0.0.53
 - [x] ai — 0.0.54
 - [x] save — 0.0.55
-- [ ] accuracy — 0.0.56
+- [x] accuracy — 0.0.56
 - [ ] mapgen — 0.0.57
 - [ ] squads — 0.0.58
 - [ ] buildlines — 0.0.59
