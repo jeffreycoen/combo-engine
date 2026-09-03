@@ -1,6 +1,6 @@
 # Phase 0.0.42 — lists carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `d66dcfa`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 
 Batch rung of `batch-extractions-2.md`. `src/depot/lists.js` moves whole into `src/modules/lists/lists.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
 
