@@ -38,7 +38,7 @@ Eleven rungs, 0.0.53 through 0.0.63. Anything beyond is a new batch order.
 - [x] 0.0.54 ai
 - [x] 0.0.55 save
 - [x] 0.0.56 accuracy
-- [ ] 0.0.57 mapgen
+- [x] 0.0.57 mapgen
 - [ ] 0.0.58 squads
 - [ ] 0.0.59 buildlines
 - [ ] 0.0.60 units
