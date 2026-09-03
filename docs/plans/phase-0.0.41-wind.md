@@ -1,6 +1,6 @@
 # Phase 0.0.41 — wind carved out
 
-Status: PLANNED. No task dispatched.
+Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung 6 of `batch-extractions-1.md`, the last rung — the small proof of the depot re-import pattern behind rung 5. The wind stream (`src/depot/wind.js`, 9 lines, no imports) moves whole into `src/modules/wind/wind.js`; the depot file becomes a one-line front door, so its importers (accuracy gate, combat gate, depot sim) keep working untouched.
