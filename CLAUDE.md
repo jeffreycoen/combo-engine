@@ -40,6 +40,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 ## Module extraction
 
 - The procedure is the extract-module superpower (`.claude/skills/extract-module/`); its templates are the required shape for phase and task documents. The skill is invoked at the start of every extraction; it is never reconstructed from memory.
+- **The README governs extraction.** Its checklist is the roadmap: every batch order and every phase names the checklist item it serves, and nothing is extracted that serves no item. The README's modules list carries the progress, flipped in each landing. Reading the README alone must show what is extracted, what is in flight, and why.
 - Every lift names its kind in the phase document: VERBATIM (file inventory with hashes), VERBATIM MATH (named substitutions, and only those — an unlisted difference stops the agent), or SHAPED (the law carried, the code new, said plainly). The kind decides the acceptance; arithmetic ratifies all three.
 - Demo files are source material, read-only, cited by line. No task ever edits a demo.
 - Every task is bracketed by the prior gates: asserted green as step 1, re-asserted before the commit. A moved number is a finding against the task, never something to fix in flight.
