@@ -1,6 +1,6 @@
 # Phase 0.0.39 — the books
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 7 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `4510510`, 2026-09-03. Gate: 7 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; prior gates unmoved. -->
 
 Batch rung 4 of `batch-extractions-1.md`. The organ is the deadweight hangar's conservation books: a genesis declaration of every credit, gram, and part in the world, and the audit that folds a full census against it — zero drift or a named needle (cD, fD, oD, pD). Source: `deadweight-hangar.html` lines 254-262 and 316-344, read-only, committed unchanged at 206d7eb.
