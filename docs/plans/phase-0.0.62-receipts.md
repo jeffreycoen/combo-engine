@@ -1,6 +1,6 @@
 # Phase 0.0.62 — the receipt log
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 4 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `a970a93`, 2026-09-03. Gate: 4 PASS / 0 FAIL; prior gates unmoved.
 
 Harness batch rung of `batch-harness-1.md`. Checklist item served: "The receipt log: events stated as plain-language numbers" — the box flips in this landing.
 
