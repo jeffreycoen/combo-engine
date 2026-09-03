@@ -1,6 +1,6 @@
 # Phase 0.0.48 — mines carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `a4c4d4f`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-2.md`. `src/depot/mines.js` moves whole into `src/modules/mines/mines.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
