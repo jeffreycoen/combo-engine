@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>DEADWEIGHT · HANGAR + PROVING RUN</title>
+<style>
+:root{--bg:#f5f4f0;--glass:rgba(255,255,255,.8);--ink:#1d222b;--ink2:#4d5560;--ink3:#8b93a0;--ok:#2e7d5b;--bad:#c0392b;--warn:#8a5a10;--blue:58,98,196;--green:30,140,70;--pillW:74px;--pillH:66px;--railH:64px;--turnW:88px;--lab:10px;--bd:29,34,43;--sab:env(safe-area-inset-bottom,0px)}
+[data-theme="dark"]{--bg:#0b0e14;--glass:rgba(20,25,33,.9);--ink:#e6eaf2;--ink2:#c2c9d6;--ink3:#96a0b2;--ok:#3fae7a;--bad:#e05545;--warn:#d9a441;--bd:230,235,245}
+[data-theme="dark"] .part,[data-theme="dark"] .hullc,[data-theme="dark"] .hud,[data-theme="dark"] #stats,[data-theme="dark"] #modcard{background:#161b23;border-color:rgba(230,235,245,.16)}
+[data-theme="dark"] .tc button{background:#141a24;border-color:rgba(120,155,225,.55);box-shadow:0 3px 12px rgba(0,0,0,.5)}
+#themeB{right:10px;top:10px;left:auto;width:40px;height:40px;border-radius:12px;font-size:16px;padding:0}
+*{box-sizing:border-box;margin:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,'SF Pro Display',sans-serif;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.hud{position:fixed;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(29,34,43,.08);border-radius:14px;box-shadow:0 4px 20px rgba(29,34,43,.05)}
+.lbl{font-size:8px;font-weight:800;letter-spacing:1.6px;color:var(--ink3);text-transform:uppercase}
+button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+/* hangar */
+#tray{left:10px;top:10px;width:212px;padding:10px 9px;overflow:hidden;height:auto;max-height:calc(100% - 128px)}
+.part{width:100%;margin:0 0 8px;padding:8px 6px;border-radius:11px;border:1.5px solid rgba(29,34,43,.14);background:#fff;text-align:left}
+.part.sel{border-color:rgba(var(--blue),.8);background:rgba(var(--blue),.06)}
+.part .nm{font-size:10px;font-weight:800;letter-spacing:.4px}
+.part .st{font-size:9px;color:var(--ink2);font-variant-numeric:tabular-nums}
+#tray .mods{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#tray .mods .part{margin:0;padding:7px 7px}
+#tray .bprow{display:flex;gap:6px;overflow-x:auto;overflow-y:hidden;padding:2px 0 5px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#tray .bprow::-webkit-scrollbar{display:none}
+#tray .bprow .part{flex:0 0 auto;width:auto;min-width:98px;margin:0;border-radius:999px;padding:7px 12px}
+#stats{right:10px;top:56px;width:150px;padding:10px 12px;font-variant-numeric:tabular-nums}
+#stats div{font-size:11px;margin:2px 0}
+#stats b{font-weight:700}
+#warn{color:var(--bad);font-weight:700;font-size:10px;min-height:13px}
+#hint{left:50%;transform:translateX(-50%);bottom:164px;padding:6px 14px;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--warn);text-transform:uppercase}
+#fly{right:10px;left:auto;transform:none;bottom:calc(34px + var(--sab));height:54px;min-width:168px;border-radius:16px;border:1.5px solid rgba(var(--green),.4);background:rgba(var(--green),.1);color:rgb(var(--green));font-size:13px;font-weight:800;letter-spacing:2px}
+#fly:disabled{opacity:.4}
+#wallet{left:10px;bottom:calc(34px + var(--sab));padding:9px 14px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+/* flight */
+#fhud{left:10px;top:10px;padding:8px 14px;font-size:11px;font-variant-numeric:tabular-nums;display:none}
+#fhud b{font-weight:800}
+.tc{position:fixed;bottom:calc(30px + var(--sab));display:none;gap:8px}
+.tc button{height:var(--railH);min-width:68px;border-radius:16px;border:1.7px solid rgba(var(--blue),.5);background:rgba(246,245,241,.96);color:rgb(var(--blue));font-size:18px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 2px 10px rgba(29,34,43,.08)}
+.tc button:active{background:rgba(var(--blue),.22)}
+.tc .bl{font-size:var(--lab);font-weight:800;letter-spacing:1.6px;text-transform:uppercase;opacity:.9}
+#burnB{background:rgb(var(--blue))!important;color:#fff!important;border-color:rgb(var(--blue))!important;min-width:96px}
+#burnB .bl{color:rgba(255,255,255,.85)}
+#tcL button{width:var(--turnW)}
+#tcW{gap:10px}
+#tcW button{width:var(--pillW);height:var(--pillH)}
+#tcL{left:12px}#tcR{right:12px}
+#stopB{border-color:rgba(138,90,16,.4)!important;color:var(--warn)!important;background:rgba(138,90,16,.07)!important}
+#fireB{border-color:rgba(192,57,43,.4)!important;color:var(--bad)!important;background:rgba(192,57,43,.07)!important}
+#report{left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,420px);padding:18px 20px;display:none;text-align:left}
+#report h2{font-size:12px;font-weight:800;letter-spacing:2px;margin-bottom:8px}
+#report .row{font-size:12px;margin:3px 0;font-variant-numeric:tabular-nums;display:flex;justify-content:space-between}
+#report button{margin-top:12px;height:46px;width:100%;border-radius:13px;border:1.5px solid rgba(var(--blue),.35);background:rgba(var(--blue),.08);color:rgb(var(--blue));font-weight:800;letter-spacing:1.5px}
+#selftest{left:10px;top:10px;transform:none;padding:5px 12px;font-size:9px;font-weight:800;letter-spacing:1.5px}
+#selftest.ok{color:var(--ok)}#selftest.bad{color:var(--bad)}
+#modcard{left:10px;bottom:88px;width:216px;padding:11px 13px;display:none}
+#modcard .nm{font-size:12px;font-weight:800}
+#modcard .ds{font-size:10px;color:var(--ink2);line-height:1.4;margin:4px 0 6px}
+#modcard .ct{font-size:10px;color:var(--ink);font-variant-numeric:tabular-nums}
+#modcard button{margin-top:8px;width:100%;height:34px;border-radius:10px;border:1.5px solid rgba(192,57,43,.35);background:rgba(192,57,43,.06);color:var(--bad);font-weight:800;letter-spacing:1px;font-size:10px}
+#modcard button:disabled{opacity:.35}
+#mcCv{width:64px;height:64px;flex:none;background:#fdfdfb;border-radius:9px;border:1px solid rgba(29,34,43,.07)}
+#modcard .row2{display:flex;gap:9px;align-items:flex-start;margin:5px 0 2px}
+#modcard .col{flex:1;min-width:0}
+#hulls{position:fixed;inset:0;z-index:900;background:rgba(246,245,241,.98);display:none;flex-direction:column;padding:16px 10px 10px}
+#hulls .hd .t{font-size:14px;font-weight:900;letter-spacing:4px}
+#hulls .hd .s{font-size:10px;color:var(--ink3);margin:3px 0 10px}
+#hullGrid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:9px;align-content:start;overflow:hidden;padding:2px}
+.hullc{background:#fff;border:1.4px solid rgba(29,34,43,.14);border-radius:14px;padding:10px;text-align:left}
+.hullc.sel{border-color:rgba(138,90,16,.65);background:rgba(138,90,16,.05)}
+.hullc.out{opacity:.45}
+.hullc b{font-size:11px;color:rgb(var(--blue));letter-spacing:.3px}
+.hullc.sel b{color:var(--warn)}
+.hullc{cursor:pointer}
+.hullc .st{font-size:8.5px;color:var(--ink2);line-height:1.5;font-variant-numeric:tabular-nums}
+.hullc .pr{font-size:9.5px;font-weight:800;margin-top:3px}
+#hullGo{margin-top:10px;height:50px;border-radius:15px;border:1.6px solid rgba(var(--green),.5);background:rgba(var(--green),.1);color:rgb(var(--green));font-weight:900;letter-spacing:2px;font-size:12px}
+#hullB{right:188px;left:auto;bottom:calc(34px + var(--sab));height:54px;padding:0 13px;border-radius:16px;border:1.5px solid rgba(138,90,16,.45);background:rgba(138,90,16,.07);color:var(--warn);font-weight:900;letter-spacing:1px;font-size:11px}
+#stopbanner{left:50%;top:22%;transform:translateX(-50%);padding:14px 26px;text-align:center;display:none;border-color:rgba(138,90,16,.35)}
+#stopbanner .big{font-size:26px;font-weight:900;letter-spacing:6px;color:var(--warn)}
+#stopbanner .sub{font-size:12px;color:var(--ink2);margin-top:4px;font-variant-numeric:tabular-nums}
+#piratebanner{left:50%;top:34%;transform:translateX(-50%);padding:12px 22px;text-align:center;display:none;border-color:rgba(192,57,43,.45)}
+#piratebanner .big{font-size:20px;font-weight:900;letter-spacing:4px;color:var(--bad)}
+#piratebanner .sub{font-size:11px;color:var(--ink2);margin-top:3px;font-variant-numeric:tabular-nums}
+#piratebanner button{margin-top:8px;width:100%;height:36px;border-radius:10px;border:1.5px solid rgba(192,57,43,.45);background:rgba(192,57,43,.08);color:var(--bad);font-weight:900;letter-spacing:2px;font-size:12px}
+</style></head><body>
+<canvas id="cv"></canvas>
+<div class="hud" id="selftest">BOOT…</div>
+<!-- hangar chrome -->
+<div class="hud" id="tray"></div>
+<div class="hud" id="stats"></div>
+<div class="hud" id="hint" style="display:none"></div>
+<button class="hud" id="fly">TEST FLIGHT ▸</button>
+<div class="hud" id="wallet"></div>
+<button class="hud" id="themeB">◑</button>
+<button class="hud" id="hullB" style="display:none">▤ HULL</button>
+<div class="hud" id="modcard"></div>
+<!-- flight chrome -->
+<div class="hud" id="fhud"></div>
+<div class="tc" id="tcL"><button id="ccwB">↺<span class="bl">turn</span></button><button id="cwB">↻<span class="bl">turn</span></button></div>
+<div class="tc" id="tcW" style="flex-direction:column;right:12px;bottom:calc(102px + var(--sab))"><button id="dockB" style="display:none;border-color:rgba(30,140,70,.4);color:#2e7d5b;background:rgba(30,140,70,.07)">⚓<span class="bl">dock</span></button><button id="scavB" style="display:none;border-color:rgba(138,90,16,.4);color:#8a5a10;background:rgba(138,90,16,.07)">⚙<span class="bl">weld</span></button><button id="mslB" style="display:none">🚀<span class="bl">msl</span></button><button id="fireB" style="display:none">✦<span class="bl">fire</span></button><button id="slingB" style="display:none;border-color:rgba(233,178,92,.55);color:#b07d1e;background:rgba(233,178,92,.09)">✨<span class="bl">sling</span></button><button id="yankB" style="display:none;border-color:rgba(192,57,43,.5);color:#a03428;background:rgba(192,57,43,.08)">💥<span class="bl">yank</span></button><button id="grapB" style="display:none;border-color:rgba(90,70,50,.45);color:#5a4632;background:rgba(90,70,50,.06)">🪝<span class="bl">grap</span></button></div>
+<div class="tc" id="tcR"><button id="stopB">⊘<span class="bl">stop</span></button><button id="retroB">▽<span class="bl">retro</span></button><button id="burnB" style="min-width:78px;font-size:18px">▲<span class="bl">burn</span></button><button id="cancelB" style="display:none;min-width:74px;border-color:rgba(192,57,43,.5);color:#a03428;background:rgba(192,57,43,.08)">✕<span class="bl">cancel</span></button><button id="commitB" style="display:none;min-width:96px;font-size:17px;border-color:rgba(30,140,70,.5);color:#2e7d5b;background:rgba(30,140,70,.1);font-weight:900">⬤<span class="bl">fire</span></button></div>
+<div id="hulls"><div class="hd"><div class="t" id="hullsT">PICK YOUR HULL</div><div class="s" id="hullsS"></div></div><div id="hullGrid"></div><div id="hullLeg" style="font-size:9px;color:#4d5560;padding:6px 4px 0;letter-spacing:.4px"></div><button id="hullGo">CONTINUE ▸</button></div>
+<div id="intro" style="position:fixed;inset:0;z-index:1000;background:rgba(246,245,241,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;font-family:-apple-system,sans-serif">
+<div style="font-size:26px;font-weight:900;letter-spacing:10px;color:#1d222b">DEADWEIGHT</div>
+<div style="font-size:11px;letter-spacing:3px;color:#8b93a0;margin:6px 0 14px">EVERYTHING IS MASS</div>
+<div style="width:120px;height:1px;background:rgba(29,34,43,.2);margin-bottom:16px"></div>
+<div style="font-size:13px;line-height:1.7;color:#4d5560;max-width:340px">You are nobody: a wallet and a hull.<br>Fuel is grams. Cargo is weight.<br>Money moves — it never appears.<br><br>The world runs whether you fly or not.<br>It pays for daring.<br><br>Die, and your ship drifts where it fell —<br>claimable by anyone faster.</div>
+<button id="introP" style="margin-top:22px;padding:13px 30px;border-radius:12px;border:1.5px solid rgba(138,90,16,.45);background:rgba(138,90,16,.07);color:#8a5a10;font-weight:900;letter-spacing:2px;font-size:13px">FLY AS PILOT · RATED P0</button>
+<button id="introB" style="margin-top:10px;padding:13px 30px;border-radius:12px;border:1.5px solid rgba(30,140,70,.4);background:rgba(30,140,70,.07);color:#2e7d5b;font-weight:900;letter-spacing:2px;font-size:13px">ENTER THE HANGAR</button>
+<div id="introSeed" style="margin-top:14px;font-size:10px;letter-spacing:1px;color:#8b93a0"></div>
+</div>
+<div class="hud" id="stopbanner"><div class="big">STOPPING</div><div class="sub"></div></div>
+<div class="hud" id="piratebanner"><div class="big">☠ PIRATE LOCK</div><div class="sub"></div><button id="payB"></button><button id="dumpB" style="margin-top:6px;border-color:rgba(138,90,16,.45);background:rgba(138,90,16,.07);color:#8a5a10">DUMP HOLD — LET IT CHASE THE CRATE</button></div>
+<div class="hud" id="report"></div>
+<script>
+// rng.js — deterministic PRNG (mulberry32) + state hashing.
+// WHY: every scenario must reproduce exactly from a seed. Math.random is banned
+// engine-wide; all randomness flows through a seeded stream so soak failures
+// can be replayed with --seed.
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// FNV-1a over the raw float64 bytes of body state. Bit-exact: two runs match
+// iff every position/velocity/angle matches to the last bit.
+const _buf = new ArrayBuffer(8);
+const _dv = new DataView(_buf);
+
+function hashFloats(hash, ...vals) {
+  let h = hash >>> 0;
+  for (const v of vals) {
+    _dv.setFloat64(0, v);
+    for (let i = 0; i < 8; i++) {
+      h ^= _dv.getUint8(i);
+      h = Math.imul(h, 0x01000193) >>> 0;
+    }
+  }
+  return h >>> 0;
+}
+
+const FNV_SEED = 0x811c9dc5;
+
+
+'use strict';
+// H1: determinism seal. SEED -> sim stream (rng) + fx stream (rngFx, visual only).
+const SEED=(typeof location!=='undefined'&&+new URLSearchParams(location.search).get('seed'))||90210;
+let rng=mulberry32(SEED), rngFx=mulberry32((SEED^0xBEEF)>>>0);
+const TAU=Math.PI*2, C30=Math.cos(Math.PI/6), S30=.5;
+// diagnostics: real error text on the badge, since the viewer masks it
+function reportErr(msg){try{const b=document.getElementById('badge');
+  if(b){b.textContent='⚠ '+String(msg).slice(0,120);
+    b.style.display='block';b.style.zIndex='99';   // errors outrank mode: visible in flight too
+    b.style.background='#c0392b';b.style.color='#fff';b.style.fontWeight='800';}}catch(_){}}
+if(typeof addEventListener==='function')addEventListener('error',e=>reportErr(e.message||(e.error&&e.error.message)||'unknown'));
+const cv=document.getElementById('cv'); let ctx=cv.getContext('2d');
+const $=id=>document.getElementById(id);
+let DPR=1;
+function fit(){DPR=Math.min(devicePixelRatio||1,2);cv.width=innerWidth*DPR;cv.height=innerHeight*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+fit();addEventListener('resize',fit);
+const W=()=>innerWidth,H=()=>innerHeight;
+
+/* ================= MODULE SPEC (the catalog, live) ================= */
+const SPEC={
+ bridge:{nm:'BRIDGE',kg:4.0, price:12000, ports:['E','W','N','S'], col:['#2a3448','#1c2431']},
+ engine:{nm:'ENGINE',kg:6.0, price:9000,  ports:['E','N','S'], col:['#2e3a49','#19222c'], thrust:55},
+ pod:   {nm:'CARGO POD',kg:3.0, price:4500, ports:['E','W','N','S'], col:['#6a5f4e','#453e33']},
+ tank:  {nm:'FUEL TANK',kg:2.5, price:3800, ports:['E','W','N','S'], col:['#4a5578','#2d3450'], tank:300},
+ shield:{nm:'SHIELD GEN',kg:5.0, price:11000, ports:['W'], col:['#4e6360','#2e3d3a']},
+ mount: {nm:'SLUG MOUNT',kg:3.5, price:7500, ports:['W'], col:['#5a3a3a','#362121'], slugs:40},
+ strut: {nm:'STRUT',kg:0.8, price:900, ports:['E','W','N','S'], col:['#57544c','#36342e'], weak:true},
+ rcs:   {nm:'RCS QUAD',kg:1.2, price:2600, ports:['E','W','N','S'], col:['#6b7480','#3e4650'], rcsN:16},
+ rack:  {nm:'MISSILE RACK',kg:2.5, price:6500, ports:['W'], col:['#4a3a52','#2b2132'], birds:4},
+ grapple:{nm:'GRAPPLE',kg:2.0, price:5200, ports:['W'], col:['#5a4632','#33281c']},
+};
+const DESC={
+ bridge:'Command. You live here — your wallet, your canopy, your baseline attitude ring. The build dies with it.',
+ engine:'Main thrust, applied AT this mount. Off the CoM line it torques the whole ship every burn.',
+ pod:'Hold volume. Dry frame plus whatever the ledger puts inside; the grams show up in your turn rate.',
+ tank:'Adds 300u of fuel capacity. Saddle-mounts on any face. Full it barges, empty it dances.',
+ shield:'A pocket gusher: weak repulser shoving rocks and slugs off-line. Drinks fuel while working.',
+ mount:'Slug driver. Fires mass; recoil kicks AT this mount — off-axis shots yaw you.',
+ strut:'Frame. Reach and spacing; its joints are the weakest welds on the ship, by design.',
+ rcs:'Attitude quad. Turn torque = 16N x its arm from the CoM — wingtips are leverage.',
+  grapple:'Tethered harpoon, one reusable head — snap it off and you fly to fetch it. Reel in wrecks — or reel against a hauler\'s welds until its cargo tears free. The line pulls both ways.',
+ rack:'4 birds x 0.9 kg. Ejection kicks AT the rack, then the motor lights and the recoil becomes the missile\'s problem. Firing lightens you.',
+};
+const CELL=4;
+// blueprints: loadable builds. Every part bought/sold through the docked pools.
+const BLUEPRINTS={
+ STARTER:[['bridge',0,0],['engine',-1,0],['pod',1,0]],
+ COURIER:[['bridge',0,0],['pod',1,0],['engine',0,-1],['engine',0,1]],
+ HAULER:[['bridge',0,0],['engine',-1,0],['pod',1,0],['pod',2,0],['pod',1,-1],['pod',1,1],['rcs',2,1]],
+ 'LONG-RANGE':[['bridge',0,0],['engine',-1,0],['pod',1,0],['tank',0,1],['tank',0,-1]],
+ GUNBOAT:[['bridge',0,0],['engine',-1,0],['pod',1,0],['pod',1,1],['pod',1,-1],['mount',2,0],['rack',2,1],['shield',2,-1]],
+ 'WING TURNER':[['bridge',0,0],['engine',-1,0],['pod',1,0],['strut',1,1],['strut',1,2],['rcs',1,3]],
+ CATAMARAN:[['bridge',0,0],['strut',0,-1],['pod',0,-2],['engine',-1,-2],['pod',1,-2],['rcs',2,-2],
+            ['strut',0,1],['pod',0,2],['engine',-1,2],['pod',1,2],['rcs',2,2]],
+ GRAPPLER:[['bridge',0,0],['engine',0,-1],['engine',0,1],['tank',-1,0],
+           ['pod',1,0],['pod',2,0],['grapple',3,0],['rcs',1,1],['rcs',1,-1]],
+};
+function bpCost(nm){ // priced on pool COPIES: sell current build, buy the blueprint, net cost
+  const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+  const cp={};for(const k in m)if(typeof m[k]==='object')cp[k]={q:m[k].q,c:m[k].c};
+  let net=0;
+  for(const md of build){const p=cp[PKEY[md.t]];
+    const k2=p.q*p.c;const nq=p.q+1;const out=Math.floor(p.c-k2/nq);p.q=nq;p.c-=out;net-=out;}
+  for(const[t]of BLUEPRINTS[nm]){const p=cp[PKEY[t]];
+    if(p.q<2)return null;
+    const k2=p.q*p.c;const nq=p.q-1;const cost=Math.ceil(k2/nq-p.c);p.q=nq;p.c+=cost;net+=cost;}
+  return net;}
+function loadBlueprint(nm){
+  const net=bpCost(nm);
+  if(net===null||wallet<net)return false;
+  const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+  for(const md of build){const got=poolSell(m[PKEY[md.t]],1);wallet+=got;}
+  build=[];
+  for(const[t,gx,gy]of BLUEPRINTS[nm]){const paid=poolBuy(m[PKEY[t]],1);wallet-=paid;build.push({t,gx,gy,org:(dockedAt&&dockedAt.id)==='hollow'?'hol':'clo'});}
+  L.playerC=wallet;slog('REFIT → '+nm+(net>=0?' −¢'+net.toLocaleString():' +¢'+(-net).toLocaleString()));recAction('bp',{nm});trayInit();return true;}                       // world units per grid cell
+const WELD_S=1200, WELD_WEAK=500;   // strut joints shear first
+const FUEL_PER_NS=0.35/18;          // certified: units per newton-second
+const BRIDGE_RCS_TAU=26, BRIDGE_RCS_N=5;   // the bridge's built-in attitude ring: weak
+// real turn authority comes from RCS QUAD placement: tau = 12N x arm from CoM
+
+/* ================= SHIP: build state -> flying body ================= */
+// H1: the mini-ledger. Every cent and gram declared at genesis, audited to zero drift.
+// H2: constant-product markets. Each station holds part pools {q stock, c credit reserve}.
+// price ~ c/q; every trade moves it. Credits, parts, grams, ordnance: all one audit.
+const MKT={
+ cloister:{pods:{q:14,c:44800}, tank:{q:12,c:36000}, strut:{q:30,c:24000}, bridge:{q:3,c:35400},
+   engine:{q:3,c:29400}, shield:{q:2,c:23000}, mount:{q:2,c:16400}, rcs:{q:6,c:18000}, rack:{q:2,c:14400},
+   grapple:{q:2,c:12800},
+   fuelPool:{q:9000,c:81000}, ordKg:220, credits:0},
+ hollow:{pods:{q:5,c:26000}, tank:{q:6,c:25200}, strut:{q:16,c:17600}, bridge:{q:2,c:25000},
+   engine:{q:9,c:46800}, shield:{q:3,c:27000}, mount:{q:5,c:32000}, rcs:{q:12,c:25200}, rack:{q:4,c:23200},
+   grapple:{q:5,c:22000},
+   fuelPool:{q:60000,c:360000}, ordKg:280, credits:0},
+};
+const PKEY={bridge:'bridge',engine:'engine',pod:'pods',tank:'tank',shield:'shield',mount:'mount',strut:'strut',rcs:'rcs',rack:'rack',grapple:'grapple'};
+function poolBuy(p,n){ // buy n units from pool -> cost (credits into pool)
+  const k=p.q*p.c;const nq=p.q-n;if(nq<1)return null;
+  const cost=Math.ceil(k/nq-p.c);p.q=nq;p.c+=cost;return cost;}
+function poolSell(p,n){ // sell n units into pool -> proceeds (credits out)
+  const k=p.q*p.c;const nq=p.q+n;
+  const out=Math.floor(p.c-k/nq);p.q=nq;p.c-=out;return out;}
+function price1(p){const k=p.q*p.c;return Math.ceil(k/(p.q-1)-p.c);}
+const GEN={C0:0,F0:0,ORD0:0,PARTS0:{}};
+function genesis(){
+  GEN.C0=60000;GEN.F0=0;GEN.ORD0=0;
+  for(const sid in MKT){const m=MKT[sid];
+    for(const k in m){if(k==='fuelPool'){GEN.F0+=m[k].q;GEN.C0+=m[k].c;}
+      else if(k==='ordKg')GEN.ORD0+=m[k];
+      else if(k==='credits')GEN.C0+=m[k];
+      else{GEN.C0+=m[k].c;GEN.PARTS0[k]=(GEN.PARTS0[k]||0)+m[k].q;}}}
+}
+genesis();
+// H4: contracts. When a station's stock starves, its treasury escrows a bounty:
+// locked payout = spot-at-post + 35% premium, one unit, open race, 120s expiry.
+MKT.cloister.credits=15000;MKT.hollow.credits=15000;GEN.C0+=30000;
+const CONTRACTS=[];let ctSeq=0,ctScan=0;
+function postContract(sid,part){
+  const m=MKT[sid];
+  const other=MKT[sid==='cloister'?'hollow':'cloister'][part];
+  const srcSpot=other.c/Math.max(1,other.q);
+  let pay=Math.ceil(srcSpot*1.55+120);        // what sourcing costs, plus the daring margin
+  pay=Math.min(pay,m.credits);                 // a desperate station pays everything it has
+  if(pay<200)return;
+  m.credits-=pay;
+  CONTRACTS.push({id:'C'+(++ctSeq),at:sid,part,n:1,pay,escrow:pay,t:120,open:true});}
+function postRescue(tr){
+  let sid='cloister',bd=1e9;
+  for(const st of world.stations){const dd=Math.hypot(tr.x-st.x,tr.y-st.y);if(dd<bd){bd=dd;sid=st.id;}}
+  const m=MKT[sid];
+  const fee=Math.min(m.credits,600+Math.round(trampValue(tr)*0.3));
+  if(fee<200)return null;
+  m.credits-=fee;
+  const ct={id:'R'+(++ctSeq),kind:'rescue',at:sid,tr,trId:tr.id,pay:fee,escrow:fee,t:150,open:true};
+  CONTRACTS.push(ct);return ct;}
+function fulfilContract(ct,who){ // who: 'player' | tramp ref
+  if(!ct.open)return 0;
+  ct.open=false;
+  if(ct.kind!=='rescue')MKT[ct.at][ct.part].q+=ct.n;   // rescue pays escrow, no stock
+  const pay=ct.escrow;ct.escrow=0;
+  MKT[ct.at].cool=30;
+  return pay;}
+function stepContracts(dt){
+  for(const ct of CONTRACTS)if(ct.open){ct.t-=dt;
+    if(ct.t<=0){ct.open=false;MKT[ct.at].credits+=ct.escrow;ct.escrow=0;MKT[ct.at].cool=30;}}
+  for(const sid in MKT)if(MKT[sid].cool>0)MKT[sid].cool-=dt;
+  if((ctScan++)%60)return;
+  for(const sid in MKT){const m=MKT[sid];
+    if(m.cool>0)continue;
+    if(CONTRACTS.some(c=>c.open&&c.kind!=='rescue'&&c.at===sid))continue;
+    for(const part of['engine','pods','tank','rcs','mount','shield','rack','strut','bridge','grapple']){
+      if(m[part].q<=1){postContract(sid,part);break;}}}}
+GEN.PARTS0.bridge+=1;GEN.PARTS0.engine+=1;GEN.PARTS0.pods+=1;  // the starter dart exists at genesis
+GEN.C0+=40000;GEN.F0+=360;   // two tramps: ¢20k + 180u fuel each, declared
+GEN.C0+=3000;GEN.PARTS0.pods+=1;   // T-3 the derelict: its wallet and its cargo, declared
+GEN.C0+=500;GEN.F0+=240;     // the pirate's seed hoard and tank, declared
+// H6: the ledger pays. The Proving Authority holds a finite purse for
+// gate crossings and flyby daring. When it's dry, daring is its own reward.
+const AUTH={credits:40000};GEN.C0+=40000;
+// H7: death is universal. Replacements immigrate from a FINITE frontier
+// reserve; when it's dry, the world permanently loses actors.
+const FRONTIER={credits:52000,fuel:900};GEN.C0+=52000;GEN.F0+=900;
+function authPay(amt){const p=Math.min(AUTH.credits,Math.max(0,Math.round(amt)));
+  AUTH.credits-=p;wallet+=p;L.playerC=wallet;return p;}
+const L={playerC:60000, shipFuel:0, exhaust:0, shipOrdKg:0, worldOrdKg:0};
+function audit(){
+  let C=L.playerC,F=L.shipFuel+L.exhaust,O=L.shipOrdKg+L.worldOrdKg;
+  const P={};for(const md of build)P[PKEY[md.t]]=(P[PKEY[md.t]]||0)+1;
+  if(typeof world!=='undefined'&&world&&world.tramps)for(const tr of world.tramps){
+    C+=tr.credits;F+=tr.fuel;
+    for(const k in tr.cargo)P[k]=(P[k]||0)+tr.cargo[k];}
+  if(typeof world!=='undefined'&&world&&world.pirates){
+    for(const pi of world.pirates){C+=pi.credits;F+=pi.fuel;}
+    for(const cr of world.crates){C+=cr.credits;F+=cr.fuelU;}}
+  for(const ct of CONTRACTS)C+=ct.escrow;
+  C+=AUTH.credits;
+  C+=FRONTIER.credits;F+=FRONTIER.fuel;
+  if(typeof world!=='undefined'&&world&&world.wreckage)
+    for(const wk of world.wreckage){if(wk.t)P[PKEY[wk.t]]=(P[PKEY[wk.t]]||0)+1;
+      C+=wk.credits||0;F+=wk.fuelU||0;}
+  if(typeof world!=='undefined'&&world&&world.debris)
+    for(const d2 of world.debris)P[PKEY[d2.t]]=(P[PKEY[d2.t]]||0)+1;
+  if(typeof ship!=='undefined'&&ship&&ship.hold)
+    for(const it of ship.hold)P[PKEY[it.t]]=(P[PKEY[it.t]]||0)+1;
+  for(const sid in MKT){const m=MKT[sid];
+    for(const k in m){if(k==='fuelPool'){F+=m[k].q;C+=m[k].c;}
+      else if(k==='ordKg')O+=m[k];
+      else if(k==='credits')C+=m[k];
+      else if(typeof m[k]!=='object')continue;   // timers etc are not pools
+      else{C+=m[k].c;P[k]=(P[k]||0)+m[k].q;}}}
+  const cD=C-GEN.C0, fD=F-GEN.F0, oD=O-GEN.ORD0;
+  let pD=0;for(const k in GEN.PARTS0)pD+=Math.abs((P[k]||0)-GEN.PARTS0[k]);
+  // parts installed on the flying ship count too
+  return{cD,fD:+fD.toFixed(6),oD:+oD.toFixed(6),pD,ok:cD===0&&Math.abs(fD)<1e-6&&Math.abs(oD)<1e-9&&pD===0};}
+let wallet=60000; // mirrored into L.playerC on every mutation below
+let build=[{t:'bridge',gx:0,gy:0,org:'gen'},{t:'engine',gx:-1,gy:0,org:'gen'},{t:'pod',gx:1,gy:0,org:'gen'}]; // the starter dart, GEN-issued
+function occupied(gx,gy){return build.find(m=>m.gx===gx&&m.gy===gy);}
+function portDirs(m){return SPEC[m.t].ports.map(p=>({E:[1,0],W:[-1,0],N:[0,-1],S:[0,1]}[p]));}
+function rotLegal(md,f2){                          // one law: the nozzle never points into the hull
+  const ldx=[1,0,-1,0][f2],ldy=[0,1,0,-1][f2];
+  const nx2=md.gx-ldx,ny2=md.gy-ldy;               // the exhaust cell, aft of the thrust axis
+  return !build.some(n=>n!==md&&n.gx===nx2&&n.gy===ny2);}
+function nextFacing(md){for(let k=1;k<=4;k++){const f2=((md.f||0)+k)%4;
+  if(rotLegal(md,f2))return f2;}return md.f||0;}
+function doRot(md){const f2=nextFacing(md);if(f2===(md.f||0))return false;
+  md.f=f2;slog('ROTATED '+SPEC[md.t].nm+' → '+['bow','port','stern','starboard'][f2]);return true;}
+function doRm(md){
+  if(md.t==='bridge'&&build.filter(m=>m.t==='bridge').length===1)return false;
+  const rest=build.filter(m=>m!==md);const bi=rest.findIndex(m=>m.t==='bridge');
+  if(bi<0||connectedFrom(rest,weldsOf(rest),bi).size!==rest.length)return false;
+  build=rest;const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+  const got=poolSell(m[PKEY[md.t]],1);wallet+=got;L.playerC=wallet;
+  slog('SOLD-BACK '+SPEC[md.t].nm+' +¢'+got.toLocaleString());return true;}
+
+function adjacencyOK(gx,gy,t){ // a cell is placeable if some neighbor's port faces it AND new part has a port facing back
+  for(const m of build){const dx=gx-m.gx,dy=gy-m.gy;
+    if(Math.abs(dx)+Math.abs(dy)!==1)continue;
+    const out=portDirs(m).some(d=>d[0]===dx&&d[1]===dy);
+    const back=SPEC[t].ports.map(p=>({E:[1,0],W:[-1,0],N:[0,-1],S:[0,1]}[p])).some(d=>d[0]===-dx&&d[1]===-dy);
+    if(out&&back)return true;}
+  return false;}
+function weldsOf(list){const ws=[];
+  for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){
+    const a=list[i],b=list[j];
+    if(Math.abs(a.gx-b.gx)+Math.abs(a.gy-b.gy)===1)
+      ws.push({a:i,b:j,strength:(SPEC[a.t].weak||SPEC[b.t].weak)?WELD_WEAK:WELD_S});}
+  return ws;}
+function derive(list){
+  let m=0,cx=0,cy=0;
+  for(const md of list){const kg=SPEC[md.t].kg;m+=kg;cx+=md.gx*CELL*kg;cy+=md.gy*CELL*kg;}
+  cx/=m;cy/=m;
+  let I=0;for(const md of list){const kg=SPEC[md.t].kg;const r2=(md.gx*CELL-cx)**2+(md.gy*CELL-cy)**2;I+=kg*(r2+3);}
+  const engines=list.filter(md=>md.t==='engine');
+  const tanks=list.filter(md=>md.t==='tank');
+  const rcsMods=list.filter(md=>md.t==='rcs');
+  let tau=list.some(md=>md.t==='bridge')?BRIDGE_RCS_TAU:0;
+  let rcsN=list.some(md=>md.t==='bridge')?BRIDGE_RCS_N:0;
+  for(const r of rcsMods){const arm=Math.hypot(r.gx*CELL-cx,r.gy*CELL-cy);
+    tau+=SPEC.rcs.rcsN*Math.max(arm,1.8);rcsN+=SPEC.rcs.rcsN;}
+  const F=engines.length*SPEC.engine.thrust;
+  // torque of full burn (all engines thrust along body +x at their mounts)
+  let tq=0;for(const e of engines)tq+= -(e.gy*CELL-cy)*SPEC.engine.thrust;
+  const engF=engines.filter(e=>!(e.f||0)),engR=engines.filter(e=>(e.f||0)===2);
+  return {m,cx,cy,I,F:engF.length*SPEC.engine.thrust,tq:engF.reduce((a,e)=>a+(-(e.gy*CELL-cy))*SPEC.engine.thrust,0),
+    engF,engR,tau,rcsN,engines,fuelCap:260+tanks.length*300,
+    hasShield:list.some(md=>md.t==='shield'),mount:list.find(md=>md.t==='mount'),rack:list.find(md=>md.t==='rack'),grap:list.find(md=>md.t==='grapple'),pods:list.filter(md=>md.t==='pod').length};
+}
+function connectedFrom(list,ws,rootIdx){const seen=new Set([rootIdx]);let ch=1;
+  while(ch){ch=0;for(const w of ws){ if(seen.has(w.a)&&!seen.has(w.b)){seen.add(w.b);ch=1;} if(seen.has(w.b)&&!seen.has(w.a)){seen.add(w.a);ch=1;}}}
+  return seen;}
+
+/* ================= WORLD: the proving run ================= */
+function makeWell(x,y,mu,soft,r,name){return{x,y,vx:0,vy:0,mu,soft,r:r||0,p:2.3,name};}
+let world=null;
+function makeWorld(){
+  const varn=makeWell(160,86,2900,4,28,'varn'), moth=makeWell(160+112,86+30,2100,3,22,'moth');
+  const sep=Math.hypot(moth.x-varn.x,moth.y-varn.y);
+  const vO=Math.sqrt(.01*(varn.mu+moth.mu)*sep/Math.pow(sep*sep+9,1.65));
+  const nx=(moth.y-varn.y)/sep,ny=-(moth.x-varn.x)/sep,mt=varn.mu+moth.mu;
+  varn.vx=-nx*vO*(moth.mu/mt);varn.vy=-ny*vO*(moth.mu/mt);
+  moth.vx=nx*vO*(varn.mu/mt);moth.vy=ny*vO*(varn.mu/mt);
+  const sun=makeWell(345,-105,8000,6,52,'sun');sun.kill=60;sun.heat=150;
+  const hole=makeWell(505,235,15000,2,9,'hole');hole.kill=16;
+  const gush=makeWell(468,80,-380,9,20,'gusher');
+  const wells=[varn,moth,sun,hole,gush];
+  const rocks=[];const rr=mulberry32((SEED^0x5EED)>>>0);
+  for(let i=0;i<9;i++){rocks.push({x:46+rr()*80,y:-14+rr()*48,vx:(rr()-.5)*.2,vy:(rr()-.5)*.2,
+    r:1.5+rr()*2.1,ang:rr()*TAU,w:(rr()-.5)*.8,seed:rr()*9,t:(0.6+rr()*1.6)});}
+  const comet={x:330,y:-215,vx:6.4,vy:0,r:1.6,trail:[]};
+  return{varn,moth,sun,hole,gush,wells,rocks,comet,
+    gate:{x:640,y:0,hw:18},pad:{x:0,y:0},slugs:[],debris:[],accreted:0,
+    bounds:{x0:-90,x1:710,y0:-330,y1:330},missiles:[],dust:[],fx:[],
+    stations:[
+      {id:'cloister',nm:'CLOISTER',x:0,y:0,r:14},
+      {id:'hollow',nm:'HOLLOW',x:612,y:84,r:14},
+    ],
+    pirates:[
+      {id:'P-X',x:330,y:-197,vx:0,vy:0,st:'roost',credits:500,fuel:240,cargoKg:0,
+       cool:0,mark:null,markT:0,lockT:0,shot:0,hp:100,roost:{x:330,y:-172}},
+    ],crates:[],wreckage:[],
+    tramps:[
+      {id:'T-1',x:0,y:0,vx:0,vy:0,st:'dock',at:'cloister',dwell:2.5,credits:20000,fuel:180,cargo:{},wp:0,heading:1},
+      {id:'T-2',x:612,y:84,vx:0,vy:0,st:'dock',at:'hollow',dwell:4.5,credits:20000,fuel:180,cargo:{},wp:0,heading:-1},
+      {id:'T-3',x:78,y:52,vx:0.4,vy:-0.3,st:'derelict',at:'cloister',dwell:0,credits:3000,fuel:0,
+       cargo:{pods:1},wp:0,heading:1,hp:40},   // engines dead, cargo aboard: somebody's payday
+    ]};
+}
+function accel(wells,x,y){let ax=0,ay=0;
+  for(const w of wells){const dx=w.x-x,dy=w.y-y;const r2=dx*dx+dy*dy+w.soft*w.soft;
+    const s=w.mu/Math.pow(r2,1.65);ax+=dx*s;ay+=dy*s;}
+  return[ax,ay];}
+function inNeb(x,y){const dx=(x-352)/78,dy=(y-64)/52;return dx*dx+dy*dy<1;}
+
+/* ================= FLIGHT STATE ================= */
+let mode='hangar', sel=null, selMod=null, cardPart=null, T=0, hz=8, hrot=0;
+let tape=[], tick=0, lastInp={};
+function recAction(k,d){tape.push(Object.assign({t:tick,k},d||{}));}
+let ship=null, run=null, dockedAt=null, inp={ccw:false,cw:false,burn:false,retro:false,stop:false};
+function rebuildShipAt(x,y){
+  const d=derive(build);
+  const keepFuel=Math.min(ship?ship.fuel:0, d.fuelCap);
+  ship={x,y,vx:0,vy:0,ang:0,w:0,
+    modules:build.map(m=>({...m,hp:100})),welds:weldsOf(build),broken:[],
+    fuel:keepFuel,d,dead:false,salvage:(ship&&ship.salvage)||0,hold:(ship&&ship.hold)||[],
+    slugs:d.mount?SPEC.mount.slugs:0,missiles:d.rack?SPEC.rack.birds:0};
+  ship.d=derive(ship.modules);
+  return ship;}
+function dock(st){
+  if(GRAP)GRAP=null;   // docking winches the line home
+
+  dockedAt=st;mode='hangar';recAction('dock',{id:st.id});chrome();}
+function undock(){
+  if(!dockedAt)return;
+  // ordnance delta is PURCHASED mass, not conjured
+  const before=L.shipOrdKg;
+  rebuildShipAt(dockedAt.x+18,dockedAt.y+16);
+  run._manifest=build.map(m=>m.t);   // the receipt: what left the pad
+  const now=ship.slugs*0.05+ship.missiles*0.9;
+  const delta=now-before;
+  MKT[dockedAt.id].ordKg-=delta;L.shipOrdKg=now;
+  ship.vx=0;ship.vy=0;
+  if(run&&run.done){ // a new run begins after death or a finished crossing
+    run={t:0,fuel0:ship.fuel,minD:{},flybys:[],broken:0,done:false,heat:0};
+    for(const w of world.wells)run.minD[w.name]=1e9;
+    $('report').style.display='none';}
+  recAction('undock',{});dockedAt=null;mode='flight';chrome();}
+function launch(){
+  recAction('launch');
+  world=makeWorld();
+  {const t3=world.tramps.find(t2=>t2.id==='T-3');
+   if(t3&&!CONTRACTS.some(c2=>c2.kind==='rescue'&&c2.tr===t3))postRescue(t3);}   // the first distress call
+  const d=derive(build);
+  ship={x:world.pad.x,y:world.pad.y,vx:0,vy:0,ang:0,w:0,
+    modules:build.map(m=>({...m,hp:100})),welds:weldsOf(build),broken:[],
+    fuel:Math.min(260,d.fuelCap),d,dead:false,salvage:0,hold:[],slugs:d.mount?SPEC.mount.slugs:0,missiles:d.rack?SPEC.rack.birds:0};
+  ship.d=derive(ship.modules);
+  ship.fuel=Math.min(ship.d.fuelCap, 260+ (ship.d.fuelCap>260? (ship.d.fuelCap-260):0)*0? ship.d.fuelCap: 260);
+  {const m=MKT.cloister;const want=ship.d.fuelCap;
+   const cost=Math.ceil(m.fuelPool.c*want/(m.fuelPool.q-want));
+   const afford=wallet>=cost?want:Math.floor(m.fuelPool.q*wallet/(m.fuelPool.c+wallet));
+   const paid=poolBuy(m.fuelPool,afford)||0;
+   wallet-=paid;L.playerC=wallet;
+   L.shipFuel=afford;ship.fuel=afford;}   // launch fuel is BOUGHT at cloister spot
+  {const now=ship.slugs*0.05+ship.missiles*0.9;
+   MKT.cloister.ordKg-=now;L.shipOrdKg=now;}
+  run={t:0,fuel0:ship.fuel,minD:{},flybys:[],broken:0,done:false,heat:0};
+  for(const w of world.wells)run.minD[w.name]=1e9;
+  dockedAt=null;mode='flight';chrome();
+}
+let RATING_MODE=false;   // optional mode: the Authority rates your flying. Declared at entry, on the hash.
+{const ip=document.getElementById('introP');
+ if(ip)ip.addEventListener('pointerdown',e=>{e.preventDefault();RATING_MODE=true;
+   document.getElementById('intro').style.display='none';
+   if(!hullsBooted){hullsBooted=true;hullsShow();}});}
+{const ib=document.getElementById('introB');
+ if(ib)ib.addEventListener('pointerdown',e=>{e.preventDefault();
+   document.getElementById('intro').style.display='none';
+   if(!hullsBooted){hullsBooted=true;hullsShow();}});
+ const isd=document.getElementById('introSeed');
+ if(isd)isd.textContent='seed '+SEED+' · every run is a receipt';}
+let hullSel=null,hullsBooted=false;
+let SHIPLOG=[];
+function slog(txt){SHIPLOG.push({t:(run&&run.t)||0,txt});if(SHIPLOG.length>40)SHIPLOG.shift();}
+function hullStats(mods){const d=derive(mods);
+  const wep=[];if(d.mount)wep.push('slugs');if(d.rack)wep.push('msl');if(d.grap)wep.push('hook');
+  return d.m.toFixed(1)+' kg · a '+(d.F/d.m).toFixed(1)+' · τ'+(d.tau|0)+' · fuel '+(d.fuelCap|0)+
+    ' · '+d.pods+' pod'+(d.pods===1?'':'s')+(wep.length?' · '+wep.join('+'):'');}
+function hullSil(mods){                              // silhouette as plain DOM: no canvas, no race
+  let x0=9,x1=-9,y0=9,y1=-9;
+  for(const md of mods){x0=Math.min(x0,md.gx);x1=Math.max(x1,md.gx);y0=Math.min(y0,md.gy);y1=Math.max(y1,md.gy);}
+  const s2=Math.min(14,Math.min(150/(x1-x0+1.6),38/(y1-y0+1.6)));
+  const cw=(x1-x0+1)*s2, ch=(y1-y0+1)*s2;
+  let h='<div class="sil" style="height:40px;position:relative;margin:6px 0 5px">'+
+        '<div style="position:absolute;left:50%;top:50%;width:'+cw.toFixed(0)+'px;height:'+ch.toFixed(0)+
+        'px;transform:translate(-50%,-50%)">';
+  const dockHue=(dockedAt&&dockedAt.id)==='hollow'?'hol':'clo';   // blueprint parts come from THIS shelf
+  for(const md of mods){
+    const col=ORIGIN[md.org||dockHue][0];
+    const cw2=(s2*.84).toFixed(0);
+    h+='<i class="cell" style="position:absolute;left:'+((md.gx-x0)*s2).toFixed(0)+'px;top:'+((md.gy-y0)*s2).toFixed(0)+
+       'px;width:'+cw2+'px;height:'+cw2+'px;background:'+col+';border-radius:2px">'+
+       '<svg viewBox="0 0 44 44" style="position:absolute;inset:0;width:100%;height:100%">'+glyphSVG(md.t)+'</svg></i>';}
+  return h+'</div></div>';}
+function hullsShow(){
+  hullSel=null;
+  const names=Object.keys(BLUEPRINTS);
+  let h='<div class="hullc sel" id="hull_keep"><b>KEEP CURRENT ◂</b>'+hullSil(build)+
+     '<div class="st">'+hullStats(build)+'</div><div class="pr" style="color:var(--warn)">¢0</div></div>';
+  names.forEach((nm,i)=>{const net=bpCost(nm);const out2=net===null||net>wallet;
+    const mods=BLUEPRINTS[nm].map(([t,gx,gy])=>({t,gx,gy}));
+    h+='<div class="hullc'+(out2?' out':'')+'" id="hull_'+i+'"><b>'+nm+'</b>'+hullSil(mods)+
+       '<div class="st">'+hullStats(mods)+'</div>'+
+       '<div class="pr">'+(net===null?'parts OUT':(net>=0?'refit ¢'+net.toLocaleString():'refit +¢'+(-net).toLocaleString()))+'</div></div>';});
+  $('hullGrid').innerHTML=h;
+  $('hullsS').textContent=((dockedAt&&dockedAt.nm)||'CLOISTER')+' · browsing is free — the refit books on continue · ¢'+wallet.toLocaleString();
+  {const lg=$('hullLeg');if(lg)lg.innerHTML='body = origin: '+
+    Object.entries({clo:'cloister',hol:'hollow',sal:'salvage',gen:'gen'}).map(([k,n])=>
+      '<i style="display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;background:'+ORIGIN[k][0]+'"></i> '+n).join('  ')+
+    ' · accent = type';}
+  const setGo=()=>{const g=$('hullGo');if(!g)return;
+    if(hullSel===null){g.textContent='CONTINUE — KEEP HULL ▸';g.disabled=false;return;}
+    const nm=names[hullSel],net=bpCost(nm);
+    g.textContent='REFIT TO '+nm+(net!==null?' · '+(net>=0?'¢'+net.toLocaleString():'+¢'+(-net).toLocaleString()):'')+' ▸';
+    g.disabled=net===null||net>wallet;};
+  const mark=()=>{const kb=$('hull_keep');if(kb)kb.classList.toggle('sel',hullSel===null);
+    names.forEach((nm,i)=>{const b=$('hull_'+i);if(b)b.classList.toggle('sel',hullSel===i);});};
+  {const kb=$('hull_keep');if(kb)kb.addEventListener('pointerdown',e=>{e.preventDefault();hullSel=null;mark();setGo();});}
+  names.forEach((nm,i)=>{const b=$('hull_'+i);if(b)b.addEventListener('pointerdown',e=>{e.preventDefault();
+    const net=bpCost(nm);if(net===null||net>wallet)return;
+    hullSel=i;mark();setGo();});});
+  setGo();
+  $('hulls').style.display='flex';}
+{const hg2=$('hullGo');if(hg2)hg2.addEventListener('pointerdown',e=>{e.preventDefault();
+  if(hullSel!==null)loadBlueprint(Object.keys(BLUEPRINTS)[hullSel]);
+  $('hulls').style.display='none';});}
+{const hb2=$('hullB');if(hb2)hb2.addEventListener('pointerdown',e=>{e.preventDefault();
+  if(mode==='hangar')hullsShow();});}
+{const tb=$('themeB');if(tb)tb.addEventListener('pointerdown',e=>{e.preventDefault();
+  setTheme(THEME==='dark'?'light':'dark');});}
+try{if(typeof window!=='undefined'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)setTheme('dark');}catch(e){}
+function chrome(){
+
+  const h=mode==='hangar';
+  $('stopbanner').style.display='none';
+  $('piratebanner').style.display='none';
+  $('tray').style.display=h?'block':'none';$('stats').style.display=h?'block':'none';
+  $('fly').style.display=h?'block':'none';$('wallet').style.display=h?'block':'none';
+  $('hullB').style.display=h?'block':'none';
+  $('hint').style.display='none';
+  $('fhud').style.display=h?'none':'block';
+  $('tcL').style.display=h?'none':'flex';$('tcR').style.display=h?'none':'flex';$('tcW').style.display=h?'none':'flex';
+  $('slingB').style.display='none';$('yankB').style.display='none';
+  for(const[id,has]of[['fireB',ship&&ship.d.mount],['mslB',ship&&ship.d.rack],['grapB',ship&&ship.d.grap]]){
+    const b=$(id);b.style.display=h?'none':'flex';
+    b.style.opacity=has?'1':'.32';b.dataset.has=has?'1':'';}
+  $('dockB').style.display='none';
+  $('scavB').style.display='none';
+  if(h)$('report').style.display='none';
+}
+/* module world position (flight) */
+function modWorld(md){const lx=md.gx*CELL-ship.d.cx,ly=md.gy*CELL-ship.d.cy;
+  const c=Math.cos(ship.ang),s=Math.sin(ship.ang);
+  return[ship.x+lx*c-ly*s, ship.y+lx*s+ly*c];}
+
+// H4: the world is indifferent — celestials, rocks, and time run whether you fly or not
+function stepWorld(dt){
+  const wl=world;
+  for(const[a,b]of[[wl.varn,wl.moth],[wl.moth,wl.varn]]){
+    const dx=b.x-a.x,dy=b.y-a.y,r2=dx*dx+dy*dy+b.soft*b.soft;
+    const s=.01*b.mu/Math.pow(r2,1.65);a.vx+=dx*s*dt;a.vy+=dy*s*dt;}
+  wl.varn.x+=wl.varn.vx*dt;wl.varn.y+=wl.varn.vy*dt;
+  wl.moth.x+=wl.moth.vx*dt;wl.moth.y+=wl.moth.vy*dt;
+  {const[ax,ay]=accel(wl.wells,wl.comet.x,wl.comet.y);
+   wl.comet.vx+=ax*dt;wl.comet.vy+=ay*dt;wl.comet.x+=wl.comet.vx*dt;wl.comet.y+=wl.comet.vy*dt;
+   if((T*60|0)%4===0){wl.comet.trail.push({x:wl.comet.x,y:wl.comet.y});if(wl.comet.trail.length>50)wl.comet.trail.shift();}}
+  for(const r of wl.rocks){const[ax,ay]=accel(wl.wells,r.x,r.y);
+    r.vx+=ax*dt;r.vy+=ay*dt;r.x+=r.vx*dt;r.y+=r.vy*dt;r.ang+=r.w*dt;
+    for(const w of wl.wells)if(w.kill||w.r){const kd=w.kill||w.r;
+      if(Math.hypot(r.x-w.x,r.y-w.y)<kd+r.r){r.dead=true;wl.accreted+=r.t;}}}
+  wl.rocks=wl.rocks.filter(r=>!r.dead);
+}
+function stepFlight(dt){
+  const wl=world;
+  run._fired=new Set();
+  if(ship.dead)return;
+  const d=ship.d;
+  // forces
+  let fx=0,fy=0,tq=0;const c=Math.cos(ship.ang),s=Math.sin(ship.ang);
+  const dry=ship.fuel<=0;
+  let usedN=0,rcsBurnN=0;
+  const thrustAt=(md,N)=>{const lx=md.gx*CELL-d.cx,ly=md.gy*CELL-d.cy;
+    const f2=(md.f||0),ldx=[1,0,-1,0][f2],ldy=[0,1,0,-1][f2];   // the nozzle's facing, body frame
+    fx+=N*(ldx*c-ldy*s);fy+=N*(ldx*s+ldy*c);
+    tq+=(lx*ldy-ly*ldx)*N;usedN+=Math.abs(N);
+    (run._fired=run._fired||new Set()).add(md);};
+  if(!dry){
+    if(inp.burn)for(const e of d.engF)thrustAt(e,SPEC.engine.thrust);
+    else if(inp.retro){
+      if(d.engR.length)for(const e of d.engR)thrustAt(e,SPEC.engine.thrust);   // a stern nozzle: honest, strong retro
+      else if(d.rcsN>0){fx-=d.rcsN*c;fy-=d.rcsN*s;rcsBurnN+=d.rcsN;}}          // else: the quads' gentle shove
+    else if(inp.stop){const v=Math.hypot(ship.vx,ship.vy);
+      if(v>.05){                                   // brake with what you built
+        const va=Math.atan2(ship.vy,ship.vx);
+        const useR=d.engR.length>0;                // stern nozzles: brake prograde, no flip
+        let err=(useR?va:va+Math.PI)-ship.ang;
+        while(err>Math.PI)err-=TAU;while(err<-Math.PI)err+=TAU;
+        ship.w+= Math.sign(err)*Math.min(Math.abs(err)*6, d.tau/d.I)*dt*30;
+        if(Math.abs(err)<.35)for(const e of (useR?d.engR:d.engF))thrustAt(e,SPEC.engine.thrust*Math.min(1,v/2));
+      } else {ship.vx*=.7;ship.vy*=.7;if(Math.hypot(ship.vx,ship.vy)<.05){ship.vx=0;ship.vy=0;disarmStop();}}
+      ship.w*=.9;}
+  }
+  // screen chirality: canvas y grows DOWN, so screen-CCW = world angle DECREASING
+  if(inp.ccw&&!dry){ship.w-=d.tau/d.I*dt*8;rcsBurnN+=d.rcsN;}
+  if(inp.cw&&!dry){ship.w+=d.tau/d.I*dt*8;rcsBurnN+=d.rcsN;}
+  // gravity at CoM
+  const[gax,gay]=accel(wl.wells,ship.x,ship.y);
+  const M=totalM();
+  let ax=fx/M+gax, ay=fy/M+gay;
+  // nebula drag
+  if(inNeb(ship.x,ship.y)){ship.vx*=Math.pow(.45,dt);ship.vy*=Math.pow(.45,dt);}
+  // shield: repel rocks (and drink fuel)
+  if(d.hasShield&&!dry){let on=false;
+    // one rule over every registered body (Step-0 Finding 3); own hardware exempt.
+    for(const b of collectBodies()){
+      if(b.own==='ship')continue;
+      const dx=b.x-ship.x,dy=b.y-ship.y,dd=Math.hypot(dx,dy);
+      if(dd<16&&dd>0.1){on=true;const F=2900/(dd+2);
+        b.dv(dx/dd*F*dt,dy/dd*F*dt);}}
+    for(const dc of wl.dust)for(const p of dc.ps){
+      const dx=p.x-ship.x,dy=p.y-ship.y,dd=Math.hypot(dx,dy);
+      if(dd<8&&!p.got){p.got=true;const mp=dc.mass/dc.ps.length;
+        ship.salvage=(ship.salvage||0)+mp;dc.mass-=mp;
+        run.scooped=(run.scooped||0)+mp;}
+      else if(dd<16){on=true;const pw=900/(dd+2);p.vx+=dx/dd*pw*dt;p.vy+=dy/dd*pw*dt;}}
+    if(on){const bF=Math.min(ship.fuel,.2*dt);
+      ship.fuel-=bF;L.shipFuel=ship.fuel;L.exhaust+=bF;}}
+  ship.vx+=ax*dt;ship.vy+=ay*dt;
+  ship.w+=tq/d.I*dt; ship.w*=Math.pow(.25,dt);   // RCS damping keeps it flyable
+  ship.x+=ship.vx*dt;ship.y+=ship.vy*dt;ship.ang+=ship.w*dt;
+  stepPlan(dt);
+  if(inp.stop&&!dry)rcsBurnN+=d.rcsN;
+  {const bF=Math.min(ship.fuel,(usedN+rcsBurnN)*FUEL_PER_NS*dt);
+   ship.fuel-=bF;L.shipFuel=ship.fuel;L.exhaust+=bF;}   // burned grams go to the declared sink
+  // weld stress: |accel|·outboard mass; impulses add spikes elsewhere
+  const aMag=Math.hypot(ax-gax,ay-gay)+Math.abs(tq/d.I)*3;
+  for(const w of ship.welds){
+    const seenA=connectedFrom(ship.modules,ship.welds.filter(x=>x!==w),w.a);
+    const outer=Math.min(seenA.size,ship.modules.length-seenA.size);
+    let om=0;const inA=seenA.has(w.b)?null:seenA;
+    // mass of the smaller side
+    const sideB=connectedFrom(ship.modules,ship.welds.filter(x=>x!==w),w.b);
+    const small=(seenA.size<=sideB.size)?seenA:sideB;
+    for(const i of small)om+=SPEC[ship.modules[i].t].kg;
+    w.load=aMag*om*9;
+    if(w.load>w.strength)breakWeld(w);
+  }
+  // collisions: modules vs rocks
+  // severed joints: sharp red cracks at the torn faces
+  for(const bw of ship.broken){
+    const A=ship.modules.find(m=>m.gx===bw.agx&&m.gy===bw.agy);
+    const B=ship.modules.find(m=>m.gx===bw.bgx&&m.gy===bw.bgy);
+    for(const[md,ox,oy]of[[A,(bw.bgx-bw.agx),(bw.bgy-bw.agy)],[B,(bw.agx-bw.bgx),(bw.agy-bw.bgy)]]){
+      if(!md)continue;
+      const lx=(md.gx+ (md===A?bw.bgx-bw.agx:bw.agx-bw.bgx)*.45)*CELL-ship.d.cx,
+            ly=(md.gy+ (md===A?bw.bgy-bw.agy:bw.agy-bw.bgy)*.45)*CELL-ship.d.cy;
+      const c=Math.cos(ship.ang),s2=Math.sin(ship.ang);
+      const[qx,qy]=iso(ship.x+lx*c-ly*s2,ship.y+lx*s2+ly*c,1.55);
+      ctx.strokeStyle='rgba(192,57,43,.95)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(qx-3,qy-3);ctx.lineTo(qx+3,qy+3);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(qx+3,qy-3);ctx.lineTo(qx-3,qy+3);ctx.stroke();}}
+  // hull-vs-rock resolves in the fabric (STEP 2)
+  // sun heat cooks modules; a dead module lets go of its welds
+  {const su=world.sun;const dd=Math.hypot(ship.x-su.x,ship.y-su.y);
+   if(dd<su.heat)for(const md of ship.modules)md.hp=Math.max(0,md.hp-6*(1-dd/su.heat)*dt);
+   for(let i=ship.modules.length-1;i>=0;i--){const md=ship.modules[i];
+     if(md.hp<=0){ if(md.t==='bridge')return die('bridge destroyed');
+       shedModule(md); }}}   // STEP 3: one shed path, books always synced
+  // kill zones + heat + flybys + gate
+  for(const w of wl.wells){const dd=Math.hypot(ship.x-w.x,ship.y-w.y);
+    run.minD[w.name]=Math.min(run.minD[w.name],dd);
+    const f=run['_f'+w.name]||(run['_f'+w.name]={in:false,v:0,min:1e9});
+    const R=1.8*((w.kill||w.r||6)+10);
+    if(!f.in&&dd<R){f.in=true;f.v=Math.hypot(ship.vx,ship.vy);f.min=dd;}
+    else if(f.in){f.min=Math.min(f.min,dd);
+      if(dd>R){f.in=false;
+        const clr=+(f.min-(w.kill||w.r||0)).toFixed(1);
+        const dv=+(Math.hypot(ship.vx,ship.vy)-f.v).toFixed(2);
+        run.flybys.push({p:w.name,clr,dv});
+        let bounty=Math.abs(dv)*(1+18/Math.max(5,clr))*42;
+        if(w.name==='sun')bounty*=1.6;
+        const paid=authPay(bounty);
+        if(paid>0){run.bounties=(run.bounties||0)+paid;
+          run.toasts=run.toasts||[];
+          run.toasts.push({x:ship.x,y:ship.y-6,txt:'+¢'+paid.toLocaleString()+' DARING',t:0});}
+        f.min=1e9;}}
+    const kd=w.kill||(w.mu>0?w.r:0);
+    if(kd&&dd<kd)return die('flew into '+w.name);
+    if(w.kill&&dd<w.kill*1.15){                      // the burn band: hull cooks before anything kills
+      const burn=5*(1-(dd-w.kill)/(w.kill*0.15));
+      for(const md of ship.modules)md.hp=Math.max(0,md.hp-burn*dt/ship.modules.length*3);
+      run.burn={n:w.name,left:dd-w.kill};}
+    else if(run.burn&&run.burn.n===w.name)run.burn=null;
+    if(w.heat&&dd<w.heat)run.heat+=dt*(1-dd/w.heat);
+  }
+  if(inp.stop&&!ship.dead){if((run._sp|0)%8===0)run.stopPred=predStop();run._sp=(run._sp||0)+1;}
+  else{run.stopPred=null;run._sp=0;}
+  run.nearSt=null;
+  for(const st of wl.stations){const dd=Math.hypot(ship.x-st.x,ship.y-st.y);
+    if(dd<26&&Math.hypot(ship.vx,ship.vy)<2.5){run.nearSt=st;break;}}
+  if(ship.x>=wl.gate.x&&Math.abs(ship.y-wl.gate.y)<wl.gate.hw&&!run.done)finish(true);
+  {const b=wl.bounds;
+   if(ship.x<b.x0||ship.x>b.x1||ship.y<b.y0||ship.y>b.y1)if(!run.done)finish(false,'crossed the boundary');}
+}
+function holdKg(){let k=0;if(ship)for(const it of ship.hold)k+=SPEC[it.t].kg;return k;}
+function holdCap(){return ship?ship.d.pods*6:0;}
+function totalM(){return ship.d.m+ship.fuel*0.01+ship.slugs*0.05+ship.missiles*0.9+holdKg();}   // the head's 0.15 lives inside the grapple's 2.0
+function breakWeld(w){
+  const i=ship.welds.indexOf(w);if(i<0)return;
+  const A=ship.modules[w.a],B=ship.modules[w.b];
+  ship.broken.push({agx:A.gx,agy:A.gy,bgx:B.gx,bgy:B.gy});
+  ship.welds.splice(i,1);run.broken++;
+  // whichever side lost the bridge becomes debris
+  const bi=ship.modules.findIndex(m=>m.t==='bridge');
+  const keep=connectedFrom(ship.modules,ship.welds,bi);
+  if(keep.size<ship.modules.length){
+    const gone=[];ship.modules.forEach((m,idx)=>{if(!keep.has(idx))gone.push(idx);});
+    for(const gi of gone){const[mx,my]=modWorld(ship.modules[gi]);
+      world.debris.push({x:mx,y:my,vx:ship.vx+(rng()-.5),vy:ship.vy+(rng()-.5),
+        ang:ship.ang,w:(rng()-.5)*2,t:ship.modules[gi].t});}
+    const kept=[...keep].sort((a,b)=>a-b);
+    const remap=new Map(kept.map((old,idx)=>[old,idx]));
+    ship.modules=kept.map(i2=>ship.modules[i2]);
+    ship.welds=ship.welds.filter(w2=>remap.has(w2.a)&&remap.has(w2.b))
+      .map(w2=>({...w2,a:remap.get(w2.a),b:remap.get(w2.b)}));
+    syncBuild();
+    ship.d=derive(ship.modules);
+    if(!ship.d.engines.length&&!run.done){/* adrift is its own sentence */}
+  }
+}
+function syncBuild(){build=ship.modules.map(m2=>({t:m2.t,gx:m2.gx,gy:m2.gy,org:m2.org}));}   // THE sync: provenance always survives
+function shedModule(md){                                   // STEP 3: the one shed path
+  const gi=ship.modules.indexOf(md);if(gi<0)return;
+  const[mx,my]=modWorld(md);
+  world.debris.push({x:mx,y:my,vx:ship.vx+(rng()-.5),vy:ship.vy+(rng()-.5),
+    ang:ship.ang,w:(rng()-.5)*2,t:md.t});
+  ship.modules.splice(gi,1);
+  ship.welds=weldsOf(ship.modules);ship.d=derive(ship.modules);
+  syncBuild();
+  run.toasts=run.toasts||[];
+  run.toasts.push({x:mx,y:my-5,txt:'💥 '+SPEC[md.t].nm+' SHED — weld failed',t:0});
+  slog('SHED '+SPEC[md.t].nm+' — weld failed in flight');}
+function die(why){
+  ship.dead=true;
+  for(const md of [...ship.modules]){const[mx,my]=modWorld(md);
+    world.wreckage.push({t:md.t,x:mx,y:my,vx:ship.vx+(rng()-.5)*6,vy:ship.vy+(rng()-.5)*6,
+      ang:ship.ang,w:(rng()-.5)*1.4,hp:Math.max(15,md.hp)});}   // a wreck is inert matter, not a dying patient
+  for(const it of ship.hold)
+    world.wreckage.push({t:it.t,hot:it.hot,x:ship.x+(rng()-.5)*3,y:ship.y+(rng()-.5)*3,
+      vx:ship.vx+(rng()-.5)*2,vy:ship.vy+(rng()-.5)*2,ang:rng()*TAU,w:(rng()-.5),hp:60});
+  ship.hold=[];
+  if(ship.salvage>0.05||ship.fuel>1)
+    world.wreckage.push({t:null,x:ship.x,y:ship.y-3,vx:ship.vx*.5+(rng()-.5)*3,vy:ship.vy*.5-2,
+      credits:0,fuelU:ship.fuel,salv:ship.salvage||0,ang:0,w:.4});
+  L.shipFuel=0;ship.fuel=0;
+  L.worldOrdKg+=L.shipOrdKg;L.shipOrdKg=0;
+  run.wreckAt={x:ship.x|0,y:ship.y|0};
+  build=[];
+  finish(false,why);}
+function respawn(){
+  dockedAt=world.stations[0];
+  const m=MKT.cloister;
+  build=[];
+  for(const[t,gx,gy]of BLUEPRINTS.STARTER){
+    const paid=poolBuy(m[PKEY[t]],1)||0;
+    wallet-=paid;L.playerC=wallet;
+    build.push({t,gx,gy,org:'clo'});}
+  ship=null;
+  rebuildShipAt(dockedAt.x+18,dockedAt.y+16);   // the ship exists, docked, dry
+  {const p=m.fuelPool;const grant=Math.min(60,p.q-1);   // mercy fuel, fronted on the same debt
+   const k2=p.q*p.c;const cost=Math.ceil(k2/(p.q-grant)-p.c);
+   const paid=poolBuy(p,grant)||0;
+   wallet-=paid;L.playerC=wallet;
+   ship.fuel=grant;L.shipFuel=grant;}
+  selMod=null;mode='hangar';
+  recAction('respawn',{});chrome();trayInit();}
+function finish(win,why){run.done=true;
+  if(win){const purse=authPay(800+Math.hypot(ship.vx,ship.vy)*60);
+    run.purse=purse;}
+  const fb=run.flybys.map(f=>f.p+' '+(f.dv>=0?'+':'')+f.dv+' Δv @'+f.clr+'u').join('<br>')||'—';
+  $('report').innerHTML='<h2>'+(win?'GATE CROSSED':'RUN ENDED')+'</h2>'+
+   (why?'<div class="row"><span>cause</span><b>'+why+'</b></div>':'')+
+   '<div class="row"><span>time</span><b>'+run.t.toFixed(1)+'s</b></div>'+
+   '<div class="row"><span>fuel burned</span><b>'+(run.fuel0-ship.fuel).toFixed(0)+'u</b></div>'+
+   '<div class="row"><span>gate speed</span><b>'+Math.hypot(ship.vx,ship.vy).toFixed(1)+' u/s</b></div>'+
+   (run.purse?'<div class="row"><span>gate purse</span><b>+¢'+run.purse.toLocaleString()+'</b></div>':'')+
+   (run.bounties?'<div class="row"><span>daring bounties</span><b>+¢'+run.bounties.toLocaleString()+'</b></div>':'')+
+   (ship.salvage>0.05?'<div class="row"><span>salvage aboard</span><b>'+ship.salvage.toFixed(1)+'t — sell docked</b></div>':'')+
+   '<div class="row"><span>welds broken</span><b>'+run.broken+'</b></div>'+
+   '<div class="row"><span>sun exposure</span><b>'+run.heat.toFixed(1)+'s</b></div>'+
+   (run.dusted?'<div class="row"><span>rocks dusted</span><b>'+run.dusted+' ('+run.dustMass.toFixed(1)+'t now drifting)</b></div>':'')+
+   (run.kills?'<div class="row"><span>pirates downed</span><b>'+run.kills+'</b></div>':'')+
+   (run.looted?'<div class="row"><span>crates claimed</span><b>'+run.looted+'</b></div>':'')+
+   '<div class="row" style="align-items:flex-start"><span>flybys</span><b style="text-align:right">'+fb+'</b></div>'+
+   (ship.dead&&run.wreckAt?'<div class="row"><span>wreck</span><b>'+world.wreckage.length+' pieces adrift at ('+run.wreckAt.x+','+run.wreckAt.y+')</b></div>':'')+
+   '<button id="rb">'+(ship.dead?'⟲ RESPAWN AT CLOISTER'+(wallet<9000?' — ON DEBT':''):'⟲ REBUILD IN HANGAR')+'</button>';
+  $('report').style.display='block';
+  $('rb').addEventListener('click',()=>{if(ship.dead)respawn();else{mode='hangar';chrome();}});
+}
+
+/* ================= RENDER ================= */
+let cam={x:0,y:0,z:5,rot:0};
+let VCX=0,VCY=0,potLock=null;
+function iso(x,y,h){
+  if(cam.rot){const c=Math.cos(cam.rot),s2=Math.sin(cam.rot);
+    const rx=x*c-y*s2,ry=x*s2+y*c;x=rx;y=ry;}
+  return[VCX+((x-cam.x)-(y-cam.y))*C30*cam.z,
+  VCY+((x-cam.x)+(y-cam.y))*S30*cam.z-(h||0)*cam.z*1.15+(potLock!==null?potLock:pot(x,y))-_pR];}
+// funnel profile: A·r0²/(r²+r0²) — quiet far field, violent throat
+function wellProf(w){
+  if(w.name==='hole')return[240/DEEP,30];   // the hole already renders at the fold floor
+  if(w.name==='sun')return[70,w.r*1.5];
+  if(w.mu<0)return[-52,26];
+  return[w.mu>2500?46:40,w.r*1.6];}
+const DEEP=4.4;let _pR=0;                        // the camera rides the warp: sink is relative to you                                  // sink multiplier: 3x folds space; 2.2 is the fold-free ceiling
+function pot(x,y){if(mode!=='flight')return 0;let d=0;
+  for(const w of world.wells){const r2=(x-w.x)**2+(y-w.y)**2;
+    const[A,r0]=wellProf(w);d+=A*r0*r0/(r2+r0*r0);}
+  return (cam.z/2.3)*DEEP*Math.max(-60,Math.min(230,d));}   // deep AND proportional: depth rides the zoom
+
+function gridDraw(R,sp){
+  const cgx=Math.round(cam.x/sp)*sp,cgy=Math.round(cam.y/sp)*sp;
+  const RANGE=R*sp;
+  // pass A: the fabric — every line a full-resolution polyline, vertex each sp
+  for(let k=-R;k<=R;k++){
+    const off=Math.abs(k*sp+( (cgx-cam.x)+(cgy-cam.y) )*0)/1; // per-axis handled below
+    for(const axis of[0,1]){
+      const lineCoord=(axis?cgy:cgx)+k*sp;
+      const perp=Math.abs(lineCoord-(axis?cam.y:cam.x));
+      const fade=Math.max(0,1-(perp/RANGE)**2)*.17;
+      if(fade<.012)continue;
+      ctx.strokeStyle='rgba('+PAL.net+','+fade.toFixed(3)+')';
+      ctx.lineWidth=0.5;
+      ctx.beginPath();
+      for(let g=0;g<=2*R;g++){
+        const t2=(-R+g)*sp;
+        const wx=axis?((cgx)+t2):(lineCoord);
+        const wy=axis?(lineCoord):((cgy)+t2);
+        const[qx,qy]=iso(wx,wy,0);
+        g?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);}
+      ctx.stroke();}}
+  // pass B: gravity's blue, only where it bites
+  if(mode==='flight'){
+    for(let k=-R;k<=R;k++)for(const axis of[0,1]){
+      const lineCoord=(axis?cgy:cgx)+k*sp;
+      const perp=Math.abs(lineCoord-(axis?cam.y:cam.x));
+      if(perp>RANGE)continue;
+      for(let g=0;g<2*R;g++){
+        const t2=(-R+g)*sp;
+        const mx=axis?cgx+t2+sp/2:lineCoord, my2=axis?lineCoord:cgy+t2+sp/2;
+        const d=pot(mx,my2);const t=Math.min(1,Math.max(0,d)/95);
+        if(t<0.05)continue;
+        const x1=axis?cgx+t2:lineCoord, y1=axis?lineCoord:cgy+t2;
+        const x2=axis?cgx+t2+sp:lineCoord, y2=axis?lineCoord:cgy+t2+sp;
+        ctx.strokeStyle='rgba('+PAL.grav+','+Math.min(.92,t*1.05).toFixed(2)+')';
+        ctx.lineWidth=0.5+t*1.7;
+        const[a1,a2]=iso(x1,y1,0),[b1,b2]=iso(x2,y2,0);
+        ctx.beginPath();ctx.moveTo(a1,a2);ctx.lineTo(b1,b2);ctx.stroke();}}}}
+function prismAt(x,y,ang,w2,d2,Hh,top,side){
+  const c=Math.cos(ang),s=Math.sin(ang);
+  const P=[[-w2,-d2],[w2,-d2],[w2,d2],[-w2,d2]].map(([a,b])=>[x+a*c-b*s,y+a*s+b*c]);
+  const G=P.map(([a,b])=>iso(a,b,0)),Tp=P.map(([a,b])=>iso(a,b,Hh));
+  ctx.fillStyle=side;
+  for(let i=0;i<4;i++){const j=(i+1)%4;if((G[i][1]+G[j][1])/2<(Tp[i][1]+Tp[j][1])/2)continue;
+    ctx.beginPath();ctx.moveTo(G[i][0],G[i][1]);ctx.lineTo(G[j][0],G[j][1]);ctx.lineTo(Tp[j][0],Tp[j][1]);ctx.lineTo(Tp[i][0],Tp[i][1]);ctx.closePath();ctx.fill();}
+  ctx.fillStyle=top;ctx.beginPath();Tp.forEach(([a,b],i)=>i?ctx.lineTo(a,b):ctx.moveTo(a,b));ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(20,24,32,.4)';ctx.lineWidth=1.1;ctx.stroke();return Tp;}
+let ZH=1;                                          // elevation scale: flight 1, hangar flattens
+// THEME: two palettes, one switch. Canvas reads PAL; CSS reads data-theme.
+const THEMES={
+ light:{bg:'#f5f4f0',mm:'#fdfdfb',plume:'#f2f8ff',net:'50,60,80',grav:'62,100,232',ink:'29,34,43',inkHex:'#1d222b',glass:'rgba(255,255,255,.82)',
+   org:{clo:['#3a5d96','#263d63'],hol:['#6a5136','#453520'],sal:['#8a4a2e','#5a301e'],gen:['#4d5560','#323841']}},
+ dark:{bg:'#0b0e14',mm:'#12161e',plume:'#f2f8ff',net:'210,222,242',grav:'143,176,255',ink:'228,234,246',inkHex:'#dfe4ee',glass:'rgba(20,25,33,.92)',
+   org:{clo:['#5b82c8','#33507e'],hol:['#9a7a52','#5e4a30'],sal:['#c2704a','#7a4228'],gen:['#8b93a0','#4d5560']}}};
+let THEME='light';let PAL=THEMES[THEME];
+function setTheme(t){THEME=t;PAL=THEMES[t];
+  try{document.documentElement.dataset.theme=t;}catch(e){}
+  const b=$('themeB');if(b)b.textContent=t==='dark'?'◐':'◑';}
+// PROVENANCE: body wears the station it came from. THE only module-body color table.
+
+const ORIGIN=new Proxy({},{get:(t,k)=>PAL.org[k]});   // reads follow the theme
+const OLETTER={bridge:'B',engine:'E',pod:'P',tank:'T',mount:'M',rack:'R',grapple:'G',rcs:'Q',shield:'D',strut:''};
+const AW='rgba(255,255,255,.92)',AW2='rgba(255,255,255,.55)',AK='rgba(0,0,0,.55)';
+// TYPE accent, white ink, drawn on the top face. Canvas renderer.
+function glyphCanvas(c2,t,cx,cy,s,rot){
+  c2.save();c2.translate(cx,cy);c2.scale(s/22,s/22*0.72);   // iso-squashed top
+  if(rot)c2.rotate(rot);
+  c2.lineCap='round';
+  if(t==='bridge'){c2.strokeStyle=AW2;c2.lineWidth=2;
+    c2.beginPath();c2.moveTo(0,-11);c2.lineTo(11,0);c2.lineTo(0,11);c2.lineTo(-11,0);c2.closePath();c2.stroke();
+    c2.fillStyle=AW;c2.beginPath();c2.ellipse(0,-2,7,4.4,0,0,TAU);c2.fill();}
+  else if(t==='engine'){c2.strokeStyle=AW2;c2.lineWidth=1.6;
+    c2.beginPath();c2.moveTo(-8,-9);c2.lineTo(7,-9);c2.lineTo(13,0);c2.lineTo(7,9);c2.lineTo(-8,9);c2.closePath();c2.stroke();
+    c2.fillStyle=AW;c2.beginPath();c2.moveTo(8,-7);c2.lineTo(17,0);c2.lineTo(8,7);c2.closePath();c2.fill();}
+  else if(t==='pod'){c2.strokeStyle=AW;c2.lineWidth=2.4;c2.strokeRect(-10,-10,20,20);
+    c2.strokeStyle=AW2;c2.lineWidth=1.6;
+    c2.beginPath();c2.moveTo(0,-10);c2.lineTo(0,10);c2.moveTo(-10,0);c2.lineTo(10,0);c2.stroke();}
+  else if(t==='tank'){c2.fillStyle=AW;
+    c2.beginPath();c2.roundRect(-12,-6.5,24,13,6.5);c2.fill();
+    c2.strokeStyle='rgba(0,0,0,.25)';c2.lineWidth=1;c2.stroke();}
+  else if(t==='mount'){c2.fillStyle=AW;
+    c2.beginPath();c2.moveTo(-9,10);c2.lineTo(0,-11);c2.lineTo(9,10);c2.closePath();c2.fill();}
+  else if(t==='rack'){for(const ox of[-6.5,6.5]){
+    c2.fillStyle=AW;c2.beginPath();c2.arc(ox,0,6,0,TAU);c2.fill();
+    c2.fillStyle=AK;c2.beginPath();c2.arc(ox,0,2.7,0,TAU);c2.fill();}}
+  else if(t==='grapple'){c2.strokeStyle=AW;c2.lineWidth=3.2;
+    c2.beginPath();c2.moveTo(0,-13);c2.lineTo(0,-1);c2.arc(0,5,6.5,-Math.PI/2,Math.PI*0.78,false);c2.stroke();}
+  else if(t==='rcs'){c2.strokeStyle=AW;c2.lineWidth=2.8;
+    c2.beginPath();
+    c2.moveTo(0,-13);c2.lineTo(0,-6);c2.moveTo(0,6);c2.lineTo(0,13);
+    c2.moveTo(-13,0);c2.lineTo(-6,0);c2.moveTo(6,0);c2.lineTo(13,0);c2.stroke();}
+  else if(t==='shield'){c2.strokeStyle=AW;c2.lineWidth=2.4;
+    c2.beginPath();c2.arc(-3,0,11,Math.PI*0.6,Math.PI*1.4,false);c2.stroke();
+    c2.beginPath();c2.arc(3,0,11,-Math.PI*0.4,Math.PI*0.4,false);c2.stroke();}
+  c2.restore();}
+// same geometry, SVG strings, for the DOM picker
+function glyphSVG(t){
+  const s={bridge:'<path d="M22 11 L33 22 L22 33 L11 22 Z" fill="none" stroke="'+AW2+'" stroke-width="2"/><ellipse cx="22" cy="20" rx="7" ry="4.4" fill="'+AW+'"/>',
+   engine:'<path d="M14 13 L29 13 L35 22 L29 31 L14 31 Z" fill="none" stroke="'+AW2+'" stroke-width="1.6"/><path d="M30 15 L39 22 L30 29 Z" fill="'+AW+'"/>',
+   pod:'<rect x="12" y="12" width="20" height="20" fill="none" stroke="'+AW+'" stroke-width="2.4"/><line x1="22" y1="12" x2="22" y2="32" stroke="'+AW2+'" stroke-width="1.6"/><line x1="12" y1="22" x2="32" y2="22" stroke="'+AW2+'" stroke-width="1.6"/>',
+   tank:'<rect x="10" y="15.5" width="24" height="13" rx="6.5" fill="'+AW+'"/>',
+   mount:'<path d="M13 32 L22 11 L31 32 Z" fill="'+AW+'"/>',
+   rack:'<circle cx="15.5" cy="22" r="6" fill="'+AW+'"/><circle cx="15.5" cy="22" r="2.7" fill="'+AK+'"/><circle cx="28.5" cy="22" r="6" fill="'+AW+'"/><circle cx="28.5" cy="22" r="2.7" fill="'+AK+'"/>',
+   grapple:'<path d="M22 9 L22 21 A6.5 6.5 0 1 0 29 27" fill="none" stroke="'+AW+'" stroke-width="3.2" stroke-linecap="round"/>',
+   rcs:'<g stroke="'+AW+'" stroke-width="2.8" stroke-linecap="round"><line x1="22" y1="9" x2="22" y2="16"/><line x1="22" y1="28" x2="22" y2="35"/><line x1="9" y1="22" x2="16" y2="22"/><line x1="28" y1="22" x2="35" y2="22"/></g>',
+   shield:'<path d="M14 12 A13 13 0 0 0 14 32" fill="none" stroke="'+AW+'" stroke-width="2.4"/><path d="M30 12 A13 13 0 0 1 30 32" fill="none" stroke="'+AW+'" stroke-width="2.4"/>',
+   strut:'<rect x="9" y="19.5" width="26" height="5" rx="2" fill="rgba(255,255,255,.30)"/>'};
+  return s[t]||'';}
+
+function drawModule(md,x,y,ang,glow,list){
+  const S2=SPEC[md.t];
+  const OC=ORIGIN[md.org||'gen'];
+  if(md.t==='strut'){
+    // a strut is a BEAM, not a block: thin, oriented along its connections
+    let horiz=true;
+    if(list){horiz=list.some(m2=>Math.abs(m2.gx-md.gx)===1&&m2.gy===md.gy);
+      if(!horiz&&!list.some(m2=>m2.gx===md.gx&&Math.abs(m2.gy-md.gy)===1))horiz=true;}
+    prismAt(x,y,ang,horiz?2.0:0.6,horiz?0.6:2.0,0.7*ZH,OC[0],OC[1]);
+    const[tx,ty]=iso(x,y,0.72*ZH);
+    ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(tx-4,ty);ctx.lineTo(tx+4,ty);ctx.stroke();
+    if(glow){ctx.strokeStyle='rgba(58,98,196,.7)';ctx.lineWidth=1.6;ctx.strokeRect(tx-11,ty-8,22,16);}
+    return;}
+  // distinct silhouettes: size + height + accent per type
+  const SHAPE={bridge:[1.45,1.45,2.0],engine:[1.9,1.6,1.15],pod:[1.7,1.7,1.8],tank:[1.6,1.35,.9],
+               shield:[1.4,1.4,1.35],mount:[1.55,1.3,1.0],rcs:[1.15,1.15,1.05]}[md.t]||[1.7,1.7,1.5];
+  prismAt(x,y,ang,SHAPE[0],SHAPE[1],SHAPE[2]*ZH,OC[0],OC[1]);
+  const[tx,ty]=iso(x,y,SHAPE[2]*ZH+.05);
+  if(md.t==='engine'){const f3=(md.f||0),ldx=[1,0,-1,0][f3],ldy=[0,1,0,-1][f3];
+    const c=Math.cos(ang),s=Math.sin(ang);const nx2=ldx*c-ldy*s,ny2=ldx*s+ldy*c;
+    const[ex,ey]=iso(x-2.4*nx2,y-2.4*ny2,.7);
+    ctx.fillStyle='#10161f';ctx.beginPath();ctx.arc(ex,ey,3.6,0,TAU);ctx.fill();   // the nozzle: real, the plume's anchor
+    ctx.strokeStyle=AW2;ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(ex,ey,4.4,0,TAU);ctx.stroke();}
+  {const gs=Math.min(26,SHAPE[0]*cam.z*1.15);       // TYPE accent on the top face
+   glyphCanvas(ctx,md.t,tx,ty,gs,(md.t==='engine'?(md.f||0)*Math.PI/2:0));
+   if(gs>13&&OLETTER[md.t]){ctx.fillStyle='rgba(255,255,255,.85)';
+     ctx.font='700 '+Math.max(6,gs*0.3)+'px -apple-system,sans-serif';
+     ctx.fillText(OLETTER[md.t],tx+gs*0.34,ty+gs*0.42);}}
+  if(glow){ctx.strokeStyle='rgba(58,98,196,.7)';ctx.lineWidth=1.6;
+    const[gx2,gy2]=iso(x,y,1.5);ctx.strokeRect(gx2-11,gy2-8,22,16);}
+}
+function drawPartThumb(){
+  const cv2=document.getElementById('mcCv');
+  if(!cv2||!cardPart)return;
+  const d2=Math.min(devicePixelRatio||1,2);
+  if(cv2.width!==64*d2){cv2.width=64*d2;cv2.height=64*d2;}
+  const oc=ctx,ox=VCX,oy=VCY,ocam={...cam};
+  ctx=cv2.getContext('2d');ctx.setTransform(d2,0,0,d2,0,0);
+  VCX=32;VCY=38;cam={x:0,y:0,z:7.5,rot:T*.4};
+  ctx.fillStyle=PAL.mm;ctx.fillRect(0,0,64,64);
+  drawModule({t:cardPart,gx:0,gy:0},0,0,0,false,null);
+  ctx=oc;VCX=ox;VCY=oy;cam=ocam;}
+function shadow(_c,_i,x,y,r,a){const[sx,sy]=iso(x,y,0);
+  const g2=ctx.createRadialGradient(sx,sy+2,1,sx,sy+2,r);
+  g2.addColorStop(0,'rgba(40,48,64,'+a+')');g2.addColorStop(1,'rgba(40,48,64,0)');
+  ctx.fillStyle=g2;ctx.beginPath();ctx.ellipse(sx,sy+2,r,r*.5,0,0,TAU);ctx.fill();}
+function drawCoupler(ax,ay,bx,by){
+  const mx=(ax+bx)/2,my2=(ay+by)/2;
+  const axAng=Math.atan2(by-ay,bx-ax);
+  prismAt(mx,my2,axAng,1.15,0.5,0.95,'#2c343f','#181e26');
+  const[qx,qy]=iso(mx,my2,1.0);
+  ctx.strokeStyle='rgba(233,178,92,.8)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.ellipse(qx,qy,2.6,1.4,-.5,0,TAU);ctx.stroke();}
+function comSym(x,y,h){const[px,py]=iso(x,y,h);const r=5;
+  ctx.save();ctx.lineWidth=1.4;ctx.strokeStyle='#1d222b';
+  ctx.fillStyle='#1d222b';
+  ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,r,0,Math.PI/2);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,r,Math.PI,Math.PI*1.5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,r,Math.PI/2,Math.PI);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(px,py);ctx.arc(px,py,r,Math.PI*1.5,TAU);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.arc(px,py,r,0,TAU);ctx.stroke();ctx.restore();}
+function planet(w){
+  const rp=w.r*cam.z;
+  potLock=Math.max(0,pot(w.x,w.y)-rp*.62);
+  const[cx,cy]=iso(w.x,w.y,0);
+  const isV=w.name==='varn';
+  const C=isV?{atm:'rgba(196,122,61,.18)',hi:[236,183,130],mid:[201,138,82],lo:[122,70,32],band:[168,101,58],storm:[240,192,138]}
+             :{atm:'rgba(70,140,150,.17)',hi:[168,208,212],mid:[95,147,154],lo:[52,94,101],sea:[46,81,87],cap:[201,228,230]};
+  // atmosphere
+  const ag=ctx.createRadialGradient(cx,cy,rp*.6,cx,cy,rp*2.2);
+  ag.addColorStop(0,C.atm);ag.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ag;ctx.beginPath();ctx.ellipse(cx,cy,rp*2.2,rp*2.2*.8,0,0,TAU);ctx.fill();
+  // ring, back half
+  if(w.name==='moth'){ctx.strokeStyle='rgba(70,110,120,.45)';ctx.lineWidth=Math.max(1.4,rp*.09);
+    ctx.beginPath();ctx.ellipse(cx,cy,rp*1.85,rp*.5,-.5,Math.PI*1.02,Math.PI*1.98);ctx.stroke();}
+  // FACETED BODY — matter in the module grammar, hard-shaded by the shared rig
+  const LA=9, LO=16, spin=T*(isV?.06:.04)+ (isV?0:2.1);
+  // shared light, lifted toward the viewer
+  let Lx3=-0.50,Ly3=0.62,Lz3=0.60; const Ln=Math.hypot(Lx3,Ly3,Lz3);Lx3/=Ln;Ly3/=Ln;Lz3/=Ln;
+  const P=(la,lo)=>{ // unit sphere -> screen; y' up
+    const sy=Math.cos(la), sr=Math.sin(la);
+    const x=sr*Math.cos(lo), z=sr*Math.sin(lo);
+    return{x,y:sy,z,px:cx+x*rp,py:cy-sy*rp};};
+  for(let i=0;i<LA;i++){
+    const la0=(i/LA)*Math.PI, la1=((i+1)/LA)*Math.PI;
+    for(let j=0;j<LO;j++){
+      const lo0=(j/LO)*TAU+spin, lo1=((j+1)/LO)*TAU+spin;
+      const a=P(la0,lo0),b=P(la0,lo1),c=P(la1,lo1),d2=P(la1,lo0);
+      const nz=(a.z+b.z+c.z+d2.z)/4;
+      if(nz<=0.02)continue;
+      const nx=(a.x+b.x+c.x+d2.x)/4, ny=(a.y+b.y+c.y+d2.y)/4;
+      const nl=Math.hypot(nx,ny,nz)||1;
+      const sh=Math.max(0,(nx/nl)*Lx3+(ny/nl)*Ly3+(nz/nl)*Lz3);
+      let base;
+      if(isV){
+        base=(i%2?C.band:C.mid);
+        if(i===5&&((j+((T*.5)|0))%LO)===4)base=C.storm;
+      }else{
+        base=C.mid;
+        if(i<2)base=C.cap;
+        else if(Math.sin(i*3.1+j*5.3)>0.55)base=C.sea;
+      }
+      const t2=0.35+0.65*sh;
+      const R2=Math.round(C.lo[0]+(base[0]-C.lo[0])*t2+(C.hi[0]-base[0])*Math.max(0,sh-.75)*1.6);
+      const G2=Math.round(C.lo[1]+(base[1]-C.lo[1])*t2+(C.hi[1]-base[1])*Math.max(0,sh-.75)*1.6);
+      const B2=Math.round(C.lo[2]+(base[2]-C.lo[2])*t2+(C.hi[2]-base[2])*Math.max(0,sh-.75)*1.6);
+      ctx.fillStyle='rgb('+R2+','+G2+','+B2+')';
+      ctx.beginPath();ctx.moveTo(a.px,a.py);ctx.lineTo(b.px,b.py);ctx.lineTo(c.px,c.py);ctx.lineTo(d2.px,d2.py);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(20,24,32,.16)';ctx.lineWidth=.5;ctx.stroke();}}
+  // sun flavor: warm rim toward it
+  const la2=Math.atan2(world.sun.y-w.y,world.sun.x-w.x);
+  const[lsx,lsy]=iso(w.x+Math.cos(la2)*10,w.y+Math.sin(la2)*10,0);
+  const sA=Math.atan2(lsy-cy,lsx-cx);
+  ctx.strokeStyle=isV?'rgba(255,220,180,.35)':'rgba(215,242,244,.35)';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.arc(cx,cy,rp*1.0,sA-.9,sA+.9);ctx.stroke();
+  // ring, front half
+  if(w.name==='moth'){ctx.strokeStyle='rgba(88,132,142,.6)';ctx.lineWidth=Math.max(1.4,rp*.09);
+    ctx.beginPath();ctx.ellipse(cx,cy,rp*1.85,rp*.5,-.5,Math.PI*.02,Math.PI*.98);ctx.stroke();}
+  label(w.name.toUpperCase(),cx,cy-rp-8);potLock=null;}
+function label(t,x,y){ctx.font='700 9px -apple-system,sans-serif';ctx.fillStyle='rgba(45,52,68,.6)';
+  ctx.textAlign='center';ctx.fillText(t,x,y);ctx.textAlign='left';}
+function drawWorld(){
+  gridDraw(44,5);
+  // field rings: where gravity bites, the net says so
+  for(const q of world.wells){
+    const base=Math.pow(q.mu,1/3.3);
+    for(let k=0;k<4;k++){
+      const r=base*[0.55,0.85,1.25,1.8][k];
+      ctx.strokeStyle='rgba(138,90,16,'+[0.22,0.15,0.10,0.06][k]+')';
+      ctx.lineWidth=k===0?1.6:1;
+      ctx.beginPath();
+      for(let i=0;i<=28;i++){const a2=i/28*TAU;
+        const[px2,py2]=iso(q.x+Math.cos(a2)*r,q.y+Math.sin(a2)*r,0);
+        i?ctx.lineTo(px2,py2):ctx.moveTo(px2,py2);}
+      ctx.stroke();}}
+  // nebula
+  for(const[dx,dy,r,a]of[[-18,6,80,.26],[22,-10,66,.22],[0,16,90,.16],[-30,-14,52,.2]]){
+    const[cx,cy]=iso(352+dx,64+dy,0);const g=ctx.createRadialGradient(cx,cy,2,cx,cy,r*cam.z/5);
+    g.addColorStop(0,'rgba(138,110,190,'+a+')');g.addColorStop(1,'rgba(138,110,190,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(cx,cy,r*cam.z/5,r*cam.z/5*0.577,0,0,TAU);ctx.fill();}
+  label('NEBULA — 90t of drag', ...iso(352,16,0));
+  // gusher
+  {const w=world.gush;
+   potLock=Math.min(0,pot(w.x,w.y)+cam.z*3);
+   const[cx,cy]=iso(w.x,w.y,0);const pu=.5+.5*Math.sin(T*3);
+   for(let i=0;i<12;i++){const a=i/12*TAU+T*.4;ctx.strokeStyle='rgba(150,130,200,'+(.25+pu*.2)+')';ctx.lineWidth=2;
+     ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*cam.z*8,cy+Math.sin(a)*cam.z*8*0.577);
+     ctx.lineTo(cx+Math.cos(a)*(cam.z*22+pu*10),cy+Math.sin(a)*(cam.z*22+pu*10)*0.577);ctx.stroke();}
+   ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(cx,cy,cam.z*8.5,cam.z*8.5*0.7,0,0,TAU);ctx.fill();
+   ctx.strokeStyle='rgba(150,130,200,.6)';ctx.stroke();label('GUSHER μ−380',cx,cy-22);potLock=null;}
+  // sun
+  {const w=world.sun;const rp=w.r*cam.z;
+   potLock=Math.max(0,pot(w.x,w.y)-rp*.6);
+   const[cx,cy]=iso(w.x,w.y,0);
+   const co=ctx.createRadialGradient(cx,cy,rp*.4,cx,cy,rp*2.6);co.addColorStop(0,'rgba(240,180,90,.5)');co.addColorStop(1,'rgba(240,180,90,0)');
+   ctx.fillStyle=co;ctx.beginPath();ctx.ellipse(cx,cy,rp*2.6,rp*2.6*0.72,0,0,TAU);ctx.fill();
+   const bg=ctx.createRadialGradient(cx,cy,1,cx,cy,rp);bg.addColorStop(0,'#fff6e8');bg.addColorStop(.5,'#f0b45a');bg.addColorStop(1,'#c47a3d');
+   ctx.fillStyle=bg;ctx.beginPath();ctx.arc(cx,cy,rp,0,TAU);ctx.fill();
+   {const pl=potLock;potLock=null;                       // the ring rides the terrain, point by point
+    ctx.beginPath();
+    for(let i=0;i<=48;i++){const a2=i/48*TAU;
+      const[qx,qy]=iso(w.x+Math.cos(a2)*w.kill,w.y+Math.sin(a2)*w.kill,0);
+      i?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);}
+    ctx.closePath();
+    ctx.fillStyle='rgba(192,57,43,.08)';ctx.fill();
+    ctx.setLineDash([4,5]);ctx.strokeStyle='rgba(192,57,43,.75)';ctx.lineWidth=1.8;ctx.stroke();ctx.setLineDash([]);
+    potLock=pl;}
+   label('SUN 8,000t',cx,cy-rp*2.7);potLock=null;}
+  // black hole
+  {const w=world.hole;
+   potLock=pot(w.x,w.y)-cam.z*7;   // the disc floats just above the very bottom of its pit
+   const[cx,cy]=iso(w.x,w.y,0);
+   ctx.save();ctx.translate(cx,cy);ctx.rotate(T*.6);
+   ctx.strokeStyle='rgba(140,170,255,.6)';ctx.lineWidth=2;ctx.setLineDash([9,6]);
+   ctx.beginPath();ctx.ellipse(0,0,cam.z*26,cam.z*8,0,0,TAU);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+   ctx.fillStyle='#0a0c10';ctx.beginPath();ctx.arc(cx,cy,cam.z*11,0,TAU);ctx.fill();
+   label('HOLE 15,000t',cx,cy-30);potLock=null;}
+  planet(world.varn);planet(world.moth);
+  // comet
+  {const cm=world.comet;
+   if(cm.trail.length>2){ctx.strokeStyle='rgba(160,200,230,.5)';ctx.lineWidth=1.4;ctx.beginPath();
+     cm.trail.forEach((p,i)=>{const[qx,qy]=iso(p.x,p.y,0);i?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);});ctx.stroke();}
+   const[cx,cy]=iso(cm.x,cm.y,0);ctx.fillStyle='#dfe9f2';ctx.beginPath();ctx.arc(cx,cy,3.5,0,TAU);ctx.fill();}
+  // rocks + debris
+  for(const r of world.rocks){potLock=pot(r.x,r.y);
+    const n=5+((r.seed*7)|0)%3;ctx.fillStyle='#6b6257';ctx.beginPath();
+    for(let i=0;i<n;i++){const a=i/n*TAU+r.ang;const rr2=r.r*(0.7+0.5*Math.abs(Math.sin(r.seed*9.7+i*3.1)));
+      const[qx,qy]=iso(r.x+Math.cos(a)*rr2,r.y+Math.sin(a)*rr2*.85,0.8);i?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);}
+    ctx.closePath();ctx.fill();ctx.strokeStyle='rgba('+PAL.ink+',.35)';ctx.lineWidth=.8;ctx.stroke();potLock=null;}
+  for(const d2 of world.debris){potLock=pot(d2.x,d2.y);
+    drawModule({t:d2.t,gx:0,gy:0},d2.x,d2.y,d2.ang,false,null);potLock=null;
+    d2.x+=d2.vx/60;d2.y+=d2.vy/60;d2.ang+=d2.w/60;}
+  // the boundary: thin red laser walls, sharp and translucent
+  {const b=world.bounds;const pu=.6+.4*Math.sin(T*2);
+   const seg=(x1,y1,x2,y2)=>{
+     const steps=Math.ceil(Math.hypot(x2-x1,y2-y1)/60);
+     for(let i2=0;i2<steps;i2++){
+       const ax=x1+(x2-x1)*i2/steps,ay=y1+(y2-y1)*i2/steps;
+       const bx=x1+(x2-x1)*(i2+1)/steps,by=y1+(y2-y1)*(i2+1)/steps;
+       const mx=(ax+bx)/2,my2=(ay+by)/2;
+       if(Math.abs(mx-cam.x)>320||Math.abs(my2-cam.y)>320)continue;
+       const g1=iso(ax,ay,0),g2=iso(bx,by,0),t1=iso(ax,ay,9),t2=iso(bx,by,9);
+       ctx.fillStyle='rgba(226,60,50,'+(0.05+pu*0.03)+')';
+       ctx.beginPath();ctx.moveTo(g1[0],g1[1]);ctx.lineTo(g2[0],g2[1]);ctx.lineTo(t2[0],t2[1]);ctx.lineTo(t1[0],t1[1]);ctx.closePath();ctx.fill();
+       ctx.save();ctx.shadowColor='rgba(226,60,50,.8)';ctx.shadowBlur=8;
+       ctx.strokeStyle='rgba(226,60,50,'+(0.5+pu*0.3)+')';ctx.lineWidth=1.4;
+       ctx.beginPath();ctx.moveTo(t1[0],t1[1]);ctx.lineTo(t2[0],t2[1]);ctx.stroke();ctx.restore();
+       ctx.strokeStyle='rgba(226,60,50,.25)';ctx.lineWidth=1;
+       ctx.beginPath();ctx.moveTo(g1[0],g1[1]);ctx.lineTo(g2[0],g2[1]);ctx.stroke();}};
+   seg(b.x0,b.y0,b.x1,b.y0);seg(b.x0,b.y1,b.x1,b.y1);
+   seg(b.x0,b.y0,b.x0,b.y1);seg(b.x1,b.y0,b.x1,b.y1);}
+  // armed stop: where you will die to zero, and when
+  if(inp.stop&&run.stopPred){const sp=run.stopPred;
+    const[sx,sy]=iso(ship.x,ship.y,0),[px2,py2]=iso(sp.x,sp.y,0);
+    ctx.setLineDash([4,5]);ctx.strokeStyle='rgba(138,90,16,.55)';ctx.lineWidth=1.4;
+    ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(px2,py2);ctx.stroke();ctx.setLineDash([]);
+    const pu=.5+.5*Math.sin(T*4);
+    ctx.strokeStyle='rgba(138,90,16,'+(.6+pu*.3)+')';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(px2,py2,7+pu*3,0,TAU);ctx.stroke();
+    ctx.fillStyle='rgba(138,90,16,.9)';ctx.beginPath();ctx.arc(px2,py2,2.2,0,TAU);ctx.fill();
+    ctx.font='800 10px -apple-system,sans-serif';ctx.fillStyle='#8a5a10';
+    ctx.fillText('⊘ T−'+sp.t.toFixed(1)+'s',px2+12,py2+3);}
+  // tramps: the economy, visibly flying
+  for(const tr of world.tramps){
+    if(tr.st==='dock')continue;
+    potLock=pot(tr.x,tr.y);
+    const va=Math.atan2(tr.vy,tr.vx);
+    shadow(ctx,iso,tr.x,tr.y,14,.14);
+    prismAt(tr.x-1.2*Math.cos(va),tr.y-1.2*Math.sin(va),va,2.6,1.4,0.9,'#4d5560','#2d333c');
+    prismAt(tr.x+2.4*Math.cos(va),tr.y+2.4*Math.sin(va),va,1.1,1.2,1.6,'#39424f','#20262e');
+    const[ex,ey]=iso(tr.x-4.2*Math.cos(va),tr.y-4.2*Math.sin(va),.7);
+    const pg=ctx.createRadialGradient(ex,ey,0,ex,ey,7);
+    pg.addColorStop(0,'rgba(120,160,235,.55)');pg.addColorStop(1,'rgba(58,98,196,0)');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(ex,ey,6,0,TAU);ctx.fill();
+    label(tr.id+(tr.st==='derelict'?' ⚠ DERELICT — tow me in':''),...iso(tr.x,tr.y-8,0));
+    potLock=null;}
+  // the line, if flying or taut (self-healing: a bad frame cuts the line, not the game)
+  try{
+  if(GRAP&&ship&&!ship.dead){
+    const[ax0,ay0]=grapAnchor();
+    const lined=GRAP.state==='fly'||GRAP.state==='stuck'||GRAP.state==='reel';
+    const[q1x,q1y]=iso(ax0,ay0,1.2),[q2x,q2y]=iso(GRAP.x,GRAP.y,.8);
+    if(lined){
+      ctx.strokeStyle=GRAP.state==='reel'?'rgba(138,90,16,.85)':'rgba(90,70,50,.6)';
+      ctx.lineWidth=GRAP.state==='reel'?1.8:1.1;
+      ctx.beginPath();ctx.moveTo(q1x,q1y);
+      const sag=GRAP.state==='fly'?0:6;
+      ctx.quadraticCurveTo((q1x+q2x)/2,(q1y+q2y)/2+sag,q2x,q2y);ctx.stroke();}
+    ctx.fillStyle='#33281c';ctx.beginPath();ctx.arc(q2x,q2y,2.4,0,TAU);ctx.fill();
+    ctx.strokeStyle='rgba(233,178,92,.8)';ctx.lineWidth=1;ctx.stroke();}
+  }catch(e){GRAP=null;reportErr('line: '+e.message);}
+  if(run.plan&&!run.done&&ship&&!ship.dead){
+    label('✨ burn in '+Math.max(0,run.plan.at-run.t).toFixed(1)+'s',...iso(ship.x,ship.y-10,0));}
+  if(run.burn&&!run.done&&ship&&!ship.dead){
+    label('☀ BURNING — '+(Math.max(0,run.burn.left)|0)+'u to incineration',...iso(ship.x,ship.y-14,0));}
+  // payout toasts
+  if(run.toasts)for(const t2 of run.toasts){t2.t+=1/60;
+    const[qx,qy]=iso(t2.x,t2.y,3+t2.t*4);
+    ctx.font='800 11px -apple-system,sans-serif';
+    ctx.fillStyle='rgba(30,120,70,'+Math.max(0,1-t2.t/1.4).toFixed(2)+')';
+    ctx.fillText(t2.txt,qx-24,qy);}
+  if(run.toasts)run.toasts=run.toasts.filter(t2=>t2.t<1.4);
+  // the pirate and its roost
+  for(const pi of world.pirates){
+    if(pi.hp<=0)continue;
+    {const[rx2,ry2]=iso(pi.roost.x,pi.roost.y,0);
+     ctx.strokeStyle='rgba(192,57,43,.3)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+     ctx.beginPath();ctx.ellipse(rx2,ry2,10,5.7,0,0,TAU);ctx.stroke();ctx.setLineDash([]);}
+    potLock=pot(pi.x,pi.y);
+    const va=Math.atan2(pi.vy,pi.vx)||0;
+    shadow(ctx,iso,pi.x,pi.y,13,.15);
+    prismAt(pi.x-1*Math.cos(va),pi.y-1*Math.sin(va),va,2.4,1.2,0.9,'#5a3a3a','#362121');
+    prismAt(pi.x+2*Math.cos(va),pi.y+2*Math.sin(va),va,1.0,1.0,1.4,'#4a2d2d','#2a1818');
+    if(pi.st==='hunt'){const[ex,ey]=iso(pi.x-3.8*Math.cos(va),pi.y-3.8*Math.sin(va),.7);
+      const pg=ctx.createRadialGradient(ex,ey,0,ex,ey,8);
+      pg.addColorStop(0,'rgba(226,84,62,.6)');pg.addColorStop(1,'rgba(226,84,62,0)');
+      ctx.fillStyle=pg;ctx.beginPath();ctx.arc(ex,ey,7,0,TAU);ctx.fill();}
+    label('☠ '+pi.id,...iso(pi.x,pi.y-8,0));
+    potLock=null;}
+  for(const wk of world.wreckage){
+    potLock=pot(wk.x,wk.y);
+    if(wk.t)drawModule({t:wk.t,gx:0,gy:0},wk.x,wk.y,wk.ang,false,null);
+    else{prismAt(wk.x,wk.y,wk.ang,1.2,1.2,0.9,'#4d5560','#2d333c');
+      ctx.strokeStyle='rgba(138,90,16,.7)';ctx.lineWidth=1.4;
+      ctx.beginPath();ctx.ellipse(...iso(wk.x,wk.y,1.2),6,3.4,0,0,TAU);ctx.stroke();}
+    potLock=null;}
+  for(const cr of world.crates){
+    potLock=pot(cr.x,cr.y);
+    prismAt(cr.x,cr.y,T*.5,1.1,1.1,1.0,'#8a5a10','#4d330c');
+    label('¢'+cr.credits.toLocaleString(),...iso(cr.x,cr.y-6,0));
+    potLock=null;}
+  // stations
+  for(const st of world.stations){
+    potLock=pot(st.x,st.y);
+    shadow(ctx,iso,st.x,st.y,34,.16);
+    prismAt(st.x,st.y,0,7,7,3.6,'#3a4254','#232833');
+    if(st.id==='cloister'){for(const[dx2,dy2]of[[-3,-2.5],[0.5,0],[3.5,2.5]]){
+      const[ccx,ccy]=iso(st.x+dx2,st.y+dy2,3.6);
+      ctx.fillStyle='#4b5a6e';ctx.beginPath();ctx.arc(ccx,ccy,7,Math.PI,0);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.stroke();}}
+    else{for(const dy2 of[-3,1]){prismAt(st.x+5,st.y+dy2,0,1.3,1.3,5,'#4a5563','#293039');
+      const[tx2,ty2]=iso(st.x+5,st.y+dy2,5);
+      ctx.fillStyle='#5b6878';ctx.beginPath();ctx.ellipse(tx2,ty2,6,3,0,0,TAU);ctx.fill();}}
+    const near=run&&run.nearSt===st;
+    const pu=.5+.5*Math.sin(T*3);
+    ctx.strokeStyle='rgba(30,140,70,'+(near?(.5+pu*.3):.22)+')';ctx.lineWidth=near?2.2:1.2;
+    ctx.setLineDash(near?[]:[4,5]);
+    ctx.beginPath();ctx.ellipse(...iso(st.x,st.y,0),26*cam.z/2.3,26*cam.z/2.3*.577,0,0,TAU);ctx.stroke();
+    ctx.setLineDash([]);
+    {const ct=CONTRACTS.find(c=>c.open&&c.at===st.id);
+     if(ct){const pu2=.5+.5*Math.sin(T*4);
+       const[bx2,by2]=iso(st.x,st.y,10);
+       ctx.save();ctx.translate(bx2,by2-16);ctx.rotate(Math.PI/4);
+       ctx.strokeStyle='rgba(138,90,16,'+(.5+pu2*.4)+')';ctx.lineWidth=2;
+       ctx.strokeRect(-5,-5,10,10);ctx.restore();
+       label(ct.kind==='rescue'?('⛑ RESCUE '+ct.trId+' ¢'+ct.pay):('CONTRACT · '+ct.part.toUpperCase()+' ¢'+ct.pay),...iso(st.x,st.y-26,0));}}
+    label(st.nm+(near?' — ⚓ DOCK':''),...iso(st.x,st.y-18,0));
+    potLock=null;}
+  // pad + gate
+
+  {const g=world.gate;const pu=.5+.5*Math.sin(T*2.5);
+   const b1=iso(g.x,g.y-g.hw,0),b2=iso(g.x,g.y+g.hw,0);const t1=[b1[0],b1[1]-30],t2=[b2[0],b2[1]-30];
+   ctx.save();ctx.shadowColor='rgba(30,140,70,.4)';ctx.shadowBlur=14;
+   ctx.fillStyle='rgba(30,140,70,'+(.08+pu*.05)+')';
+   ctx.beginPath();ctx.moveTo(b1[0],b1[1]);ctx.lineTo(t1[0],t1[1]);ctx.lineTo(t2[0],t2[1]);ctx.lineTo(b2[0],b2[1]);ctx.closePath();ctx.fill();
+   ctx.lineWidth=3;ctx.strokeStyle='rgba(30,140,70,'+(.55+pu*.25)+')';
+   ctx.beginPath();ctx.moveTo(b1[0],b1[1]);ctx.lineTo(t1[0],t1[1]);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(b2[0],b2[1]);ctx.lineTo(t2[0],t2[1]);ctx.stroke();
+   ctx.beginPath();ctx.moveTo(t1[0],t1[1]);ctx.lineTo(t2[0],t2[1]);ctx.stroke();ctx.restore();
+   label('GATE',b1[0]+ (b2[0]-b1[0])/2, t1[1]-8);}
+}
+function drawShipFlight(){
+  // plumes — layered bloom, thrust-scaled, white-hot core
+  const fired=run._fired&&run._fired.size?[...run._fired].filter(x=>x.t==='engine'):[];
+  const burning=fired.length>0&&ship.fuel>0;
+  if(burning){for(const e of fired){
+    const[mx,my]=modWorld(e);const c=Math.cos(ship.ang),s=Math.sin(ship.ang);
+    const f3=(e.f||0),ldx=[1,0,-1,0][f3],ldy=[0,1,0,-1][f3];
+    const nx=ldx*c-ldy*s,ny=ldx*s+ldy*c;                 // the nozzle's world axis
+    const th=inp.burn||inp.retro?1:.8;
+    const f=(0.85+.15*Math.sin(T*34+e.gx*3))*th;
+    const[ex,ey]=iso(mx-2.4*nx,my-2.4*ny,.8);
+    const[tx2,ty2]=iso(mx-(2.4+13*f)*nx,my-(2.4+13*f)*ny,.8);
+    const dx=tx2-ex,dy=ty2-ey;
+    // outer glow
+    let pg=ctx.createRadialGradient(ex,ey,0,ex+dx*.4,ey+dy*.4,22*f);
+    pg.addColorStop(0,'rgba(90,140,235,.5)');pg.addColorStop(1,'rgba(58,98,196,0)');
+    ctx.fillStyle=pg;ctx.beginPath();ctx.arc(ex+dx*.3,ey+dy*.3,20*f,0,TAU);ctx.fill();
+    // cone
+    ctx.save();ctx.translate(ex,ey);ctx.rotate(Math.atan2(dy,dx));
+    const L=Math.hypot(dx,dy);
+    let cg=ctx.createLinearGradient(0,0,L,0);
+    cg.addColorStop(0,'rgba(220,236,255,.95)');cg.addColorStop(.35,'rgba(120,166,240,.7)');cg.addColorStop(1,'rgba(58,98,196,0)');
+    ctx.fillStyle=cg;ctx.beginPath();ctx.moveTo(0,-3.4*f);ctx.lineTo(L*.75,-1.1*f);ctx.lineTo(L,0);ctx.lineTo(L*.75,1.1*f);ctx.lineTo(0,3.4*f);ctx.closePath();ctx.fill();
+    // shock diamonds
+    ctx.fillStyle='rgba(235,245,255,.85)';
+    for(const q of[.22,.45,.68]){ctx.beginPath();ctx.ellipse(L*q,0,2.6*f*(1-q*.7),1.3*f*(1-q*.7),0,0,TAU);ctx.fill();}
+    ctx.restore();
+    // white-hot core
+    ctx.save();ctx.shadowColor='rgba(200,225,255,.95)';ctx.shadowBlur=14;
+    ctx.fillStyle='#f2f8ff';ctx.beginPath();ctx.arc(ex,ey,2.6*f+ .6,0,TAU);ctx.fill();ctx.restore();}
+    // anamorphic flare, occasional
+    if((T%2.6)<0.45){const a=1-Math.abs((T%2.6)/0.45*2-1);
+      const e0=ship.d.engines[0];const[mx,my]=modWorld(e0);
+      const c=Math.cos(ship.ang),s=Math.sin(ship.ang);
+      const[fx2,fy2]=iso(mx-3*c,my-3*s,.8);
+      const fg=ctx.createLinearGradient(fx2-130,fy2,fx2+130,fy2);
+      fg.addColorStop(0,'rgba(140,190,255,0)');fg.addColorStop(.5,'rgba(190,220,255,'+(.5*a)+')');fg.addColorStop(1,'rgba(140,190,255,0)');
+      ctx.strokeStyle=fg;ctx.lineWidth=1.6;
+      ctx.beginPath();ctx.moveTo(fx2-130,fy2);ctx.lineTo(fx2+130,fy2);ctx.stroke();
+      ctx.fillStyle='rgba(220,240,255,'+(.55*a)+')';ctx.beginPath();ctx.arc(fx2,fy2,3.4*a+1,0,TAU);ctx.fill();}
+  }
+  // burn edges: kick on ignition, puff on release
+  if(burning&&!run._b){run._b=true;run._zk=.22;}
+  if(!burning&&run._b){run._b=false;
+    for(const e of ship.d.engines){const[mx,my]=modWorld(e);
+      const c=Math.cos(ship.ang),s=Math.sin(ship.ang);
+      for(let i=0;i<9;i++){const a=Math.atan2(-s,-c)+(rngFx()-.5)*.9;const sp=2+rngFx()*4;
+        world.fx.push({x:mx-2.6*c,y:my-2.6*s,vx:ship.vx+Math.cos(a)*sp,vy:ship.vy+Math.sin(a)*sp,t:0,life:.7+rngFx()*.5});}}}
+  // weld seams under stress tint
+  for(const w of ship.welds){const a=ship.modules[w.a],b=ship.modules[w.b];
+    const[ax,ay]=modWorld(a),[bx,by]=modWorld(b);
+    const[q1x,q1y]=iso(ax,ay,1.55),[q2x,q2y]=iso(bx,by,1.55);
+    const st=Math.min(1,(w.load||0)/w.strength);
+    ctx.strokeStyle=st>.7?'rgba(192,57,43,.9)':'rgba(233,178,92,'+(0.5+st*.4)+')';
+    ctx.lineWidth=1.6+st*1.5;
+    ctx.beginPath();ctx.moveTo(q1x,q1y);ctx.lineTo(q2x,q2y);ctx.stroke();}
+  potLock=pot(ship.x,ship.y);
+  {const items=ship.modules.map(md=>{const[mx,my]=modWorld(md);
+     return{k:mx+my,f:()=>drawModule(md,mx,my,ship.ang,false,ship.modules)};});
+   for(const w of ship.welds){const A=ship.modules[w.a],B=ship.modules[w.b];
+     const[ax,ay]=modWorld(A),[bx,by]=modWorld(B);
+     items.push({k:(ax+ay+bx+by)/2-.01,f:()=>drawCoupler(ax,ay,bx,by)});}
+   items.sort((p,q)=>p.k-q.k);for(const it of items)it.f();}
+  potLock=null;
+  // heading + velocity
+  const[c0x,c0y]=iso(ship.x,ship.y,2.2);
+  const[h1x,h1y]=iso(ship.x+Math.cos(ship.ang)*9,ship.y+Math.sin(ship.ang)*9,2.2);
+  ctx.strokeStyle='rgba(138,90,16,.95)';ctx.lineWidth=2.4;
+  ctx.beginPath();ctx.moveTo(c0x,c0y);ctx.lineTo(h1x,h1y);ctx.stroke();
+  const v=Math.hypot(ship.vx,ship.vy);
+  if(v>.5){const[v1x,v1y]=iso(ship.x+ship.vx/v*6,ship.y+ship.vy/v*6,2.2);
+    ctx.strokeStyle='rgba(58,98,196,.9)';ctx.lineWidth=1.6;
+    ctx.beginPath();ctx.moveTo(c0x,c0y);ctx.lineTo(v1x,v1y);ctx.stroke();}
+  comSym(ship.x,ship.y,2.6);
+  // coast prediction (wells advanced 1%)
+  if(v>1&&!run.done){let px=ship.x,py=ship.y,pvx=ship.vx,pvy=ship.vy;
+    const wl=world.wells.map(w=>({...w}));const pdt=1/20;
+    ctx.lineWidth=1.2;
+    for(let i=0;i<480;i++){   // 24s of coast, twice the sightline
+      for(const[a,b]of[[wl[0],wl[1]],[wl[1],wl[0]]]){const dx=b.x-a.x,dy=b.y-a.y,r2=dx*dx+dy*dy+9;
+        const s2=.01*b.mu/Math.pow(r2,1.65);a.vx+=dx*s2*pdt;a.vy+=dy*s2*pdt;}
+      wl[0].x+=wl[0].vx*pdt;wl[0].y+=wl[0].vy*pdt;wl[1].x+=wl[1].vx*pdt;wl[1].y+=wl[1].vy*pdt;
+      let ax2=0,ay2=0,md2=1e9;
+      for(const w of wl){const dx=w.x-px,dy=w.y-py;const r2=dx*dx+dy*dy+w.soft*w.soft;
+        const s2=w.mu/Math.pow(r2,1.65);ax2+=dx*s2;ay2+=dy*s2;md2=Math.min(md2,Math.hypot(dx,dy)/((w.kill||w.r||6)));}
+      pvx+=ax2*pdt;pvy+=ay2*pdt;px+=pvx*pdt;py+=pvy*pdt;
+      if(i%4===0){const[q1x,q1y]=iso(px,py,0);
+        ctx.strokeStyle=md2<2?'rgba(192,57,43,.55)':'rgba(58,98,196,'+(0.4-i/480*.30).toFixed(2)+')';
+        ctx.beginPath();ctx.arc(q1x,q1y,.8,0,TAU);ctx.stroke();}
+      if(md2<1.02)break;}}
+}
+function lerpCol(t){ // 0 good -> 1 bad
+  const g=[46,125,91],r=[192,57,43];const c=g.map((gv,i)=>Math.round(gv+(r[i]-gv)*Math.min(1,Math.max(0,t))));
+  return 'rgb('+c.join(',')+')';}
+function drawStatus(){
+  const mods=ship.modules,ws=ship.welds;
+  let minx=99,maxx=-99,miny=99,maxy=-99;
+  for(const m of mods){minx=Math.min(minx,m.gx);maxx=Math.max(maxx,m.gx);miny=Math.min(miny,m.gy);maxy=Math.max(maxy,m.gy);}
+  const CS=15,pw=(maxx-minx+1)*CS+22,ph=(maxy-miny+1)*CS+30;
+  const ox=W()-pw-10,oy=64;
+  ctx.fillStyle=PAL.glass;ctx.strokeStyle='rgba('+PAL.ink+',.14)';
+  ctx.beginPath();ctx.roundRect(ox,oy,pw,ph,10);ctx.fill();ctx.stroke();
+  ctx.font='800 7px -apple-system,sans-serif';ctx.fillStyle='#8b93a0';
+  ctx.fillText('SHIP · HP + WELD LOAD',ox+8,oy+11);
+  const px=m=>ox+11+(m.gx-minx)*CS+CS/2, py=m=>oy+20+(m.gy-miny)*CS+CS/2;
+  for(const w of ws){const a=mods[w.a],b=mods[w.b];
+    ctx.strokeStyle=lerpCol((w.load||0)/w.strength);ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(px(a),py(a));ctx.lineTo(px(b),py(b));ctx.stroke();}
+  ctx.setLineDash([3,3]);
+  for(const bw of ship.broken){
+    const a=mods.find(m=>m.gx===bw.agx&&m.gy===bw.agy),b=mods.find(m=>m.gx===bw.bgx&&m.gy===bw.bgy);
+    if(!a&&!b)continue;
+    const ax=a?px(a):px(b)+(bw.agx-bw.bgx)*CS,ay=a?py(a):py(b)+(bw.agy-bw.bgy)*CS;
+    const bx=b?px(b):px(a)+(bw.bgx-bw.agx)*CS,by=b?py(b):py(a)+(bw.bgy-bw.agy)*CS;
+    ctx.strokeStyle='rgba(192,57,43,.95)';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();}
+  ctx.setLineDash([]);
+  for(const m of mods){ctx.fillStyle=ORIGIN[m.org||'gen'][0];
+    ctx.fillRect(px(m)-5.5,py(m)-5.5,11,11);
+    ctx.strokeStyle=lerpCol(1-m.hp/100);ctx.lineWidth=2;
+    ctx.strokeRect(px(m)-5.5,py(m)-5.5,11,11);
+    glyphCanvas(ctx,m.t,px(m),py(m),9);}
+}
+function minimap(){
+  const mw=150,mh=64,ox=10,oy=H()-mh-96;   // bottom-left: the rail owns the right
+  ctx.fillStyle=PAL.glass;ctx.strokeStyle='rgba('+PAL.ink+',.15)';
+  ctx.beginPath();ctx.roundRect(ox,oy,mw,mh,10);ctx.fill();ctx.stroke();
+  const mx=x=>ox+8+(x+40)/720*(mw-16),my=y=>oy+mh/2+y/720*(mw-16);
+  const dot=(x,y,c,r)=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(mx(x),my(y),r||2,0,TAU);ctx.fill();};
+  if(ship&&!ship.dead&&mode==='flight'&&!run.done&&Math.hypot(ship.vx,ship.vy)>1){
+    let px2=ship.x,py2=ship.y,pvx=ship.vx,pvy=ship.vy;
+    const wl=world.wells.map(w=>({...w}));const pdt=1/12;
+    for(let i=0;i<900;i++){   // 75s: the slingshot planner's view
+      for(const[a,b]of[[wl[0],wl[1]],[wl[1],wl[0]]]){const dx=b.x-a.x,dy=b.y-a.y,r2=dx*dx+dy*dy+9;
+        const s2=.01*b.mu/Math.pow(r2,1.65);a.vx+=dx*s2*pdt;a.vy+=dy*s2*pdt;}
+      wl[0].x+=wl[0].vx*pdt;wl[0].y+=wl[0].vy*pdt;wl[1].x+=wl[1].vx*pdt;wl[1].y+=wl[1].vy*pdt;
+      let ax2=0,ay2=0,md2=1e9;
+      for(const w of wl){const dx=w.x-px2,dy=w.y-py2;const r2=dx*dx+dy*dy+w.soft*w.soft;
+        const s2=w.mu/Math.pow(r2,1.65);ax2+=dx*s2;ay2+=dy*s2;md2=Math.min(md2,Math.hypot(dx,dy)/((w.kill||w.r||6)));}
+      pvx+=ax2*pdt;pvy+=ay2*pdt;px2+=pvx*pdt;py2+=pvy*pdt;
+      if(i%6===0){ctx.fillStyle=md2<2?'rgba(192,57,43,.7)':'rgba(58,98,196,'+(0.55-i/900*.4).toFixed(2)+')';
+        ctx.beginPath();ctx.arc(mx(px2),my(py2),.7,0,TAU);ctx.fill();}
+      if(md2<1.02)break;}}
+  dot(world.varn.x,world.varn.y,'#c47a3d',5);dot(world.moth.x,world.moth.y,'#7fb8bd',4);
+  dot(world.sun.x,world.sun.y,'#f0b45a',8);dot(world.hole.x,world.hole.y,'#0a0c10',3.4);
+  dot(world.gush.x,world.gush.y,'#b7a8e0',2.2);dot(world.comet.x,world.comet.y,'#9fb8cc',1.6);
+  ctx.fillStyle='rgba(138,110,190,.4)';ctx.beginPath();ctx.ellipse(mx(352),my(64),13,7,0,0,TAU);ctx.fill();
+  ctx.strokeStyle='rgba(30,140,70,.8)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(mx(640),my(-14));ctx.lineTo(mx(640),my(14));ctx.stroke();
+  for(const st of world.stations)dot(st.x,st.y,'#2e7d5b',2.6);
+  for(const tr of world.tramps)if(tr.st!=='dock'){
+    if(tr.st==='derelict'){const pu=1.4+0.9*Math.abs(Math.sin(run.t*3));dot(tr.x,tr.y,'#8a5a10',pu+1.1);}
+    else dot(tr.x,tr.y,'#4d5560',1.8);}
+  for(const pi of world.pirates)if(pi.hp>0)dot(pi.x,pi.y,'#c0392b',2.2);
+  for(const cr of world.crates)dot(cr.x,cr.y,'#8a5a10',2);
+  for(const wk of world.wreckage)dot(wk.x,wk.y,'#8b93a0',1.6);
+  for(const db of world.debris)dot(db.x,db.y,'#a8836a',1.4);
+  if(inp.stop&&run.stopPred)dot(run.stopPred.x,run.stopPred.y,'#8a5a10',2.4);
+  dot(ship.x,ship.y,'#1d222b',2.6);
+}
+
+/* ================= HANGAR RENDER + INPUT ================= */
+function drawHangar(){
+  cam.x=0;cam.y=0;cam.z=hz;
+  VCX=W()/2;VCY=H()*0.60;                          // the stage: full-width center, below the panels
+  gridDraw(9,CELL);
+  const d=derive(build);
+  // placeable cells glow when a part is selected
+  if(sel){for(let gx=-6;gx<=6;gx++)for(let gy=-4;gy<=4;gy++){
+    if(occupied(gx,gy))continue;
+    if(!adjacencyOK(gx,gy,sel))continue;
+    const pu=.5+.5*Math.sin(T*3.4+gx+gy);
+    const[cx2,cy2]=iso(gx*CELL,gy*CELL,0);
+    ctx.save();ctx.shadowColor='rgba(233,178,92,.9)';ctx.shadowBlur=6+pu*5;
+    ctx.strokeStyle='rgba(138,90,16,'+(.6+pu*.3)+')';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx2,cy2,5+pu*1.6,0,TAU);ctx.stroke();
+    ctx.fillStyle='#e9b25c';ctx.beginPath();ctx.arc(cx2,cy2,2.2,0,TAU);ctx.fill();ctx.restore();}}
+  // welds, rated: joint g-limit = strength / (outboard mass x 9);
+  // tinted by how hard YOUR OWN full burn leans on each joint
+  const ws2=weldsOf(build);
+  const aFull=d.F/(d.m+2.6);
+  let gMin=1e9,gWeak=null;
+  for(const w of ws2){
+    const sideA=connectedFrom(build,ws2.filter(x=>x!==w),w.a);
+    const sideB=connectedFrom(build,ws2.filter(x=>x!==w),w.b);
+    const small=(sideA.size<=sideB.size)?sideA:sideB;
+    let om=0;for(const i of small)om+=SPEC[build[i].t].kg;
+    w.gLim=w.strength/(Math.max(om,.1)*9);
+    if(w.gLim<gMin){gMin=w.gLim;gWeak=w;}}
+  d.gMin=gMin;d.aFull=aFull;
+  ZH=0.55;                                        // flatten: five-row hulls must read as plan, not rubble
+  {const items=[...build].map(md=>({k:md.gx+md.gy,f:()=>drawModule(md,md.gx*CELL,md.gy*CELL,0,md===selMod,build)}));
+   for(const w of ws2){const a=build[w.a],b=build[w.b];
+     items.push({k:(a.gx+a.gy+b.gx+b.gy)/2-.01,f:()=>drawCoupler(a.gx*CELL,a.gy*CELL,b.gx*CELL,b.gy*CELL)});}
+   items.sort((p,q)=>p.k-q.k);for(const it of items)it.f();}
+  ZH=1;
+  // strain stripes over the couplers: the load truth stays visible
+  for(const w of ws2){const a=build[w.a],b=build[w.b];
+    const[q1x,q1y]=iso(a.gx*CELL,a.gy*CELL,1.9*0.55),[q2x,q2y]=iso(b.gx*CELL,b.gy*CELL,1.9*0.55);
+    const strain=Math.min(1.2,aFull/w.gLim);
+    ctx.strokeStyle=lerpCol(strain*0.85);ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo((q1x+q2x)/2-((q2x-q1x)*.18),(q1y+q2y)/2-((q2y-q1y)*.18));
+    ctx.lineTo((q1x+q2x)/2+((q2x-q1x)*.18),(q1y+q2y)/2+((q2y-q1y)*.18));ctx.stroke();}
+  comSym(d.cx,d.cy,2.6);
+  // thrust line + torque warning
+  if(d.engines.length){
+    const ty0=d.engines.reduce((t,e)=>t+e.gy*CELL,0)/d.engines.length;
+    const[l1x,l1y]=iso(-30,ty0,1.2),[l2x,l2y]=iso(34,ty0,1.2);
+    ctx.strokeStyle='rgba(58,98,196,.5)';ctx.lineWidth=1.3;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(l1x,l1y);ctx.lineTo(l2x,l2y);ctx.stroke();ctx.setLineDash([]);
+    if(Math.abs(d.tq)>0.5){const[ax2,ay2]=iso(d.cx+8,d.cy,2.2);
+      ctx.strokeStyle='rgba(192,57,43,.8)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(ax2,ay2,14,-.6,1.2*(d.tq>0?1:-1),d.tq<0);ctx.stroke();}}
+  // stats
+  const t90=Math.sqrt(2*(Math.PI/2)/(d.tau*8/d.I)).toFixed(2);
+  const a0=(d.F/(d.m+2.6)).toFixed(2);
+  let statsHTML='<div class="lbl">this build</div>'+
+   '<div>mass <b>'+d.m.toFixed(1)+' kg dry</b></div>'+
+   '<div>thrust <b>'+d.F+'N</b> · a <b>'+a0+' u/s²</b>'+(d.engR.length?' · retro <b>'+(d.engR.length*SPEC.engine.thrust)+'N</b>':'')+'</div>'+
+   '<div>turn authority <b>τ'+d.tau.toFixed(0)+'</b> · 90° <b>~'+t90+'s</b></div>'+
+   '<div>fuel <b>'+(ship?ship.fuel.toFixed(0):0)+'</b> / cap <b>'+d.fuelCap+'u</b></div>'+
+   '<div>welds <b>'+weldsOf(build).length+'</b>'+(build.some(m=>m.t==='strut')?' <span style="color:var(--warn)">(strut joints weak)</span>':'')+'</div>'+
+   '<div>struct limit <b>'+(d.gMin===1e9?'—':d.gMin.toFixed(2)+' u/s²')+'</b> vs burn <b>'+d.aFull.toFixed(2)+'</b></div>'+
+   '<div id="warn">'+(Math.abs(d.tq)>0.5?('⚠ yaws '+(d.tq>0?'left':'right')+' under burn'):'')+
+     ((d.tau/d.I<0.09)?' ⚠ sluggish attitude — add RCS':'')+
+     ((d.gMin<d.aFull)?' ⚠ UNSOUND: full burn out-pulls the weakest joint — it WILL shear on throttle':
+      (d.gMin<d.aFull*1.6&&d.gMin<1e9)?' ⚠ marginal joints — impacts will finish them':'')+
+     ((!build.some(m=>m.t==='engine'))?'⚠ no engine':'')+
+     (SHIPLOG.length?'<div style="margin-top:5px;padding-top:4px;border-top:1px solid rgba(var(--bd),.08);font-size:8.5px;color:var(--ink3)">'+SHIPLOG.slice(-3).map(e2=>'· '+e2.txt).join('<br>')+'</div>':'')+
+     ((run&&run._manifest)?(()=>{const now2=build.map(m=>m.t);const lost=[...run._manifest];
+        for(const t2 of now2){const i2=lost.indexOf(t2);if(i2>=0)lost.splice(i2,1);}
+        return lost.length?' <span style="color:var(--bad)">⚠ lost in flight: '+lost.map(t2=>SPEC[t2].nm).join(', ')+'</span>':'';})():'')+'</div>';
+  $('wallet').textContent='¢'+wallet.toLocaleString();
+  // contracts board: the panel is STABLE — innerHTML only on structural change,
+  // countdown ticks by textContent, buttons wired at write time on pointerdown
+  {const sid=(dockedAt&&dockedAt.id)||'cloister';
+   const open=CONTRACTS.filter(c=>c.open&&c.at===sid);
+   for(const ct of open){
+     if(ct.kind==='rescue'){
+       statsHTML+='<div style="margin-top:8px;padding-top:7px;border-top:1px solid rgba(var(--bd),.1)">'+
+         '<div class="lbl" style="color:var(--warn)">⛑ RESCUE · <span id="ctT_'+ct.id+'"></span></div>'+
+         '<div style="font-size:11px">tow <b>'+ct.trId+'</b> to any pad — pays <b>¢'+ct.pay.toLocaleString()+'</b></div></div>';
+       continue;}
+     const spare=build.filter(md=>PKEY[md.t]===ct.part).length-(ct.part==='bridge'||ct.part==='engine'?1:0);
+     statsHTML+='<div style="margin-top:8px;padding-top:7px;border-top:1px solid rgba(var(--bd),.1)">'+
+       '<div class="lbl" style="color:var(--warn)">CONTRACT · <span id="ctT_'+ct.id+'"></span></div>'+
+       '<div style="font-size:11px">deliver <b>1× '+ct.part.toUpperCase()+'</b> — pays <b>¢'+ct.pay.toLocaleString()+'</b></div>'+
+       '<button id="dlv_'+ct.id+'" style="margin-top:5px;width:100%;height:30px;border-radius:9px;border:1.5px solid rgba(138,90,16,.4);background:rgba(138,90,16,.07);color:var(--warn);font-weight:800;font-size:10px;letter-spacing:1px"'+
+       (spare>0?'':' disabled')+'>'+(spare>0?'DELIVER FROM SHIP':'NO SPARE '+ct.part.toUpperCase())+'</button></div>';}
+   const st2=$('stats');
+   if(st2._key!==statsHTML){st2._key=statsHTML;st2.innerHTML=statsHTML;
+     for(const ct of open){const b=$('dlv_'+ct.id);
+       if(b)b.addEventListener('pointerdown',e=>{e.preventDefault();
+         if(!b._armed){b._armed=true;                 // irreversible sale: two taps
+           b.textContent='TAP AGAIN — SELLS '+ct.part.toUpperCase()+' ¢'+ct.pay.toLocaleString();
+           b.style.background='rgba(192,57,43,.12)';b.style.color='var(--bad)';b.style.borderColor='rgba(192,57,43,.5)';
+           setTimeout(()=>{if(b._armed){b._armed=false;st2._key=null;}},4000);return;}
+         // remove one matching module, legality preserved
+         const cands=build.filter(md=>PKEY[md.t]===ct.part);
+         for(const md of cands){
+           if(md.t==='bridge'&&build.filter(m=>m.t==='bridge').length===1)continue;
+           if(md.t==='engine'&&build.filter(m=>m.t==='engine').length===1)continue;
+           const rest=build.filter(m=>m!==md);
+           const bi=rest.findIndex(m=>m.t==='bridge');
+           if(bi<0||connectedFrom(rest,weldsOf(rest),bi).size!==rest.length)continue;
+           build=rest;
+           const pay2=fulfilContract(ct,'player');wallet+=pay2;L.playerC=wallet;
+           slog('SOLD '+SPEC[md.t].nm+' → +¢'+pay2.toLocaleString()+' (contract)');
+           recAction('deliver',{id:ct.id});st2._key=null;trayInit();break;}});}}
+   for(const ct of open){const tEl=$('ctT_'+ct.id);if(tEl)tEl.textContent=ct.t.toFixed(0)+'s';}}
+  {const fs2=$('fillSt');if(fs2){const mm=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+    const need=Math.max(0,d.fuelCap-(ship?ship.fuel:0));
+    fs2.textContent=need<1?'tank full':('~¢'+Math.ceil(mm.fuelPool.c*need/(mm.fuelPool.q-need)).toLocaleString()+' for '+need.toFixed(0)+'u · spot ¢'+(mm.fuelPool.c/mm.fuelPool.q).toFixed(1));}}
+  $('fly').disabled=!(build.some(m=>m.t==='bridge')&&build.some(m=>m.t==='engine'));
+  $('fly').textContent=dockedAt?('UNDOCK — '+dockedAt.nm+' ▸'):'TEST FLIGHT ▸';
+}
+function trayInit(){
+  const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+  let h='<div class="lbl" style="margin-bottom:6px">'+((dockedAt&&dockedAt.nm)||'CLOISTER')+' · SHOP</div>';
+  h+='<div class="mods">';
+  for(const[k,s2]of Object.entries(SPEC)){
+    const p=m[PKEY[k]];const cost=p.q>1?price1(p):null;
+    h+='<button class="part" data-k="'+k+'"'+(cost===null||cost>wallet?' style="opacity:.45"':'')+'>'+
+      '<div class="nm">'+s2.nm+'</div><div class="st">'+s2.kg.toFixed(1)+' kg · '+
+      (cost===null?'OUT':'¢'+cost.toLocaleString())+' · '+(p.q-1)+' left</div></button>';}
+  h+='</div><div class="lbl" style="margin:8px 0 4px">FUEL</div>'+
+     '<button class="part" id="fillB"><div class="nm">FILL TANK</div><div class="st" id="fillSt"></div></button>';
+  if(ship&&ship.hold&&ship.hold.length){
+    h+='<div class="lbl" style="margin:8px 0 4px">HOLD · '+holdKg().toFixed(1)+'/'+holdCap()+' kg</div>';
+    ship.hold.forEach((it,i)=>{
+      const p=m[PKEY[it.t]];const kk=p.q*p.c;
+      const full=Math.floor(p.c-kk/(p.q+1));
+      const pay=it.hot?Math.floor(full*0.55):full;
+      h+='<button class="part" data-hi="'+i+'"><div class="nm">'+SPEC[it.t].nm+(it.hot?' <span style="color:var(--bad)">⚠ HOT</span>':'')+'</div>'+
+         '<div class="st">sell ¢'+pay.toLocaleString()+(it.hot?' (fenced)':'')+'</div></button>';});
+    h+='<button class="part" id="fitB"><div class="nm">SHIPFITTER</div><div class="st">weld first hold item · ¢150 labor</div></button>';}
+  if(ship&&ship.salvage>0.05){
+    const rate=(dockedAt&&dockedAt.id)==='hollow'?95:130;
+    const worth=Math.min(MKT[(dockedAt&&dockedAt.id)||'cloister'].credits,Math.round(ship.salvage*rate));
+    h+='<div class="lbl" style="margin:8px 0 4px">SALVAGE</div>'+
+       '<button class="part" id="salvB"><div class="nm">SELL '+ship.salvage.toFixed(1)+'t DUST</div>'+
+       '<div class="st">¢'+rate+'/t → ¢'+worth.toLocaleString()+'</div></button>';}
+  $('tray').innerHTML=h;
+  for(const b of document.querySelectorAll('[data-hi]'))b.addEventListener('click',()=>{
+    const i=+b.dataset.hi;const it=ship.hold[i];if(!it)return;
+    const p=m[PKEY[it.t]];
+    const full=poolSell(p,1);
+    const pay=it.hot?Math.floor(full*0.55):full;
+    m.credits+=(full-pay);          // the fence keeps the difference
+    wallet+=pay;L.playerC=wallet;
+    ship.hold.splice(i,1);recAction('fence',{i});trayInit();});
+  {const fb=$('fitB');if(fb)fb.addEventListener('click',()=>{
+    if(!ship.hold.length||wallet<150)return;
+    const it=ship.hold[0];
+    if(nearWreckStub({t:it.t,hp:80,hot:it.hot})){
+      ship.hold.shift();
+      wallet-=150;L.playerC=wallet;
+      MKT[(dockedAt&&dockedAt.id)||'cloister'].credits+=150;
+      recAction('fit',{});trayInit();}});}
+  {const sb=$('salvB');if(sb)sb.addEventListener('click',()=>{
+    const sid=(dockedAt&&dockedAt.id)||'cloister';const m2=MKT[sid];
+    const rate=sid==='hollow'?95:130;
+    const worth=Math.min(m2.credits,Math.round(ship.salvage*rate));
+    m2.credits-=worth;wallet+=worth;L.playerC=wallet;
+    ship.salvage=0;recAction('salv',{c:worth});trayInit();});}
+  $('fillB').addEventListener('click',()=>{
+    if(!ship)return;   // fuel needs a tank to live in
+    const mm=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+    const d=derive(build);const need=Math.max(0,d.fuelCap-(ship?ship.fuel:0));
+    if(need<1)return;
+    const want=Math.min(need,mm.fuelPool.q-1);
+    const k2=mm.fuelPool.q*mm.fuelPool.c;
+    const cost=Math.ceil(k2/(mm.fuelPool.q-want)-mm.fuelPool.c);
+    const buy=wallet>=cost?want:Math.floor(mm.fuelPool.q*wallet/(mm.fuelPool.c+wallet));
+    if(buy<1)return;
+    const paid=poolBuy(mm.fuelPool,buy)||0;
+    wallet-=paid;L.playerC=wallet;
+    if(ship){ship.fuel+=buy;}L.shipFuel=(ship?ship.fuel:0);
+    recAction('fill',{u:buy});trayInit();});
+  for(const b of document.querySelectorAll('.part'))b.addEventListener('click',()=>{
+    if(b.dataset.bp){loadBlueprint(b.dataset.bp);return;}
+    if(b.dataset.k)setSel(sel===b.dataset.k?null:b.dataset.k);});}
+function setSel(k){sel=k;
+  for(const b2 of document.querySelectorAll('.part'))b2.classList.toggle('sel',b2.dataset.k===sel);
+  $('hint').style.display=sel?'block':'none';
+  $('hint').textContent=sel?'tap a glowing port to snap':'';
+  if(sel){selMod=null;
+    const S2=SPEC[sel],ex={engine:'thrust +55N each',tank:'+300u fuel',rcs:'τ = 16N × arm from CoM',
+      rack:'4 birds × 0.9 kg',mount:'40 slugs × 0.05 kg',shield:'repulser field · drinks fuel',
+      strut:'weak joints (500 vs 1200)',bridge:'required · attitude ring τ16',pod:'holds 6 kg of goods'}[sel]||'';
+    $('modcard').innerHTML='<div class="nm">'+S2.nm+' · '+S2.kg.toFixed(1)+' kg · ¢'+S2.price.toLocaleString()+'</div>'+
+      '<div class="row2"><canvas id="mcCv"></canvas><div class="col">'+
+      '<div class="ds">'+DESC[sel]+'</div>'+(ex?'<div class="ct">'+ex+'</div>':'')+'</div></div>';
+    $('modcard').style.display='block';cardPart=sel;$('hint').style.display='none';}
+  else {cardPart=null;modCard();}}
+function screenToCell(px,py){
+  // exact inverse of iso(): same VCX/VCY, same cam terms, same pot() warp.
+  // the widened 3x profile keeps the warp slope at its proven value, so
+  // fixed-point refinement converges everywhere it always did
+  let xr=0,yr=0;
+  for(let it=0;it<12;it++){
+    const pw=(it===0)?0:pot(xr,yr)-_pR;
+    const u=(px-VCX)/(C30*cam.z), v=(py-VCY-pw)/(S30*cam.z);
+    xr=(u+v)/2+cam.x; yr=(v-u)/2+cam.y;}
+  let x=xr,y=yr;
+  if(cam.rot){const c=Math.cos(-cam.rot),s2=Math.sin(-cam.rot);
+    const rx=x*c-y*s2,ry=x*s2+y*c;x=rx;y=ry;}
+  return[Math.round(x/CELL),Math.round(y/CELL)];}
+const ptrs=new Map();let pinch=null;
+cv.addEventListener('pointermove',e=>{
+  if(mode!=='hangar'||!ptrs.has(e.pointerId))return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2){const[a,b]=[...ptrs.values()];
+    const d=Math.hypot(a.x-b.x,a.y-b.y),an=Math.atan2(b.y-a.y,b.x-a.x);
+    if(!pinch)pinch={d,an,z:hz,rot:hrot};
+    hz=Math.min(14,Math.max(4,pinch.z*d/pinch.d));
+    hrot=pinch.rot+(an-pinch.an);cam.rot=hrot;}});
+const endP=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;};
+cv.addEventListener('pointerup',endP);cv.addEventListener('pointercancel',endP);
+cv.addEventListener('pointerdown',e=>{
+  if(mode!=='hangar')return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size>1)return;
+  const[gx,gy]=screenToCell(e.clientX,e.clientY);
+  const hit=occupied(gx,gy);
+  if(hit){setSel(null);selMod=hit;modCard();return;}
+  if(sel&&adjacencyOK(gx,gy,sel)){
+    {const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];const p=m[PKEY[sel]];
+     const cost=price1(p);if(cost===null||wallet<cost)return;
+     const paid=poolBuy(p,1);wallet-=paid;L.playerC=wallet;
+     build.push({t:sel,gx,gy,org:(dockedAt&&dockedAt.id)==='hollow'?'hol':'clo'});slog('WELDED '+SPEC[sel].nm+' −¢'+paid.toLocaleString());recAction('snap',{p:sel,gx,gy});trayInit();}return;}
+  selMod=null;modCard();
+});
+function modCard(){
+  const c=$('modcard');
+  if(!selMod){c.style.display='none';cardPart=sel||null;return;}
+  const md=selMod,S2=SPEC[md.t],d=derive(build);
+  let ct='';
+  if(md.t==='engine'){const arm=(md.gy*CELL-d.cy);
+    ct='thrust +55N · torque arm '+(-arm).toFixed(1)+' (yaw '+(Math.abs(arm)<.3?'neutral':(arm>0?'left':'right'))+')';}
+  if(md.t==='rcs'){const arm=Math.hypot(md.gx*CELL-d.cx,md.gy*CELL-d.cy);
+    ct='τ contribution '+(16*Math.max(arm,1.8)).toFixed(0)+' (arm '+arm.toFixed(1)+'u)';}
+  if(md.t==='tank')ct='+300u fuel capacity';
+  if(md.t==='pod')ct='dry 3.0kg · goods ride here in the real game';
+  if(md.t==='bridge')ct='baseline attitude ring τ26';
+  if(md.t==='rack')ct='4 birds × 0.9 kg aboard = 3.6 kg riding your inertia';
+  const isLastBridge=md.t==='bridge'&&build.filter(m=>m.t==='bridge').length===1;
+  const rest=build.filter(m=>m!==md);
+  const bi=rest.findIndex(m=>m.t==='bridge');
+  const legal=!isLastBridge&&bi>=0&&connectedFrom(rest,weldsOf(rest),bi).size===rest.length;
+  c.innerHTML='<div class="nm">'+S2.nm+' · '+S2.kg.toFixed(1)+' kg</div>'+
+    '<div class="row2"><canvas id="mcCv"></canvas><div class="col">'+
+    '<div class="ds">'+DESC[md.t]+'</div>'+
+    (ct?'<div class="ct">'+ct+'</div>':'')+'</div></div>'+
+    (()=>{const p2=MKT[(dockedAt&&dockedAt.id)||'cloister'][PKEY[md.t]];
+      const _rp=Math.floor(p2.c-(p2.q*p2.c)/(p2.q+1));
+      return '<button id="rmM"'+(legal?'':' disabled')+'>'+(legal?'REMOVE · refund ¢'+_rp.toLocaleString():(isLastBridge?'LAST BRIDGE — KEEP':'REMOVAL SPLITS THE SHIP'))+'</button>';})()+
+    (md.t==='engine'?'<button id="rotM" style="margin-top:5px">⟳ ROTATE NOZZLE · '+['bow','port','stern','starboard'][md.f||0]+'</button>':'');
+  c.style.display='block';cardPart=md.t;$('hint').style.display='none';
+  const rm=$('rmM');
+  if(legal)rm.addEventListener('click',()=>{
+    if(doRm(md)){recAction('rm',{gx:md.gx,gy:md.gy});selMod=null;modCard();trayInit();}});
+  {const rb=$('rotM');if(rb)rb.addEventListener('click',()=>{
+    if(doRot(md)){recAction('rot',{gx:md.gx,gy:md.gy});modCard();trayInit();}});}
+}
+$('fly').addEventListener('click',()=>{dockedAt?undock():launch();});
+
+/* ================= FLIGHT INPUT ================= */
+const bindHold=(id,k)=>{const b=$(id);
+  const dn=e=>{e.preventDefault();inp[k]=true;if(k!=='stop')disarmStop();};const up=e=>{e.preventDefault();inp[k]=false;};
+  b.addEventListener('pointerdown',dn);for(const ev of['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,up);};
+bindHold('ccwB','ccw');bindHold('cwB','cw');bindHold('burnB','burn');bindHold('retroB','retro');
+$('stopB').addEventListener('pointerdown',e=>{e.preventDefault();inp.stop=!inp.stop;recAction('stop',{v:inp.stop?1:0});
+  $('stopB').style.background=inp.stop?'rgba(138,90,16,.28)':'rgba(138,90,16,.07)';});
+const disarmStop=()=>{if(inp.stop){inp.stop=false;$('stopB').style.background='rgba(138,90,16,.07)';}};
+function fireSlug(){
+  if(!ship||!ship.d.mount||ship.slugs<=0)return;
+  const md=ship.d.mount;const[mx,my]=modWorld(md);
+  const c=Math.cos(ship.ang),s=Math.sin(ship.ang);const V=28;
+  world.slugs.push({x:mx+c*3,y:my+s*3,vx:ship.vx+c*V,vy:ship.vy+s*V,t:0});
+  ship.slugs--;L.shipOrdKg-=0.05;L.worldOrdKg+=0.05;recAction('fire',{});
+  const J=0.05*V, M2=totalM();
+  ship.vx-=c*J/M2;ship.vy-=s*J/M2;
+  const arm=-(md.gy*CELL-ship.d.cy);ship.w-=arm*J/ship.d.I;   // off-axis mounts yaw you
+}
+$('fireB').addEventListener('pointerdown',e=>{e.preventDefault();fireSlug();});
+function nearWreck(){
+  if(!ship||ship.dead||mode!=='flight')return null;
+  for(const wk of world.wreckage){
+    if(Math.hypot(ship.x-wk.x,ship.y-wk.y)<7&&
+       Math.hypot(ship.vx-wk.vx,ship.vy-wk.vy)<5)return wk;}
+  return null;}
+function scavenge(){
+  const wk=nearWreck();if(!wk)return;
+  if(!wk.t){
+    const fT=Math.min(wk.fuelU||0,ship.d.fuelCap-ship.fuel);
+    ship.fuel+=fT;L.shipFuel=ship.fuel;L.exhaust+=(wk.fuelU||0)-fT;
+    ship.salvage=(ship.salvage||0)+(wk.salv||0);
+    wallet+=wk.credits||0;L.playerC=wallet;
+    wk.dead=true;world.wreckage=world.wreckage.filter(w2=>!w2.dead);
+    recAction('scav',{});return;}
+  let best=null,bd=1e9;
+  for(const md of ship.modules)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){
+    const gx=md.gx+dx,gy=md.gy+dy;
+    if(ship.modules.some(m2=>m2.gx===gx&&m2.gy===gy))continue;
+    const save=build;build=ship.modules;
+    const ok=adjacencyOK(gx,gy,wk.t);build=save;
+    if(!ok)continue;
+    const c=Math.cos(ship.ang),s2=Math.sin(ship.ang);
+    const lx=gx*CELL-ship.d.cx,ly=gy*CELL-ship.d.cy;
+    const px2=ship.x+lx*c-ly*s2,py2=ship.y+lx*s2+ly*c;
+    const dd=Math.hypot(px2-wk.x,py2-wk.y);
+    if(dd<bd){bd=dd;best={gx,gy};}}
+  if(!best)return;
+  ship.modules.push({t:wk.t,gx:best.gx,gy:best.gy,hp:Math.max(20,wk.hp||60),org:'sal'});slog('WELDED '+SPEC[wk.t].nm+' (salvage)');
+  ship.d=derive(ship.modules);ship.welds=weldsOf(ship.modules);
+  syncBuild();
+  wk.dead=true;world.wreckage=world.wreckage.filter(w2=>!w2.dead);
+  recAction('scav',{});run.rewelds=(run.rewelds||0)+1;}
+let GRAP=null;   // one line at a time
+function fireGrapple(){try{fireGrappleInner();}catch(e){reportErr('fire: '+e.message);}}
+function fireGrappleInner(){
+  if(!ship||!ship.d.grap||ship.dead)return;
+  if(GRAP){ // tap grammar: fly->reel->cut
+    if(GRAP.state==='fly'){GRAP.state='rewind';return;}   // call the cast back
+    if(GRAP.state==='stuck'){GRAP.state='reel';return;}
+    if(GRAP.state==='reel'){GRAP=null;recAction('cut',{});return;}   // the winch brings the head home
+    return;}   // embedded/adrift: the head is out there — go fetch it
+  const md=ship.d.grap;const[mx,my]=modWorld(md);
+  const c=Math.cos(ship.ang),s2=Math.sin(ship.ang);const V0=34;
+  GRAP={x:mx+c*2.2,y:my+s2*2.2,vx:ship.vx+c*V0,vy:ship.vy+s2*V0,
+    state:'fly',t:0,hit:null,tension:0};
+  const J=0.15*V0,M2=totalM();
+  ship.vx-=c*J/M2;ship.vy-=s2*J/M2;
+  const arm=-(md.gy*CELL-ship.d.cy);ship.w-=arm*J/ship.d.I;
+  recAction('grap',{});}
+function grapAnchor(){const md=ship.d.grap;const[mx,my]=modWorld(md);return[mx,my];}
+function stepGrapple(dt){try{stepGrappleInner(dt);}catch(e){GRAP=null;reportErr('step: '+e.message);}}
+function stepGrappleInner(dt){
+  if(!GRAP||!ship||ship.dead){if(GRAP&&ship&&ship.dead)GRAP=null;return;}
+  if(!ship.d.grap){GRAP=null;return;}   // the winch was shed: the line goes with it, head adrift
+  const[ax0,ay0]=grapAnchor();
+  const g=GRAP;
+  if(g.state==='fly'){
+    g.t+=dt;
+    const[gax,gay]=accel(world.wells,g.x,g.y);
+    g.vx+=gax*dt;g.vy+=gay*dt;g.x+=g.vx*dt;g.y+=g.vy*dt;
+    // the bite is the fabric's job now (STEP 2)
+    if(run._castTgt&&run._castTgt.o){const o2=run._castTgt.o;
+      const md2=Math.hypot(g.x-o2.x,g.y-o2.y);
+      if(g._min===undefined||md2<g._min)g._min=md2;}
+    if(Math.hypot(g.x-ax0,g.y-ay0)>95||g.t>5){g.state='rewind';
+      if(run._castTgt&&g._min!==undefined){
+        run.toasts=run.toasts||[];
+        run.toasts.push({x:g.x,y:g.y-5,txt:'🪝 missed '+run._castTgt.kind+' by '+g._min.toFixed(1)+'u',t:0});
+        slog('MISSED '+run._castTgt.kind+' by '+g._min.toFixed(1)+'u');}
+      run._castTgt=null;return;}}   // spent cast: the rope is still attached — winch it home
+  else if(g.state==='rewind'){
+    const dx=ax0-g.x,dy=ay0-g.y,dd=Math.hypot(dx,dy)||1;
+    g.vx=dx/dd*44;g.vy=dy/dd*44;g.x+=g.vx*dt;g.y+=g.vy*dt;
+    if(dd<2.5)GRAP=null;   // home, armed again
+    return;}
+  else if(g.state==='adrift'){
+    const[gax,gay]=accel(world.wells,g.x,g.y);
+    g.vx+=gax*dt;g.vy+=gay*dt;g.x+=g.vx*dt;g.y+=g.vy*dt;
+    if(Math.hypot(g.x-ship.x,g.y-ship.y)<3){GRAP=null;
+      run.toasts=run.toasts||[];run.toasts.push({x:ship.x,y:ship.y-6,txt:'🪝 head recovered',t:0});}
+    return;}
+  else if(g.state==='embedded'){
+    const tgt=g.hit.kind==='wreck'?g.hit.wk:(g.hit.kind==='pirate'?g.hit.pi:(g.hit.kind==='rock'?g.hit.r:(g.hit.kind==='loot'?g.hit.cr:g.hit.tr)));
+    if(g.hit.kind==='wreck'&&!world.wreckage.includes(tgt)){g.state='adrift';return;}
+    if(g.hit.kind==='loot'&&(tgt.dead||!world.crates.includes(tgt))){g.state='rewind';return;}   // collected: the line comes home
+    g.x=tgt.x;g.y=tgt.y;g.vx=tgt.vx||0;g.vy=tgt.vy||0;
+    if(Math.hypot(g.x-ship.x,g.y-ship.y)<3){GRAP=null;
+      run.toasts=run.toasts||[];run.toasts.push({x:ship.x,y:ship.y-6,txt:'🪝 head recovered',t:0});}
+    return;}
+  else{
+    // the rope. Rest length set at the bite; slack inside it, a spring-damper
+    // beyond it, pulling BOTH ends by their masses, applied at the mount.
+    const tgt=g.hit.kind==='wreck'?g.hit.wk:(g.hit.kind==='pirate'?g.hit.pi:(g.hit.kind==='rock'?g.hit.r:(g.hit.kind==='loot'?g.hit.cr:g.hit.tr)));
+    if(g.hit.kind==='loot'&&(tgt.dead||!world.crates.includes(tgt))){g.state='rewind';return;}   // collected off the hook: line home
+    const tx=tgt.x,ty=tgt.y;
+    g.x=tx;g.y=ty;
+    const dx=tx-ax0,dy=ty-ay0,dd=Math.hypot(dx,dy)||1;
+    if(g.restLen===undefined)g.restLen=dd;
+    if(g.state==='reel')g.restLen=Math.max(4,g.restLen-8*dt);
+    const tm=g.hit.kind==='wreck'?SPEC[tgt.t].kg:(g.hit.kind==='pirate'?15:(g.hit.kind==='rock'?tgt.t*40:(g.hit.kind==='loot'?1.5:trampMass(tgt))));
+    const M=totalM(), mu=(M*tm)/(M+tm);
+    const rx=ax0-ship.x, ry=ay0-ship.y;
+    if(g.yankReq){ g.yankReq=false;                  // 💥 one commanded haul through the line
+      g.restLen=Math.min(g.restLen,dd);              // the slack is gone the instant you pull
+      const nx=dx/dd, ny=dy/dd;
+      const J=mu*22;                                 // the same law as the jerk: mass decides
+      if(J>260){ g.state='embedded';g.taut=false;g.tear=0;
+        run.toasts=run.toasts||[];run.toasts.push({x:ship.x,y:ship.y-6,txt:'line SNAPPED — too much mass',t:0});
+        return;}
+      ship.vx+=nx*J/M; ship.vy+=ny*J/M;
+      ship.w+=(rx*ny-ry*nx)*J/ship.d.I;
+      tgt.vx-=nx*J/tm; tgt.vy-=ny*J/tm;
+      if(g.hit.kind==='tramp')g.tear=(g.tear||0)+J*0.6;
+      run.toasts=run.toasts||[];run.toasts.push({x:ship.x,y:ship.y-6,txt:'💥 YANK',t:0});}
+    if(dd>g.restLen){                               // TAUT: a constraint, not a spring
+      const avx=ship.vx-ship.w*ry, avy=ship.vy+ship.w*rx;   // the anchor rides the hull's spin
+      const nx=dx/dd, ny=dy/dd;
+      const vrad=(tgt.vx-avx)*nx+(tgt.vy-avy)*ny;   // + = separating
+      const want=g.state==='reel'?-8:0;             // the winch demands 8 u/s of closing
+      const rel=vrad-want;
+      if(rel>0){
+        let J=rel*mu;                               // reduced mass decides who moves whom
+        if(!g.taut){ J*=1.15;                       // THE JERK: rope stretch pays back
+          if(J>260){ g.state='embedded';g.taut=false;g.tear=0;
+            run.toasts=run.toasts||[];run.toasts.push({x:ship.x,y:ship.y-6,txt:'line SNAPPED — head embedded',t:0});
+            return;}}
+        ship.vx+=nx*J/M; ship.vy+=ny*J/M;
+        ship.w+=(rx*ny-ry*nx)*J/ship.d.I;
+        tgt.vx-=nx*J/tm; tgt.vy-=ny*J/tm;
+        if(g.hit.kind==='tramp'&&g.state==='reel')g.tear=(g.tear||0)+J;   // strain is reeling against a weld
+        if(g.hit.kind==='pirate'&&g.hit.pi.mark!=='player'){
+          g.hit.pi.mark='player';g.hit.pi.st='hunt';g.hit.pi.markT=0;}   // harpoon the predator and it turns
+      }
+      g.taut=true;
+      const err=dd-g.restLen, wS=tm/(M+tm), wT=M/(M+tm), nx2=dx/dd, ny2=dy/dd;
+      ship.x+=nx2*err*wS; ship.y+=ny2*err*wS;       // the line does not stretch:
+      tgt.x-=nx2*err*wT; tgt.y-=ny2*err*wT;         // positions split by inverse mass
+    } else { g.taut=false; g.tear=Math.max(0,(g.tear||0)-60*dt); }   // slack bleeds the strain slowly
+    if(g.state==='reel'){
+      if(g.hit.kind==='tramp'&&(g.tear||0)>140){ // the cargo weld tears: accumulated jerk
+        const tr=g.hit.tr;
+        const keys=Object.keys(tr.cargo).filter(k=>tr.cargo[k]>0);
+        if(!keys.length){GRAP=null;tr.flee=Math.max(tr.flee||0,8);return;}  // nothing left to take
+        const k=keys[(rng()*keys.length)|0];
+        tr.cargo[k]--;if(!tr.cargo[k])delete tr.cargo[k];
+        const t2=k==='pods'?'pod':k;
+        world.wreckage.push({t:t2,hot:true,x:tr.x,y:tr.y,vx:tr.vx*.6,vy:tr.vy*.6,ang:rng()*TAU,w:(rng()-.5),hp:60});
+        g.hit={kind:'wreck',wk:world.wreckage[world.wreckage.length-1]};
+        g.tear=0;g.restLen=Math.hypot(tr.x-ax0,tr.y-ay0);
+        tr.flee=14;tr.scavDone=true;   // it runs
+        run.torn=(run.torn||0)+1;}
+      if(dd<6&&g.hit.kind==='loot'){const cr2=tgt;   // winched aboard: the line empties the can
+        const fT=Math.min(cr2.fuelU||0,ship.d.fuelCap-ship.fuel);
+        ship.fuel+=fT;L.shipFuel=ship.fuel;L.exhaust+=(cr2.fuelU||0)-fT;
+        wallet+=cr2.credits||0;L.playerC=wallet;
+        run.toasts=run.toasts||[];
+        run.toasts.push({x:cr2.x,y:cr2.y-5,txt:'📦 '+(cr2.credits?'+¢'+cr2.credits.toLocaleString():'')+(cr2.credits&&fT?' · ':'')+(fT?'+'+(fT|0)+'u ⛽':'')+(!cr2.credits&&!fT?'empty crate':''),t:0});
+        cr2.credits=0;cr2.fuelU=0;cr2.dead=true;world.crates=world.crates.filter(c2=>!c2.dead);
+        run.looted=(run.looted||0)+1;GRAP=null;return;}
+      if(dd<6&&g.hit.kind==='wreck'){
+        {const wk=g.hit.wk;
+          if(!world.wreckage.includes(wk)){GRAP=null;return;}
+          if(!wk.t){ // a crate on the hook: absorb it
+            const fT=Math.min(wk.fuelU||0,ship.d.fuelCap-ship.fuel);
+            ship.fuel+=fT;L.shipFuel=ship.fuel;L.exhaust+=(wk.fuelU||0)-fT;
+            ship.salvage=(ship.salvage||0)+(wk.salv||0);
+            wallet+=wk.credits||0;L.playerC=wallet;
+            wk.dead=true;world.wreckage=world.wreckage.filter(w2=>!w2.dead);
+            GRAP=null;return;}
+          if(holdKg()+SPEC[wk.t].kg<=holdCap()){ship.hold.push({t:wk.t,hot:!!wk.hot});wk.dead=true;}
+          else{ // no room: field-weld it instead
+            const held=nearWreckStub(wk);if(held)wk.dead=true;}
+          world.wreckage=world.wreckage.filter(w2=>!w2.dead);}
+        GRAP=null;}}   // the head comes home
+  }}
+function nearWreckStub(wk){ // weld a specific piece to the nearest legal port
+  let best=null,bd=1e9;
+  for(const md of ship.modules)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){
+    const gx=md.gx+dx,gy=md.gy+dy;
+    if(ship.modules.some(m2=>m2.gx===gx&&m2.gy===gy))continue;
+    const save=build;build=ship.modules;
+    const ok=adjacencyOK(gx,gy,wk.t);build=save;
+    if(ok){best={gx,gy};bd=0;break;}}
+  if(!best)return false;
+  ship.modules.push({t:wk.t,gx:best.gx,gy:best.gy,hp:Math.max(20,wk.hp||60),org:'sal'});slog('WELDED '+SPEC[wk.t].nm+' (salvage)');
+  ship.d=derive(ship.modules);ship.welds=weldsOf(ship.modules);
+  syncBuild();
+  return true;}
+function stepPlan(dt){
+  if(!run.plan||run.done||!ship||ship.dead)return;
+  if(run.t>=run.plan.at){
+    const va=Math.atan2(ship.vy,ship.vx);   // prograde at the moment of firing — deterministic
+    doSling(va);run.plan=null;}}
+function doSling(va){
+  const M=totalM();const dv=14;
+  const cost=Math.min(ship.fuel,M*dv*FUEL_PER_NS);
+  const real=cost/(M*FUEL_PER_NS);   // if the tank is short, the exit is shorter
+  ship.fuel-=cost;L.shipFuel=ship.fuel;L.exhaust+=cost;
+  ship.vx+=Math.cos(va)*real;ship.vy+=Math.sin(va)*real;
+  run.slings=(run.slings||0)+1;
+  run.toasts=run.toasts||[];
+  run.toasts.push({x:ship.x,y:ship.y-6,txt:'SLING +'+real.toFixed(1)+' Δv',t:0});}
+function aimCandidates(w){
+  const cone=0.7, reach=w==='grap'?90:150;   // wide enough that neighbors survive a snap
+  const[mx,my]=w==='grap'&&ship.d.grap?grapAnchor():[ship.x,ship.y];
+  const out=[];
+  for(const b of collectBodies()){
+    if(b.own==='ship'||b.kind==='head'||b.kind==='slug'||b.kind==='missile')continue;
+    const dx=b.x-mx,dy=b.y-my,dd=Math.hypot(dx,dy);
+    if(dd<3||dd>reach)continue;
+    let da=Math.atan2(dy,dx)-ship.ang;da=Math.atan2(Math.sin(da),Math.cos(da));
+    if(Math.abs(da)>cone)continue;
+    out.push({b,dd,da});}
+  out.sort((p,q)=>p.da-q.da);return out;}
+function interceptAng(b,w){
+  const V0=w==='grap'?34:18;   // missile: launch 8 + motor, ~18 effective over the burn
+  const[mx,my]=w==='grap'&&ship.d.grap?grapAnchor():[ship.x,ship.y];
+  const rx0=b.x-mx,ry0=b.y-my;
+  const vx=b.vx-ship.vx,vy=b.vy-ship.vy;       // the projectile rides the hull's velocity
+  const a=vx*vx+vy*vy-V0*V0,bq=2*(rx0*vx+ry0*vy),c=rx0*rx0+ry0*ry0;
+  let t;
+  if(Math.abs(a)<1e-6){t=-c/bq;}
+  else{const D=bq*bq-4*a*c;if(D<0)return null;
+    const r1=(-bq-Math.sqrt(D))/(2*a),r2=(-bq+Math.sqrt(D))/(2*a);
+    const ts=[r1,r2].filter(x=>x>0.01);if(!ts.length)return null;t=Math.min(...ts);}
+  if(!(t>0)||!isFinite(t))return null;
+  const seed=Math.atan2(ry0+vy*t,rx0+vx*t);
+  // refine by real flight: the anchor rotates with the hull, so each candidate
+  // angle places its own muzzle; gravity is integrated; best miss wins
+  const anchorAt=a3=>{if(w!=='grap'||!ship.d.grap)return[ship.x,ship.y];
+    const keep=ship.ang;ship.ang=a3;const p=grapAnchor();ship.ang=keep;return p;};
+  let best=seed,bd=1e9;
+  for(let k=-6;k<=6;k++){
+    const a2=seed+k*0.03,ca=Math.cos(a2),sa=Math.sin(a2);
+    const[mx2,my2]=anchorAt(a2);
+    let px=mx2+ca*2.2,py=my2+sa*2.2,pvx=ship.vx+ca*V0,pvy=ship.vy+sa*V0;
+    let tx=b.x,ty=b.y,tvx=b.vx,tvy=b.vy;
+    for(let i=0;i<75;i++){const[gax,gay]=accel(world.wells,px,py);
+      pvx+=gax/30;pvy+=gay/30;px+=pvx/30;py+=pvy/30;
+      const[tgx,tgy]=accel(world.wells,tx,ty);       // the target falls too
+      tvx+=tgx/30;tvy+=tgy/30;tx+=tvx/30;ty+=tvy/30;
+      const d2=Math.hypot(px-tx,py-ty);if(d2<bd){bd=d2;best=a2;}}}
+  return best;}                                  // frozen time does the lead math, honestly
+function cycleAimTarget(d){
+  if(!run.aim||(run.aim.w!=='grap'&&run.aim.w!=='msl'))return false;
+  const cands=aimCandidates(run.aim.w);
+  if(!cands.length){run.aim.tgtI=undefined;return false;}
+  const n=cands.length;
+  run.aim.tgtI=run.aim.tgtI===undefined?(d>0?0:n-1):(run.aim.tgtI+d+n)%n;
+  if(run.aim.tgtI>=n)run.aim.tgtI=n-1;
+  const sol=interceptAng(cands[run.aim.tgtI].b,run.aim.w);
+  if(sol!==null)ship.ang=sol;
+  return true;}
+function fireMissileAt(a){ship.ang=a;fireMissile();}
+function fireMissile(){
+  if(!ship||!ship.d.rack||ship.missiles<=0||ship.dead)return;
+  const md=ship.d.rack;const[mx,my]=modWorld(md);
+  const c=Math.cos(ship.ang),s2=Math.sin(ship.ang);const V0=8;
+  world.missiles.push({x:mx+c*2.5,y:my+s2*2.5,vx:ship.vx+c*V0,vy:ship.vy+s2*V0,
+    t:0,motor:false,fuelT:4,trail:[]});
+  ship.missiles--;L.shipOrdKg-=0.9;L.worldOrdKg+=0.9;recAction('msl',{});
+  const J=0.9*V0,M2=totalM();
+  ship.vx-=c*J/M2;ship.vy-=s2*J/M2;
+  const arm=-(md.gy*CELL-ship.d.cy);ship.w-=arm*J/ship.d.I;
+}
+$('mslB').addEventListener('pointerdown',e=>{e.preventDefault();
+  if(run.aim&&run.aim.w==='msl')return;           // armed: ⬤ FIRE commits, ✕ cancels
+  if(ship.missiles>0)run.aim={w:'msl'};});
+$('dockB').addEventListener('pointerdown',e=>{e.preventDefault();
+  if(run&&run.nearSt)dock(run.nearSt);});
+function dumpHold(){
+  if(!ship||ship.dead)return;
+  if(!ship.hold.length&&ship.salvage<=0.05)return;
+  for(const it of ship.hold)
+    world.wreckage.push({t:it.t,hot:it.hot,x:ship.x+(rng()-.5)*3,y:ship.y-4+(rng()-.5)*2,
+      vx:ship.vx*.7,vy:ship.vy*.7-1.5,ang:rng()*TAU,w:(rng()-.5),hp:60});
+  if(ship.salvage>0.05)
+    world.wreckage.push({t:null,x:ship.x,y:ship.y-4,vx:ship.vx*.7,vy:ship.vy*.7-1.5,
+      credits:0,fuelU:0,salv:ship.salvage,ang:0,w:.3});
+  ship.hold=[];ship.salvage=0;
+  const pi=world.pirates[0];
+  if(pi&&pi.mark==='player'){ // the demand is met by mass on the float
+    pi.lastMark='player';pi.mark=null;pi.st='home';pi.cool=60;
+    run.pirateLock=false;}
+  recAction('dump',{});run.dumped=(run.dumped||0)+1;}
+function payPirate(){
+  if(!run.pirateLock)return;
+  const pi=world.pirates[0];const dem=pirateDemand('player');
+  wallet-=dem;L.playerC=wallet;pi.credits+=dem;
+  pi.lastMark='player';pi.mark=null;pi.st='home';pi.cool=60;
+  run.pirateLock=false;recAction('pay',{c:dem});}
+$('payB').addEventListener('pointerdown',e=>{e.preventDefault();payPirate();});
+$('dumpB').addEventListener('pointerdown',e=>{e.preventDefault();dumpHold();});
+$('scavB').addEventListener('pointerdown',e=>{e.preventDefault();scavenge();});
+$('slingB').addEventListener('pointerdown',e=>{e.preventDefault();try{
+  if(run.aim&&run.aim.w==='sling')return;         // armed: ⬤ COMMIT BURN commits, ✕ cancels
+  run.toasts=run.toasts||[];
+  if(run.plan){run.toasts.push({x:ship.x,y:ship.y-6,txt:'burn already committed',t:0});return;}
+  if(ship.fuel<=9){run.toasts.push({x:ship.x,y:ship.y-6,txt:'tank too low to sling',t:0});return;}
+  run.aim={w:'sling'};run.slingI=2;
+}catch(err){reportErr('sling: '+err.message);}});
+$('cancelB').addEventListener('pointerdown',e=>{e.preventDefault();
+  if(run.aim){run.aim=null;run._tr=0;}});
+$('commitB').addEventListener('pointerdown',e=>{e.preventDefault();try{
+  if(!run.aim)return;
+  const w=run.aim.w;
+  if(w==='grap'){const a=ship.ang;
+    try{const cn=aimCandidates('grap');const lk=cn[run.aim.tgtI];
+      run._castTgt=lk?{kind:lk.b.kind,o:lk.b.o}:null;}catch(e){run._castTgt=null;}
+    run.aim=null;recAction('grap',{ang:a});fireGrappleInner();return;}
+  if(w==='msl'){const a=ship.ang;run.aim=null;recAction('msl2',{ang:a});fireMissileAt(a);return;}
+  if(w==='sling'){const k=run.slingI|0;const at=run.t+k*1.5;
+    run.aim=null;recAction('plan',{at});run.plan={at};return;}
+}catch(err){reportErr('commit: '+err.message);}});
+$('yankB').addEventListener('pointerdown',e=>{e.preventDefault();try{
+  if(GRAP&&(GRAP.state==='stuck'||GRAP.state==='reel')){GRAP.yankReq=true;recAction('yank',{});}
+}catch(err){reportErr('yank: '+err.message);}});
+$('grapB').addEventListener('pointerdown',e=>{e.preventDefault();
+  if(GRAP){fireGrapple();return;}                 // live line keeps reel/cut grammar
+  if(run.aim&&run.aim.w==='grap')return;          // armed: ⬤ FIRE commits, ✕ cancels
+  run.aim={w:'grap'};});
+addEventListener('keydown',e=>{const k=String(e.key).toLowerCase();
+  if(k==='x'){inp.stop=!inp.stop;recAction('stop',{v:inp.stop?1:0});$('stopB').style.background=inp.stop?'rgba(138,90,16,.28)':'rgba(138,90,16,.07)';e.preventDefault();return;}
+  const m2={a:'ccw',arrowleft:'ccw',d:'cw',arrowright:'cw',w:'burn',s:'retro'}[k];
+  if(m2){inp[m2]=true;disarmStop();e.preventDefault();}});
+addEventListener('keyup',e=>{const m2={a:'ccw',arrowleft:'ccw',d:'cw',arrowright:'cw',w:'burn',s:'retro'}[String(e.key).toLowerCase()];if(m2)inp[m2]=false;});
+function fracture(r,hitVx,hitVy){
+  r.dead=true;
+  if(r.r>1.1){
+    const n=2+((r.seed*5)|0)%2;
+    for(let i=0;i<n;i++){const a=(i/n)*TAU+r.seed;
+      world.rocks.push({x:r.x+Math.cos(a)*r.r*.6,y:r.y+Math.sin(a)*r.r*.6,
+        vx:r.vx+Math.cos(a)*(3+2*rng())+(hitVx||0)*.05,
+        vy:r.vy+Math.sin(a)*(3+2*rng())+(hitVy||0)*.05,
+        r:r.r*(.52+.14*rng()),ang:rng()*TAU,w:(rng()-.5)*1.6,
+        seed:r.seed+i+1,t:r.t/n});}
+  } else {
+    const ps=[];for(let i=0;i<16;i++){const a=rng()*TAU,sp=1+rng()*3;
+      ps.push({x:r.x,y:r.y,vx:r.vx+Math.cos(a)*sp,vy:r.vy+Math.sin(a)*sp});}
+    world.dust.push({ps,t:0,mass:r.t});
+    run.dusted=(run.dusted||0)+1;run.dustMass=(run.dustMass||0)+r.t;}
+}
+function stepMissiles(dt){
+  for(const m of world.missiles){
+    m.t+=dt;
+    if(!m.motor&&m.t>0.35)m.motor=true;
+    const[gax,gay]=accel(world.wells,m.x,m.y);
+    let ax=gax,ay=gay;
+    if(m.motor&&m.fuelT>0){m.fuelT-=dt;
+      let tgt=null,td=1e9;
+      for(const r of world.rocks){const dd=Math.hypot(r.x-m.x,r.y-m.y);if(dd<td){td=dd;tgt=r;}}
+      let dx,dy;
+      if(tgt){dx=tgt.x-m.x;dy=tgt.y-m.y;
+        const lead=td/26;dx+=(tgt.vx-m.vx)*lead;dy+=(tgt.vy-m.vy)*lead;}
+      else{dx=m.vx;dy=m.vy;}
+      const dl=Math.hypot(dx,dy)||1;
+      ax+=dx/dl*6.7;ay+=dy/dl*6.7;}
+    m.vx+=ax*dt;m.vy+=ay*dt;m.x+=m.vx*dt;m.y+=m.vy*dt;
+    if((run.t*60|0)%3===0){m.trail.push({x:m.x,y:m.y});if(m.trail.length>26)m.trail.shift();}
+    // rock strikes resolve in the fabric (payload 70 fractures)
+    for(const w of world.wells){const kd=w.kill||(w.mu>0?w.r:0);
+      if(kd&&Math.hypot(m.x-w.x,m.y-w.y)<kd)m.dead=true;}
+    if(m.t>14)m.dead=true;}
+  world.missiles=world.missiles.filter(m=>!m.dead);
+  world.rocks=world.rocks.filter(r=>!r.dead);
+  for(const dc of world.dust){dc.t+=dt;
+    for(const p of dc.ps){
+      const[gax,gay]=accel(world.wells,p.x,p.y);
+      p.vx+=gax*dt;p.vy+=gay*dt;
+      p.vx*=Math.pow(.85,dt);p.vy*=Math.pow(.85,dt);
+      p.x+=p.vx*dt;p.y+=p.vy*dt;}}
+  world.dust=world.dust.filter(dc=>dc.t<40);
+  for(const p of world.fx){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=Math.pow(.3,dt);p.vy*=Math.pow(.3,dt);}
+  world.fx=world.fx.filter(p=>p.t<p.life);
+}
+function predStop(){
+  if(ship.fuel<=0)return null;
+  const d=ship.d,M=totalM();
+  let x=ship.x,y=ship.y,vx=ship.vx,vy=ship.vy,ang=ship.ang,w=ship.w;
+  const wl=world.wells.map(q=>({...q}));
+  const pdt=1/60;
+  for(let i=0;i<5400;i++){
+    for(const[a,b]of[[wl[0],wl[1]],[wl[1],wl[0]]]){const dx=b.x-a.x,dy=b.y-a.y,r2=dx*dx+dy*dy+9;
+      const s2=.01*b.mu/Math.pow(r2,1.65);a.vx+=dx*s2*pdt;a.vy+=dy*s2*pdt;}
+    wl[0].x+=wl[0].vx*pdt;wl[0].y+=wl[0].vy*pdt;wl[1].x+=wl[1].vx*pdt;wl[1].y+=wl[1].vy*pdt;
+    let ax=0,ay=0;
+    for(const q of wl){const dx=q.x-x,dy=q.y-y;const r2=dx*dx+dy*dy+q.soft*q.soft;
+      const s2=q.mu/Math.pow(r2,1.65);ax+=dx*s2;ay+=dy*s2;}
+    const v=Math.hypot(vx,vy);
+    const gM=Math.hypot(ax,ay);
+    if(v<Math.max(0.12,2.2*gM*M/d.F))return{x,y,t:i*pdt};
+    const va=Math.atan2(vy,vx);
+    const useR=d.engR.length>0;
+    let err=(useR?va:va+Math.PI)-ang;
+    while(err>Math.PI)err-=TAU;while(err<-Math.PI)err+=TAU;
+    w+=Math.sign(err)*Math.min(Math.abs(err)*6,d.tau/d.I)*pdt*30;w*=.9;   // mirror the sim's per-step damping exactly
+    if(Math.abs(err)<.35){const dec=(useR?d.engR.length:d.engF.length)*SPEC.engine.thrust*Math.min(1,v/2)/M;
+      const bd=useR?-1:1;                          // stern set pushes back along the nose
+      ax+=bd*Math.cos(ang)*dec;ay+=bd*Math.sin(ang)*dec;}
+    vx+=ax*pdt;vy+=ay*pdt;x+=vx*pdt;y+=vy*pdt;ang+=w*pdt;}
+  return null;}
+// H3: tramps. They arbitrage parts between the two markets through the SAME pools
+// the player uses, buy their own fuel, and fly the safe southern lane.
+const LANE_E=[[150,-168],[400,-222],[566,-52]];               // cloister -> hollow (southbound side)
+const LANE_W=[[566,-36],[400,-202],[150,-152]];               // hollow -> cloister (northbound side)
+// lanes hold 20 u separation AND clear the sun's kill radius with sag margin —
+// NPC accretion made the star as lethal to them as it always was to you
+// right-hand traffic: the fabric made hulls real, so opposing legs get 20 u of separation
+const TRAMP_HOLD=6.0, TRAMP_A=2.6, TRAMP_F2G=0.35/18;
+function trampBrain(tr){
+  const here=MKT[tr.at], there=MKT[tr.at==='cloister'?'hollow':'cloister'];
+  // contract delivery first: locked pay, escrow to wallet
+  for(const ct of CONTRACTS){if(!ct.open||ct.kind==='rescue'||ct.at!==tr.at)continue;
+    if((tr.cargo[ct.part]||0)>=ct.n){tr.cargo[ct.part]-=ct.n;if(!tr.cargo[ct.part])delete tr.cargo[ct.part];
+      tr.credits+=fulfilContract(ct,tr);}}
+  // sell everything profitable first
+  for(const k in tr.cargo){while(tr.cargo[k]>0){
+    const got=poolSell(here[k],1);tr.credits+=got;tr.cargo[k]--;}
+    if(!tr.cargo[k])delete tr.cargo[k];}
+  // refuel from the local pool if short
+  if(tr.fuel<120&&here.fuelPool.q>400){
+    const want=Math.min(180-tr.fuel,300);
+    const k2=here.fuelPool.q*here.fuelPool.c;
+    const cost=Math.ceil(k2/(here.fuelPool.q-want)-here.fuelPool.c);
+    if(tr.credits>=cost){const paid=poolBuy(here.fuelPool,want);tr.credits-=paid;tr.fuel+=want;}}
+  // best spread that fits the hold
+  let best=null,bestGain=90;   // must beat ¢90/leg to bother
+  for(const k of['engine','pods','tank','rcs','strut','mount','shield','rack','bridge','grapple']){
+    if(!(k in here)||here[k].q<2)continue;
+    const kgK={engine:6,pods:3,tank:2.5,rcs:1.2,strut:0.8,mount:3.5,shield:5,rack:2.5,bridge:4,grapple:2}[k];
+    if(kgK>TRAMP_HOLD)continue;
+    const buyC=price1(here[k]);
+    const sellP=there[k];const kk=sellP.q*sellP.c;
+    const sellC=Math.floor(sellP.c-kk/(sellP.q+1));
+    if(buyC!==null&&tr.credits>=buyC&&sellC-buyC>bestGain){best=k;bestGain=sellC-buyC;}}
+  // contracts posted HERE-or-THERE: can we source the part cheaper than the locked pay?
+  let job=null;
+  for(const ct of CONTRACTS){if(!ct.open||ct.kind==='rescue')continue;
+    const srcId=ct.at==='cloister'?'hollow':'cloister';
+    const src=MKT[srcId][ct.part];
+    if(src.q<2)continue;
+    const kg={engine:6,pods:3,tank:2.5,rcs:1.2,strut:0.8,mount:3.5,shield:5,rack:2.5,bridge:4,grapple:2}[ct.part];
+    if(kg>TRAMP_HOLD)continue;
+    const cost=price1(src);
+    if(cost===null||tr.credits<cost)continue;
+    const gain=ct.pay-cost;
+    if(gain>bestGain*1.15&&gain>200){job={ct,srcId,cost};bestGain=gain;best=null;}}
+  if(job){
+    if(tr.at===job.srcId){const paid=poolBuy(MKT[tr.at][job.ct.part],1);
+      tr.credits-=paid;tr.cargo[job.ct.part]=(tr.cargo[job.ct.part]||0)+1;tr.job=job.ct.id;}
+    else tr.job=null;   // fly to the source first, empty
+    tr.heading=(tr.at==='cloister')?1:-1;tr.wp=0;tr.st='fly';return;}
+  if(best){const paid=poolBuy(MKT[tr.at][best],1);tr.credits-=paid;tr.cargo[best]=(tr.cargo[best]||0)+1;}
+  // set course
+  tr.heading=(tr.at==='cloister')?1:-1;tr.wp=0;tr.st='fly';}
+function trampMass(tr){let m=13+tr.fuel*0.01;
+  for(const k in tr.cargo)m+=tr.cargo[k]*({engine:6,pods:3,tank:2.5,rcs:1.2,strut:0.8,mount:3.5,shield:5,rack:2.5,bridge:4,grapple:2}[k]);
+  return m;}
+function stepTramps(dt){
+  for(const tr of world.tramps){
+    if(tr.st==='gone')continue;
+    if(tr.st==='dead'){tr.deadT-=dt;if(tr.deadT<=0)trampRespawn(tr);continue;}
+    if(tr.st==='derelict'){                        // dead engines: gravity and the rope decide
+      const[gax,gay]=accel(world.wells,tr.x,tr.y);
+      tr.vx+=gax*dt;tr.vy+=gay*dt;tr.x+=tr.vx*dt;tr.y+=tr.vy*dt;
+      for(const st of world.stations){
+        if(Math.hypot(tr.x-st.x,tr.y-st.y)<26&&Math.hypot(tr.vx,tr.vy)<2.5){
+          const m=MKT[st.id];
+          const rc=CONTRACTS.find(c=>c.open&&c.kind==='rescue'&&c.tr===tr);
+          const fee=rc?fulfilContract(rc,'player'):(()=>{const f2=Math.min(m.credits,600+Math.round(trampValue(tr)*0.3));m.credits-=f2;return f2;})();
+          wallet+=fee;L.playerC=wallet;
+          tr.st='dock';tr.at=st.id;tr.dwell=8;tr.x=st.x+14;tr.y=st.y+14;tr.vx=0;tr.vy=0;
+          if(GRAP&&GRAP.hit&&GRAP.hit.tr===tr)GRAP=null;
+          run.toasts=run.toasts||[];run.rescues=(run.rescues||0)+1;
+          run.toasts.push({x:tr.x,y:tr.y-6,txt:'+¢'+fee.toLocaleString()+' RESCUE',t:0});break;}}
+      continue;}
+    if(tr.st==='dock'){tr.dwell-=dt;if(tr.dwell<=0)trampBrain(tr);continue;}
+    if(tr.st==='fly'&&world.tramps.filter(x=>x.st==='derelict').length<2){
+      const r=rng();                               // one draw serves roll AND scar: the stream is sacred
+      if(r<dt/240){
+      tr.st='derelict';                            // engine failure: the lane keeps its momentum
+      const vent=tr.fuel*0.9;tr.fuel-=vent;L.exhaust+=vent;   // ruptured lines vent, grams declared
+      tr.hp=Math.min(tr.hp,16+(((r*240/dt)%1*8)|0));          // the scar that explains the drift
+      run.toasts=run.toasts||[];
+      const rc=postRescue(tr);
+      run.toasts.push({x:tr.x,y:tr.y-6,txt:'⚠ '+tr.id+' ENGINE FAILURE'+(rc?' — ⛑ ¢'+rc.pay.toLocaleString()+' @ '+rc.at.toUpperCase():''),t:0});}}
+    if(tr.flee>0&&tr.st!=='derelict'){tr.flee-=dt;
+      const[gax,gay]=accel(world.wells,tr.x,tr.y);
+      const away=Math.atan2(tr.y-(ship?ship.y:tr.y-1),tr.x-(ship?ship.x:tr.x-1));
+      let ax=Math.cos(away)*TRAMP_A,ay=Math.sin(away)*TRAMP_A;
+      if(tr.fuel>0){const bF=Math.min(tr.fuel,Math.hypot(ax,ay)*trampMass(tr)*TRAMP_F2G*dt);
+        tr.fuel-=bF;L.exhaust+=bF;tr.vx+=(ax+gax)*dt;tr.vy+=(ay+gay)*dt;}
+      else{tr.vx+=gax*dt;tr.vy+=gay*dt;}
+      tr.x+=tr.vx*dt;tr.y+=tr.vy*dt;continue;}
+    // a rich wreck near the lane is worth the detour (one piece per leg)
+    if(!tr.scavDone)for(const wk of world.wreckage){
+      if(!wk.t)continue;
+      const dd2=Math.hypot(wk.x-tr.x,wk.y-tr.y);
+      if(dd2<70){const kg={engine:6,pod:3,tank:2.5,rcs:1.2,strut:0.8,mount:3.5,shield:5,rack:2.5,bridge:4,grapple:2}[wk.t];
+        let held=0;for(const k in tr.cargo)held+=tr.cargo[k]*({engine:6,pods:3,tank:2.5,rcs:1.2,strut:0.8,mount:3.5,shield:5,rack:2.5,bridge:4,grapple:2}[k]||3);
+        if(GRAP&&GRAP.hit&&GRAP.hit.wk===wk)continue;   // it's on someone's line
+        if(held+kg<=TRAMP_HOLD&&dd2<9){
+          const key=wk.t==='pod'?'pods':wk.t;
+          tr.cargo[key]=(tr.cargo[key]||0)+1;wk.dead=true;tr.scavDone=true;
+          world.wreckage=world.wreckage.filter(w2=>!w2.dead);break;}
+        if(held+kg<=TRAMP_HOLD){
+          const want2=Math.min(14,Math.max(1,dd2*0.14));
+          const[gax2,gay2]=accel(world.wells,tr.x,tr.y);
+          let ax2=((wk.x-tr.x)/dd2*want2-tr.vx)*0.9-gax2, ay2=((wk.y-tr.y)/dd2*want2-tr.vy)*0.9-gay2;
+          const aM2=Math.hypot(ax2,ay2);if(aM2>TRAMP_A){ax2*=TRAMP_A/aM2;ay2*=TRAMP_A/aM2;}
+          if(tr.fuel>0){const bF=Math.min(tr.fuel,Math.hypot(ax2,ay2)*trampMass(tr)*TRAMP_F2G*dt);
+            tr.fuel-=bF;L.exhaust+=bF;tr.vx+=(ax2+gax2)*dt;tr.vy+=(ay2+gay2)*dt;}
+          tr.x+=tr.vx*dt;tr.y+=tr.vy*dt;
+          continue;}}}
+    for(const o2 of world.tramps){if(o2===tr||o2.st!=='fly')continue;   // pilots steer apart
+      const sx=tr.x-o2.x,sy=tr.y-o2.y,sd=Math.hypot(sx,sy);
+      if(sd<14&&sd>0.1){tr.vx+=sx/sd*3.2*dt;tr.vy+=sy/sd*3.2*dt;}}
+    const lane=tr.heading>0?LANE_E:LANE_W;
+    const dest=tr.heading>0?world.stations[1]:world.stations[0];
+    const tgt=tr.wp<lane.length?{x:lane[tr.wp][0],y:lane[tr.wp][1]}:dest;
+    const dx=tgt.x-tr.x,dy=tgt.y-tr.y,dd=Math.hypot(dx,dy)||1;
+    if(tr.wp<lane.length&&dd<28){tr.wp++;continue;}
+    const[gax,gay]=accel(world.wells,tr.x,tr.y);
+    const v=Math.hypot(tr.vx,tr.vy);
+    const final=tr.wp>=lane.length;
+    const want=final?Math.min(15,Math.max(0.9,dd*0.14)):Math.min(16,6+dd*.06);
+    let ax=(dx/dd*want-tr.vx)*0.9-gax, ay=(dy/dd*want-tr.vy)*0.9-gay;
+    const aM=Math.hypot(ax,ay);if(aM>TRAMP_A){ax*=TRAMP_A/aM;ay*=TRAMP_A/aM;}
+    const dry=tr.fuel<=0;
+    if(!dry){
+      const burnN=Math.hypot(ax,ay)*trampMass(tr);
+      const bF=Math.min(tr.fuel,burnN*TRAMP_F2G*dt);
+      tr.fuel-=bF;L.exhaust+=bF;
+      tr.vx+=(ax+gax)*dt;tr.vy+=(ay+gay)*dt;
+    } else { tr.vx+=gax*dt;tr.vy+=gay*dt; }
+    tr.x+=tr.vx*dt;tr.y+=tr.vy*dt;
+    if(tr.wp>=lane.length&&dd<20&&v<4){
+      tr.st='dock';tr.at=dest.id;tr.dwell=3+((tr.id==='T-1')?0.7:1.9);tr.scavDone=false;
+      tr.x=dest.x+ (tr.heading>0?-16:16);tr.y=dest.y+14;tr.vx=0;tr.vy=0;}}
+}
+// H5: pirates — forced-trade predators. Your defense is flying.
+const PI_A=3.2, PI_SEE=270, PI_LOCK=14, PI_DEMAND=0.30;
+function trampValue(tr){let v=0;
+  for(const k in tr.cargo)v+=tr.cargo[k]*( {engine:5200,pods:3800,tank:3400,rcs:2300,strut:900,mount:6800,shield:9200,rack:6000,bridge:11800,grapple:4800}[k]||0);
+  return v+Math.max(0,tr.credits-1500);}
+function playerValue(){if(!ship||ship.dead||mode!=='flight')return 0;
+  let v=0;for(const md of build)v+=SPEC[md.t].price;
+  return Math.max(0,v-25500)+wallet*0.15;}   // the starter dart is beneath notice
+function pirateDemand(tgt){
+  if(tgt==='player')return Math.ceil(Math.min(wallet,playerValue()*PI_DEMAND));
+  return Math.ceil(Math.min(Math.max(0,tgt.credits-1500),trampValue(tgt)*PI_DEMAND));}
+function trampDie(tr){
+  tr.st='dead';tr.deadT=90+rng()*150;
+  for(const k in tr.cargo)for(let i=0;i<tr.cargo[k];i++)
+    world.wreckage.push({t:{pods:'pod'}[k]||k,x:tr.x+(rng()-.5)*4,y:tr.y+(rng()-.5)*4,
+      vx:tr.vx*.5+(rng()-.5)*2,vy:tr.vy*.5+(rng()-.5)*2,ang:rng()*TAU,w:(rng()-.5),hp:50});
+  world.wreckage.push({t:null,x:tr.x,y:tr.y,vx:tr.vx*.4,vy:tr.vy*.4,
+    credits:Math.max(0,tr.credits),fuelU:tr.fuel,salv:0,ang:0,w:.3});
+  tr.cargo={};tr.credits=Math.min(0,tr.credits);tr.fuel=0;
+  run.trampKills=(run.trampKills||0)+1;}
+function trampRespawn(tr){
+  const need=20000,fneed=180;
+  if(FRONTIER.credits<need||FRONTIER.fuel<fneed){tr.st='gone';return;}   // the frontier is dry
+  FRONTIER.credits-=need;FRONTIER.fuel-=fneed;
+  tr.credits+=need;tr.fuel=fneed;tr.hp=60;tr.cargo={};
+  tr.at=rng()<.5?'cloister':'hollow';
+  const st=world.stations.find(s2=>s2.id===tr.at);
+  tr.x=st.x+14;tr.y=st.y+14;tr.vx=0;tr.vy=0;tr.st='dock';tr.dwell=3+rng()*4;}
+// H10 STEP 1: THE BODY REGISTRY. Every mass in the world enrolls once with
+// the same four facts and two verbs. The resolver (Step 2) will consume it;
+// for now the census runs alongside the legacy interaction sites.
+// Exemption register (single source: STEP0-MATRIX.md): intra-ship = welds;
+// own projectiles/head get muzzle grace; projectile x projectile inert.
+function collectBodies(){
+  const B=[];
+  if(ship&&!ship.dead&&mode==='flight'){const M=totalM();
+    for(const md of ship.modules){const[mx,my]=modWorld(md);
+      B.push({kind:'module',own:'ship',o:md,x:mx,y:my,vx:ship.vx,vy:ship.vy,
+        m:SPEC[md.t].kg,r:1.9,
+        dv:(ix,iy)=>{ship.vx+=ix/M;ship.vy+=iy/M;},
+        hurt:d=>{md.hp=Math.max(0,md.hp-d);}});}}
+  for(const tr of world.tramps){if(tr.st==='dead'||tr.st==='gone'||tr.st==='dock')continue;
+    const m=trampMass(tr);
+    B.push({kind:'tramp',o:tr,x:tr.x,y:tr.y,vx:tr.vx,vy:tr.vy,m,r:3.2,
+      dv:(ix,iy)=>{tr.vx+=ix/m;tr.vy+=iy/m;},
+      hurt:d=>{tr.hp=(tr.hp===undefined?60:tr.hp)-d;
+        tr.flee=Math.max(tr.flee||0,8);if(tr.hp<=0)trampDie(tr);}});}
+  for(const pi of world.pirates){if(pi.hp<=0)continue;
+    B.push({kind:'pirate',o:pi,x:pi.x,y:pi.y,vx:pi.vx,vy:pi.vy,m:15,r:3.0,
+      dv:(ix,iy)=>{pi.vx+=ix/15;pi.vy+=iy/15;},
+      hurt:d=>pirateHit(pi,d)});}
+  for(const r of world.rocks){const m=r.t*40;   // ONE mass for rock, everywhere (Step-0 Finding 1)
+    B.push({kind:'rock',o:r,x:r.x,y:r.y,vx:r.vx||0,vy:r.vy||0,m,r:r.r,
+      dv:(ix,iy)=>{r.vx=(r.vx||0)+ix/m;r.vy=(r.vy||0)+iy/m;},
+      hurt:(d,ivx,ivy)=>{if(d>18)fracture(r,ivx||0,ivy||0);}});}
+  for(const wk of world.wreckage){const m=wk.t?SPEC[wk.t].kg:1.5;
+    B.push({kind:wk.t?'wreck':'crate',o:wk,x:wk.x,y:wk.y,vx:wk.vx,vy:wk.vy,m,r:wk.t?1.8:1.4,
+      dv:(ix,iy)=>{wk.vx+=ix/m;wk.vy+=iy/m;},
+      hurt:wk.t?(d=>{wk.hp-=d;
+        if(wk.hp<=0){wk.dead=true;GEN.PARTS0[PKEY[wk.t]]-=1;}}):null});}   // pulverized matter leaves genesis, on the books
+  for(const cr of world.crates){const m=1.5;        // loot is matter: the fabric sees it
+    B.push({kind:'loot',o:cr,x:cr.x,y:cr.y,vx:cr.vx,vy:cr.vy,m,r:1.4,
+      dv:(ix,iy)=>{cr.vx+=ix/m;cr.vy+=iy/m;},hurt:null});}
+  for(const d2 of world.debris){const m=SPEC[d2.t].kg;
+    B.push({kind:'debris',o:d2,x:d2.x,y:d2.y,vx:d2.vx,vy:d2.vy,m,r:1.6,
+      dv:(ix,iy)=>{d2.vx+=ix/m;d2.vy+=iy/m;},hurt:null});}
+  for(const sl of world.slugs)
+    B.push({kind:'slug',own:sl.src?'pirate':'ship',o:sl,x:sl.x,y:sl.y,vx:sl.vx,vy:sl.vy,
+      m:0.05,r:0.6,dv:(ix,iy)=>{sl.vx+=ix/0.05;sl.vy+=iy/0.05;},
+      hurt:()=>{sl.dead=true;},payload:30});
+  for(const ms of world.missiles)
+    B.push({kind:'missile',own:'ship',o:ms,x:ms.x,y:ms.y,vx:ms.vx,vy:ms.vy,
+      m:0.9,r:0.9,dv:(ix,iy)=>{ms.vx+=ix/0.9;ms.vy+=iy/0.9;},
+      hurt:()=>{ms.dead=true;},payload:70});
+  if(GRAP&&GRAP.state==='fly')
+    B.push({kind:'head',own:'ship',o:GRAP,x:GRAP.x,y:GRAP.y,vx:GRAP.vx,vy:GRAP.vy,
+      m:0.15,r:0.8,dv:(ix,iy)=>{GRAP.vx+=ix/0.15;GRAP.vy+=iy/0.15;},hurt:null});
+  return B;}
+// H10 STEP 2: ONE RESOLVER. Impulse for closing contacts; payloads detonate on
+// any overlap; the head ATTACHES instead of bouncing. Exemptions per the register.
+const DMG={slug:0,missile:0,head:0,rock:0.4,module:2.2,tramp:2.2,pirate:2.2,wreck:0.15,crate:0,loot:0,debris:0.1};
+function grapFabricAttach(b){
+  if(!GRAP||GRAP.state!=='fly')return;
+  if(b.kind==='wreck'||b.kind==='crate'){GRAP.state='stuck';GRAP.hit={kind:'wreck',wk:b.o};return;}
+  if(b.kind==='tramp'){GRAP.state='stuck';GRAP.hit={kind:'tramp',tr:b.o};
+    if(b.o.st!=='derelict')b.o.flee=Math.max(b.o.flee||0,10);   // a failed engine cannot panic
+    return;}
+  if(b.kind==='pirate'){GRAP.state='stuck';GRAP.hit={kind:'pirate',pi:b.o};return;}
+  if(b.kind==='rock'){GRAP.state='stuck';GRAP.hit={kind:'rock',r:b.o};return;}
+  if(b.kind==='loot'){GRAP.state='stuck';GRAP.hit={kind:'loot',cr:b.o};return;}
+  if(b.kind==='debris'){
+    const d2=b.o;d2.dead=true;world.debris=world.debris.filter(x=>!x.dead);
+    const wk={t:d2.t,x:d2.x,y:d2.y,vx:d2.vx,vy:d2.vy,ang:d2.ang,w:d2.w,hp:50};
+    world.wreckage.push(wk);GRAP.state='stuck';GRAP.hit={kind:'wreck',wk};return;}}
+function stepFabric(dt){
+  const B=collectBodies();
+  for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){
+    const a=B[i],b=B[j];
+    if(a.o&&a.o.dead)continue;if(b.o&&b.o.dead)continue;       // the dead leave the tick
+    if(a.kind==='tramp'&&a.o.st==='dead')continue;if(b.kind==='tramp'&&b.o.st==='dead')continue;
+    if(ship&&ship.dead&&(a.own==='ship'||b.own==='ship'))continue;
+    if(a.kind==='module'&&b.kind==='module')continue;
+    const proj=k=>k==='slug'||k==='missile'||k==='head';
+    if(proj(a.kind)&&proj(b.kind))continue;
+    if((a.kind==='head'&&b.kind==='module'&&b.own==='ship')||(b.kind==='head'&&a.kind==='module'&&a.own==='ship'))continue;
+    if((proj(a.kind)&&a.own==='ship'&&b.kind==='module'&&b.own==='ship')||(proj(b.kind)&&b.own==='ship'&&a.kind==='module'&&a.own==='ship'))continue;
+    if((a.kind==='slug'&&a.own==='pirate'&&b.kind==='pirate')||(b.kind==='slug'&&b.own==='pirate'&&a.kind==='pirate'))continue;
+    const dx=b.x-a.x,dy=b.y-a.y,dd=Math.hypot(dx,dy),rr=a.r+b.r;
+    if(dd>=rr||dd<1e-6)continue;
+    if(a.kind==='head'){grapFabricAttach(b);continue;}
+    if(b.kind==='head'){grapFabricAttach(a);continue;}
+    const nx=dx/dd,ny=dy/dd;
+    const cl=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+    let J=0;
+    if(cl>0){J=cl*(a.m*b.m)/(a.m+b.m)*1.6;
+      a.dv(-nx*J,-ny*J);b.dv(nx*J,ny*J);
+      b.o.x+=nx*(rr-dd)*.5;b.o.y+=ny*(rr-dd)*.5;}
+    const Je=J>4?J:0;                // grazes don't wound
+    const hitA=Math.min(55,Je*(DMG[a.kind]||0))+(J>0?(b.payload||0):0);   // one strike never one-shots a bridge
+    const hitB=Math.min(55,Je*(DMG[b.kind]||0))+(J>0?(a.payload||0):0);
+    if(hitA>0&&a.hurt)a.hurt(hitA,b.vx,b.vy);
+    if(hitB>0&&b.hurt)b.hurt(hitB,a.vx,a.vy);
+    if(J===0&&(a.payload||b.payload)){
+      if(a.payload){if(b.hurt)b.hurt(a.payload,a.vx,a.vy);a.hurt&&a.hurt(1);}
+      if(b.payload){if(a.hurt)a.hurt(b.payload,b.vx,b.vy);b.hurt&&b.hurt(1);}}
+    if(a.kind==='module'||b.kind==='module'){
+      for(const w2 of ship.welds)w2.load=(w2.load||0)+J*3;
+      for(const w2 of ship.welds)if(w2.load>w2.strength){breakWeld(w2);break;}
+      if(J>0.5)run.rams=(run.rams||0)+1;}}
+  for(const w of world.wells)if(w.kill){const kd=w.kill;   // true kill zones only; planet-surface crashes await planets-as-bodies
+    for(const tr of world.tramps)if(tr.st!=='dead'&&tr.st!=='gone'&&tr.st!=='dock'&&Math.hypot(tr.x-w.x,tr.y-w.y)<kd)trampDie(tr);
+    for(const pi of world.pirates)if(pi.hp>0&&Math.hypot(pi.x-w.x,pi.y-w.y)<kd)pirateHit(pi,1e4);}}
+function stepPirates(dt){
+  for(const pi of world.pirates){
+    if(pi.hp<=0)continue;
+    if(pi.cool>0)pi.cool-=dt;
+    // choose a mark
+    if(pi.st==='roost'&&pi.cool<=0){
+      let best=null,bv=2500;
+      for(const tr of world.tramps){if(tr.st==='dock')continue;
+        const d=Math.hypot(tr.x-pi.x,tr.y-pi.y);
+        const v=trampValue(tr);
+        if(d<PI_SEE&&v>bv&&tr!==pi.lastMark){bv=v;best=tr;}}
+      {const d=ship?Math.hypot(ship.x-pi.x,ship.y-pi.y):1e9;
+       const v=playerValue();
+       if(mode==='flight'&&!run.done&&d<PI_SEE&&v>bv){bv=v;best='player';}}
+      if(best){pi.mark=best;pi.st='hunt';pi.markT=0;pi.lockT=0;}}
+    if(pi.st==='hunt'&&!pi.mark){pi.st='home';pi.cool=20;continue;}
+    if(pi.st==='hunt'){
+      const tx=pi.mark==='player'?ship.x:pi.mark.x, ty=pi.mark==='player'?ship.y:pi.mark.y;
+      const tvx=pi.mark==='player'?ship.vx:pi.mark.vx, tvy=pi.mark==='player'?ship.vy:pi.mark.vy;
+      const dd=Math.hypot(tx-pi.x,ty-pi.y);
+      pi.markT+=dt;
+      const dead=pi.mark==='player'&&(run.done||ship.dead);
+      // escape: the gap must be GROWING — range rate, not relative speed
+      const rr2=((tx-pi.x)*(tvx-pi.vx)+(ty-pi.y)*(tvy-pi.vy))/Math.max(1,dd);
+      if(dead||dd>340||pi.markT>75||(dd>130&&rr2>10)){
+        pi.lastMark=pi.mark;pi.mark=null;pi.st='home';pi.cool=60;run.pirateLock=false;continue;}
+      const lead=Math.min(2.2,dd/34);
+      const ax0=(tx+tvx*lead-pi.x), ay0=(ty+tvy*lead-pi.y);
+      const dl=Math.hypot(ax0,ay0)||1;
+      const[gax,gay]=accel(world.wells,pi.x,pi.y);
+      // a predator stalks: match the prey's velocity and hover at lock range —
+      // the fabric made contact real, and ramming your mark kills the payday
+      const want=dd<20?Math.max(0,(dd-10))*0.5:Math.min(24,6+dd*.12);
+      let ax=(tvx+ax0/dl*want-pi.vx)*0.9-gax, ay=(tvy+ay0/dl*want-pi.vy)*0.9-gay;
+      const aM=Math.hypot(ax,ay);if(aM>PI_A){ax*=PI_A/aM;ay*=PI_A/aM;}
+      if(pi.fuel>0){const bF=Math.min(pi.fuel,Math.hypot(ax,ay)*16*TRAMP_F2G*dt);
+        pi.fuel-=bF;L.exhaust+=bF;
+        pi.vx+=(ax+gax)*dt;pi.vy+=(ay+gay)*dt;}
+      else{pi.vx+=gax*dt;pi.vy+=gay*dt;pi.st='home';pi.mark=null;pi.cool=90;}
+      pi.x+=pi.vx*dt;pi.y+=pi.vy*dt;
+      // the lock: forced trade
+      if(dd<PI_LOCK){
+        if(pi.mark==='player'){
+          if(!run.pirateLock){run.pirateLock=true;run.pirateT=6;}
+          run.pirateT-=dt;pi.lockT+=dt;
+          if(run.pirateT<=0){pi.shot+=dt;
+            if(pi.shot>4){pi.shot=0;
+              const va=Math.atan2(ship.y-pi.y,ship.x-pi.x);
+              world.slugs.push({x:pi.x,y:pi.y,vx:pi.vx+Math.cos(va)*42,vy:pi.vy+Math.sin(va)*42,t:0,src:'pirate'});}}
+        } else {
+          const pay=pirateDemand(pi.mark);
+          pi.mark.credits-=pay;pi.credits+=pay;
+          const fTake=Math.min(pi.mark.fuel,30);pi.mark.fuel-=fTake;pi.fuel+=fTake;
+          pi.lastMark=pi.mark;pi.mark=null;pi.st='home';pi.cool=60;}}
+      else if(pi.mark==='player'&&run.pirateLock&&dd>26){run.pirateLock=false;}
+    }
+    if(pi.st==='home'){
+      const dd=Math.hypot(pi.roost.x-pi.x,pi.roost.y-pi.y);
+      if(dd<8){pi.vx*=0.9;pi.vy*=0.9;if(Math.hypot(pi.vx,pi.vy)<0.5)pi.st='roost';}
+      else{const[gax,gay]=accel(world.wells,pi.x,pi.y);
+        const want=Math.min(14,Math.max(1,dd*0.1));
+        let ax=((pi.roost.x-pi.x)/dd*want-pi.vx)*0.8-gax, ay=((pi.roost.y-pi.y)/dd*want-pi.vy)*0.8-gay;
+        const aM=Math.hypot(ax,ay);if(aM>PI_A){ax*=PI_A/aM;ay*=PI_A/aM;}
+        if(pi.fuel>0){const bF=Math.min(pi.fuel,Math.hypot(ax,ay)*16*TRAMP_F2G*dt);
+          pi.fuel-=bF;L.exhaust+=bF;pi.vx+=(ax+gax)*dt;pi.vy+=(ay+gay)*dt;}
+        else{pi.vx+=gax*dt;pi.vy+=gay*dt;}
+        pi.x+=pi.vx*dt;pi.y+=pi.vy*dt;}}
+  }
+  // wreckage drifts under gravity, forever, on the books
+  for(const wk of world.wreckage){
+    const[gax,gay]=accel(world.wells,wk.x,wk.y);
+    wk.vx+=gax*dt;wk.vy+=gay*dt;wk.x+=wk.vx*dt;wk.y+=wk.vy*dt;wk.ang+=wk.w*dt;
+    for(const w of world.wells)if(w.kill||w.r){const kd=w.kill||w.r;
+      if(Math.hypot(wk.x-w.x,wk.y-w.y)<kd){wk.dead=true;
+        if(wk.fuelU)L.exhaust+=wk.fuelU;
+        if(wk.credits)GEN.C0-=wk.credits;   // a star can eat money — genesis records it
+        if(wk.t)GEN.PARTS0[PKEY[wk.t]]-=1;}}}
+  if(ship&&!ship.dead&&mode==='flight')for(const wk of world.wreckage){
+    if(wk.t)continue;
+    if(Math.hypot(ship.x-wk.x,ship.y-wk.y)<5){
+      const fT=Math.min(wk.fuelU||0,ship.d.fuelCap-ship.fuel);
+      ship.fuel+=fT;L.shipFuel=ship.fuel;L.exhaust+=(wk.fuelU||0)-fT;
+      ship.salvage=(ship.salvage||0)+(wk.salv||0);
+      wallet+=wk.credits||0;L.playerC=wallet;
+      wk.dead=true;run.looted=(run.looted||0)+1;}}
+  world.wreckage=world.wreckage.filter(wk=>!wk.dead);
+  for(const d2 of world.debris){
+    for(const w of world.wells)if(w.kill||w.r){const kd=w.kill||w.r;
+      if(Math.hypot(d2.x-w.x,d2.y-w.y)<kd){d2.dead=true;GEN.PARTS0[PKEY[d2.t]]-=1;}}}
+  world.debris=world.debris.filter(d2=>!d2.dead);
+  // loot crates drift and get claimed by proximity
+  for(const cr of world.crates){
+    const[gax,gay]=accel(world.wells,cr.x,cr.y);
+    cr.vx+=gax*dt;cr.vy+=gay*dt;cr.x+=cr.vx*dt;cr.y+=cr.vy*dt;
+    let near=ship&&!ship.dead&&Math.hypot(ship.x-cr.x,ship.y-cr.y)<7;
+    if(ship&&!ship.dead&&!near)for(const md of ship.modules){const[mx2,my2]=modWorld(md);
+      if(Math.hypot(mx2-cr.x,my2-cr.y)<3.2){near=true;break;}}   // the deck takes it on touch
+    if(near&&mode==='flight'){
+      wallet+=cr.credits;L.playerC=wallet;
+      const fT=Math.min(cr.fuelU,ship.d.fuelCap-ship.fuel);
+      ship.fuel+=fT;L.shipFuel=ship.fuel;
+      cr.fuelU-=fT;L.exhaust+=cr.fuelU;   // unclaimable overflow vents, on the books
+      run.toasts=run.toasts||[];
+      run.toasts.push({x:cr.x,y:cr.y-5,txt:'📦 '+(cr.credits?'+¢'+cr.credits.toLocaleString():'')+(cr.credits&&fT?' · ':'')+(fT?'+'+(fT|0)+'u ⛽':'')+(!cr.credits&&!fT?'empty crate':''),t:0});
+      cr.credits=0;cr.fuelU=0;cr.dead=true;run.looted=(run.looted||0)+1;}}
+  world.crates=world.crates.filter(c=>!c.dead);
+}
+function pirateHit(pi,dmg){
+  pi.hp-=dmg;
+  if(pi.hp<=0){
+    world.crates.push({x:pi.x,y:pi.y,vx:pi.vx*.4,vy:pi.vy*.4,credits:pi.credits,fuelU:pi.fuel});
+    pi.credits=0;pi.fuel=0;run.pirateLock=false;run.kills=(run.kills||0)+1;}}
+function stepSlugs(dt){for(const sl of world.slugs){
+  const[ax,ay]=accel(world.wells,sl.x,sl.y);
+  sl.vx+=ax*dt;sl.vy+=ay*dt;sl.x+=sl.vx*dt;sl.y+=sl.vy*dt;sl.t+=dt;
+  }   // targeting is the fabric's job now (STEP 2)
+  world.slugs=world.slugs.filter(s2=>!s2.dead&&s2.t<12);
+  world.rocks=world.rocks.filter(r=>!r.dead);}
+
+/* ================= STEP (shared by play and replay) ================= */
+function predictShot(w){ // integrate the real projectile through the real field
+  const md=w==='grap'?ship.d.grap:ship.d.rack;if(!md)return null;
+  const[mx,my]=modWorld(md);
+  const c=Math.cos(ship.ang),s2=Math.sin(ship.ang);
+  let x=mx+c*2.4,y=my+s2*2.4;
+  let vx,vy,life;
+  if(w==='grap'){vx=ship.vx+c*34;vy=ship.vy+s2*34;life=5;}
+  else{vx=ship.vx+c*8;vy=ship.vy+s2*8;life=6;}
+  const pts=[];let hit=null;const dt2=1/30;let mFuel=4;
+  // ghosts: movers fly forward too — aim at where they WILL be
+  const gh=[];
+  for(const tr of world.tramps){if(tr.st==='dead'||tr.st==='gone'||tr.st==='dock')continue;
+    gh.push({n:tr.id,x:tr.x,y:tr.y,vx:tr.vx,vy:tr.vy,r:3.4,trail:[]});}
+  for(const pi of world.pirates){if(pi.hp<=0)continue;
+    gh.push({n:'☠ '+pi.id,x:pi.x,y:pi.y,vx:pi.vx,vy:pi.vy,r:3.2,trail:[]});}
+  for(const wk of world.wreckage)
+    gh.push({n:wk.t?SPEC[wk.t].nm+' wreck':'crate',x:wk.x,y:wk.y,vx:wk.vx,vy:wk.vy,r:2.6,trail:[]});
+  for(const r of world.rocks)
+    gh.push({n:'rock '+r.t.toFixed(1)+'t',x:r.x,y:r.y,vx:r.vx||0,vy:r.vy||0,r:r.r+.6,trail:[]});
+  for(let t=0;t<life&&!hit;t+=dt2){
+    const[gax,gay]=accel(world.wells,x,y);
+    if(w==='msl'&&mFuel>0){const sp=Math.hypot(vx,vy)||1;vx+=vx/sp*26*dt2;vy+=vy/sp*26*dt2;mFuel-=dt2;}
+    vx+=gax*dt2;vy+=gay*dt2;x+=vx*dt2;y+=vy*dt2;
+    pts.push([x,y]);
+    if(w==='grap'&&Math.hypot(x-(pts[0][0]),y-(pts[0][1]))>95)break;
+    for(const g2 of gh){
+      const[ga2x,ga2y]=accel(world.wells,g2.x,g2.y);
+      g2.vx+=ga2x*dt2;g2.vy+=ga2y*dt2;g2.x+=g2.vx*dt2;g2.y+=g2.vy*dt2;
+      if((t*30|0)%8===0)g2.trail.push([g2.x,g2.y]);
+      if(!hit&&Math.hypot(x-g2.x,y-g2.y)<g2.r)hit={n:g2.n,x:g2.x,y:g2.y};}
+    if(!hit)for(const r of world.rocks){if(Math.hypot(x-r.x,y-r.y)<r.r+.5){hit={n:'rock',x:r.x,y:r.y};break;}}}
+  return{pts,hit,w,gh};}
+function stepOnce(dt){
+  if(run&&run.aim&&mode==='flight'&&!run.done)return;   // frozen time: the world waits on your aim
+  for(const f of['ccw','cw','burn','retro']){
+    if(!!inp[f]!==!!lastInp[f]){recAction('in',{f,v:inp[f]?1:0});lastInp[f]=!!inp[f];}}
+  tick++;
+  stepWorld(dt);stepSlugs(dt);stepMissiles(dt);stepGrapple(dt);stepTramps(dt);stepPirates(dt);stepFabric(dt);stepContracts(dt);
+  if(!run.done){run.t+=dt;stepFlight(dt);}}
+function stateHash(){
+  let h=FNV_SEED;
+  h=hashFloats(h,ship.x,ship.y,ship.vx,ship.vy,ship.ang,ship.w,ship.fuel,wallet,run.t,run.broken,AUTH.credits,ship.salvage||0,RATING_MODE?1:0);
+  for(const r of world.rocks)h=hashFloats(h,r.x,r.y,r.vx,r.vy,r.r);
+  for(const m of world.missiles)h=hashFloats(h,m.x,m.y,m.vx,m.vy);
+  h=hashFloats(h,world.varn.x,world.varn.y,world.moth.x,world.moth.y,world.comet.x,world.comet.y);
+  for(const tr of world.tramps)h=hashFloats(h,tr.x,tr.y,tr.vx,tr.vy,tr.credits,tr.fuel);
+  for(const ct of CONTRACTS)h=hashFloats(h,ct.escrow,ct.t,ct.open?1:0);
+  return h>>>0;}
+// headless driver: boot a seed, feed a tape, step, hash — the replay IS the save
+if(typeof globalThis!=='undefined')globalThis.__dw={
+  boot(){build=[{t:'bridge',gx:0,gy:0,org:'gen'},{t:'engine',gx:-1,gy:0,org:'gen'},{t:'pod',gx:1,gy:0,org:'gen'}];
+    tape=[];tick=0;lastInp={};for(const f in inp)inp[f]=false;launch();},
+  apply(a){if(a.k==='in')inp[a.f]=!!a.v;
+    if(a.k==='stop')inp.stop=!!a.v;
+    if(a.k==='msl')fireMissile();
+    if(a.k==='fire')fireSlug();
+    if(a.k==='dock'&&run&&run.nearSt)dock(run.nearSt);
+    if(a.k==='undock')undock();
+    if(a.k==='bp')loadBlueprint(a.nm);
+    if(a.k==='pay')payPirate();
+    if(a.k==='salv'){}
+    if(a.k==='scav')scavenge();
+    if(a.k==='grap'){if(a.ang!==undefined){ship.ang=a.ang;fireGrappleInner();}else fireGrapple();}
+    if(a.k==='msl2')fireMissileAt(a.ang);
+    if(a.k==='aim')run.aim=a.w?{w:a.w}:null;   // null thaws
+    if(a.k==='sling')doSling(a.ang);
+    if(a.k==='plan')run.plan={at:a.at};
+    if(a.k==='cut'){if(GRAP)GRAP=null;}
+    if(a.k==='yank'){if(GRAP&&(GRAP.state==='stuck'||GRAP.state==='reel'))GRAP.yankReq=true;}
+    if(a.k==='dump')dumpHold();
+    if(a.k==='fence'){}
+    if(a.k==='snap'){
+      if(build.some(m2=>m2.gx===a.gx&&m2.gy===a.gy))return;
+      if(!adjacencyOK(a.gx,a.gy,a.p))return;
+      const m=MKT[(dockedAt&&dockedAt.id)||'cloister'];
+      const p=m[PKEY[a.p]];const paid=poolBuy(p,1);
+      wallet-=paid;L.playerC=wallet;build.push({t:a.p,gx:a.gx,gy:a.gy,org:(dockedAt&&dockedAt.id)==='hollow'?'hol':'clo'});}
+    if(a.k==='rm'){const md2=build.find(m=>m.gx===a.gx&&m.gy===a.gy);if(md2)doRm(md2);}
+    if(a.k==='rot'){const md2=build.find(m=>m.gx===a.gx&&m.gy===a.gy);if(md2)doRot(md2);}
+    if(a.k==='fit'){if(ship&&ship.hold.length&&wallet>=150){
+      const it=ship.hold[0];
+      if(nearWreckStub({t:it.t,hp:80,hot:it.hot})){
+        ship.hold.shift();wallet-=150;L.playerC=wallet;
+        MKT[(dockedAt&&dockedAt.id)||'cloister'].credits+=150;}}}
+
+    if(a.k==='respawn')respawn();},
+  respawn, scavenge, nearWreck, frontier:()=>FRONTIER, wreckage:()=>world.wreckage,
+  collectBodies, stepFabric, stepGrapple, GRAPset:g=>{GRAP=g;}, GRAPget:()=>GRAP,
+  cycleAimTarget, aimCandidates, iso, screenToCell, setSel, glyphCanvas, glyphSVG, shedModule, shipLog:()=>SHIPLOG, weldsOf, predStop,
+  L,
+  grap:()=>GRAP, fireGrapple, hold:()=>ship&&ship.hold,
+  auth:()=>AUTH,
+  payPirate, pirates:()=>world.pirates, crates:()=>world.crates,
+  loadBlueprint, bpCost,
+  dock:()=>{if(run&&run.nearSt)dock(run.nearSt);},
+  undock:()=>undock(),
+  mkt:()=>MKT, wallet:()=>wallet, poolBuy, poolSell, price1, dockedAt:()=>dockedAt, contracts:()=>CONTRACTS,
+  post:(sid,part)=>postContract(sid,part),
+  step(){stepOnce(1/60);},
+  ship:()=>ship, world:()=>world, run:()=>run, audit, derive:(b)=>derive(b||build),
+  build:()=>build, SPEC, adjacencyOK:(x,y,t)=>adjacencyOK(x,y,t), weldsOf:(b)=>weldsOf(b),
+  cam, frameRef:()=>{_pR=(mode==='flight')?pot(cam.x,cam.y):0;return _pR;},
+  inp, hash:stateHash, tape:()=>tape,
+};
+/* ================= LOOP ================= */
+function selftest(){const checks=[
+ ['spec 10 modules',Object.keys(SPEC).length===10],
+ ['starter legal',adjacencyOK!==undefined&&build.length===3],
+ ['derive sane',(()=>{const d=derive(build);return Math.abs(d.m-13)<.01&&d.F===55;})()],
+ ['world builds',(()=>{const w=makeWorld();return w.wells.length===5&&w.rocks.length===9;})()],
+];const f=checks.filter(c=>!c[1]);
+ $('selftest').textContent=f.length?('BOOT FAIL: '+f.map(c=>c[0]).join(', ')):'H16.0'+(RATING_MODE?' · PILOT':'')+' · seed '+SEED+' · '+checks.length+'/'+checks.length;
+ $('selftest').className='hud '+(f.length?'bad':'ok');
+ setTimeout(()=>$('selftest').style.display='none',f.length?60000:3000);}
+trayInit();selftest();chrome();
+let last=performance.now(),acc=0;
+function loop(now){
+  VCX=W()/2;VCY=H()/2+8;_pR=(mode==='flight')?pot(cam.x,cam.y):0;
+  const dt=1/60;acc+=Math.min(.05,(now-last)/1000);last=now;T=now/1000;
+  ctx.fillStyle=PAL.bg;ctx.fillRect(0,0,W(),H());
+  if(mode==='hangar'){cam.rot=hrot;drawHangar();if(cardPart&&$('modcard').style.display==='block')drawPartThumb();}
+  else{cam.rot=0;$('modcard').style.display='none';
+    while(acc>=dt){acc-=dt;stepOnce(dt);}
+    cam.x+=(ship.x-cam.x)*.1;cam.y+=(ship.y-cam.y)*.1;
+    run._zk=(run._zk||0)*Math.pow(.03,1/60);
+    if((inp.burn||inp.retro)&&ship.fuel>0){cam.x+=(rngFx()-.5)*.5;cam.y+=(rngFx()-.5)*.5;}
+    let zt=2.3;for(const w of world.wells){const dd=Math.hypot(ship.x-w.x,ship.y-w.y);
+      if(dd<(w.kill||w.r||6)*5)zt=Math.max(zt,2.3+1.1*(1-dd/((w.kill||w.r||6)*5)));}
+    cam.z+=(zt+(run._zk||0)-cam.z)*.04+(run._zk||0)*.02;
+    drawWorld();drawShipFlight();
+    if(inNeb(ship.x,ship.y)){
+      const[sx2,sy2]=iso(ship.x,ship.y,1);
+      for(const[ox,oy,rr,aa]of[[0,0,150,.34],[60*Math.sin(T*.7),24*Math.cos(T*.5),110,.26],[-70*Math.cos(T*.6),-20*Math.sin(T*.8),95,.22]]){
+        const g=ctx.createRadialGradient(sx2+ox,sy2+oy,10,sx2+ox,sy2+oy,rr);
+        g.addColorStop(0,'rgba(138,110,190,'+aa+')');g.addColorStop(1,'rgba(138,110,190,0)');
+        ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(sx2+ox,sy2+oy,rr,rr*.7,0,0,TAU);ctx.fill();}}
+    drawStatus();
+    for(const p of world.fx){const a=1-p.t/p.life;
+      const[qx,qy]=iso(p.x,p.y,.8);
+      ctx.fillStyle='rgba(150,185,240,'+(a*.6).toFixed(2)+')';
+      ctx.beginPath();ctx.arc(qx,qy,2.4*a+.6,0,TAU);ctx.fill();}
+    for(const dc of world.dust){const fa=Math.max(.12,.5-dc.t*.012);
+      ctx.fillStyle='rgba(110,104,92,'+fa.toFixed(2)+')';
+      for(const p of dc.ps){const[qx,qy]=iso(p.x,p.y,.4);ctx.fillRect(qx-.9,qy-.9,1.8,1.8);}}
+    for(const m of world.missiles){
+      if(m.trail.length>2){ctx.strokeStyle='rgba(226,84,62,.4)';ctx.lineWidth=1;
+        ctx.beginPath();m.trail.forEach((p,i)=>{const[qx,qy]=iso(p.x,p.y,.8);i?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);});ctx.stroke();}
+      const[qx,qy]=iso(m.x,m.y,.8);
+      const va=Math.atan2(m.vy,m.vx);
+      ctx.save();ctx.translate(qx,qy);ctx.rotate(va*0+Math.atan2(
+        (iso(m.x+Math.cos(va),m.y+Math.sin(va),.8)[1]-qy),
+        (iso(m.x+Math.cos(va),m.y+Math.sin(va),.8)[0]-qx)));
+      ctx.fillStyle='#1d222b';ctx.fillRect(-3,-1.1,6,2.2);
+      if(m.motor&&m.fuelT>0){const f=.7+.3*Math.sin(T*40);
+        ctx.fillStyle='rgba(233,140,60,.85)';
+        ctx.beginPath();ctx.moveTo(-3,0);ctx.lineTo(-3-6*f,-1.6*f);ctx.lineTo(-3-6*f,1.6*f);ctx.closePath();ctx.fill();}
+      ctx.restore();}
+    for(const sl of world.slugs){const[qx,qy]=iso(sl.x,sl.y,1);
+      ctx.fillStyle='#1d222b';ctx.beginPath();ctx.arc(qx,qy,1.6,0,TAU);ctx.fill();}
+    if(run&&run.aim&&run.aim.w==='sling'&&mode==='flight'&&!run.done){try{
+      const rot=(inp.ccw?-1:0)+(inp.cw?1:0);
+      if(rot){run._sr=(run._sr||0)+1;if(run._sr>7){run._sr=0;
+        run.slingI=Math.max(0,Math.min(7,(run.slingI|0)+rot));}}
+      const M=totalM();
+      const dv=Math.min(14,ship.fuel/(M*FUEL_PER_NS));
+      for(let k=0;k<8;k++){
+        // coast to the k-th burn point on the swing, then burn prograde THERE
+        let px2=ship.x,py2=ship.y,pvx=ship.vx,pvy=ship.vy;
+        const tb=k*1.5;
+        for(let i=0;i<tb*12;i++){const[gax,gay]=accel(world.wells,px2,py2);
+          pvx+=gax/12;pvy+=gay/12;px2+=pvx/12;py2+=pvy/12;}
+        const bx=px2,by=py2;
+        const va=Math.atan2(pvy,pvx);
+        pvx+=Math.cos(va)*dv;pvy+=Math.sin(va)*dv;
+        const sel=k===(run.slingI|0);
+        ctx.setLineDash(sel?[]:[2,6]);
+        ctx.strokeStyle=sel?'rgba(176,125,30,.95)':'rgba(176,125,30,.28)';
+        ctx.lineWidth=sel?2.2:1.1;ctx.beginPath();
+        {const[qx,qy]=iso(bx,by,1);ctx.moveTo(qx,qy);}
+        for(let i=0;i<170;i++){const[gax,gay]=accel(world.wells,px2,py2);
+          pvx+=gax/12;pvy+=gay/12;px2+=pvx/12;py2+=pvy/12;
+          const[qx,qy]=iso(px2,py2,1);ctx.lineTo(qx,qy);}
+        ctx.stroke();
+        {const[qx,qy]=iso(bx,by,1.2);   // the burn point itself
+         ctx.fillStyle=sel?'rgba(176,125,30,.95)':'rgba(176,125,30,.4)';
+         ctx.beginPath();ctx.arc(qx,qy,sel?3.4:2,0,TAU);ctx.fill();
+         if(sel)label('burn T+'+tb.toFixed(1)+'s',qx,qy-10);}}
+      ctx.setLineDash([]);
+      label('✨ SLING — turn picks the burn point on the swing · tap ✨ to COMMIT',...iso(ship.x,ship.y-12,0));
+      }catch(err){run.aim=null;reportErr('fan: '+err.message);}}
+    else if(run&&run.aim&&mode==='flight'&&!run.done){
+      const rot=(inp.ccw?-1:0)+(inp.cw?1:0);
+      const seln=(run.aim.w==='grap'||run.aim.w==='msl');
+      let cands=[];
+      try{
+        if(seln){                                   // THE CONE — world-space, split by the true line
+          const reach=run.aim.w==='grap'?95:150;
+          const[mx3,my3]=run.aim.w==='grap'&&ship.d.grap?grapAnchor():[ship.x,ship.y];
+          ctx.fillStyle='rgba(138,90,16,.13)';
+          ctx.beginPath();
+          {const[ax2,ay2]=iso(mx3,my3,0);ctx.moveTo(ax2,ay2);}
+          for(let k=-8;k<=8;k++){const a3=ship.ang+k/8*0.7;
+            const[qx,qy]=iso(mx3+Math.cos(a3)*reach,my3+Math.sin(a3)*reach,0);
+            ctx.lineTo(qx,qy);}
+          ctx.closePath();ctx.fill();
+          ctx.strokeStyle='rgba(138,90,16,.8)';ctx.lineWidth=1.6;
+          for(const kk of[-1,1]){const a3=ship.ang+kk*0.7;
+            const[ax2,ay2]=iso(mx3,my3,0);
+            const[qx,qy]=iso(mx3+Math.cos(a3)*reach,my3+Math.sin(a3)*reach,0);
+            ctx.beginPath();ctx.moveTo(ax2,ay2);ctx.lineTo(qx,qy);ctx.stroke();}}
+        cands=seln?aimCandidates(run.aim.w):[];
+        run._coneN=seln?cands.length:undefined;
+        if(seln&&cands.length&&run.aim.tgtI===undefined)cycleAimTarget(1);   // nearest locks on entry
+        if(rot){
+          if(cands.length){run._tr=(run._tr||0)+1;
+            if(run._tr>3){run._tr=0;cycleAimTarget(rot);}}
+          else ship.ang+=rot*1.7*(1/60);}
+        if(seln&&cands.length){                     // the cone, marked
+          for(let ci=0;ci<cands.length;ci++){
+            const cb=cands[ci].b;const[qx,qy]=iso(cb.x,cb.y,1);
+            const sel2=ci===run.aim.tgtI;
+            ctx.strokeStyle=sel2?'rgba(138,90,16,1)':'rgba(138,90,16,.55)';
+            ctx.lineWidth=sel2?2.4:1.3;
+            ctx.beginPath();ctx.ellipse(qx,qy,sel2?13:9,sel2?7.6:5.2,0,0,TAU);ctx.stroke();
+            if(sel2){ctx.fillStyle='rgba(138,90,16,.9)';ctx.beginPath();ctx.arc(qx,qy-0,2,0,TAU);ctx.fill();
+              label('◈ '+cb.kind+(cb.kind==='rock'?' '+cb.o.t.toFixed(1)+'t':''),qx,qy-16);}}}
+      }catch(err){reportErr('cone: '+err.message);}
+      const P=predictShot(run.aim.w);
+      if(P){ctx.setLineDash([3,5]);
+        ctx.strokeStyle=run.aim.w==='grap'?'rgba(138,90,16,.75)':'rgba(192,57,43,.7)';
+        ctx.lineWidth=1.6;ctx.beginPath();
+        P.pts.forEach(([px2,py2],i)=>{const[qx,qy]=iso(px2,py2,1);i?ctx.lineTo(qx,qy):ctx.moveTo(qx,qy);});
+        ctx.stroke();ctx.setLineDash([]);
+        for(const g2 of P.gh)for(const[gx2,gy2]of g2.trail){
+          const[qx,qy]=iso(gx2,gy2,1);
+          ctx.fillStyle='rgba(77,85,96,.28)';ctx.beginPath();ctx.arc(qx,qy,1.6,0,TAU);ctx.fill();}
+        if(P.hit){const[hx,hy]=iso(P.hit.x,P.hit.y,1);
+          ctx.strokeStyle='rgba(192,57,43,.9)';ctx.lineWidth=2;
+          ctx.beginPath();ctx.ellipse(hx,hy,11,6.4,0,0,TAU);ctx.stroke();
+          label('▸ '+P.hit.n,hx,hy-14);}
+        else{const[ex,ey]=iso(...P.pts[P.pts.length-1],1);label('no target in reach',ex,ey-8);}}}
+    minimap();
+    $('dockB').style.display=(run.nearSt&&!run.done)?'flex':'none';
+    $('scavB').style.display=(nearWreck()&&!run.done)?'flex':'none';
+    {const frozen=!!run.aim;                       // frozen time: the rail transforms
+     for(const id of['stopB','retroB','burnB'])$(id).style.display=frozen?'none':'';
+     $('cancelB').style.display=frozen?'flex':'none';
+     $('commitB').style.display=frozen?'flex':'none';
+     if(frozen){inp.burn=0;inp.retro=0;
+       $('commitB').querySelector('.bl').textContent=run.aim.w==='sling'?'commit burn':'fire';}}
+    $('yankB').style.display=(GRAP&&(GRAP.state==='stuck'||GRAP.state==='reel'))?'flex':'none';
+    {let near=false;for(const w of world.wells){if(Math.hypot(ship.x-w.x,ship.y-w.y)<170){near=true;break;}}
+     $('slingB').style.display=(near&&Math.hypot(ship.vx,ship.vy)>8&&!run.done)?'flex':'none';}
+    if(inp.stop&&!run.done&&!ship.dead){
+      $('stopbanner').style.display='block';
+      $('stopbanner').querySelector('.sub').textContent=
+        ship.fuel<=0?'NO FUEL — cannot stop':
+        run.stopPred?('time to zero velocity: '+run.stopPred.t.toFixed(1)+'s'):'time to zero velocity: >75s';
+    } else $('stopbanner').style.display='none';
+    if(run.pirateLock&&!run.done){
+      const dem=pirateDemand('player');
+      $('piratebanner').style.display='block';
+      $('piratebanner').querySelector('.sub').textContent=
+        run.pirateT>0?('demand ¢'+dem.toLocaleString()+' — fire in '+run.pirateT.toFixed(1)+'s — or OUTRUN'):'TAKING FIRE — pay or fly';
+      $('payB').textContent='PAY ¢'+dem.toLocaleString();
+      $('dumpB').style.display=(ship.hold.length||ship.salvage>0.05)?'block':'none';
+    } else $('piratebanner').style.display='none';
+    const v=Math.hypot(ship.vx,ship.vy);
+    $('fhud').innerHTML='<span class="lbl">RUN</span> <b>'+run.t.toFixed(1)+'s</b> · v <b>'+v.toFixed(1)+
+      '</b> · ⛽ <b>'+ship.fuel.toFixed(0)+'u</b> · m <b>'+totalM().toFixed(1)+'kg</b>'+
+      (run.aim?' · <b style="color:#8a5a10">AIM '+(run.aim.w==='sling'?'✨':(run.aim.w==='grap'?'🪝':'🚀'))+
+        (run._coneN!==undefined?' · CONE '+run._coneN+((run._coneN>0)?' — ◀▶ target':' — none in reach'):'')+
+        ' · ⬤ fires · ✕ cancels</b>':'')+
+      ((world.pirates[0]&&world.pirates[0].mark==='player')?' · <b style="color:var(--bad)">☠ '+Math.hypot(ship.x-world.pirates[0].x,ship.y-world.pirates[0].y).toFixed(0)+'u</b>':'')+
+      (ship.slugs?' · ✦'+ship.slugs:'')+(ship.missiles?' · 🚀'+ship.missiles:'')+
+      (ship.d.grap?' · 🪝'+(GRAP?((GRAP.state==='adrift'||GRAP.state==='embedded')?'ADRIFT '+(Math.hypot(GRAP.x-ship.x,GRAP.y-ship.y)|0)+'u':'OUT'):'⌂'):'')+
+      (ship.hold&&ship.hold.length?' · 📦'+holdKg().toFixed(0)+'/'+holdCap()+'kg':'')+
+      (ship.fuel<=0?' · <b style="color:var(--bad)">DRY</b>':'');
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+</script></body></html>
