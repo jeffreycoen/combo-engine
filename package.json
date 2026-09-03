@@ -1,7 +1,7 @@
 {
   "name": "combo-engine",
   "private": true,
-  "version": "0.0.47",
+  "version": "0.0.48",
   "type": "module",
   "dependencies": {
     "three": "0.128.0"
