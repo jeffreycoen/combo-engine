@@ -1,6 +1,6 @@
 # Phase 0.0.63 — the phone-first page kit
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `070ee45`, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 
 Api batch rung of `batch-api-1.md`. Checklist item served and flipped in this landing: "The phone-first page kit".
 
