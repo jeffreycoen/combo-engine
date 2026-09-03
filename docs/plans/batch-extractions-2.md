@@ -43,7 +43,7 @@ Eleven rungs, 0.0.42 through 0.0.52. Anything beyond is a new batch order.
 
 - [x] 0.0.42 lists
 - [x] 0.0.43 orient
-- [ ] 0.0.44 route
+- [x] 0.0.44 route
 - [ ] 0.0.45 territory
 - [ ] 0.0.46 intel
 - [ ] 0.0.47 fog
