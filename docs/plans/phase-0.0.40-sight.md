@@ -1,6 +1,6 @@
 # Phase 0.0.40 — sight carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `32dd8a6`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung 5 of `batch-extractions-1.md`, the first depot carve-out. The sight map (`src/depot/sight.js`, 206 lines, no imports) moves whole into `src/modules/sight/sight.js`; the depot file becomes a one-line front door re-exporting the module, so all five importers (frostline pause and cover, depot boot, tick, state) keep working untouched.
