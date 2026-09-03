@@ -1,6 +1,6 @@
 # Phase 0.0.51 — transports carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `aa1932e`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-2.md`. `src/depot/transports.js` moves whole into `src/modules/transports/transports.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
