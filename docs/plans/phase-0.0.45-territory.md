@@ -1,6 +1,6 @@
 # Phase 0.0.45 — territory carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `3338654`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-2.md`. `src/depot/territory.js` moves whole into `src/modules/territory/territory.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
