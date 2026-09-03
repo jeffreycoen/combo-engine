@@ -82,7 +82,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 
 - [x] The conservation ledger: every unit declared at world start, audited to zero drift forever
 - [x] Market pools: prices that move with every trade, players and computer traders in the same pools
-- [ ] Contracts with escrow, open races, and expiry
+- [x] Contracts with escrow, open races, and expiry
 - [x] The ship builder: parts on a grid, connection ports, derived mass, balance, and turn authority
 - [x] Weld stress with load-based breaking and honest ship splitting
 - [x] The grapple rope: taut constraint, both ends pulled by their masses, yank, snap
