@@ -1,6 +1,6 @@
 # Phase 0.0.49 — economy carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `5bb8115`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-2.md`. `src/depot/economy.js` moves whole into `src/modules/economy/economy.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
