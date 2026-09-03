@@ -1,6 +1,6 @@
 # Phase 0.0.57 — mapgen carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `6c2af57`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 
 Batch rung of `batch-extractions-3.md`. `src/depot/mapgen.js` moves whole into `src/modules/mapgen/mapgen.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
 
