@@ -29,11 +29,8 @@ const GATES = {
   "grapple": ["scripts/grapple-test.mjs"],
   "old-master": ["scripts/old-master-test.mjs"],
   "frostline": ["scripts/frostline-test.mjs"],
-  "poolmarket": ["scripts/poolmarket-test.mjs"],
   "escrow": ["scripts/escrow-test.mjs"],
   "wells": ["scripts/wells-test.mjs"],
-  "conserve": ["scripts/conserve-test.mjs"],
-  "shipyard": ["scripts/shipyard-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

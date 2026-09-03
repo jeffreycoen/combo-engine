@@ -125,64 +125,36 @@ A fan-fiction tactics campaign in the clone-war shape, live at `docs/frostline/`
 
 ## The extracted modules
 
-Every module in `src/modules/`, where it came from, and the phase that landed it. Each has a headless gate in `scripts/gate.mjs`. This list is the extraction's progress record; every landing updates it.
+Every module in `src/modules/`, the checklist item it serves, and the phase that landed it. Each has a headless gate in `scripts/gate.mjs`. The checklist governs extraction; this list carries the progress, flipped in each landing.
 
-From the demos, as modules with their own gates:
+Serving checklist items:
 
-- [x] market — space-hauler demo — 0.0.2
-- [x] builder — space-hauler demo — 0.0.3
-- [x] ledger — space-hauler demo — 0.0.4
-- [x] weldstress — space-hauler demo — 0.0.5
-- [x] tape — space-hauler demo — 0.0.6
-- [x] physics-pb — mech demo — 0.0.7
-- [x] rig — mech demo — 0.0.8
-- [x] solids — shooting-range demo — 0.0.9
-- [x] ballistics — shooting-range demo — 0.0.10
-- [x] orders — fleet demo — 0.0.11
-- [x] steering — fleet demo — 0.0.12
-- [x] voxel — shooting-range demo — 0.0.13
-- [x] support — shooting-range demo — 0.0.14
-- [x] grapple — space-hauler demo — 0.0.15
-- [x] poolmarket — deadweight hangar demo — 0.0.36
-- [x] escrow — deadweight hangar demo — 0.0.37
-- [x] wells — deadweight hangar demo — 0.0.38
-- [x] conserve — deadweight hangar demo — 0.0.39
-- [x] shipyard — deadweight hangar demo — 0.0.52
+- [x] market — market pools — 0.0.2
+- [x] builder — the ship builder — 0.0.3
+- [x] ledger — the conservation ledger — 0.0.4
+- [x] weldstress — weld stress — 0.0.5
+- [x] tape — the input tape — 0.0.6
+- [x] physics-pb — the position-based physics core — 0.0.7
+- [x] rig — the rig table — 0.0.8
+- [x] solids — plane-set solids — 0.0.9
+- [x] ballistics — the ballistics solver — 0.0.10
+- [x] orders — the fleet order model — 0.0.11
+- [x] steering — steering behaviors — 0.0.12
+- [x] voxel — voxel destruction — 0.0.13
+- [x] support — support propagation — 0.0.14
+- [x] grapple — the grapple rope — 0.0.15
+- [x] escrow — contracts with escrow — 0.0.37
+- [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38
 
-From the depot, carved out whole behind unchanged depot front doors (hash-identical moves; the four bracketing gates unmoved at each landing):
+Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
-- [x] sight — 0.0.40
-- [x] wind — 0.0.41
-- [x] lists — 0.0.42
-- [x] orient — 0.0.43
-- [x] route — 0.0.44
-- [x] territory — 0.0.45
-- [x] intel — 0.0.46
-- [x] fog — 0.0.47
-- [x] mines — 0.0.48
-- [x] economy — 0.0.49
-- [x] cards — 0.0.50
-- [x] transports — 0.0.51
-
-In flight (batch 3, `docs/plans/batch-extractions-3.md`):
-
-- [x] specs — 0.0.53
-- [x] ai — 0.0.54
-- [x] save — 0.0.55
-- [x] accuracy — 0.0.56
-- [x] mapgen — 0.0.57
-- [ ] squads — 0.0.58
-- [ ] buildlines — 0.0.59
-- [ ] units — 0.0.60
-- [ ] drivers — 0.0.61
-- [ ] muster — 0.0.62
-- [ ] bell — 0.0.63
+Retired: poolmarket (0.0.36), conserve (0.0.39), shipyard (0.0.52) — second lifts of already-landed capabilities; the first lifts are canonical by ruling. Withdrawn unlanded: squads, buildlines, units, drivers, muster, bell — batch 3 closed at mapgen; the realignment is `docs/plans/the-realignment.md`.
 
 Staying in the depot by ruling, not by miss: tick, state, sim, boot, api — the engine's spine. Staying in the deadweight demo by ruling: the tramp and pirate brains and fracture — shaped lifts that wait on a design sitting.
 
 ## Status
 
-The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). The demos are not in this tree yet; their systems land per the checklist.
+The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). FROSTLINE plays live at `docs/frostline/`, mid-repair per its audit. The deadweight hangar demo rides in the tree as read-only source. The next extractions come from the checklist's unchecked boxes, harness layer first.
 
 ## License
 

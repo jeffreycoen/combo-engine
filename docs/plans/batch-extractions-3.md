@@ -39,9 +39,4 @@ Eleven rungs, 0.0.53 through 0.0.63. Anything beyond is a new batch order.
 - [x] 0.0.55 save
 - [x] 0.0.56 accuracy
 - [x] 0.0.57 mapgen
-- [ ] 0.0.58 squads
-- [ ] 0.0.59 buildlines
-- [ ] 0.0.60 units
-- [ ] 0.0.61 drivers
-- [ ] 0.0.62 muster
-- [ ] 0.0.63 bell
+- withdrawn: squads, buildlines, units, drivers, muster, bell — the batch closed at mapgen; no rung of it served a checklist item. The realignment is `the-realignment.md`.
