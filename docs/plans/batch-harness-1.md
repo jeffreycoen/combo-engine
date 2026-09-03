@@ -22,6 +22,6 @@ As proven in the extraction batches: trial first, plan from the run, rehearsal g
 ## The record
 
 - [x] 0.0.59 determinism kit
-- [ ] 0.0.60 contract pattern
+- [x] 0.0.60 contract pattern
 - [ ] 0.0.61 gates and the boot badge
 - [ ] 0.0.62 receipt log
