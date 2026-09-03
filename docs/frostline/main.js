@@ -14,6 +14,7 @@ import { destShield, hitChance, knownThreats } from "../../src/games/frostline/c
 import { setOverwatch, clearOverwatch, applyFireControl, toggleDiscipline, discOf, markTarget, markedTarget, focusOrder, owPaths, OVERWATCH } from "../../src/games/frostline/verbs.js";
 import { loadPurse, savePurse, earnFromEvents, winBonus, buyTeam, teamPrice, FOR_SALE, STORE_KEY, fieldedTypes, menOf, recordCasualties, refillCost, buyRefill, campaignOver } from "../../src/games/frostline/purse.js";
 import { makeBoard, completionPay, doneOf, markJobDone } from "../../src/games/frostline/contracts.js";
+import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 import { makeCtx, stepBattle, applyOp, record } from "../../src/games/frostline/tape.js";
 import { INFANTRY_ARMS } from "../../src/depot/specs.js";
 
@@ -201,47 +202,15 @@ function screenToWorld(cx, cy) {
   return { x: px + f.x * t, z: pz + f.z * t };
 }
 
-// ---- gestures: a tap orders; two fingers are the camera (pinch zooms,
-// twist rotates) and never order. A tap is down-and-up under 9 px with no
-// second finger; orders moved from pointerdown to the release so the first
-// finger of a pinch never pops a confirmation.
+// ---- gestures: the page kit's one tracker — a tap orders; two fingers
+// are the camera (pinch zooms, twist rotates) and never order. The law
+// this page proved lives in the kit now; this page is a caller.
 const clampZoom = (z) => Math.max(0.5, Math.min(2.6, z));
-const ptrs = new Map();
-let gesture = false, tapStart = null, pinchD = 0, twistA = 0;
-canvas.addEventListener("pointerdown", (e) => {
-  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-  if (ptrs.size === 2) {
-    gesture = true; tapStart = null;
-    const [a, b] = [...ptrs.values()];
-    pinchD = Math.hypot(b.x - a.x, b.y - a.y);
-    twistA = Math.atan2(b.y - a.y, b.x - a.x);
-  } else if (ptrs.size === 1) tapStart = { id: e.pointerId, x: e.clientX, y: e.clientY };
+makeGestures(canvas, {
+  tap: (x, y) => tapAt(x, y),
+  pinch: (f) => { zoom = clampZoom(zoom * f); R.setZoom(zoom); },
+  twist: (r) => R.rotateBy(r),
 });
-canvas.addEventListener("pointermove", (e) => {
-  const p = ptrs.get(e.pointerId);
-  if (!p) return;
-  p.x = e.clientX; p.y = e.clientY;
-  if (gesture && ptrs.size === 2) {
-    const [a, b] = [...ptrs.values()];
-    const d = Math.hypot(b.x - a.x, b.y - a.y);
-    const ang = Math.atan2(b.y - a.y, b.x - a.x);
-    if (pinchD > 0) { zoom = clampZoom(zoom * (d / pinchD)); R.setZoom(zoom); }
-    let da = ang - twistA;
-    if (da > Math.PI) da -= 2 * Math.PI;
-    if (da < -Math.PI) da += 2 * Math.PI;
-    R.rotateBy(-da);
-    pinchD = d; twistA = ang;
-  }
-});
-canvas.addEventListener("pointerup", (e) => {
-  const wasTap = tapStart && tapStart.id === e.pointerId && !gesture &&
-    Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y) < 9;
-  ptrs.delete(e.pointerId);
-  if (ptrs.size === 0) gesture = false;
-  tapStart = null;
-  if (wasTap) tapAt(e.clientX, e.clientY);
-});
-canvas.addEventListener("pointercancel", (e) => { ptrs.delete(e.pointerId); if (ptrs.size === 0) gesture = false; tapStart = null; });
 document.getElementById("rotL").addEventListener("click", () => R.rotateStep(1));
 document.getElementById("rotR").addEventListener("click", () => R.rotateStep(-1));
 

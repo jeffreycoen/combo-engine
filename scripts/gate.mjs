@@ -35,6 +35,7 @@ const GATES = {
   "contract": ["scripts/contract-test.mjs"],
   "badge": ["scripts/badge-test.mjs"],
   "receipts": ["scripts/receipts-test.mjs"],
+  "pagekit": ["scripts/pagekit-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
