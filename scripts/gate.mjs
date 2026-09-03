@@ -38,6 +38,7 @@ const GATES = {
   "pagekit": ["scripts/pagekit-test.mjs"],
   "describe": ["scripts/describe-test.mjs"],
   "registry": ["scripts/registry-test.mjs"],
+  "manifest": ["scripts/manifest-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

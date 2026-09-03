@@ -38,7 +38,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [ ] Boot from a world description object (seed, terrain, gravity and wind, spec tables, module choices, dials)
 - [x] Module registry and the standard sockets (tick input, renderer flags, sound events)
 - [x] The module pattern: skeleton, seam definitions, and the module-author's rule sheet (minted by the market module)
-- [ ] The manifest tool: a map of what every file imports from the engine, kept mechanically
+- [x] The manifest tool: a map of what every file imports from the engine, kept mechanically
 
 ### The harness layer (universal — these pay off in every game)
 
@@ -152,6 +152,7 @@ Serving checklist items:
 - [x] pagekit — the phone-first page kit — 0.0.63
 - [x] describe — the described-world boot door (its checklist box stays open: spec tables and module choices are not yet mechanisms) — 0.0.64
 - [x] registry — the module registry and the standard sockets — 0.0.65
+- [x] manifest (scripts/manifest.mjs) — the import map, kept mechanically — 0.0.66
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
