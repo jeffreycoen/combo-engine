@@ -1,6 +1,6 @@
 # Phase 0.0.52 — the shipyard
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `811c551`, 2026-09-03. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; prior gates unmoved. -->
 
 Batch rung 11 of `batch-extractions-2.md`, the one deadweight organ. The grid builder's laws: the part table as data, occupancy and ports, the nozzle rule, placement adjacency, the weld list with the strut's weak joints, the derived body (mass, center, inertia, thrust, torque, turn authority, fuel), and hull connectivity. Source: `deadweight-hangar.html` lines 171-182, 195, 227-229, 347-400, read-only, committed unchanged at 206d7eb. `fracture` stays behind by the batch order's own ruling.
