@@ -31,6 +31,7 @@ const GATES = {
   "frostline": ["scripts/frostline-test.mjs"],
   "escrow": ["scripts/escrow-test.mjs"],
   "wells": ["scripts/wells-test.mjs"],
+  "determinism": ["scripts/determinism-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
