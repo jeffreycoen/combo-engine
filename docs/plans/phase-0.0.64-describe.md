@@ -1,6 +1,6 @@
 # Phase 0.0.64 — the described-world boot door
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `4ee7b96`, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 
 Api batch rung of `batch-api-1.md`. Serves the checklist box for the described-world boot; the box stays OPEN at this landing, by this plan's own kind statement.
 
