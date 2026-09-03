@@ -1,6 +1,6 @@
 # Phase 0.0.59 — the determinism kit
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `358a076`, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 5 PASS / 0 FAIL; prior gates unmoved. -->
 
 Harness batch rung of `batch-harness-1.md`. Checklist item served: "Determinism kit: one seeded random stream for the sim, a second for effects, bit-exact state hashing" — the box flips in this landing.
