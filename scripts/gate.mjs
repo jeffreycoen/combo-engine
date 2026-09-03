@@ -30,6 +30,7 @@ const GATES = {
   "old-master": ["scripts/old-master-test.mjs"],
   "frostline": ["scripts/frostline-test.mjs"],
   "poolmarket": ["scripts/poolmarket-test.mjs"],
+  "escrow": ["scripts/escrow-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
