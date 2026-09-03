@@ -23,5 +23,5 @@ As the harness batch ran: trial first, plan from the run, rehearsal green, dispa
 
 - [x] 0.0.63 page kit
 - [x] 0.0.64 described-world boot
-- [ ] 0.0.65 registry and sockets
+- [x] 0.0.65 registry and sockets
 - [ ] 0.0.66 manifest tool

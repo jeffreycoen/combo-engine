@@ -36,7 +36,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 ### The api itself
 
 - [ ] Boot from a world description object (seed, terrain, gravity and wind, spec tables, module choices, dials)
-- [ ] Module registry and the standard sockets (tick input, renderer flags, sound events)
+- [x] Module registry and the standard sockets (tick input, renderer flags, sound events)
 - [x] The module pattern: skeleton, seam definitions, and the module-author's rule sheet (minted by the market module)
 - [ ] The manifest tool: a map of what every file imports from the engine, kept mechanically
 
@@ -151,6 +151,7 @@ Serving checklist items:
 - [x] receipts — the receipt log — 0.0.62
 - [x] pagekit — the phone-first page kit — 0.0.63
 - [x] describe — the described-world boot door (its checklist box stays open: spec tables and module choices are not yet mechanisms) — 0.0.64
+- [x] registry — the module registry and the standard sockets — 0.0.65
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
