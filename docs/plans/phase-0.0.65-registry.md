@@ -1,6 +1,6 @@
 # Phase 0.0.65 — the module registry and the sockets
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `918dc19`, 2026-09-03. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 
 Api batch rung of `batch-api-1.md`. Checklist item served and flipped in this landing: "Module registry and the standard sockets".
 
