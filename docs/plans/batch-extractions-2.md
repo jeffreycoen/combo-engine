@@ -48,7 +48,7 @@ Eleven rungs, 0.0.42 through 0.0.52. Anything beyond is a new batch order.
 - [x] 0.0.46 intel
 - [x] 0.0.47 fog
 - [x] 0.0.48 mines
-- [ ] 0.0.49 economy
+- [x] 0.0.49 economy
 - [ ] 0.0.50 cards
 - [ ] 0.0.51 transports
 - [ ] 0.0.52 shipyard
