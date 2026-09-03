@@ -1,6 +1,6 @@
 # Phase 0.0.37 — the escrow contracts
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 7 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `4aff0cd`, 2026-09-03. Gate: 7 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; prior gates unmoved. -->
 
 Batch rung 2 of `batch-extractions-1.md`. The organ is the deadweight hangar's contract escrow: a starving station locks part of its treasury behind a posted bounty priced off the other station's spot plus the daring margin; fulfilment pays the escrow once and restocks; expiry returns every cent; a rescue fee is 600 plus thirty percent of the stranded value, treasury-capped. Source: `deadweight-hangar.html` lines 267-302, read-only, committed unchanged at 206d7eb.
