@@ -123,6 +123,63 @@ A fan-fiction tactics campaign in the clone-war shape, live at `docs/frostline/`
 - **The purse remembers.** Kills pay bounties win or lose; contracts pay their posted price; the shop sells squads, medics, and the hunter — one armored man, twin sidearms, a 35-meter jetpack line, one of a kind. The men persist between contracts and the dead stay dead until replaced at the table's own split price. Purse, roster, heat, and casualties ride the browser's storage with a reset.
 - **The gate:** `node scripts/gate.mjs frostline` — one-call asserts grouped by area, seconds to run; long-run truths are the owner's playtest at the page, by standing ruling.
 
+## The extracted modules
+
+Every module in `src/modules/`, where it came from, and the phase that landed it. Each has a headless gate in `scripts/gate.mjs`. This list is the extraction's progress record; every landing updates it.
+
+From the demos, as modules with their own gates:
+
+- [x] market — space-hauler demo — 0.0.2
+- [x] builder — space-hauler demo — 0.0.3
+- [x] ledger — space-hauler demo — 0.0.4
+- [x] weldstress — space-hauler demo — 0.0.5
+- [x] tape — space-hauler demo — 0.0.6
+- [x] physics-pb — mech demo — 0.0.7
+- [x] rig — mech demo — 0.0.8
+- [x] solids — shooting-range demo — 0.0.9
+- [x] ballistics — shooting-range demo — 0.0.10
+- [x] orders — fleet demo — 0.0.11
+- [x] steering — fleet demo — 0.0.12
+- [x] voxel — shooting-range demo — 0.0.13
+- [x] support — shooting-range demo — 0.0.14
+- [x] grapple — space-hauler demo — 0.0.15
+- [x] poolmarket — deadweight hangar demo — 0.0.36
+- [x] escrow — deadweight hangar demo — 0.0.37
+- [x] wells — deadweight hangar demo — 0.0.38
+- [x] conserve — deadweight hangar demo — 0.0.39
+- [x] shipyard — deadweight hangar demo — 0.0.52
+
+From the depot, carved out whole behind unchanged depot front doors (hash-identical moves; the four bracketing gates unmoved at each landing):
+
+- [x] sight — 0.0.40
+- [x] wind — 0.0.41
+- [x] lists — 0.0.42
+- [x] orient — 0.0.43
+- [x] route — 0.0.44
+- [x] territory — 0.0.45
+- [x] intel — 0.0.46
+- [x] fog — 0.0.47
+- [x] mines — 0.0.48
+- [x] economy — 0.0.49
+- [x] cards — 0.0.50
+- [x] transports — 0.0.51
+
+In flight (batch 3, `docs/plans/batch-extractions-3.md`):
+
+- [ ] specs — 0.0.53
+- [ ] ai — 0.0.54
+- [ ] save — 0.0.55
+- [ ] accuracy — 0.0.56
+- [ ] mapgen — 0.0.57
+- [ ] squads — 0.0.58
+- [ ] buildlines — 0.0.59
+- [ ] units — 0.0.60
+- [ ] drivers — 0.0.61
+- [ ] muster — 0.0.62
+- [ ] bell — 0.0.63
+
+Staying in the depot by ruling, not by miss: tick, state, sim, boot, api — the engine's spine. Staying in the deadweight demo by ruling: the tramp and pirate brains and fracture — shaped lifts that wait on a design sitting.
+
 ## Status
 
 The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). The demos are not in this tree yet; their systems land per the checklist.
