@@ -1,6 +1,6 @@
 # Phase 0.0.56 — accuracy carved out
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: prior gates unmoved, hashes identical.
+Status: LANDED, commit `18df1d5`, 2026-09-03. Gate: prior gates unmoved, hashes identical.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: prior gates unmoved, hashes identical. -->
 
 Batch rung of `batch-extractions-3.md`. `src/depot/accuracy.js` moves whole into `src/modules/accuracy/accuracy.js`; the depot file becomes a one-line front door, so every importer keeps working untouched.
