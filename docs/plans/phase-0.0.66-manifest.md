@@ -1,6 +1,6 @@
 # Phase 0.0.66 — the manifest tool
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 3 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `59e1066`, 2026-09-03. Gate: 3 PASS / 0 FAIL; prior gates unmoved.
 
 Api batch rung of `batch-api-1.md`. Checklist item served and flipped in this landing: "The manifest tool".
 
