@@ -1,6 +1,6 @@
 # Phase 0.0.36 — the part pools
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `6969b23`, 2026-09-03. Gate: 10 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; prior gates unmoved. -->
 
 Batch rung 1 of `batch-extractions-1.md`. The organ is the deadweight hangar's constant-product part pools: a pool is {q: stock, c: credit reserve}, the invariant k = q*c prices every trade, ceil-on-buy and floor-on-sell always favor the pool, and a refit prices sell-all-then-buy-all on a copy. Source: `deadweight-hangar.html` lines 209-253 (bpCost, poolBuy, poolSell, price1), read-only, committed unchanged at 206d7eb.
