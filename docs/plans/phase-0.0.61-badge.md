@@ -1,6 +1,6 @@
 # Phase 0.0.61 — the gates and the boot badge
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 2 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `1b1e37d`, 2026-09-03. Gate: 2 PASS / 0 FAIL; prior gates unmoved.
 
 Harness batch rung of `batch-harness-1.md`. Checklist item served: "Headless gates and the boot self-test badge: fixed run from a seed, hashes printed, checks shown at start" — the box flips in this landing.
 
