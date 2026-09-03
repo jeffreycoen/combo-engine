@@ -1,6 +1,6 @@
 # Phase 0.0.38 — the gravity wells
 
-Status: LANDED, commit stamped below, 2026-09-03. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `6d1687a`, 2026-09-03. Gate: 9 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 9 PASS / 0 FAIL; prior gates unmoved. -->
 
 Batch rung 3 of `batch-extractions-1.md`. The organ is the deadweight hangar's gravity field: the well maker, the field law mu / (r^2 + soft^2)^1.65, the binary pair's mutual pull, the warp potential's clamped sum, and the two predictors that integrate the real field — where a killing burn ends, and where a shot flies. Source: `deadweight-hangar.html` lines 403, 438-441, 596-602, 855-858, 2124-2149, 2541-2572, read-only, committed unchanged at 206d7eb.
