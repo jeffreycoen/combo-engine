@@ -150,6 +150,7 @@ Serving checklist items:
 - [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61
 - [x] receipts — the receipt log — 0.0.62
 - [x] pagekit — the phone-first page kit — 0.0.63
+- [x] describe — the described-world boot door (its checklist box stays open: spec tables and module choices are not yet mechanisms) — 0.0.64
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
