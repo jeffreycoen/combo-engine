@@ -32,6 +32,7 @@ const GATES = {
   "poolmarket": ["scripts/poolmarket-test.mjs"],
   "escrow": ["scripts/escrow-test.mjs"],
   "wells": ["scripts/wells-test.mjs"],
+  "conserve": ["scripts/conserve-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

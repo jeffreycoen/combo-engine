@@ -40,6 +40,6 @@ Each landing flips its own phase record; this document gets one status line per 
 - [x] 0.0.36 pool-market
 - [x] 0.0.37 escrow-contracts
 - [x] 0.0.38 wells
-- [ ] 0.0.39 conservation-audit
+- [x] 0.0.39 conservation-audit
 - [ ] 0.0.40 sight
 - [ ] 0.0.41 wind
