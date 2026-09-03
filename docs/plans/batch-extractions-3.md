@@ -35,7 +35,7 @@ Eleven rungs, 0.0.53 through 0.0.63. Anything beyond is a new batch order.
 ## The record
 
 - [x] 0.0.53 specs
-- [ ] 0.0.54 ai
+- [x] 0.0.54 ai
 - [ ] 0.0.55 save
 - [ ] 0.0.56 accuracy
 - [ ] 0.0.57 mapgen
