@@ -1,6 +1,6 @@
 # Phase 0.0.69 — the per-joint load telemetry
 
-Status: LANDED, commit stamped below, 2026-09-04. Gate: 4 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `e294872`, 2026-09-04. Gate: 4 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 4 PASS / 0 FAIL; prior gates unmoved. -->
 
 Harvest batch rung of `batch-harvest-1.md`. Checklist item served and flipped in this landing: "Per-joint load telemetry".
