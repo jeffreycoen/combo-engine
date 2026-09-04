@@ -43,6 +43,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - **The README governs extraction.** Its checklist is the roadmap: every batch order and every phase names the checklist item it serves, and nothing is extracted that serves no item. The README's modules list carries the progress, flipped in each landing. Reading the README alone must show what is extracted, what is in flight, and why.
 - Every lift names its kind in the phase document: VERBATIM (file inventory with hashes), VERBATIM MATH (named substitutions, and only those — an unlisted difference stops the agent), or SHAPED (the law carried, the code new, said plainly). The kind decides the acceptance; arithmetic ratifies all three.
 - Demo files are source material, read-only, cited by line. No task ever edits a demo.
+- **Demos are harvested, never committed.** Their code is lifted into modules; the demo file stays outside the record. A gate never reads a demo file — fidelity is proven in the trial at lift time; the gate holds laws. (The one demo already in git predates this rule and stays; its readers are grandfathered.)
 - Every task is bracketed by the prior gates: asserted green as step 1, re-asserted before the commit. A moved number is a finding against the task, never something to fix in flight.
 - The record close rides the landing (owner, 2026-08-28): when every gate is green, the phase status line and the README checklist boxes flip in the same landing, not on a later word.
 
