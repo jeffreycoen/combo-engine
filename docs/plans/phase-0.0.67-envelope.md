@@ -1,6 +1,6 @@
 # Phase 0.0.67 — the mount failure envelopes
 
-Status: LANDED, commit stamped below, 2026-09-04. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `198e594`, 2026-09-04. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 
 Harvest batch rung of `batch-harvest-1.md`. Checklist item served and flipped in this landing: "Mount failure envelopes".
 
