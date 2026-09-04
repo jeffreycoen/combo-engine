@@ -65,7 +65,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [ ] Leg inverse kinematics
 - [ ] The balance controller and the walking planner
 - [ ] Labeled-cheat presets: every relaxed rule named, with its measured consequence
-- [ ] Per-joint load telemetry as an engine output
+- [x] Per-joint load telemetry as an engine output
 
 ### From the shooting-range demo
 
@@ -155,6 +155,7 @@ Serving checklist items:
 - [x] manifest (scripts/manifest.mjs) — the import map, kept mechanically — 0.0.66
 - [x] envelope laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.67) — mount failure envelopes — 0.0.67
 - [x] actuator laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.68) — torque-limited joint actuators — 0.0.68
+- [x] telemetry — per-joint load telemetry as an engine output — 0.0.69
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 

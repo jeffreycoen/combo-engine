@@ -41,6 +41,7 @@ const GATES = {
   "manifest": ["scripts/manifest-test.mjs"],
   "envelope": ["scripts/envelope-test.mjs"],
   "actuator": ["scripts/actuator-test.mjs"],
+  "telemetry": ["scripts/telemetry-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
