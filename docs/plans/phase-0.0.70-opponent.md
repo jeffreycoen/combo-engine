@@ -1,6 +1,6 @@
 # Phase 0.0.70 — the non-lethal opponent model
 
-Status: LANDED, commit stamped below, 2026-09-04. Gate: 6 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `71003a1`, 2026-09-04. Gate: 6 PASS / 0 FAIL; prior gates unmoved.
 
 Harvest batch rung of `batch-harvest-1.md`. Checklist item served and flipped in this landing: "The non-lethal opponent model".
 
