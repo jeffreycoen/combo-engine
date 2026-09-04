@@ -3,6 +3,8 @@
 // shapes said once instead of by convention. SHAPED: the law is the
 // checklist's words; the table is the tree's own truth, proven by its gate
 // against the filesystem and the gate table. Pure data plus lookups.
+import * as wells from "../wells/wells.js";
+import * as solids from "../solids/solids.js";
 
 // The seams, per the module pattern: tick (steps state), consume (pure
 // calls on demand), draw (renders), sample (answers queries).
@@ -60,3 +62,23 @@ export const SOCKETS = {
 
 export function moduleOf(name) { return REGISTRY[name] || null; }
 export function modulesBySeam(seam) { return Object.keys(REGISTRY).filter((k) => REGISTRY[k].seam === seam); }
+
+// The attach makers — one module name to a function returning its surface.
+// Static imports, not a dynamic import() per call: both wells and solids
+// are plain function surfaces with no seam to wire, so the whole module's
+// export namespace IS the surface. A module needing setup gets its own
+// maker here later; the map is the only place that changes.
+const MAKERS = { wells: () => wells, solids: () => solids };
+
+// canAttach(name) -> true when a maker exists. The describe door checks
+// this before it ever calls attach, so a bad name is reported, not thrown.
+export function canAttach(name) { return !!MAKERS[name]; }
+
+// attach(name, opts) -> { name, seam, surface }. Throws when the name has
+// no maker — callers that already checked canAttach never hit this.
+export function attach(name, opts) {
+  const mod = moduleOf(name);
+  const make = MAKERS[name];
+  if (!mod || !make) throw new Error("registry: no attach maker for \"" + name + "\"");
+  return { name, seam: mod.seam, surface: make(opts) };
+}

@@ -150,7 +150,7 @@ Serving checklist items:
 - [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61
 - [x] receipts — the receipt log — 0.0.62
 - [x] pagekit — the phone-first page kit — 0.0.63
-- [x] describe — the described-world boot door (its checklist box stays open: spec tables and module choices are not yet mechanisms) — 0.0.64
+- [x] describe — the described-world boot door (grown 0.0.72: spec-table overrides and module choices come through the door; the box stays open until module choices reach the loop's seams) — 0.0.64
 - [x] registry — the module registry and the standard sockets — 0.0.65
 - [x] manifest (scripts/manifest.mjs) — the import map, kept mechanically — 0.0.66
 - [x] envelope laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.67) — mount failure envelopes — 0.0.67
