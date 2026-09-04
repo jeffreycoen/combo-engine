@@ -59,7 +59,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 ### From the mech demo
 
 - [x] The position-based physics core (the mech island coldsnap already reserves a hook for)
-- [ ] Mount failure envelopes: four load types, one utilization number, honest tearing
+- [x] Mount failure envelopes: four load types, one utilization number, honest tearing
 - [ ] Torque-limited joint actuators with finite stiffness
 - [x] The rig table: a whole machine as data, mirrored per side, assembled from the table
 - [ ] Leg inverse kinematics
@@ -153,6 +153,7 @@ Serving checklist items:
 - [x] describe — the described-world boot door (its checklist box stays open: spec tables and module choices are not yet mechanisms) — 0.0.64
 - [x] registry — the module registry and the standard sockets — 0.0.65
 - [x] manifest (scripts/manifest.mjs) — the import map, kept mechanically — 0.0.66
+- [x] envelope laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.67) — mount failure envelopes — 0.0.67
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
