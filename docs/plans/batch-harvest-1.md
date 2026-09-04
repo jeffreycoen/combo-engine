@@ -29,7 +29,7 @@ As the api batch ran, plus the new law: no demo enters git; every trial proves f
 ## The record
 
 - [x] 0.0.67 mount envelopes
-- [ ] 0.0.68 torque actuators
+- [x] 0.0.68 torque actuators
 - [ ] 0.0.69 joint telemetry
 - [ ] 0.0.70 opponent model
 - [ ] 0.0.71 senses and cover
