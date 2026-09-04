@@ -1,6 +1,6 @@
 # Phase 0.0.72 — the boot door grows spec tables and module choices
 
-Status: LANDED, commit `commit stamped below`, 2026-09-04. Gate: 11 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `commit `ca82842``, 2026-09-04. Gate: 11 PASS / 0 FAIL; prior gates unmoved.
 
 The described-world boot door (landed 0.0.64) accepts seed and four dials and refuses everything else. This phase grows the door's two named-but-missing fields. `specs`: a description may override any of the seven row-shaped spec tables; each override is contract-checked at the door, every problem reported at once, and the merged tables ride the boot result. `modules`: a description names registered modules to attach; an unknown name is a door refusal; named modules come back attached, grouped by seam. The registry gains the missing mechanism — an attach call — wired for the two pure-call modules (wells, solids). No demo source; this is the engine's own missing half, the law from the checklist's words.
 
