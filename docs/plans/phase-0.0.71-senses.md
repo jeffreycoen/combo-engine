@@ -1,6 +1,6 @@
 # Phase 0.0.71 — the opponent senses and cover
 
-Status: LANDED, commit stamped below, 2026-09-04. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `037ca46`, 2026-09-04. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 
 Harvest batch rung of `batch-harvest-1.md`. Checklist item served and flipped in this landing: "Opponent senses and cover reasoning".
 
