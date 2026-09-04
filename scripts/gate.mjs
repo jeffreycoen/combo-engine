@@ -43,6 +43,7 @@ const GATES = {
   "actuator": ["scripts/actuator-test.mjs"],
   "telemetry": ["scripts/telemetry-test.mjs"],
   "opponent": ["scripts/opponent-test.mjs"],
+  "senses": ["scripts/senses-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

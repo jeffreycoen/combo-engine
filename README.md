@@ -74,7 +74,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] Voxel destruction: damage only where hit, bored tunnels, support collapse, rubble that stacks
 - [x] Support propagation: unsupported structure falls; decoration goes with its host
 - [x] The non-lethal opponent model: per-part thresholds, knockdown by impulse, a lethal line that fails the mission
-- [ ] Opponent senses and cover reasoning
+- [x] Opponent senses and cover reasoning
 - [ ] The greybox part library: stairs, facades, vehicles, figures, at true human scale
 - [ ] The 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris
 
@@ -157,6 +157,7 @@ Serving checklist items:
 - [x] actuator laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.68) — torque-limited joint actuators — 0.0.68
 - [x] telemetry — per-joint load telemetry as an engine output — 0.0.69
 - [x] opponent — the non-lethal opponent model — 0.0.70
+- [x] senses — opponent senses and cover reasoning — 0.0.71
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
