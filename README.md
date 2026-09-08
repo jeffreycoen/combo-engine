@@ -140,7 +140,7 @@ Serving checklist items:
 - [x] ballistics — the ballistics solver — 0.0.10; generalized 0.0.83
 - [x] orders — the fleet order model — 0.0.11
 - [x] steering — steering behaviors — 0.0.12
-- [x] voxel — voxel destruction — 0.0.13
+- [x] voxel — voxel destruction — 0.0.13; generalized 0.0.91
 - [x] support — support propagation — 0.0.14; generalized 0.0.84
 - [x] grapple — the grapple rope — 0.0.15; generalized 0.0.81
 - [x] escrow — contracts with escrow — 0.0.37; generalized 0.0.80

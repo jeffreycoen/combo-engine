@@ -18,8 +18,24 @@
 //      here (opts.sizes, opts.defSize) with the demo's values the fixture;
 //   4. MEDIA (brittleness by name, density) imports from the ballistics
 //      module — the demo holds it in the same script scope.
+//
+// Second pass, the general parts order, phase A4. Differences, and only
+// these:
+//   1. the solids import gains makeHit; the ballistics import stays for
+//      the defaults.
+//   2. voxRay takes an out record as its last argument, default hit;
+//      every write at the end goes to out.
+//   3. makeWorldQuery takes a hitRecord option, default hit; the function
+//      it returns takes an out record as its last argument, default
+//      hitRecord, and reads and writes out where it read and wrote hit.
+//   4. makeVoxWorld takes media, gravity, limits, and hit as options,
+//      defaults the ballistics MEDIA and G, the module's own VOX table,
+//      and the solids hit; every read inside the world of MEDIA, G, and
+//      VOX reads the instance's own.
+//   5. PRIM_CONTRACT and checkPrim added, naming and checking the shape
+//      of a prim in one pass.
 // Composes with solids (raycastWorld, hit) and ballistics (MEDIA, G).
-import { raycastWorld, hit } from "../solids/solids.js";
+import { raycastWorld, hit, makeHit } from "../solids/solids.js";
 import { MEDIA, G } from "../ballistics/ballistics.js";
 
 export const VOX = {
@@ -63,7 +79,7 @@ export function voxCentre(f, i, out) {
 
 // voxRay: DDA through a field's live cells; enter, exit, path, face normal,
 // material into the shared hit record (demo 2166-2224).
-export function voxRay(f, ox, oy, oz, dx, dy, dz, maxT) {
+export function voxRay(f, ox, oy, oz, dx, dy, dz, maxT, out = hit) {
   const lo0 = f.ox, hi0 = f.ox + f.sx * f.nx;
   const lo1 = f.oy, hi1 = f.oy + f.sy * f.ny;
   const lo2 = f.oz, hi2 = f.oz + f.sz * f.nz;
@@ -109,36 +125,36 @@ export function voxRay(f, ox, oy, oz, dx, dy, dz, maxT) {
     if (t > t1 + 1e-9) { if (enter >= 0) { t = t1; break; } return false; }
   }
   if (enter < 0 || enter > maxT) return false;
-  hit.t = enter;
-  hit.tx = t;
-  hit.path = t - enter;
-  hit.nx = axis === 0 ? (dx > 0 ? -1 : 1) : 0;
-  hit.ny = axis === 1 ? (dy > 0 ? -1 : 1) : 0;
-  hit.nz = axis === 2 ? (dz > 0 ? -1 : 1) : 0;
-  hit.mat = f.prim.m;
+  out.t = enter;
+  out.tx = t;
+  out.path = t - enter;
+  out.nx = axis === 0 ? (dx > 0 ? -1 : 1) : 0;
+  out.ny = axis === 1 ? (dy > 0 ? -1 : 1) : 0;
+  out.nz = axis === 2 ? (dz > 0 ? -1 : 1) : 0;
+  out.mat = f.prim.m;
   return true;
 }
 
 // makeWorldQuery: one query over plane-set solids and voxel fields — the
 // nearer hit wins (demo 2226-2245).
-export function makeWorldQuery(getSolids, getFields) {
-  return function (ox, oy, oz, dx, dy, dz, maxT) {
+export function makeWorldQuery(getSolids, getFields, hitRecord = hit) {
+  return function (ox, oy, oz, dx, dy, dz, maxT, out = hitRecord) {
     const solids = getSolids(), fields = getFields();
     let best = Infinity, bi = -1, bt = 0, bp = 0, bnx = 0, bny = 0, bnz = 0, bm = 0;
-    if (raycastWorld(solids, ox, oy, oz, dx, dy, dz, maxT)) {
-      best = hit.t; bi = hit.solid; bt = hit.tx; bp = hit.path;
-      bnx = hit.nx; bny = hit.ny; bnz = hit.nz; bm = hit.mat;
+    if (raycastWorld(solids, ox, oy, oz, dx, dy, dz, maxT, out)) {
+      best = out.t; bi = out.solid; bt = out.tx; bp = out.path;
+      bnx = out.nx; bny = out.ny; bnz = out.nz; bm = out.mat;
     }
     for (let i = 0; i < fields.length; i++) {
       if (fields[i].prim.dead) continue;
-      if (!voxRay(fields[i], ox, oy, oz, dx, dy, dz, maxT)) continue;
-      if (hit.t >= best) continue;
-      best = hit.t; bi = solids.length + i; bt = hit.tx; bp = hit.path;
-      bnx = hit.nx; bny = hit.ny; bnz = hit.nz; bm = hit.mat;
+      if (!voxRay(fields[i], ox, oy, oz, dx, dy, dz, maxT, out)) continue;
+      if (out.t >= best) continue;
+      best = out.t; bi = solids.length + i; bt = out.tx; bp = out.path;
+      bnx = out.nx; bny = out.ny; bnz = out.nz; bm = out.mat;
     }
     if (bi < 0) return false;
-    hit.t = best; hit.tx = bt; hit.path = bp; hit.solid = bi;
-    hit.nx = bnx; hit.ny = bny; hit.nz = bnz; hit.mat = bm;
+    out.t = best; out.tx = bt; out.path = bp; out.solid = bi;
+    out.nx = bnx; out.ny = bny; out.nz = bnz; out.mat = bm;
     return true;
   };
 }
@@ -197,6 +213,10 @@ function VoxWorld(opts) {
   this.sizes = opts.sizes || {};
   this.defSize = opts.defSize === undefined ? 0.11 : opts.defSize;
   this.contactsOn = opts.contactsOn === undefined ? 1 : opts.contactsOn;
+  this.media = opts.media === undefined ? MEDIA : opts.media;
+  this.g = opts.gravity === undefined ? G : opts.gravity;
+  this.limits = { ...VOX, ...opts.limits };
+  this.hit = opts.hit === undefined ? hit : opts.hit;
 }
 
 VoxWorld.prototype.sizeFor = function (pr) {
@@ -219,7 +239,7 @@ VoxWorld.prototype.fieldFor = function (pr) {
 // and the field's live fraction under 0.32 marks the prim gone (1814-1890).
 VoxWorld.prototype.damage = function (pr, hx, hy, hz, energy, ivx, ivy, ivz) {
   const f = this.fieldFor(pr);
-  const med = MEDIA[pr.m];
+  const med = this.media[pr.m];
   const brittle = pr.brk ? (med && med.name.indexOf('glass') === 0 ? 1.9 : 1.4) : 1.0;
   const r = Math.min(2.6 * brittle, (0.20 + Math.sqrt(Math.max(0, energy)) * 0.028) * brittle);
   const r2 = r * r;
@@ -234,14 +254,14 @@ VoxWorld.prototype.damage = function (pr, hx, hy, hz, energy, ivx, ivy, ivz) {
   }
   if (!cand.length) return f.frac === undefined ? 1 : f.frac;
   cand.sort((a, b) => a[3] - b[3]);
-  const budget = Math.max(0, VOX.MAX_DYN - this.dyn.length);
+  const budget = Math.max(0, this.limits.MAX_DYN - this.dyn.length);
   const take = Math.min(cand.length, budget);
   const removed = [];
   for (let i = 0; i < take; i++) { f.alive[cand[i][4]] = 0; removed.push(cand[i]); }
   for (let i = take; i < cand.length; i++) {
     const cc = cand[i];
     f.alive[cc[4]] = 0;
-    if (this.rubble.length >= VOX.MAX_STATIC) continue;
+    if (this.rubble.length >= this.limits.MAX_STATIC) continue;
     const jx = (((cc[4] * 2654435761) >>> 0) / 4294967296 - 0.5) * f.sx * 2.2;
     const jz = (((cc[4] * 1597334677) >>> 0) / 4294967296 - 0.5) * f.sz * 2.2;
     this.rubble.push({
@@ -376,7 +396,7 @@ VoxWorld.prototype.step = function (dt, solids) {
     const o = d[i];
     if (o.sleep) continue;
     o.t += dt;
-    o.vy -= G * dt;
+    o.vy -= this.g * dt;
     o.x += o.vx * dt; o.y += o.vy * dt; o.z += o.vz * dt;
     o.ra += o.wa * dt; o.rb += o.wb * dt;
     const half = o.s * 0.5;
@@ -426,7 +446,7 @@ VoxWorld.prototype.step = function (dt, solids) {
   let w = 0;
   for (let i = 0; i < n; i++) {
     const e2 = d[i];
-    if (e2.sleep === 1 && this.rubble.length < VOX.MAX_STATIC) {
+    if (e2.sleep === 1 && this.rubble.length < this.limits.MAX_STATIC) {
       this.raiseRubble(e2.x, e2.z, e2.y + e2.sy * 0.42);
       this.rubble.push({
         x: e2.x, y: e2.y, z: e2.z, sx: e2.sx, sy: e2.sy, sz: e2.sz,
@@ -485,8 +505,8 @@ VoxWorld.prototype.collapse = function (f, solids) {
         comp[k2] = 1; st2.push(k2);
       }
     }
-    if (this.clusters.length >= VOX.MAX_CLUSTERS) break;
-    if (cellsUsed + group.length > VOX.MAX_CLUSTER_CELLS) break;
+    if (this.clusters.length >= this.limits.MAX_CLUSTERS) break;
+    if (cellsUsed + group.length > this.limits.MAX_CLUSTER_CELLS) break;
     cellsUsed += group.length;
     const cen2 = [0, 0, 0];
     let cx = 0, cy = 0, cz = 0;
@@ -501,7 +521,7 @@ VoxWorld.prototype.collapse = function (f, solids) {
       const rr = Math.hypot(ox, oy, oz); if (rr > rad) rad = rr;
       f.alive[group[g2]] = 0;
     }
-    const rho = MEDIA[f.prim.m] ? MEDIA[f.prim.m].rho : 1000;
+    const rho = this.media[f.prim.m] ? this.media[f.prim.m].rho : 1000;
     this.clusters.push({
       x: cx, y: cy, z: cz, vx: 0, vy: 0, vz: 0,
       ra: 0, rb: 0, wa: (this.rng() - 0.5) * 0.5, wb: (this.rng() - 0.5) * 0.3,
@@ -523,7 +543,7 @@ VoxWorld.prototype.stepClusters = function (dt, solids) {
   for (let i = 0; i < out.length; i++) {
     const C = out[i];
     C.t += dt;
-    C.vy -= G * dt;
+    C.vy -= this.g * dt;
     C.x += C.vx * dt; C.y += C.vy * dt; C.z += C.vz * dt;
     C.ra += C.wa * dt; C.rb += C.wb * dt;
     let lowest = 1e9;
@@ -542,7 +562,7 @@ VoxWorld.prototype.stepClusters = function (dt, solids) {
       const impact = Math.abs(C.vy);
       const lift = floorY - (lowest - C.sy * 0.5) - C.sy * 0.5;
       C.y += Math.max(0, lift);
-      if (impact > VOX.SHATTER_V) this.shatterCluster(C);
+      if (impact > this.limits.SHATTER_V) this.shatterCluster(C);
       else this.bakeCluster(C);
       continue;
     }
@@ -555,7 +575,7 @@ VoxWorld.prototype.stepClusters = function (dt, solids) {
 VoxWorld.prototype.bakeCluster = function (C) {
   const ca = Math.round(C.ra / 1.5708) * 1.5708, cb = Math.round(C.rb / 1.5708) * 1.5708;
   for (let q = 0; q < C.nc; q++) {
-    if (this.rubble.length >= VOX.MAX_STATIC) break;
+    if (this.rubble.length >= this.limits.MAX_STATIC) break;
     const x = C.x + C.cells[q * 3], y = Math.max(0.06, C.y + C.cells[q * 3 + 1]), z = C.z + C.cells[q * 3 + 2];
     this.raiseRubble(x, z, y + C.sy * 0.42);
     this.rubble.push({ x, y, z, sx: C.sx, sy: C.sy, sz: C.sz, ca, cb });
@@ -563,7 +583,7 @@ VoxWorld.prototype.bakeCluster = function (C) {
 };
 
 VoxWorld.prototype.shatterCluster = function (C) {
-  const budget = Math.max(0, VOX.MAX_DYN - this.dyn.length);
+  const budget = Math.max(0, this.limits.MAX_DYN - this.dyn.length);
   const take = Math.min(C.nc, budget);
   for (let q = 0; q < C.nc; q++) {
     const px = C.x + C.cells[q * 3], py = C.y + C.cells[q * 3 + 1], pz = C.z + C.cells[q * 3 + 2];
@@ -576,7 +596,7 @@ VoxWorld.prototype.shatterCluster = function (C) {
         sx: C.sx, sy: C.sy, sz: C.sz, s: Math.min(C.sx, C.sy, C.sz),
         t: 0, sleep: 0,
       });
-    } else if (this.rubble.length < VOX.MAX_STATIC) {
+    } else if (this.rubble.length < this.limits.MAX_STATIC) {
       this.raiseRubble(px, pz, py + C.sy * 0.42);
       this.rubble.push({ x: px, y: Math.max(0.06, py), z: pz, sx: C.sx, sy: C.sy, sz: C.sz, ca: 0, cb: 0 });
     }
@@ -589,7 +609,7 @@ VoxWorld.prototype.shatterCluster = function (C) {
 // jitter; the live fraction under 0.32 marks the prim gone.
 VoxWorld.prototype.damageTunnel = function (pr, ax, ay, az, bx, by, bz, ivx, ivy, ivz, energy, perforated) {
   const f = this.fieldFor(pr);
-  const med = MEDIA[pr.m] || MEDIA[0];
+  const med = this.media[pr.m] || this.media[0];
   const brittle = pr.brk ? (med.name.indexOf('glass') === 0 ? 2.2 : 1.5) : 1.0;
   const cell = Math.max(f.sx, f.sy, f.sz);
   const dxs = bx - ax, dys = by - ay, dzs = bz - az;
@@ -642,7 +662,7 @@ VoxWorld.prototype.damageTunnel = function (pr, ax, ay, az, bx, by, bz, ivx, ivy
   }
   if (!cand.length) return f.frac === undefined ? 1 : f.frac;
   cand.sort((p, q) => p[5] - q[5]);
-  const budget = Math.max(0, VOX.MAX_DYN - this.dyn.length);
+  const budget = Math.max(0, this.limits.MAX_DYN - this.dyn.length);
   const take = Math.min(cand.length, budget);
   const mass = Math.max(0.02, (med.rho || 1000) * f.sx * f.sy * f.sz);
   const vs = [];
@@ -677,7 +697,7 @@ VoxWorld.prototype.damageTunnel = function (pr, ax, ay, az, bx, by, bz, ivx, ivy
   for (let i = take; i < cand.length; i++) {
     const c2 = cand[i];
     f.alive[c2[4]] = 0;
-    if (this.rubble.length >= VOX.MAX_STATIC) continue;
+    if (this.rubble.length >= this.limits.MAX_STATIC) continue;
     const jx = (((c2[4] * 2654435761) >>> 0) / 4294967296 - 0.5) * f.sx * 2.0;
     const jz = (((c2[4] * 1597334677) >>> 0) / 4294967296 - 0.5) * f.sz * 2.0;
     this.rubble.push({
@@ -703,7 +723,7 @@ VoxWorld.prototype.dropPrimAsCluster = function (pr) {
   const nz = Math.max(1, Math.min(8, Math.round(s[2] / q)));
   const sx = s[0] / nx, sy = s[1] / ny, sz = s[2] / nz;
   const n = nx * ny * nz;
-  if (this.clusters.length >= VOX.MAX_CLUSTERS) return 0;
+  if (this.clusters.length >= this.limits.MAX_CLUSTERS) return 0;
   const cells = [];
   let rad = 0;
   for (let a = 0; a < nx; a++) for (let b = 0; b < ny; b++) for (let d = 0; d < nz; d++) {
@@ -713,7 +733,7 @@ VoxWorld.prototype.dropPrimAsCluster = function (pr) {
     cells.push(ox, oy, oz);
     const rr = Math.hypot(ox, oy, oz); if (rr > rad) rad = rr;
   }
-  const rho = MEDIA[pr.m] ? MEDIA[pr.m].rho : 1000;
+  const rho = this.media[pr.m] ? this.media[pr.m].rho : 1000;
   this.clusters.push({
     x: c[0], y: c[1], z: c[2], vx: 0, vy: 0, vz: 0,
     ra: 0, rb: 0, wa: (this.rng() - 0.5) * 2.2, wb: (this.rng() - 0.5) * 1.4,
@@ -723,3 +743,32 @@ VoxWorld.prototype.dropPrimAsCluster = function (pr) {
   });
   return n;
 };
+
+export const PRIM_CONTRACT = { c: "3 finite numbers (or cc)", s: "3 finite numbers", m: "integer index into the handed media", p: "string, optional", brk: "boolean or 0/1, optional" };
+
+function isVec3(v) {
+  return Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === "number" && Number.isFinite(n));
+}
+
+// checkPrim: the prim contract — every problem of a broken prim, in one pass.
+export function checkPrim(pr, media) {
+  const problems = [];
+  if (typeof pr !== "object" || pr === null) {
+    problems.push("prim: not an object");
+    return problems;
+  }
+  if (pr.cc !== undefined) {
+    if (!isVec3(pr.cc)) problems.push("prim.cc: 3 finite numbers required");
+  } else if (!isVec3(pr.c)) {
+    problems.push("prim.c: 3 finite numbers required");
+  }
+  if (!isVec3(pr.s)) problems.push("prim.s: 3 finite numbers required");
+  if (!(Number.isInteger(pr.m) && pr.m >= 0 && (media === undefined || pr.m < media.length))) {
+    problems.push("prim.m: integer index into media required");
+  }
+  if (pr.p !== undefined && typeof pr.p !== "string") problems.push("prim.p: string required");
+  if (pr.brk !== undefined && !(typeof pr.brk === "boolean" || pr.brk === 0 || pr.brk === 1)) {
+    problems.push("prim.brk: boolean or 0/1 required");
+  }
+  return problems;
+}
