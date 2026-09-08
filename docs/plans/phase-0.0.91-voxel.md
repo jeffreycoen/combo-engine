@@ -1,6 +1,6 @@
 # Phase 0.0.91 — voxel: media and gravity handed in
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `3b05ae1`, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 20 PASS / 0 FAIL; bracket unmoved. -->
 
 Second pass over the voxel module, the general parts order, phase A4. The media table, gravity, the debris and cluster limits, and the hit record move onto the world as options, each defaulting to the demo's own value. The world query takes a hit record option too and hands it through every raycast it makes, so two queries never disturb each other's record. A prim contract, checkPrim, counts every problem of a broken prim in one pass. Every formula and every export stays; only where each value comes from changes.
