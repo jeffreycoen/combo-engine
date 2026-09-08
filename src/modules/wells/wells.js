@@ -20,6 +20,12 @@
 //      {life, thrust, thrustFuel, maxRange}, `ghosts` (movers, already
 //      shaped {n, x, y, vx, vy, r, trail}), `rocks`. The grap/msl dial
 //      values live with the caller; the integration loop is verbatim.
+//
+// The second pass, numbered, and only these:
+//   1. predStop's binary pair pull (the two-well loop, soft fixed at the
+//      literal 9) -> a pull over every ordered pair of wl, each well's own
+//      soft.
+//   2. The contract: WELL_CONTRACT and checkWell(w).
 
 // makeWell(x, y, mu, soft, r, name): a well at rest — the demo's line 403.
 export function makeWell(x, y, mu, soft, r, name) { return { x, y, vx: 0, vy: 0, mu, soft, r: r || 0, p: 2.3, name }; }
@@ -59,9 +65,9 @@ export function predStop(s, M, drv, wells) {
   const wl = wells.map((q) => ({ ...q }));
   const pdt = 1 / 60;
   for (let i = 0; i < 5400; i++) {
-    for (const [a, b] of [[wl[0], wl[1]], [wl[1], wl[0]]]) { const dx = b.x - a.x, dy = b.y - a.y, r2 = dx * dx + dy * dy + 9;
-      const s2 = .01 * b.mu / Math.pow(r2, 1.65); a.vx += dx * s2 * pdt; a.vy += dy * s2 * pdt; }
-    wl[0].x += wl[0].vx * pdt; wl[0].y += wl[0].vy * pdt; wl[1].x += wl[1].vx * pdt; wl[1].y += wl[1].vy * pdt;
+    for (const p of wl) for (const q of wl) { if (q === p) continue; const dx = q.x - p.x, dy = q.y - p.y, r2 = dx * dx + dy * dy + q.soft * q.soft;
+      const s2 = .01 * q.mu / Math.pow(r2, 1.65); p.vx += dx * s2 * pdt; p.vy += dy * s2 * pdt; }
+    for (const p of wl) { p.x += p.vx * pdt; p.y += p.vy * pdt; }
     let ax = 0, ay = 0;
     for (const q of wl) { const dx = q.x - x, dy = q.y - y; const r2 = dx * dx + dy * dy + q.soft * q.soft;
       const s2 = q.mu / Math.pow(r2, 1.65); ax += dx * s2; ay += dy * s2; }
@@ -102,4 +108,19 @@ export function predictBallistic(start, dials, wells, ghosts, rocks) {
     if (!hit) for (const r of rocks) { if (Math.hypot(x - r.x, y - r.y) < r.r + .5) { hit = { n: "rock", x: r.x, y: r.y }; break; } }
   }
   return { pts, hit, gh };
+}
+
+// WELL_CONTRACT: the shape of a well as data.
+export const WELL_CONTRACT = { x: "finite number", y: "finite number", mu: "finite number", soft: "number > 0", r: "number >= 0" };
+
+// checkWell(w): every problem with a well, in one pass, empty when clean.
+export function checkWell(w) {
+  if (typeof w !== "object" || w === null) return ["well: not an object"];
+  const problems = [];
+  if (!Number.isFinite(w.x)) problems.push("well.x: finite number required");
+  if (!Number.isFinite(w.y)) problems.push("well.y: finite number required");
+  if (!Number.isFinite(w.mu)) problems.push("well.mu: finite number required");
+  if (!(typeof w.soft === "number" && w.soft > 0)) problems.push("well.soft: number > 0 required");
+  if (!(typeof w.r === "number" && w.r >= 0)) problems.push("well.r: number >= 0 required");
+  return problems;
 }

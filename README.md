@@ -144,7 +144,7 @@ Serving checklist items:
 - [x] support — support propagation — 0.0.14
 - [x] grapple — the grapple rope — 0.0.15
 - [x] escrow — contracts with escrow — 0.0.37
-- [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38
+- [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38; generalized 0.0.79
 - [x] determinism — the determinism kit — 0.0.59
 - [x] contract — the contract pattern — 0.0.60
 - [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61; reads the gate table 0.0.75

@@ -5,7 +5,7 @@
 // worlds. NO HARDWIRED SEEDS: rolls fresh each run and prints; rerun with
 // SEED=<n> in the environment.
 import fs from "node:fs";
-import { makeWell, accel, stepPair, potField, predStop, predictBallistic } from "../src/modules/wells/wells.js";
+import { makeWell, accel, stepPair, potField, predStop, predictBallistic, checkWell } from "../src/modules/wells/wells.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -109,6 +109,97 @@ check("wells: the stop predictor kills rolled velocity with fuel and refuses wit
   const burn = predictBallistic({ x: 0, y: 0, vx: 10, vy: 0 }, { life: 3, thrust: 26, thrustFuel: 4 }, [], [], []);
   const cx = coast.pts[coast.pts.length - 1][0], bx = burn.pts[burn.pts.length - 1][0];
   check("wells: the missile's burn carries it farther than the coasting shot", bx > cx + 10);
+}
+
+// refStop: the landed two-well predStop, copied verbatim from the module's
+// text before this phase's change, renamed only. The reference for check 10.
+function refStop(s, M, drv, wells) {
+  if (s.fuel <= 0) return null;
+  let x = s.x, y = s.y, vx = s.vx, vy = s.vy, ang = s.ang, w = s.w;
+  const wl = wells.map((q) => ({ ...q }));
+  const pdt = 1 / 60;
+  for (let i = 0; i < 5400; i++) {
+    for (const [a, b] of [[wl[0], wl[1]], [wl[1], wl[0]]]) { const dx = b.x - a.x, dy = b.y - a.y, r2 = dx * dx + dy * dy + 9;
+      const s2 = .01 * b.mu / Math.pow(r2, 1.65); a.vx += dx * s2 * pdt; a.vy += dy * s2 * pdt; }
+    wl[0].x += wl[0].vx * pdt; wl[0].y += wl[0].vy * pdt; wl[1].x += wl[1].vx * pdt; wl[1].y += wl[1].vy * pdt;
+    let ax = 0, ay = 0;
+    for (const q of wl) { const dx = q.x - x, dy = q.y - y; const r2 = dx * dx + dy * dy + q.soft * q.soft;
+      const s2 = q.mu / Math.pow(r2, 1.65); ax += dx * s2; ay += dy * s2; }
+    const v = Math.hypot(vx, vy);
+    const gM = Math.hypot(ax, ay);
+    if (v < Math.max(0.12, 2.2 * gM * M / drv.F)) return { x, y, t: i * pdt };
+    const va = Math.atan2(vy, vx);
+    const useR = drv.nR > 0;
+    let err = (useR ? va : va + Math.PI) - ang;
+    while (err > Math.PI) err -= 2 * Math.PI; while (err < -Math.PI) err += 2 * Math.PI;
+    w += Math.sign(err) * Math.min(Math.abs(err) * 6, drv.tau / drv.I) * pdt * 30; w *= .9;
+    if (Math.abs(err) < .35) { const dec = (useR ? drv.nR : drv.nF) * drv.thrust * Math.min(1, v / 2) / M;
+      const bd = useR ? -1 : 1;
+      ax += bd * Math.cos(ang) * dec; ay += bd * Math.sin(ang) * dec; }
+    vx += ax * pdt; vy += ay * pdt; x += vx * pdt; y += vy * pdt; ang += w * pdt;
+  }
+  return null;
+}
+
+// two wells, soft 3 both: the new predStop equals the two-well reference
+{
+  let same = true;
+  for (let i = 0; i < 40 && same; i++) {
+    const wells = [rollWell(), rollWell()];
+    wells[0].soft = 3; wells[1].soft = 3;
+    const s = { x: 0, y: 0, vx: (rnd() - 0.5) * 20, vy: (rnd() - 0.5) * 20, ang: rnd() * 6.28, w: 0, fuel: 100 };
+    const drv = { F: 400, tau: 300, I: 60, nF: 2, nR: 0, thrust: 200 };
+    const r1 = predStop(s, 10, drv, wells);
+    const r2 = refStop(s, 10, drv, wells);
+    same = (r1 === null && r2 === null)
+      || (r1 !== null && r2 !== null && r1.x === r2.x && r1.y === r2.y && r1.t === r2.t);
+  }
+  check("wells: at rolled two-well fixtures with soft 3 the new predStop equals the two-well reference", same);
+}
+
+// three wells: predStop always returns a finite answer or null
+{
+  let ok = true;
+  for (let i = 0; i < 20 && ok; i++) {
+    const wells = [rollWell(), rollWell(), rollWell()];
+    const s = { x: 0, y: 0, vx: (rnd() - 0.5) * 20, vy: (rnd() - 0.5) * 20, ang: rnd() * 6.28, w: 0, fuel: 100 };
+    const drv = { F: 400, tau: 300, I: 60, nF: 2, nR: 0, thrust: 200 };
+    const r = predStop(s, 10, drv, wells);
+    ok = r === null || (Number.isFinite(r.x) && Number.isFinite(r.y) && Number.isFinite(r.t) && r.t >= 0);
+  }
+  check("wells: three wells give a finite answer or null", ok);
+}
+
+// a well with mu 0, placed 1000 away, changes nothing
+{
+  let same = true;
+  for (let i = 0; i < 40 && same; i++) {
+    const w1 = rollWell();
+    const w2 = rollWell(); w2.mu = 0; w2.x = w1.x + 1000; w2.y = w1.y;
+    const s = { x: 0, y: 0, vx: (rnd() - 0.5) * 20, vy: (rnd() - 0.5) * 20, ang: rnd() * 6.28, w: 0, fuel: 100 };
+    const drv = { F: 400, tau: 300, I: 60, nF: 2, nR: 0, thrust: 200 };
+    const r1 = predStop(s, 10, drv, [w1]);
+    const r2 = predStop(s, 10, drv, [w1, w2]);
+    same = (r1 === null && r2 === null)
+      || (r1 !== null && r2 !== null && r1.x === r2.x && r1.y === r2.y && r1.t === r2.t);
+  }
+  check("wells: a well with no mass changes nothing", same);
+}
+
+// the contract counts every problem, in one pass
+{
+  const p5 = checkWell({ x: "a", y: NaN, mu: Infinity, soft: 0, r: -1 });
+  const p0 = checkWell(makeWell(1, 2, 3, 4, 5, "n"));
+  const p1 = checkWell(null);
+  check("wells: the contract counts every problem", p5.length === 5 && p0.length === 0 && p1.length === 1);
+}
+
+// the module imports only from its own folder or a sibling module
+{
+  const modSrc = fs.readFileSync(new URL("../src/modules/wells/wells.js", import.meta.url), "utf8");
+  const specifiers = [...modSrc.matchAll(/import\s+.*?\s+from\s+["']([^"']+)["']/g)].map((m) => m[1]);
+  const clean = specifiers.every((spec) => /^\.\.\/[a-z0-9-]+\//.test(spec) || /^\.\//.test(spec));
+  check("wells: the module imports only from its own folder or a sibling module", clean);
 }
 
 console.log(`wells-test: ${pass} PASS / ${fail} FAIL`);
