@@ -1,6 +1,6 @@
 # Phase 0.0.90 — disc: the 3-D movement disc
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `45061c8`, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The 3-D movement disc: order movement in three dimensions with a flat pointer". Source: the fleet demo, read-only, lines 880, 1091 to 1093, 1122, 1131, 1135, 1170 to 1172. The module opens a disc at the ground point under the pointer, moves its height with a drag, and hands back the point and height to order a move.
