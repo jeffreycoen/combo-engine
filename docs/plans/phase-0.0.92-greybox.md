@@ -1,6 +1,6 @@
 # Phase 0.0.92 — greybox: the part library
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 8 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `b575cee`, 2026-09-08. Gate: 8 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 8 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The greybox part library: stairs, facades, vehicles, figures, at true human scale". Source: the shooting-range demo, read-only, lines 445 to 455, 505 to 724, 1202 to 1217. The module builds stairs, railings, facades, doors, a car body, a walking figure, and buildings at human scale, and turns a part list into solids for collision.
