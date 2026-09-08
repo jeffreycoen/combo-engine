@@ -1,6 +1,6 @@
 # Phase 0.0.94 — selection: the selection and feedback layer
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `8bf1f2e`, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The selection and feedback layer: brackets, health ramps, order lines, formation links". Source: the fleet demo, read-only, lines 815 to 825, 934 to 968, 1084 to 1090, 1130, 1138 to 1139, 1529 to 1543, 1668 to 1724. The module yields plain drawing data — brackets, health bars, the selection ring, order lines, formation links — for any renderer a game hands units to.
