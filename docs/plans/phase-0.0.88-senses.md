@@ -1,6 +1,6 @@
 # Phase 0.0.88 — senses: the view as dials
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 9 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `0d46eb3`, 2026-09-08. Gate: 9 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 9 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the senses module under the general parts order, phase A15. canSee and coverSolid now take a dials object last, default the opponent module's own numbers: view range, view angle, eye height, eye clearance, chest offset. Two new contracts check the agent's shape and the dials' shape, every problem counted in one pass.
