@@ -1,7 +1,8 @@
 // COMBO-ENGINE — receipts-test. Laws at rolled events: every known engine
 // event yields a line carrying its own numbers; unknown events get an
 // honest line; nothing ever throws; the log keeps order and count.
-import { receipt, receiptLog } from "../src/modules/receipts/receipts.js";
+import fs from "node:fs";
+import { receipt, receiptLog, LINES, checkLines } from "../src/modules/receipts/receipts.js";
 let pass = 0, fail = 0;
 const check = (n, ok) => { if (ok) { pass++; console.log("PASS " + n); } else { fail++; console.log("FAIL " + n); } };
 const SEED = process.env.SEED ? +process.env.SEED : Math.floor(Math.random() * 1e9);
@@ -31,6 +32,26 @@ const rnd = () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t 
   check("receipts: nothing ever throws — broken events get plain lines", calm); }
 { const log = receiptLog(null);
   check("receipts: an empty tick is an empty ledger", Array.isArray(log) && log.length === 0); }
+{ let carry = true;
+  for (let i = 0; i < 100 && carry; i++) {
+    const type = "ev" + Math.floor(rnd() * 1e6);
+    const n = Math.floor(rnd() * 1e6);
+    const table = { [type]: (ev) => "custom " + ev.n };
+    const one = receipt({ type, n }, table);
+    const log = receiptLog([{ type, n }, { type, n: n + 1 }], table);
+    carry = one === "custom " + n && log.length === 2 && log[0] === "custom " + n && log[1] === "custom " + (n + 1);
+  }
+  check("receipts: a rolled line table renders a rolled event type through the handed function", carry); }
+{ const l = receipt({ type: "other", n: 2 }, { known: () => "x" });
+  check("receipts: an unknown type under a handed table still gets the generic line", l.startsWith("other") && l.includes("n 2")); }
+{ const p1 = checkLines({ a: 1, b: () => "", c: "x" });
+  const p2 = checkLines(LINES);
+  const p3 = checkLines(null);
+  check("receipts: the contract counts every problem", p1.length === 2 && p2.length === 0 && p3.length === 1); }
+{ const src = fs.readFileSync(new URL("../src/modules/receipts/receipts.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/import[^'"]*from\s*["']([^"']+)["']/g)].map((m) => m[1]);
+  const ok = specifiers.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
+  check("receipts: the module imports only from its own folder or a sibling module", ok); }
 
 console.log(`receipts-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
