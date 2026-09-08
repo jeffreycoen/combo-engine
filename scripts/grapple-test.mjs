@@ -2,13 +2,32 @@
 // checks, seedless arithmetic. The knowns are the demo's own constants run
 // closed-form: recoil 0.15 x 34 = 5.1, the winch's 8 u/s demand, the jerk's
 // 1.15, the 260 snap line, the yank's mu x 22.
-import { castGrapple, tapGrapple, bite, stepFly, stepRewind, stepAdrift, stepEmbedded, requestYank, stepRope, GRAP_SNAP } from "../src/modules/grapple/grapple.js";
+//
+// Second pass: checks 17-20 exercise the dials object and the ship and
+// target contracts, at a rolled seed.
+import { castGrapple, tapGrapple, bite, stepFly, stepRewind, stepAdrift, stepEmbedded, requestYank, stepRope, GRAP_SNAP, GRAP, checkShip, checkTarget } from "../src/modules/grapple/grapple.js";
+import { readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
 const near = (a, b, e) => Math.abs(a - b) < (e || 1e-9);
 const noG = () => [0, 0];
 const mkShip = (M, I) => ({ x: 0, y: 0, vx: 0, vy: 0, w: 0, ang: 0, M: M || 100, I: I || 500 });
+
+// the small seeded stream the other gates use
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const SEED = process.env.SEED ? (parseInt(process.env.SEED, 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
+console.log(`seeds {"grapple":${SEED}}`);
+const rng = mulberry32(SEED);
+const rollIn = (lo, hi) => lo + rng() * (hi - lo);
 
 { const s = mkShip();
   const g = castGrapple(s, 2, 0, 1.5);
@@ -110,6 +129,60 @@ const mkShip = (M, I) => ({ x: 0, y: 0, vx: 0, vy: 0, w: 0, ang: 0, M: M || 100,
   // target separates at 5 u/s; J = 5*mu, torque (rx*ny - ry*nx)*J/I = -5J/500
   check("the anchor rides the hull's spin: the mount 5 above centre turns spin into 5 u/s of separation",
     near(s.vx, 5 * mu / 100) && near(s.w, 1 - 5 * (5 * mu) / 500) && near(tgt.vx, -5 * mu / 25)); }
+
+{ let ok = true;
+  const dt = 1 / 60;
+  for (let i = 0; i < 100; i++) {
+    const snap = rollIn(50, 200);
+    const d = { ...GRAP, SNAP: snap };
+
+    const sA = mkShip(100, 500);
+    const gA = bite({}); gA.restLen = 10; gA.state = 'stuck';
+    const tgtA = { x: 12, y: 0, vx: 2, vy: 0 };
+    const rA = stepRope(gA, sA, 0, 0, tgtA, 10000, dt, d);
+    if (!(rA.snapped === true && gA.state === 'embedded' && sA.vx === 0 && near(tgtA.vx, 2))) ok = false;
+
+    const sB = mkShip(100, 500);
+    const gB = bite({}); gB.restLen = 10; gB.state = 'stuck';
+    const tgtB = { x: 12, y: 0, vx: 2, vy: 0 };
+    const rB = stepRope(gB, sB, 0, 0, tgtB, 25, dt, d);
+    if (!(rB.snapped === false && rB.taut === true && near(rB.J, 46))) ok = false;
+  }
+  check("grapple: at a rolled snap threshold a jerk over it snaps and one under it holds", ok); }
+
+{ let ok = true;
+  const dt = 1 / 60;
+  for (let i = 0; i < 100; i++) {
+    const REEL = rollIn(1, 20);
+    const REST_MIN = rollIn(1, 5);
+    const d = { ...GRAP, REEL, REST_MIN };
+
+    const sA = mkShip(100, 500);
+    const gA = bite({}); gA.restLen = 10; gA.state = 'reel';
+    const tgtA = { x: 12, y: 0, vx: 0, vy: 0 };
+    stepRope(gA, sA, 0, 0, tgtA, 25, dt, d);
+    const expA = Math.max(REST_MIN, 10 - REEL * dt);
+    if (!near(gA.restLen, expA)) ok = false;
+
+    const sB = mkShip(100, 500);
+    const gB = bite({}); gB.restLen = REST_MIN + REEL * dt * 0.5; gB.state = 'reel';
+    const tgtB = { x: 12, y: 0, vx: 0, vy: 0 };
+    stepRope(gB, sB, 0, 0, tgtB, 25, dt, d);
+    if (!near(gB.restLen, REST_MIN)) ok = false;
+  }
+  check("grapple: a rolled reel rate shortens the rest length by rate times dt to the rolled floor", ok); }
+
+{ const bad = checkShip({ x: "a", y: 0, vx: 0, vy: NaN, w: 0, ang: 0, M: 0, I: -1 });
+  const good = checkShip(mkShip());
+  const badT = checkTarget({ x: NaN, y: 0, vx: "v" });
+  const nullT = checkTarget(null);
+  check("grapple: the contracts count every problem",
+    bad.length === 4 && good.length === 0 && badT.length === 2 && nullT.length === 1); }
+
+{ const src = readFileSync(new URL("../src/modules/grapple/grapple.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/^import\s+.*?\bfrom\s+["']([^"']+)["']/gm)].map(m => m[1]);
+  const ok = specifiers.every(spec => /^\.\.\/[a-z0-9-]+\//.test(spec) || /^\.\//.test(spec));
+  check("grapple: the module imports only from its own folder or a sibling module", ok); }
 
 console.log(`grapple-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
