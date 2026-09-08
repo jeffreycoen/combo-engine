@@ -1,6 +1,6 @@
 # Phase 0.0.89 — aim: the names handed in
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 13 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `a89297f`, 2026-09-08. Gate: 13 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 13 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the aim module under the general parts order, phase A7. The candidate filter that was a hardwired line is now a named default, DEFAULT_SKIP, handed in as the option skip. The near-range literal 3 is now the option minRange. The arm and cancel tape action's kind name, "aim", is now the option armAction. A contract, KINDS_CONTRACT and checkKinds, checks the shape of a kinds table. The aiming law and the lead solve are untouched.
