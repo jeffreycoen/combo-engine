@@ -50,6 +50,7 @@ const GATES = {
   "presets": ["scripts/presets-test.mjs"],
   "disc": ["scripts/disc-test.mjs"],
   "greybox": ["scripts/greybox-test.mjs"],
+  "cues": ["scripts/cues-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

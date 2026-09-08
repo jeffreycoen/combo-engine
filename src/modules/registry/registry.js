@@ -40,6 +40,7 @@ export const REGISTRY = {
   presets: { seam: "consume", gate: "presets" },
   disc: { seam: "consume", gate: "disc" },
   greybox: { seam: "sample", gate: "greybox" },
+  cues: { seam: "consume", gate: "cues" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },
