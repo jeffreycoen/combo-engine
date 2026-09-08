@@ -1,6 +1,6 @@
 # Phase 0.0.95 — physics-pb: the ground as an option, a maker for the world
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `7c6a4dc`, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 16 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the physics-pb module, general parts order, phase A12. The ground plane's height is now an option on the world and its contacts, default 0, the demo's own value. A maker, makeWorld, builds a world the same way the class does. A contract, checkBody, checks a body's shape and lists every problem in one pass. The solver's arithmetic is unchanged.
