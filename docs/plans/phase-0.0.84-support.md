@@ -1,6 +1,6 @@
 # Phase 0.0.84 — support: tolerances handed in, the prim declared
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `238b1c0`, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 16 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the support module under the general parts order, phase A5. The eight literals that decide what rests on what now live in one tolerances object, handed in last to every function that reads them, defaulting to the demo's own numbers. The prim's fields and the tolerances object's fields are each declared and checked in one pass.
