@@ -41,6 +41,18 @@
 //      predictShot's per-kind muzzle/velocity/life dials (lines
 //      2543-2549) move into KINDS as data; the integration itself is
 //      the wells module's predictBallistic, passed through unchanged.
+//
+// Second pass under the general parts order, phase A7, numbered
+// separately:
+//   1. The candidate filter (b.own==='ship' or kind head/slug/missile)
+//      is named DEFAULT_SKIP and handed to aimCandidates as skip,
+//      default DEFAULT_SKIP.
+//   2. The near-range literal 3 becomes minRange, an aimCandidates and
+//      makeAim option, default 3.
+//   3. The tape action's kind literal "aim" (arm and cancel) becomes
+//      armAction, a makeAim option, default "aim".
+//   4. KINDS_CONTRACT names the kind table's shape; checkKinds(table)
+//      checks it.
 
 // KINDS: the demo's three aim kinds as data. cone and reach are the
 // demo's aimCandidates values (line 1952); V0 is interceptAng's launch
@@ -53,21 +65,42 @@ export const KINDS = Object.freeze({
   msl: Object.freeze({ cone: 0.7, reach: 150, V0: 18, life: 6, thrust: 26, thrustFuel: 4, maxRange: null, commitKind: "msl2" }),
 });
 
+export const KINDS_CONTRACT = { "<kind>": { cone: "number or null", reach: "number or null", V0: "number or null", life: "number or null", thrust: "number >= 0", thrustFuel: "number >= 0", maxRange: "number or null", commitKind: "string" } };
+
+export function checkKinds(table) {
+  const problems = [];
+  if (typeof table !== "object" || table === null) { problems.push("kinds: not an object"); return problems; }
+  for (const k of Object.keys(table)) {
+    const cfg = table[k];
+    for (const f of ["cone", "reach", "V0", "life"]) {
+      if (!(cfg[f] === null || typeof cfg[f] === "number")) problems.push(`kinds.${k}.${f}: number or null required`);
+    }
+    for (const f of ["thrust", "thrustFuel"]) {
+      if (!(typeof cfg[f] === "number" && cfg[f] >= 0)) problems.push(`kinds.${k}.${f}: number >= 0 required`);
+    }
+    if (!(cfg.maxRange === null || typeof cfg.maxRange === "number")) problems.push(`kinds.${k}.maxRange: number or null required`);
+    if (typeof cfg.commitKind !== "string") problems.push(`kinds.${k}.commitKind: string required`);
+  }
+  return problems;
+}
+
 import { accel, predictBallistic, predStop } from "../wells/wells.js";
+
+export const DEFAULT_SKIP = (b) => b.own === "ship" || b.kind === "head" || b.kind === "slug" || b.kind === "missile";
 
 const defaultMuzzleAt = (kind, ship) => [ship.x, ship.y];
 
 // aimCandidates(kind, ship, bodies, muzzleAt, kinds): the demo's lines
 // 1951-1962, substitution 1.
-export function aimCandidates(kind, ship, bodies, muzzleAt, kinds) {
+export function aimCandidates(kind, ship, bodies, muzzleAt, kinds, skip = DEFAULT_SKIP, minRange = 3) {
   const cfg = (kinds || KINDS)[kind];
   const cone = cfg.cone, reach = cfg.reach;
   const [mx, my] = muzzleAt(kind, ship);
   const out = [];
   for (const b of bodies) {
-    if (b.own === "ship" || b.kind === "head" || b.kind === "slug" || b.kind === "missile") continue;
+    if (skip(b)) continue;
     const dx = b.x - mx, dy = b.y - my, dd = Math.hypot(dx, dy);
-    if (dd < 3 || dd > reach) continue;
+    if (dd < minRange || dd > reach) continue;
     let da = Math.atan2(dy, dx) - ship.ang; da = Math.atan2(Math.sin(da), Math.cos(da));
     if (Math.abs(da) > cone) continue;
     out.push({ b, dd, da });
@@ -123,19 +156,22 @@ export function makeAim(opts) {
   const kinds = o.kinds || KINDS;
   const muzzleAt = o.muzzleAt || defaultMuzzleAt;
   const accelFn = o.accel || accel;
+  const skip = o.skip || DEFAULT_SKIP;
+  const minRange = o.minRange === undefined ? 3 : o.minRange;
+  const armAction = o.armAction || "aim";
   let armed = null; // { kind, ship, wells, bodies, tgtI, slingK }
   let plan = null; // { at }
 
   function arm(kind, world, ship) {
     if (!kinds[kind]) return null;
     armed = { kind, ship, wells: (world && world.wells) || [], bodies: (world && world.bodies) || [], tgtI: undefined, slingK: 2 };
-    return { k: "aim", w: kind };
+    return { k: armAction, w: kind };
   }
 
   function cancel() {
     if (!armed) return null;
     armed = null;
-    return { k: "aim", w: null };
+    return { k: armAction, w: null };
   }
 
   function frozen() {
@@ -144,7 +180,7 @@ export function makeAim(opts) {
 
   function cycleTarget(dir) {
     if (!armed || (armed.kind !== "grap" && armed.kind !== "msl")) return false;
-    const cands = aimCandidates(armed.kind, armed.ship, armed.bodies, muzzleAt, kinds);
+    const cands = aimCandidates(armed.kind, armed.ship, armed.bodies, muzzleAt, kinds, skip, minRange);
     if (!cands.length) { armed.tgtI = undefined; return false; }
     const n = cands.length;
     armed.tgtI = armed.tgtI === undefined ? (dir > 0 ? 0 : n - 1) : (armed.tgtI + dir + n) % n;

@@ -158,7 +158,7 @@ Serving checklist items:
 - [x] telemetry — per-joint load telemetry as an engine output — 0.0.69
 - [x] opponent — the non-lethal opponent model — 0.0.70; generalized 0.0.87
 - [x] senses — opponent senses and cover reasoning — 0.0.71; generalized 0.0.88
-- [x] aim — frozen-time aiming — 0.0.73
+- [x] aim — frozen-time aiming — 0.0.73; generalized 0.0.89
 - [x] render2d — the 2-D canvas renderer, with the gravity-warped grid — 0.0.74
 - [x] legik — leg inverse kinematics — 0.0.77
 - [x] presets — labeled-cheat presets, every relaxed rule named with its measured consequence — 0.0.82

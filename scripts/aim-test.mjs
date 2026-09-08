@@ -3,8 +3,9 @@
 // shape of commit, the lead-solve's self-consistency against its own
 // integrator, and twin-run identity. NO HARDWIRED SEEDS: rolls fresh
 // each run and prints; rerun with SEED=<n> in the environment.
-import { makeAim, aimCandidates, interceptAng, KINDS } from "../src/modules/aim/aim.js";
+import { makeAim, aimCandidates, interceptAng, KINDS, DEFAULT_SKIP, checkKinds } from "../src/modules/aim/aim.js";
 import { makeWell, accel } from "../src/modules/wells/wells.js";
+import fs from "node:fs";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -174,6 +175,78 @@ const rollTarget = (ship, reach) => ({
   const r = aim.predictBallistic(start, { life: 1 }, [], [], []);
   check("aim: predictBallistic is the wells module's own function, passed through", r.pts.length > 10 && !r.hit);
   check("aim: predStop is the wells module's own function, passed through", aim.predStop({ x: 0, y: 0, vx: 0, vy: 0, ang: 0, w: 0, fuel: 0 }, 10, { F: 400, tau: 300, I: 60, nF: 2, nR: 0, thrust: 200 }, [makeWell(10, 0, 100, 3, 5, "a"), makeWell(-10, 0, 100, 3, 5, "b")]) === null);
+}
+
+// a rolled arm action name comes back from arm and cancel
+{
+  let ok = true;
+  for (let i = 0; i < 50 && ok; i++) {
+    const name = "arm" + Math.floor(rnd() * 1e6);
+    const aim = makeAim({ armAction: name });
+    const ship = rollShip();
+    const world = { wells: [], bodies: [] };
+    const armed = aim.arm("grap", world, ship);
+    ok = ok && armed && armed.k === name && armed.w === "grap";
+    const cancelled = aim.cancel();
+    ok = ok && cancelled && cancelled.k === name && cancelled.w === null;
+  }
+  check("aim: a rolled arm action name comes back from arm and cancel", ok);
+}
+
+// a handed skip predicate filters a rolled body set exactly
+{
+  let ok = true;
+  for (let i = 0; i < 100 && ok; i++) {
+    const ship = rollShip();
+    const kind = rnd() < 0.5 ? "grap" : "msl";
+    const cfg = KINDS[kind];
+    const bodies = [];
+    for (let j = 0; j < 8; j++) {
+      const dist = 3.1 + rnd() * (cfg.reach - 3.2);
+      const t = rollTarget(ship, cfg.reach);
+      bodies.push({ ...t, x: ship.x + Math.cos(ship.ang) * dist, y: ship.y + Math.sin(ship.ang) * dist, tag: Math.floor(rnd() * 3), id: j });
+    }
+    const skip = (b) => b.tag === 1;
+    const cands = aimCandidates(kind, ship, bodies, (k, s) => [s.x, s.y], KINDS, skip);
+    const gotIds = cands.map((c) => c.b.id).sort((x, y) => x - y);
+    const wantIds = bodies.filter((b) => b.tag !== 1).map((b) => b.id).sort((x, y) => x - y);
+    ok = ok && JSON.stringify(gotIds) === JSON.stringify(wantIds) && cands.every((c) => c.b.tag !== 1);
+  }
+  check("aim: a handed skip predicate filters a rolled body set exactly", ok);
+}
+
+// a rolled minimum range excludes bodies inside it
+{
+  let ok = true;
+  for (let i = 0; i < 100 && ok; i++) {
+    const ship = rollShip();
+    const kind = rnd() < 0.5 ? "grap" : "msl";
+    const minRange = 1 + rnd() * 9;
+    const near = { x: ship.x + Math.cos(ship.ang) * minRange * 0.9, y: ship.y + Math.sin(ship.ang) * minRange * 0.9, kind: "rock", own: "world" };
+    const far = { x: ship.x + Math.cos(ship.ang) * minRange * 1.1, y: ship.y + Math.sin(ship.ang) * minRange * 1.1, kind: "rock", own: "world" };
+    const cands = aimCandidates(kind, ship, [near, far], (k, s) => [s.x, s.y], KINDS, DEFAULT_SKIP, minRange);
+    const hasNear = cands.some((c) => c.b === near);
+    const hasFar = cands.some((c) => c.b === far);
+    ok = ok && !hasNear && hasFar;
+  }
+  check("aim: a rolled minimum range excludes bodies inside it", ok);
+}
+
+// the contract counts every problem
+{
+  const broken = checkKinds({ z: { cone: "a", reach: null, V0: 1, life: -1, thrust: -1, thrustFuel: 0, maxRange: "m", commitKind: 5 } });
+  const clean = checkKinds(KINDS);
+  const notObj = checkKinds(null);
+  const ok = broken.length === 4 && clean.length === 0 && notObj.length === 1;
+  check("aim: the contract counts every problem", ok);
+}
+
+// the module imports only from its own folder or a sibling module
+{
+  const src = fs.readFileSync(new URL("../src/modules/aim/aim.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/import\s+[^'"]*from\s+["']([^"']+)["']/g)].map((m) => m[1]);
+  const ok = specifiers.length > 0 && specifiers.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
+  check("aim: the module imports only from its own folder or a sibling module", ok);
 }
 
 console.log(`aim-test: ${pass} PASS / ${fail} FAIL`);
