@@ -8,7 +8,27 @@
 // `export` added to the top-level constants, tables, mulberry32, and the
 // class; raycastWorld and hit imported from the solids module (the demo
 // holds them in the same script scope); this header added.
-import { raycastWorld, hit } from "../solids/solids.js";
+//
+// Second pass, the general parts order, phase A3. Substitutions, and only
+// these:
+// 1. makeHit imported alongside raycastWorld and hit.
+// 2. The constructor reads six new options: media (default MEDIA), rounds
+//    (default ROUNDS), pool (default POOL), evCap (default EVCAP), tickHz
+//    (default TICK_HZ), hit (default the solids record hit). It stores
+//    this.media, this.rounds (a copy of the handed rounds, a row missing
+//    area gets one computed, the handed table never written), this.M and
+//    this.R (name to index maps built from the two tables), this.pool,
+//    this.evCap, this.tickHz, this.tickDt, this.hit. airId defaults to
+//    this.M.air when the handed media names a row air, else 0.
+// 3. fire accepts a round name or an index, read through this.R and
+//    this.rounds. Every loop over the pool runs over this.pool.
+// 4. Every read of MEDIA inside the class reads this.media; every read of
+//    TICK_DT reads this.tickDt; pushEvent caps at this.evCap.
+// 5. stepTick's raycast and query calls pass this.hit as the out record;
+//    every read after a hit reads this.hit.
+// 6. MEDIA_CONTRACT, ROUNDS_CONTRACT, checkMedia, and checkRounds added,
+//    naming the shape of a media table and a rounds table.
+import { raycastWorld, hit, makeHit } from "../solids/solids.js";
 
 export const G = 9.80665;
 export const V_STOP = 30;
@@ -73,14 +93,28 @@ export class Ballistics {
     this.windBase = opts.wind ? opts.wind.slice() : [0, 0, 0];
     this.gust = opts.gust === undefined ? 0 : opts.gust;
     this.scatter = opts.scatter === undefined ? true : opts.scatter;
-    this.airId = opts.airId === undefined ? M.air : opts.airId;
+    this.media = opts.media === undefined ? MEDIA : opts.media;
+    const roundsIn = opts.rounds === undefined ? ROUNDS : opts.rounds;
+    this.rounds = roundsIn.map((r) => r.area === undefined
+      ? Object.assign({}, r, { area: Math.PI * (r.dia / 2) * (r.dia / 2) })
+      : r);
+    this.M = {};
+    this.media.forEach((m, i) => { this.M[m.name] = i; });
+    this.R = {};
+    this.rounds.forEach((r, i) => { this.R[r.name] = i; });
+    this.pool = opts.pool === undefined ? POOL : opts.pool;
+    this.evCap = opts.evCap === undefined ? EVCAP : opts.evCap;
+    this.tickHz = opts.tickHz === undefined ? TICK_HZ : opts.tickHz;
+    this.tickDt = 1 / this.tickHz;
+    this.hit = opts.hit === undefined ? hit : opts.hit;
+    this.airId = opts.airId === undefined ? (this.M.air !== undefined ? this.M.air : 0) : opts.airId;
     this.maxTof = opts.maxTof === undefined ? 20 : opts.maxTof;
     this.maxDrop = opts.maxDrop === undefined ? -500 : opts.maxDrop;
     this.maxRange = opts.maxRange === undefined ? 5000 : opts.maxRange;
     this.tick = 0;
     this.acc = 0;
 
-    const n = POOL;
+    const n = this.pool;
     this.px = new Float64Array(n); this.py = new Float64Array(n); this.pz = new Float64Array(n);
     this.vx = new Float64Array(n); this.vy = new Float64Array(n); this.vz = new Float64Array(n);
     this.mass = new Float64Array(n); this.area = new Float64Array(n); this.tof = new Float64Array(n);
@@ -88,7 +122,7 @@ export class Ballistics {
     this.act = new Uint8Array(n); this.rngS = new Uint32Array(n); this.born = new Float64Array(n);
     this.nextSlot = 0; this.liveCount = 0;
 
-    this.ev = { type: new Uint8Array(EVCAP), x: new Float64Array(EVCAP), y: new Float64Array(EVCAP), z: new Float64Array(EVCAP), ix: new Float64Array(EVCAP), iy: new Float64Array(EVCAP), iz: new Float64Array(EVCAP), ein: new Float64Array(EVCAP), eout: new Float64Array(EVCAP), path: new Float64Array(EVCAP), dx: new Float64Array(EVCAP), dy: new Float64Array(EVCAP), dz: new Float64Array(EVCAP), mat: new Int16Array(EVCAP), solid: new Int16Array(EVCAP), pid: new Int16Array(EVCAP), n: 0 };
+    this.ev = { type: new Uint8Array(this.evCap), x: new Float64Array(this.evCap), y: new Float64Array(this.evCap), z: new Float64Array(this.evCap), ix: new Float64Array(this.evCap), iy: new Float64Array(this.evCap), iz: new Float64Array(this.evCap), ein: new Float64Array(this.evCap), eout: new Float64Array(this.evCap), path: new Float64Array(this.evCap), dx: new Float64Array(this.evCap), dy: new Float64Array(this.evCap), dz: new Float64Array(this.evCap), mat: new Int16Array(this.evCap), solid: new Int16Array(this.evCap), pid: new Int16Array(this.evCap), n: 0 };
     this.stats = { steps: 0, rays: 0 };
   }
 
@@ -111,15 +145,16 @@ export class Ballistics {
   }
 
   fire(typeId, ox, oy, oz, dx, dy, dz, seed) {
+    if (typeof typeId === "string") typeId = this.R[typeId];
     let slot = -1;
-    for (let k = 0; k < POOL; k++) { const i = (this.nextSlot + k) % POOL; if (!this.act[i]) { slot = i; break; } }
+    for (let k = 0; k < this.pool; k++) { const i = (this.nextSlot + k) % this.pool; if (!this.act[i]) { slot = i; break; } }
     if (slot < 0) {
       let oldest = 0, bt = Infinity;
-      for (let i = 0; i < POOL; i++) if (this.born[i] < bt) { bt = this.born[i]; oldest = i; }
+      for (let i = 0; i < this.pool; i++) if (this.born[i] < bt) { bt = this.born[i]; oldest = i; }
       slot = oldest;
     } else this.liveCount++;
-    this.nextSlot = (slot + 1) % POOL;
-    const r = ROUNDS[typeId];
+    this.nextSlot = (slot + 1) % this.pool;
+    const r = this.rounds[typeId];
     const l = Math.hypot(dx, dy, dz) || 1;
     const sp = r.muzzle;
     this.px[slot] = ox; this.py[slot] = oy; this.pz[slot] = oz;
@@ -132,7 +167,7 @@ export class Ballistics {
 
   pushEvent(type, i, x, y, z, ix, iy, iz, ein, eout, path, mat, solid, dx, dy, dz) {
     const e = this.ev;
-    if (e.n >= EVCAP) return;
+    if (e.n >= this.evCap) return;
     const k = e.n++;
     e.type[k] = type; e.x[k] = x; e.y[k] = y; e.z[k] = z;
     e.ix[k] = ix; e.iy[k] = iy; e.iz[k] = iz;
@@ -142,7 +177,7 @@ export class Ballistics {
   drain() { const n = this.ev.n; this.ev.n = 0; return n; }
 
   traverse(i, medId, pathLen, speed) {
-    const med = MEDIA[medId];
+    const med = this.media[medId];
     if (!this.flags[i] && speed > med.deformV) { }
     if (speed > med.deformV && !(this.flags[i] & F_DEFORMED)) {
       this.area[i] *= med.areaMult;
@@ -169,14 +204,14 @@ export class Ballistics {
   }
 
   stepTick() {
-    const dt = TICK_DT, t = this.tick * dt;
+    const dt = this.tickDt, t = this.tick * dt;
     const w = this._w || (this._w = new Float64Array(3));
-    for (let i = 0; i < POOL; i++) {
+    for (let i = 0; i < this.pool; i++) {
       if (!this.act[i]) continue;
       let px = this.px[i], py = this.py[i], pz = this.pz[i];
       let vx = this.vx[i], vy = this.vy[i], vz = this.vz[i];
       const m = this.mass[i];
-      const air = MEDIA[this.airId];
+      const air = this.media[this.airId];
       let sp = Math.hypot(vx, vy, vz);
       let sub = Math.ceil(sp * dt / MAX_CHORD_AIR); if (sub < 1) sub = 1; if (sub > 64) sub = 64;
       const h = dt / sub;
@@ -203,15 +238,15 @@ export class Ballistics {
         if (seg > 1e-12 && this.solids.length) {
           const ux = dxr / seg, uy = dyr / seg, uz = dzr / seg;
           this.stats.rays++;
-          const gotHit = this.query ? this.query(px, py, pz, ux, uy, uz, seg)
-                                     : raycastWorld(this.solids, px, py, pz, ux, uy, uz, seg);
+          const gotHit = this.query ? this.query(px, py, pz, ux, uy, uz, seg, this.hit)
+                                     : raycastWorld(this.solids, px, py, pz, ux, uy, uz, seg, this.hit);
           if (gotHit) {
-            const medId = hit.mat;
-            const hx = px + ux * hit.t, hy = py + uy * hit.t, hz = pz + uz * hit.t;
+            const medId = this.hit.mat;
+            const hx = px + ux * this.hit.t, hy = py + uy * this.hit.t, hz = pz + uz * this.hit.t;
             const vin = Math.hypot(vx, vy, vz);
             const ein = 0.5 * m * vin * vin;
-            const med = MEDIA[medId];
-            let nx = hit.nx, ny = hit.ny, nz = hit.nz;
+            const med = this.media[medId];
+            let nx = this.hit.nx, ny = this.hit.ny, nz = this.hit.nz;
             const nl = Math.hypot(nx, ny, nz) || 1; nx /= nl; ny /= nl; nz /= nl;
             const cosT = -(ux * nx + uy * ny + uz * nz);
             const theta = Math.acos(Math.max(-1, Math.min(1, cosT)));
@@ -229,18 +264,18 @@ export class Ballistics {
               const vout = vin * med.retain;
               const nvx = ox2 * vout, nvy = oy2 * vout, nvz = oz2 * vout;
               this.pushEvent(EV_RICOCHET, i, hx, hy, hz, m * (vx - nvx), m * (vy - nvy), m * (vz - nvz),
-                ein, 0.5 * m * vout * vout, 0, medId, hit.solid, ux, uy, uz);
+                ein, 0.5 * m * vout * vout, 0, medId, this.hit.solid, ux, uy, uz);
               px = hx + nx * 1e-4; py = hy + ny * 1e-4; pz = hz + nz * 1e-4;
               vx = nvx; vy = nvy; vz = nvz;
               this.flags[i] |= F_DESTABILIZED;
               continue;
             }
 
-            const pathLen = hit.path;
+            const pathLen = this.hit.path;
             const res = this.traverse(i, medId, pathLen, vin);
             const exx = hx + ux * res.x, exy = hy + uy * res.x, exz = hz + uz * res.x;
             if (res.stopped) {
-              this.pushEvent(EV_EMBED, i, exx, exy, exz, m * vx, m * vy, m * vz, ein, 0, res.x, medId, hit.solid, ux, uy, uz);
+              this.pushEvent(EV_EMBED, i, exx, exy, exz, m * vx, m * vy, m * vz, ein, 0, res.x, medId, this.hit.solid, ux, uy, uz);
               this.act[i] = 0; this.liveCount--; alive = false; break;
             } else {
               const vout = res.v, sc = vout / vin;
@@ -253,7 +288,7 @@ export class Ballistics {
                 const l3 = Math.hypot(nvx, nvy, nvz) || 1; nvx = nvx / l3 * vout; nvy = nvy / l3 * vout; nvz = nvz / l3 * vout;
               }
               this.pushEvent(EV_PERFORATE, i, exx, exy, exz, m * (vx - nvx), m * (vy - nvy), m * (vz - nvz),
-                ein, 0.5 * m * vout * vout, res.x, medId, hit.solid, ux, uy, uz);
+                ein, 0.5 * m * vout * vout, res.x, medId, this.hit.solid, ux, uy, uz);
               this.flags[i] |= F_DESTABILIZED;
               px = exx + ux * 1e-6; py = exy + uy * 1e-6; pz = exz + uz * 1e-6;
               vx = nvx; vy = nvy; vz = nvz;
@@ -281,7 +316,7 @@ export class Ballistics {
   advance(frameDt) {
     this.acc += frameDt;
     let guard = 0;
-    while (this.acc >= TICK_DT && guard++ < 100000) { this.acc -= TICK_DT; this.stepTick(); }
+    while (this.acc >= this.tickDt && guard++ < 100000) { this.acc -= this.tickDt; this.stepTick(); }
   }
 
   runToRest(maxTicks) {
@@ -289,4 +324,45 @@ export class Ballistics {
     while (this.liveCount > 0 && n++ < (maxTicks || 20000)) this.stepTick();
     return n;
   }
+}
+
+export const MEDIA_CONTRACT = { name: "string", rho: "number >= 0", cd: "number >= 0", yieldV: "number >= 0", ricochetDeg: "number", shatterV: "number >= 0", deformV: "number > 0 (Infinity allowed)", areaMult: "number > 0", retain: "number in 0 to 1" };
+
+export function checkMedia(table) {
+  const problems = [];
+  if (!Array.isArray(table)) {
+    problems.push("media: not an array");
+    return problems;
+  }
+  for (let i = 0; i < table.length; i++) {
+    const m = table[i];
+    if (typeof m.name !== "string") problems.push(`media.${i}.name: string required`);
+    if (!(Number.isFinite(m.rho) && m.rho >= 0)) problems.push(`media.${i}.rho: number >= 0 required`);
+    if (!(Number.isFinite(m.cd) && m.cd >= 0)) problems.push(`media.${i}.cd: number >= 0 required`);
+    if (!(Number.isFinite(m.yieldV) && m.yieldV >= 0)) problems.push(`media.${i}.yieldV: number >= 0 required`);
+    if (!Number.isFinite(m.ricochetDeg)) problems.push(`media.${i}.ricochetDeg: number required`);
+    if (!(Number.isFinite(m.shatterV) && m.shatterV >= 0)) problems.push(`media.${i}.shatterV: number >= 0 required`);
+    if (!(typeof m.deformV === "number" && m.deformV > 0)) problems.push(`media.${i}.deformV: number > 0 required`);
+    if (!(Number.isFinite(m.areaMult) && m.areaMult > 0)) problems.push(`media.${i}.areaMult: number > 0 required`);
+    if (!(Number.isFinite(m.retain) && m.retain >= 0 && m.retain <= 1)) problems.push(`media.${i}.retain: number in 0 to 1 required`);
+  }
+  return problems;
+}
+
+export const ROUNDS_CONTRACT = { name: "string", mass: "number > 0", dia: "number > 0", muzzle: "number > 0" };
+
+export function checkRounds(table) {
+  const problems = [];
+  if (!Array.isArray(table)) {
+    problems.push("rounds: not an array");
+    return problems;
+  }
+  for (let i = 0; i < table.length; i++) {
+    const r = table[i];
+    if (typeof r.name !== "string") problems.push(`rounds.${i}.name: string required`);
+    if (!(Number.isFinite(r.mass) && r.mass > 0)) problems.push(`rounds.${i}.mass: number > 0 required`);
+    if (!(Number.isFinite(r.dia) && r.dia > 0)) problems.push(`rounds.${i}.dia: number > 0 required`);
+    if (!(Number.isFinite(r.muzzle) && r.muzzle > 0)) problems.push(`rounds.${i}.muzzle: number > 0 required`);
+  }
+  return problems;
 }
