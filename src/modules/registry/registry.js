@@ -36,6 +36,7 @@ export const REGISTRY = {
   telemetry: { seam: "sample", gate: "telemetry" },
   opponent: { seam: "consume", gate: "opponent" },
   senses: { seam: "sample", gate: "senses" },
+  legik: { seam: "consume", gate: "legik" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },

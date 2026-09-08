@@ -62,7 +62,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] Mount failure envelopes: four load types, one utilization number, honest tearing
 - [x] Torque-limited joint actuators with finite stiffness
 - [x] The rig table: a whole machine as data, mirrored per side, assembled from the table
-- [ ] Leg inverse kinematics
+- [x] Leg inverse kinematics
 - [ ] The balance controller and the walking planner
 - [ ] Labeled-cheat presets: every relaxed rule named, with its measured consequence
 - [x] Per-joint load telemetry as an engine output
@@ -160,6 +160,7 @@ Serving checklist items:
 - [x] senses — opponent senses and cover reasoning — 0.0.71
 - [x] aim — frozen-time aiming — 0.0.73
 - [x] render2d — the 2-D canvas renderer, with the gravity-warped grid — 0.0.74
+- [x] legik — leg inverse kinematics — 0.0.77
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
