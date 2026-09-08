@@ -132,7 +132,7 @@ Serving checklist items:
 - [x] market — market pools — 0.0.2
 - [x] builder — the ship builder — 0.0.3; generalized 0.0.85
 - [x] ledger — the conservation ledger — 0.0.4
-- [x] weldstress — weld stress — 0.0.5
+- [x] weldstress — weld stress — 0.0.5; generalized 0.0.86
 - [x] tape — the input tape — 0.0.6
 - [x] physics-pb — the position-based physics core — 0.0.7
 - [x] rig — the rig table — 0.0.8

@@ -1,12 +1,32 @@
 // COMBO-ENGINE — weldstress-test: the weld-stress module's gate. Nine
 // checks, seedless arithmetic on the demo's own numbers, composing with the
 // builder module.
+//
+// Second pass: checks 10-12 exercise the load factor, the welds contract,
+// and the import law, at a rolled seed.
 import { makeBuilder } from "../src/modules/builder/builder.js";
-import { weldLoads, ratedLimits, breaking, splitByRoot } from "../src/modules/weldstress/weldstress.js";
+import { weldLoads, ratedLimits, breaking, splitByRoot, LOAD_FACTOR, checkWelds } from "../src/modules/weldstress/weldstress.js";
+import { readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
 const near = (a, b) => Math.abs(a - b) < 1e-9;
+const nearRel = (a, b, tol = 1e-9) => Math.abs(a - b) <= tol * Math.max(1, Math.abs(a), Math.abs(b));
+
+// the small seeded stream the other gates use
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const SEED = process.env.SEED ? (parseInt(process.env.SEED, 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
+console.log(`seeds {"weldstress":${SEED}}`);
+const rng = mulberry32(SEED);
+const rollIn = (lo, hi) => lo + rng() * (hi - lo);
 
 const SPEC = {
   bridge: { kg: 4.0, ports: ["E", "W", "N", "S"] },
@@ -42,6 +62,32 @@ const ws = B.weldsOf(starter);
     B.connectedFrom(r.kept, r.welds, 0).size === 2); }
 check("an uncut ship splits into itself: nothing gone",
   (() => { const r = splitByRoot(B, starter, ws, 0); return r.kept.length === 3 && r.gone.length === 0; })());
+
+{ let ok = true;
+  const omKnown = [6, 3];
+  for (let i = 0; i < 200; i++) {
+    const k = rollIn(1, 30);
+    const aMag = rollIn(0.1, 50);
+    const loads = weldLoads(B, SPEC, starter, ws, aMag, k);
+    const lims = ratedLimits(B, SPEC, starter, ws, k);
+    for (let j = 0; j < 2; j++) {
+      const expLoad = aMag * omKnown[j] * k;
+      const expGLim = ws[j].strength / Math.max(omKnown[j], 0.1) / k;
+      if (!nearRel(loads[j].load, expLoad)) ok = false;
+      if (!nearRel(lims[j].gLim, expGLim)) ok = false;
+    }
+  }
+  check("weldstress: a rolled factor scales every load and every rating exactly", ok); }
+
+{ const bad = checkWelds([{ a: 0.5, b: "x", strength: 0 }]);
+  const good = checkWelds(ws);
+  const none = checkWelds(null);
+  check("weldstress: the contract counts every problem", bad.length === 3 && good.length === 0 && none.length === 1); }
+
+{ const src = readFileSync(new URL("../src/modules/weldstress/weldstress.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/^import\s+.*?\bfrom\s+["']([^"']+)["']/gm)].map((m) => m[1]);
+  const ok = specifiers.every((spec) => /^\.\.\/[a-z0-9-]+\//.test(spec) || /^\.\//.test(spec));
+  check("weldstress: the module imports only from its own folder or a sibling module", ok); }
 
 console.log(`weldstress-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
