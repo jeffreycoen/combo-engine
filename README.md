@@ -147,11 +147,11 @@ Serving checklist items:
 - [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38
 - [x] determinism — the determinism kit — 0.0.59
 - [x] contract — the contract pattern — 0.0.60
-- [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61
+- [x] badge (with scripts/selftest.mjs) — headless gates and the boot self-test badge — 0.0.61; reads the gate table 0.0.75
 - [x] receipts — the receipt log — 0.0.62
 - [x] pagekit — the phone-first page kit — 0.0.63
 - [x] describe — the described-world boot door (grown 0.0.72: spec-table overrides and module choices come through the door; the box stays open until module choices reach the loop's seams) — 0.0.64
-- [x] registry — the module registry and the standard sockets — 0.0.65
+- [x] registry — the module registry and the standard sockets — 0.0.65; ghosts registered 0.0.75
 - [x] manifest (scripts/manifest.mjs) — the import map, kept mechanically — 0.0.66
 - [x] envelope laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.67) — mount failure envelopes — 0.0.67
 - [x] actuator laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.68) — torque-limited joint actuators — 0.0.68

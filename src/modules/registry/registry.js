@@ -33,6 +33,9 @@ export const REGISTRY = {
   describe: { seam: "consume", gate: "describe" },
   aim: { seam: "consume", gate: "aim" },
   render2d: { seam: "draw", gate: "render2d" },
+  telemetry: { seam: "sample", gate: "telemetry" },
+  opponent: { seam: "consume", gate: "opponent" },
+  senses: { seam: "sample", gate: "senses" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },
