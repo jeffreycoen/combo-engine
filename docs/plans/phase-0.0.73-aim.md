@@ -1,6 +1,6 @@
 # Phase 0.0.73 — frozen-time aiming
 
-Status: LANDED, commit stamped below. Gate: 8 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `36a010c`. Gate: 8 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 8 PASS / 0 FAIL; prior gates unmoved. -->
 
 Serves the checklist box "Frozen-time aiming: stop the sim, show the reach, predict with the sim's own step, commit or cancel." Source: the deadweight hangar demo, read-only, lines 1937–2001 (the delayed-burn planner, the candidate filter, the lead solver, target cycling), 2043–2069 (arm, cancel, the three commit branches), 2541–2578 (the prediction wiring and the freeze guard at line 2574), 2605 (the tape's aim action). The wells module (0.0.38) already carries the predictors; this phase carries the aiming law around them.
