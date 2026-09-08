@@ -1,6 +1,6 @@
 # Phase 0.0.75 — registry: the ghosts registered, the self-test made whole
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: registry 5 PASS / 0 FAIL, badge 3 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `82fbc3e`, 2026-09-08. Gate: registry 5 PASS / 0 FAIL, badge 3 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: registry 5 PASS / 0 FAIL, badge 3 PASS / 0 FAIL; bracket unmoved. -->
 
 Phase A1 of the general parts order. Three ghost modules — telemetry, opponent, senses — join the registry table, each naming its seam and its gate, so the registry's ghost check turns green. The self-test script stops carrying its own hard-coded list of gates; it reads the gate table's keys from `scripts/gate.mjs` itself, in file order, so the list can never go stale. The badge gate gains a third check proving the self-test's list equals the gate table's keys.
