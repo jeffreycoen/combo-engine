@@ -1,6 +1,6 @@
 # Phase 0.0.78 — receipts: the line table handed in
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 8 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `2e34309`, 2026-09-08. Gate: 8 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 8 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the receipts module under the general parts order, phase A16. The line table that turns each event into a line is exported, and receipt and receiptLog now take that table as a last argument, default the same table as before. A new check function lists every entry in a handed table that is not a function. Every existing line and every existing behavior at the defaults is unchanged.
