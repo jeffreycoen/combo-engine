@@ -1,6 +1,6 @@
 # Phase 0.0.96 — rig: the machine as data
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 14 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `3ae7b4b`, 2026-09-08. Gate: 14 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 14 PASS / 0 FAIL; bracket unmoved. -->
 
 The rig module's second pass, under the general parts order, phase A13. The seven-row limb chain moved onto the spec as data, MECH_SPEC.limbChain, with the two rows whose joint position flips per side marked. sideChain and buildLinkTable build from that data. assembleMech names its foot links, hip links, and collision pairs through options, each defaulted to the demo's own names. A spec contract, checkRigSpec, checks every field of a rig spec and returns every problem in one pass. Every number stays the demo's own.
