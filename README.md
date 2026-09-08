@@ -87,7 +87,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] Weld stress with load-based breaking and honest ship splitting
 - [x] The grapple rope: taut constraint, both ends pulled by their masses, yank, snap
 - [x] Frozen-time aiming: stop the sim, show the reach, predict with the sim's own step, commit or cancel
-- [ ] The 2-D canvas renderer, with the gravity-warped grid
+- [x] The 2-D canvas renderer, with the gravity-warped grid
 
 ### From the fleet demo
 
@@ -159,6 +159,7 @@ Serving checklist items:
 - [x] opponent — the non-lethal opponent model — 0.0.70
 - [x] senses — opponent senses and cover reasoning — 0.0.71
 - [x] aim — frozen-time aiming — 0.0.73
+- [x] render2d — the 2-D canvas renderer, with the gravity-warped grid — 0.0.74
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
