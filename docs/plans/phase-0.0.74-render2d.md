@@ -1,6 +1,6 @@
 # Phase 0.0.74 — the 2-D canvas renderer core, with the gravity-warped grid
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
+Status: LANDED, commit `fb4f416`, 2026-09-08. Gate: 5 PASS / 0 FAIL; prior gates unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 5 PASS / 0 FAIL; prior gates unmoved. -->
 
 Serves the checklist box "The 2-D canvas renderer, with the gravity-warped grid." Source: the deadweight hangar demo, read-only — cam (line 841), the screen-center and lock globals (842), the iso projection (843–848), the well render profile (849–853), the dip depth and reference (854), the dip itself (855–858), the two-pass grid draw (860–897), the per-frame bookkeeping (2642, 2658). The demo's higher draws (world, ship, status) are page-owned and do not move; the wells module's potField already proved this substitution pattern at 0.0.38.
