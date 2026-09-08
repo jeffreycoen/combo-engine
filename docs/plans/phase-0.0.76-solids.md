@@ -1,6 +1,6 @@
 # Phase 0.0.76 — solids: the hit record handed in
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `4e4901e`, 2026-09-08. Gate: 16 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 16 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the solids module under the general parts order, phase A2. The module now hands out its hit record instead of writing through one shared record alone: makeHit builds a fresh record, and raySolid and raycastWorld take a record to fill, defaulting to the module's own scratch record for callers that pass none. A contract function, checkSolid, checks a solid's shape and lists every problem in one pass. rayBlocked, and every other function's name, arithmetic, and export, are untouched.
