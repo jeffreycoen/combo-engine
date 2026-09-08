@@ -5,6 +5,19 @@
 // one clip routine serves boxes, turned boxes, and n-gon prisms alike.
 // Substitutions from the demo, and only these: `export` added to the seven
 // functions and the shared hit record; this header added.
+//
+// Second pass, the general parts order, phase A2. Substitutions, and only
+// these:
+// 1. makeHit() added, returning a fresh hit record.
+// 2. The module's hit record now comes from makeHit(); named as the default
+//    scratch record: the passed record is the law.
+// 3. raySolid takes an out record last, default hit; every write goes to out.
+// 4. raycastWorld takes an out record last, default hit; hands it to
+//    raySolid and reads and writes out where it read and wrote hit.
+// 5. rayBlocked is unchanged.
+// 6. SOLID_CONTRACT added, naming the shape of a solid.
+// 7. checkSolid(s) added, returning every problem of a broken solid in one
+//    pass.
 
 // an n-gon prism as a plane set. The solver already clips against arbitrary planes,
 // so a cylinder costs sides+2 planes and no new code in the hot path.
@@ -72,9 +85,14 @@ export function makeBox(cx, cy, cz, sx, sy, sz, matId) {
 
 export function makeSlab(cx, cy, cz, sx, sy, sz, matId) { return makeBox(cx, cy, cz, sx, sy, sz, matId); }
 
-export const hit = { t: 0, tx: 0, nx: 0, ny: 0, nz: 0, solid: -1, path: 0, mat: 0 };
+export function makeHit() {
+  return { t: 0, tx: 0, nx: 0, ny: 0, nz: 0, solid: -1, path: 0, mat: 0 };
+}
 
-export function raySolid(s, ox, oy, oz, dx, dy, dz) {
+// the default scratch record for the verbatim callers: the passed record is the law.
+export const hit = makeHit();
+
+export function raySolid(s, ox, oy, oz, dx, dy, dz, out = hit) {
   let tE = -Infinity, tX = Infinity, enx = 0, eny = 0, enz = 0;
   const p = s.planes;
   for (let i = 0; i < s.n; i++) {
@@ -87,22 +105,22 @@ export function raySolid(s, ox, oy, oz, dx, dy, dz) {
     else { if (t < tX) tX = t; }
   }
   if (tE > tX || tX < 0) return false;
-  hit.t = tE; hit.tx = tX; hit.nx = enx; hit.ny = eny; hit.nz = enz;
+  out.t = tE; out.tx = tX; out.nx = enx; out.ny = eny; out.nz = enz;
   return true;
 }
 
-export function raycastWorld(solids, ox, oy, oz, dx, dy, dz, maxT) {
+export function raycastWorld(solids, ox, oy, oz, dx, dy, dz, maxT, out = hit) {
   let best = Infinity, found = -1, bx = 0, bnx = 0, bny = 0, bnz = 0;
   for (let i = 0; i < solids.length; i++) {
-    if (!raySolid(solids[i], ox, oy, oz, dx, dy, dz)) continue;
-    const t = hit.t;
+    if (!raySolid(solids[i], ox, oy, oz, dx, dy, dz, out)) continue;
+    const t = out.t;
     if (t < 1e-9 || t > maxT) continue;
-    if (t < best) { best = t; found = i; bx = hit.tx; bnx = hit.nx; bny = hit.ny; bnz = hit.nz; }
+    if (t < best) { best = t; found = i; bx = out.tx; bnx = out.nx; bny = out.ny; bnz = out.nz; }
   }
   if (found < 0) return false;
-  hit.t = best; hit.tx = bx; hit.nx = bnx; hit.ny = bny; hit.nz = bnz; hit.solid = found;
-  hit.mat = solids[found].mat;
-  hit.path = bx - best;
+  out.t = best; out.tx = bx; out.nx = bnx; out.ny = bny; out.nz = bnz; out.solid = found;
+  out.mat = solids[found].mat;
+  out.path = bx - best;
   return true;
 }
 // Lamps are static, so their occlusion can be resolved once at mesh build instead of
@@ -133,5 +151,27 @@ export function rayBlocked(solids, ox, oy, oz, tx, ty, tz, skipMat) {
     if (ok) return 1;
   }
   return 0;
+}
+
+export const SOLID_CONTRACT = { planes: "float array of n times 4", n: "integer >= 4", min: "3 finite numbers", max: "3 finite numbers", mat: "integer" };
+
+export function checkSolid(s) {
+  const problems = [];
+  if (typeof s !== "object" || s === null) {
+    problems.push("solid: not an object");
+    return problems;
+  }
+  const nOk = Number.isInteger(s.n) && s.n >= 4;
+  if (!nOk) problems.push("solid.n: integer >= 4 required");
+  const planesShape = s.planes instanceof Float64Array
+    || (Array.isArray(s.planes) && s.planes.every((v) => Number.isFinite(v)));
+  const planesOk = nOk && planesShape && s.planes.length === s.n * 4;
+  if (!planesOk) problems.push("solid.planes: float array of n times 4 required");
+  if (!(Array.isArray(s.min) && s.min.length === 3 && s.min.every((v) => Number.isFinite(v))))
+    problems.push("solid.min: 3 finite numbers required");
+  if (!(Array.isArray(s.max) && s.max.length === 3 && s.max.every((v) => Number.isFinite(v))))
+    problems.push("solid.max: 3 finite numbers required");
+  if (!Number.isInteger(s.mat)) problems.push("solid.mat: integer required");
+  return problems;
 }
 
