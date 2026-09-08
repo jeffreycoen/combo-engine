@@ -157,7 +157,7 @@ Serving checklist items:
 - [x] actuator laws (mechanism in physics-pb since 0.0.7; laws gated 0.0.68) — torque-limited joint actuators — 0.0.68
 - [x] telemetry — per-joint load telemetry as an engine output — 0.0.69
 - [x] opponent — the non-lethal opponent model — 0.0.70; generalized 0.0.87
-- [x] senses — opponent senses and cover reasoning — 0.0.71
+- [x] senses — opponent senses and cover reasoning — 0.0.71; generalized 0.0.88
 - [x] aim — frozen-time aiming — 0.0.73
 - [x] render2d — the 2-D canvas renderer, with the gravity-warped grid — 0.0.74
 - [x] legik — leg inverse kinematics — 0.0.77

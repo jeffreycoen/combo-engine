@@ -314,7 +314,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.85 builder
 - [x] 0.0.86 weldstress
 - [x] 0.0.87 opponent
-- [ ] 0.0.88 senses
+- [x] 0.0.88 senses
 - [ ] 0.0.89 aim
 - [ ] 0.0.90 disc
 - [ ] 0.0.91 voxel
