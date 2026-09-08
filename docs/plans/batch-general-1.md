@@ -308,7 +308,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.79 wells
 - [x] 0.0.80 escrow
 - [x] 0.0.81 grapple
-- [ ] 0.0.82 presets
+- [x] 0.0.82 presets
 - [ ] 0.0.83 ballistics
 - [ ] 0.0.84 support
 - [ ] 0.0.85 builder

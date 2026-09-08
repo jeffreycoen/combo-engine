@@ -37,6 +37,7 @@ export const REGISTRY = {
   opponent: { seam: "consume", gate: "opponent" },
   senses: { seam: "sample", gate: "senses" },
   legik: { seam: "consume", gate: "legik" },
+  presets: { seam: "consume", gate: "presets" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },

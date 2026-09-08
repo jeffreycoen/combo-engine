@@ -47,6 +47,7 @@ const GATES = {
   "aim": ["scripts/aim-test.mjs"],
   "render2d": ["scripts/render2d-test.mjs"],
   "legik": ["scripts/legik-test.mjs"],
+  "presets": ["scripts/presets-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
