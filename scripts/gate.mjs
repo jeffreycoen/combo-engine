@@ -49,6 +49,7 @@ const GATES = {
   "legik": ["scripts/legik-test.mjs"],
   "presets": ["scripts/presets-test.mjs"],
   "disc": ["scripts/disc-test.mjs"],
+  "greybox": ["scripts/greybox-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
