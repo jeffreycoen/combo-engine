@@ -1,6 +1,6 @@
 # Phase 0.0.81 — grapple: the constants as dials
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `0a11142`, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 20 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the grapple module under the general parts order, phase A9. The fifteen named constants move into one dials object, GRAP, and every function that reads a constant takes the dials as its last argument, default GRAP. The rope law itself does not move. A ship contract and a target contract are added, each a function that lists every problem with an input in one pass.
