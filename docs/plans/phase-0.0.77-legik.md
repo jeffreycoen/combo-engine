@@ -1,6 +1,6 @@
 # Phase 0.0.77 — legik: leg inverse kinematics
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `7d0bb91`, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "Leg inverse kinematics". Source: the mech demo, read-only, lines 807 to 857 (the leg table, legIK, legFK). legIK turns a wanted ankle position into the leg's five joint angles with the sole held level; legFK checks the solve by turning the angles back into a position.
