@@ -130,7 +130,7 @@ Every module in `src/modules/`, the checklist item it serves, and the phase that
 Serving checklist items:
 
 - [x] market — market pools — 0.0.2
-- [x] builder — the ship builder — 0.0.3
+- [x] builder — the ship builder — 0.0.3; generalized 0.0.85
 - [x] ledger — the conservation ledger — 0.0.4
 - [x] weldstress — weld stress — 0.0.5
 - [x] tape — the input tape — 0.0.6

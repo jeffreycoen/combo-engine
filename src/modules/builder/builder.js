@@ -6,11 +6,28 @@
 //
 // Generalization is by PARAMETER only: the demo's globals (SPEC, CELL,
 // WELD_S, WELD_WEAK, the bridge's built-in attitude ring) become the maker's
-// options; every formula is the demo's own. The spec table keeps the demo's
-// role vocabulary (a row may carry thrust, tank, rcsN, weak, and the part
-// types "bridge"/"engine"/"tank"/"rcs" are recognized by name in derive).
+// options; every formula is the demo's own. Parts are read by a role each
+// row declares; a row without one takes its key when the key is one of
+// bridge/engine/tank/rcs.
+//
+// Second pass, the general parts order, phase A10. Substitutions, and only
+// these:
+//   1. A spec row may carry role, a string. ROLE_KEYS = ["bridge", "engine",
+//      "tank", "rcs"]; roleOf(t) reads spec[t].role, defaulting to t when t
+//      is one of the four keys, else undefined.
+//   2. In derive, every test on a part's type key becomes a test on its
+//      role: engines are the parts with role "engine", tanks role "tank",
+//      rcsMods role "rcs"; the bridge test is roleOf(md.t) === "bridge" in
+//      both places it appears.
+//   3. In derive, the three reads of a named row become reads of each
+//      part's own row: the rcs loop reads spec[r.t].rcsN in both uses; F
+//      sums spec[e.t].thrust over engF, and tq sums each engine's own
+//      thrust in its term; fuelCap sums spec[t.t].tank over tanks.
+//   4. checkSpec gains <name>.role: string required when a role is present
+//      and is not a string. SPEC_ROW_CONTRACT gains role: "string,
+//      optional".
 
-export const SPEC_ROW_CONTRACT = { kg: "number > 0", ports: "array of E|W|N|S" };
+export const SPEC_ROW_CONTRACT = { kg: "number > 0", ports: "array of E|W|N|S", role: "string, optional" };
 
 // checkSpec(spec) -> problem strings, empty when clean. Pure.
 export function checkSpec(spec) {
@@ -24,6 +41,7 @@ export function checkSpec(spec) {
     if (!(typeof row.kg === "number" && row.kg > 0)) problems.push(name + ".kg: number > 0 required");
     if (!Array.isArray(row.ports) || row.ports.some((p) => !["E", "W", "N", "S"].includes(p)))
       problems.push(name + ".ports: array of E|W|N|S required");
+    if (row.role !== undefined && typeof row.role !== "string") problems.push(name + ".role: string required");
   }
   return problems;
 }
@@ -39,6 +57,8 @@ export function makeBuilder(opts) {
   const WELD_WEAK = opts.weldWeak ?? 500;
   const BRIDGE_RCS_TAU = opts.bridgeTau ?? 26;
   const BRIDGE_RCS_N = opts.bridgeRcsN ?? 5;
+  const ROLE_KEYS = ["bridge", "engine", "tank", "rcs"];
+  const roleOf = (t) => spec[t].role ?? (ROLE_KEYS.includes(t) ? t : undefined);
 
   const occupied = (list, gx, gy) => list.find((m) => m.gx === gx && m.gy === gy);
   const portDirs = (m) => spec[m.t].ports.map((p) => DIR[p]);
@@ -83,23 +103,22 @@ export function makeBuilder(opts) {
     cx /= m; cy /= m;
     let I = 0;
     for (const md of list) { const kg = spec[md.t].kg; const r2 = (md.gx * CELL - cx) ** 2 + (md.gy * CELL - cy) ** 2; I += kg * (r2 + 3); }
-    const engines = list.filter((md) => md.t === "engine");
-    const tanks = list.filter((md) => md.t === "tank");
-    const rcsMods = list.filter((md) => md.t === "rcs");
-    let tau = list.some((md) => md.t === "bridge") ? BRIDGE_RCS_TAU : 0;
-    let rcsN = list.some((md) => md.t === "bridge") ? BRIDGE_RCS_N : 0;
+    const engines = list.filter((md) => roleOf(md.t) === "engine");
+    const tanks = list.filter((md) => roleOf(md.t) === "tank");
+    const rcsMods = list.filter((md) => roleOf(md.t) === "rcs");
+    let tau = list.some((md) => roleOf(md.t) === "bridge") ? BRIDGE_RCS_TAU : 0;
+    let rcsN = list.some((md) => roleOf(md.t) === "bridge") ? BRIDGE_RCS_N : 0;
     for (const r of rcsMods) {
       const arm = Math.hypot(r.gx * CELL - cx, r.gy * CELL - cy);
-      tau += (spec.rcs.rcsN ?? 16) * Math.max(arm, 1.8); rcsN += (spec.rcs.rcsN ?? 16);
+      tau += (spec[r.t].rcsN ?? 16) * Math.max(arm, 1.8); rcsN += (spec[r.t].rcsN ?? 16);
     }
     const engF = engines.filter((e) => !(e.f || 0)), engR = engines.filter((e) => (e.f || 0) === 2);
-    const thrust = spec.engine ? (spec.engine.thrust ?? 0) : 0;
     return {
       m, cx, cy, I,
-      F: engF.length * thrust,
-      tq: engF.reduce((a, e) => a + (-(e.gy * CELL - cy)) * thrust, 0),
+      F: engF.reduce((a, e) => a + (spec[e.t].thrust ?? 0), 0),
+      tq: engF.reduce((a, e) => a + (-(e.gy * CELL - cy)) * (spec[e.t].thrust ?? 0), 0),
       engF, engR, tau, rcsN, engines,
-      fuelCap: (opts.baseFuel ?? 260) + tanks.length * (spec.tank ? (spec.tank.tank ?? 300) : 300),
+      fuelCap: (opts.baseFuel ?? 260) + tanks.reduce((a, t) => a + (spec[t.t].tank ?? 300), 0),
     };
   }
 

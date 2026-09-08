@@ -1,10 +1,30 @@
 // COMBO-ENGINE — builder-test: the builder module's gate. Ten checks, all
-// arithmetic against the deadweight demo's own numbers. No randomness.
+// arithmetic against the deadweight demo's own numbers, seedless.
+//
+// Second pass: checks 11-14 exercise roles — a rolled spec whose engine
+// part is moved to a role-only key, rcs and tank parts read by role from
+// their own rows, the contract's role check, and the import-manifest check.
 import { checkSpec, makeBuilder } from "../src/modules/builder/builder.js";
+import { readFileSync } from "node:fs";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
 const near = (a, b) => Math.abs(a - b) < 1e-9;
+
+// the small seeded stream the other gates use
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const SEED = process.env.SEED ? (parseInt(process.env.SEED, 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
+console.log(`seeds {"builder":${SEED}}`);
+const rng = mulberry32(SEED);
+const rollIn = (lo, hi) => lo + rng() * (hi - lo);
 
 // the demo's spec rows this gate needs, values verbatim from deadweight-hangar.html lines 171-182
 const SPEC = {
@@ -44,6 +64,49 @@ check("connectivity: whole starter reachable from the bridge; removing the engin
     const rest = starter.filter((m) => m.t !== "engine");
     return all && B.connectedFrom(rest, B.weldsOf(rest), 0).size === rest.length;
   })());
+
+{ let ok = true;
+  for (let i = 0; i < 100; i++) {
+    const thrust = rollIn(10, 100), kg = rollIn(1, 10);
+    const specA = { ...SPEC, engine: { ...SPEC.engine, thrust, kg } };
+    const specB = { ...specA };
+    delete specB.engine;
+    specB.thruster = { ...specA.engine, role: "engine" };
+    const starterB = [{ t: "bridge", gx: 0, gy: 0 }, { t: "thruster", gx: -1, gy: 0 }, { t: "pod", gx: 1, gy: 0 }];
+    const dA = makeBuilder({ spec: specA }).derive(starter);
+    const dB = makeBuilder({ spec: specB }).derive(starterB);
+    if (!(near(dA.m, dB.m) && near(dA.cx, dB.cx) && near(dA.cy, dB.cy) && near(dA.I, dB.I) &&
+          near(dA.F, dB.F) && near(dA.tq, dB.tq) && dA.tau === dB.tau && dA.rcsN === dB.rcsN && dA.fuelCap === dB.fuelCap))
+      ok = false;
+  }
+  check("builder: a rolled spec whose engine part is keyed thruster with role engine derives the same thrust and torque as the demo-keyed spec", ok); }
+
+{ const specRT = {
+    bridge: { kg: 4.0, ports: ["E", "W", "N", "S"] },
+    rcsA: { kg: 1, ports: ["E", "W", "N", "S"], role: "rcs", rcsN: 10 },
+    rcsB: { kg: 1, ports: ["E", "W", "N", "S"], role: "rcs", rcsN: 30 },
+    tankA: { kg: 1, ports: ["E", "W", "N", "S"], role: "tank", tank: 100 },
+    tankB: { kg: 1, ports: ["E", "W", "N", "S"], role: "tank", tank: 200 },
+  };
+  const BRT = makeBuilder({ spec: specRT });
+  const layout = [
+    { t: "bridge", gx: 0, gy: 0 },
+    { t: "rcsA", gx: 1, gy: 0 },
+    { t: "rcsB", gx: 2, gy: 0 },
+    { t: "tankA", gx: 0, gy: 1 },
+    { t: "tankB", gx: 0, gy: 2 },
+  ];
+  const dRT = BRT.derive(layout);
+  check("builder: rcs and tank parts are read by role, each from its own row",
+    dRT.rcsN === 5 + 10 + 30 && dRT.fuelCap === 260 + 100 + 200); }
+
+check("builder: the contract counts a bad role",
+  checkSpec({ x: { kg: 1, ports: ["E"], role: 5 } }).length === 1 && checkSpec(SPEC).length === 0);
+
+{ const src = readFileSync(new URL("../src/modules/builder/builder.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/^import\s+.*?\bfrom\s+["']([^"']+)["']/gm)].map(m => m[1]);
+  const ok = specifiers.every(spec => /^\.\.\/[a-z0-9-]+\//.test(spec) || /^\.\//.test(spec));
+  check("builder: the module imports only from its own folder or a sibling module", ok); }
 
 console.log(`builder-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
