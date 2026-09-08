@@ -24,6 +24,31 @@
 // Ghosts, the already-dead, debris, decoration, and downed targets never
 // need support (3000). Composes with the voxel module: the natural onFall
 // is voxWorld.dropPrimAsCluster.
+//
+// Second pass (phase 0.0.84, batch-general-1.md A5): the law above is
+// unchanged; these are its substitutions.
+//   1. SUPPORT_TOLERANCES holds the eight literals above as one exported
+//      object, the demo's own values as defaults.
+//   2. restsOn takes tol last, default SUPPORT_TOLERANCES: tol.overlap in
+//      the four footprint tests, tol.restBelow and tol.restAbove in the
+//      rest band, tol.spanAbove in the span rule.
+//   3. linkDeco takes tol last, default SUPPORT_TOLERANCES: tol.hostGap in
+//      the host-gap test.
+//   4. findUnsupported takes tol last, default SUPPORT_TOLERANCES:
+//      tol.groundBase for the ground test, tol.passes for the loop count,
+//      tol passed on to restsOn.
+//   5. sweepDeco is unchanged; it reads no literal.
+//   6. primSupported takes tol last, default SUPPORT_TOLERANCES, passed on
+//      to findUnsupported.
+//   7. settleWorld takes tol last, default SUPPORT_TOLERANCES: tol.sweeps
+//      for the sweep guard, tol passed on to findUnsupported.
+//   8. PRIM_CONTRACT and checkPrim declare the prim's fields and check
+//      them in one pass.
+//   9. checkTolerances declares the tolerances object's fields and checks
+//      them in one pass.
+
+// SUPPORT_TOLERANCES: the demo's eight numbers, as one handed-in object.
+export const SUPPORT_TOLERANCES = { overlap: 0.05, restBelow: 0.22, restAbove: 0.06, spanAbove: 0.02, groundBase: 0.16, hostGap: 0.45, passes: 24, sweeps: 6 };
 
 // primBox: min and max corners as one array (demo 2940-2945).
 export function primBox(pr) {
@@ -33,17 +58,17 @@ export function primBox(pr) {
 }
 
 // restsOn: the demo's ledger of what counts as bearing (2946-2953).
-export function restsOn(A, B) {
-  if (A[0] > B[3] + 0.05 || A[3] < B[0] - 0.05) return false;
-  if (A[2] > B[5] + 0.05 || A[5] < B[2] - 0.05) return false;
-  if (B[4] >= A[1] - 0.22 && B[4] <= A[1] + 0.06) return true;
-  if (B[1] <= A[1] && B[4] > A[1] + 0.02) return true;
+export function restsOn(A, B, tol = SUPPORT_TOLERANCES) {
+  if (A[0] > B[3] + tol.overlap || A[3] < B[0] - tol.overlap) return false;
+  if (A[2] > B[5] + tol.overlap || A[5] < B[2] - tol.overlap) return false;
+  if (B[4] >= A[1] - tol.restBelow && B[4] <= A[1] + tol.restAbove) return true;
+  if (B[1] <= A[1] && B[4] > A[1] + tol.spanAbove) return true;
   return false;
 }
 
 // linkDeco: resolve every decoration's host once, by proximity — best
 // overlap wins, else nearest gap within 0.45, else no host (demo 2963-2991).
-export function linkDeco(level) {
+export function linkDeco(level, tol = SUPPORT_TOLERANCES) {
   for (let i = 0; i < level.length; i++) {
     const pr = level[i];
     if (!pr.deco || pr.host !== undefined) continue;
@@ -67,29 +92,29 @@ export function linkDeco(level) {
       const gap = Math.hypot(gx, gy, gz);
       if (gap < bestGap) { bestGap = gap; near = j; }
     }
-    pr.host = bestOv > 0 ? best : (bestGap <= 0.45 ? near : -1);
+    pr.host = bestOv > 0 ? best : (bestGap <= tol.hostGap ? near : -1);
   }
 }
 
 // findUnsupported: ground-up propagation in passes; whatever no pass could
 // reach is floating (demo 2992-3016).
-export function findUnsupported(level) {
+export function findUnsupported(level, tol = SUPPORT_TOLERANCES) {
   const n = level.length, ok = new Uint8Array(n), box = new Array(n), open = [];
   for (let i = 0; i < n; i++) {
     const pr = level[i];
     if (pr.ghost || pr.dead || pr.deb || pr.deco || (pr.tgt && pr.down)) { ok[i] = 1; continue; }
     box[i] = primBox(pr);
-    if (box[i][1] <= 0.16) ok[i] = 1;
+    if (box[i][1] <= tol.groundBase) ok[i] = 1;
     else open.push(i);
   }
-  for (let pass = 0; pass < 24; pass++) {
+  for (let pass = 0; pass < tol.passes; pass++) {
     let any = 0;
     for (let q = 0; q < open.length; q++) {
       const idx = open[q];
       if (ok[idx]) continue;
       for (let j = 0; j < n; j++) {
         if (!ok[j] || j === idx || !box[j]) continue;
-        if (restsOn(box[idx], box[j])) { ok[idx] = 1; any = 1; break; }
+        if (restsOn(box[idx], box[j], tol)) { ok[idx] = 1; any = 1; break; }
       }
     }
     if (!any) break;
@@ -118,16 +143,16 @@ export function sweepDeco(level, onGone) {
 }
 
 // primSupported: one prim's verdict (demo 3034-3036).
-export function primSupported(level, pr) {
+export function primSupported(level, pr, tol = SUPPORT_TOLERANCES) {
   const idx = level.indexOf(pr);
-  return findUnsupported(level).indexOf(idx) < 0;
+  return findUnsupported(level, tol).indexOf(idx) < 0;
 }
 
 // settleWorld: drop everything unsupported (welded prims stay), hand each
 // structural faller to onFall, then sweep decoration until quiet (demo
 // 3038-3060). Returns how many pieces went.
-export function settleWorld(level, onFall, onGone) {
-  const fall = findUnsupported(level);
+export function settleWorld(level, onFall, onGone, tol = SUPPORT_TOLERANCES) {
+  const fall = findUnsupported(level, tol);
   let dropped = 0;
   for (let i = 0; i < fall.length; i++) {
     const pr = level[fall[i]];
@@ -137,6 +162,66 @@ export function settleWorld(level, onFall, onGone) {
     dropped++;
   }
   let swept = 0, guard = 0;
-  do { swept = sweepDeco(level, onGone); dropped += swept; guard++; } while (swept && guard < 6);
+  do { swept = sweepDeco(level, onGone); dropped += swept; guard++; } while (swept && guard < tol.sweeps);
   return dropped;
+}
+
+// PRIM_CONTRACT: the fields support reads from a level prim.
+export const PRIM_CONTRACT = {
+  c: "3 finite numbers (centre); required unless cc is present and valid",
+  cc: "3 finite numbers (centre override); optional",
+  s: "3 finite numbers (size); required",
+  deco: "boolean or 0/1; optional",
+  ghost: "boolean or 0/1; optional",
+  dead: "boolean or 0/1; optional",
+  deb: "boolean or 0/1; optional",
+  tgt: "boolean or 0/1; optional",
+  down: "boolean or 0/1; optional",
+  weld: "boolean or 0/1; optional",
+  gone: "boolean or 0/1; optional",
+  host: "integer >= -1 (index into the level, or -1 for none); optional",
+};
+
+const isVec3 = (v) => Array.isArray(v) && v.length === 3 && v.every((n) => typeof n === "number" && Number.isFinite(n));
+
+const PRIM_FLAG_FIELDS = ["deco", "ghost", "dead", "deb", "tgt", "down", "weld", "gone"];
+
+// checkPrim: every problem with a prim, in one pass (PRIM_CONTRACT).
+export function checkPrim(pr) {
+  if (typeof pr !== "object" || pr === null) return ["prim: not an object"];
+  const problems = [];
+  if (pr.cc !== undefined) {
+    if (!isVec3(pr.cc)) problems.push("prim.cc: 3 finite numbers required");
+  } else if (!isVec3(pr.c)) {
+    problems.push("prim.c: 3 finite numbers required");
+  }
+  if (!isVec3(pr.s)) problems.push("prim.s: 3 finite numbers required");
+  for (const flag of PRIM_FLAG_FIELDS) {
+    const v = pr[flag];
+    if (v !== undefined && typeof v !== "boolean" && v !== 0 && v !== 1) {
+      problems.push(`prim.${flag}: boolean or 0/1 required`);
+    }
+  }
+  if (pr.host !== undefined && !(Number.isInteger(pr.host) && pr.host >= -1)) {
+    problems.push("prim.host: integer >= -1 required");
+  }
+  return problems;
+}
+
+const TOL_POSITIVE_FIELDS = ["overlap", "restBelow", "restAbove", "spanAbove", "groundBase", "hostGap"];
+const TOL_INT_FIELDS = ["passes", "sweeps"];
+
+// checkTolerances: every problem with a tolerances object, in one pass.
+export function checkTolerances(t) {
+  if (typeof t !== "object" || t === null) return ["tolerances: not an object"];
+  const problems = [];
+  for (const name of TOL_POSITIVE_FIELDS) {
+    const v = t[name];
+    if (typeof v !== "number" || !(v > 0)) problems.push(`tolerances.${name}: number > 0 required`);
+  }
+  for (const name of TOL_INT_FIELDS) {
+    const v = t[name];
+    if (!(Number.isInteger(v) && v >= 1)) problems.push(`tolerances.${name}: integer >= 1 required`);
+  }
+  return problems;
 }

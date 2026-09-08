@@ -2,9 +2,10 @@
 // Twelve checks. Seed 9 drives the one falling cluster; no seed is special.
 // The fixture is a post carrying a deck, a rust streak painted on the post,
 // a flag hung near the deck, and a floater with nothing under it.
+import fs from "node:fs";
 import { M, mulberry32 } from "../src/modules/ballistics/ballistics.js";
 import { makeVoxWorld } from "../src/modules/voxel/voxel.js";
-import { primBox, restsOn, linkDeco, findUnsupported, sweepDeco, primSupported, settleWorld } from "../src/modules/support/support.js";
+import { primBox, restsOn, linkDeco, findUnsupported, sweepDeco, primSupported, settleWorld, SUPPORT_TOLERANCES, checkPrim, checkTolerances } from "../src/modules/support/support.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -18,6 +19,11 @@ const mkLevel = () => [
   { id: 'floater', c: [5, 3, 0], s: [0.5, 0.5, 0.5], p: 'concrete', m: M.concrete },
   { id: 'ghostwater', c: [0, 0.01, 5], s: [10, 0.02, 1], p: 'chop', m: M.water, ghost: 1 },
 ];
+
+const SEED = process.env.SEED ? Number(process.env.SEED) : Math.floor(Math.random() * 0x100000000);
+console.log(`seeds ${JSON.stringify({ support: SEED })}`);
+const rng = mulberry32(SEED);
+const roll = (lo, hi) => lo + rng() * (hi - lo);
 
 check("primBox: centre plus and minus half size, both corners",
   (() => { const b = primBox({ c: [1, 2, 3], s: [2, 4, 6] });
@@ -85,6 +91,47 @@ check("restsOn: the deck rests on the post; a box beside it does not; a spanning
   const C = w.clusters[0];
   check("composition: the fallen floater leaves as one voxel cluster — 4 x 4 x 4 cells at concrete density",
     w.clusters.length === 1 && C.nc === 64 && near(C.mass, 2400 * (0.5 / 4) ** 3 * 64, 1e-9) && C.x === 5 && C.y === 3); }
+
+{ let ok13 = true;
+  for (let i = 0; i < 200; i++) {
+    const tol = { ...SUPPORT_TOLERANCES, restBelow: roll(0.05, 0.5), overlap: roll(0.01, 0.3) };
+    const post = { c: [0, 0.5, 0], s: [0.2, 1, 0.2] };
+    let g; do { g = roll(0, tol.restBelow + 0.3); } while (Math.abs(g - tol.restBelow) < 1e-6);
+    const slab = { c: [0, 1 + g + 0.1, 0], s: [1, 0.2, 1] };
+    const u = findUnsupported([post, slab], tol);
+    const supported = u.indexOf(1) < 0;
+    if (supported !== (g <= tol.restBelow)) { ok13 = false; break; }
+
+    let o; do { o = roll(0, 1.2); } while (Math.abs(o - (0.6 + tol.overlap)) < 1e-6);
+    const slabO = { c: [o, 1.1, 0], s: [1, 0.2, 1] };
+    const u2 = findUnsupported([post, slabO], tol);
+    const supported2 = u2.indexOf(1) < 0;
+    if (supported2 !== (o <= 0.6 + tol.overlap)) { ok13 = false; break; }
+  }
+  check("support: at rolled tolerances the rest gap and the footprint overlap decide support exactly", ok13); }
+
+{ const base = { id: 'base', c: [0, 0.1, 0], s: [1, 0.2, 1] };
+  const mkSlab = (k) => ({ id: 's' + k, c: [0, 0.2 + 0.5 * k - 0.25, 0], s: [1, 0.5, 1] });
+  const s1 = mkSlab(1), s2 = mkSlab(2), s3 = mkSlab(3), s4 = mkSlab(4);
+  const level = [s4, s3, s2, s1, base];
+  const n1 = findUnsupported(level, { ...SUPPORT_TOLERANCES, passes: 1 }).length;
+  const n2 = findUnsupported(level, { ...SUPPORT_TOLERANCES, passes: 2 }).length;
+  const n3 = findUnsupported(level, { ...SUPPORT_TOLERANCES, passes: 3 }).length;
+  const n4 = findUnsupported(level, SUPPORT_TOLERANCES).length;
+  check("support: passes 1 leaves the top of a tall stack floating where the default finds it",
+    n1 === 3 && n2 === 2 && n3 === 1 && n4 === 0); }
+
+check("support: the contracts count every problem",
+  checkPrim({ c: [0, 0], s: "x", deco: "yes", host: 1.5 }).length === 4 &&
+  checkPrim(mkLevel()[0]).length === 0 &&
+  checkPrim(null).length === 1 &&
+  checkTolerances({ ...SUPPORT_TOLERANCES, overlap: -1, passes: 0 }).length === 2 &&
+  checkTolerances(SUPPORT_TOLERANCES).length === 0);
+
+{ const src = fs.readFileSync(new URL("../src/modules/support/support.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/^import\s.*?\sfrom\s+["']([^"']+)["']/gm)].map((m) => m[1]);
+  const ok = specifiers.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
+  check("support: the module imports only from its own folder or a sibling module", ok); }
 
 console.log(`support-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
