@@ -1,6 +1,6 @@
 # Phase 0.0.93 — cues: musical cues as vocabulary
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `afa6863`, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "Musical cues folded into the sound engine's vocabulary". Source: the fleet demo, read-only, lines 51 to 151 and the ten call sites. The module holds the twelve cues and eleven voices as data and the lookup that times them; it holds no sound library and plays nothing itself.
