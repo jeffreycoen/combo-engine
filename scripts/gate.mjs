@@ -51,6 +51,7 @@ const GATES = {
   "disc": ["scripts/disc-test.mjs"],
   "greybox": ["scripts/greybox-test.mjs"],
   "cues": ["scripts/cues-test.mjs"],
+  "selection": ["scripts/selection-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

@@ -320,7 +320,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.91 voxel
 - [x] 0.0.92 greybox
 - [x] 0.0.93 cues
-- [ ] 0.0.94 selection
+- [x] 0.0.94 selection
 - [ ] 0.0.95 physics-pb
 - [ ] 0.0.96 rig
 - [ ] 0.0.97 grammar
