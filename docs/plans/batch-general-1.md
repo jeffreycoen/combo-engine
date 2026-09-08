@@ -306,7 +306,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.77 legik
 - [x] 0.0.78 receipts
 - [x] 0.0.79 wells
-- [ ] 0.0.80 escrow
+- [x] 0.0.80 escrow
 - [ ] 0.0.81 grapple
 - [ ] 0.0.82 presets
 - [ ] 0.0.83 ballistics

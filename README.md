@@ -143,7 +143,7 @@ Serving checklist items:
 - [x] voxel — voxel destruction — 0.0.13
 - [x] support — support propagation — 0.0.14
 - [x] grapple — the grapple rope — 0.0.15
-- [x] escrow — contracts with escrow — 0.0.37
+- [x] escrow — contracts with escrow — 0.0.37; generalized 0.0.80
 - [x] wells — carries the field and predictors the frozen-time-aiming box needs — 0.0.38; generalized 0.0.79
 - [x] determinism — the determinism kit — 0.0.59
 - [x] contract — the contract pattern — 0.0.60
