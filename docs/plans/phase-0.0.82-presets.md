@@ -1,6 +1,6 @@
 # Phase 0.0.82 — presets: the labeled cheats
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `07b657c`, 2026-09-08. Gate: 7 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "Labeled-cheat presets: every relaxed rule named, with its measured consequence". Source: the mech demo, read-only, lines 1664 to 1693 (the six presets and applyPreset) and 1722 to 1731 (the fallbacks). The module carries the six presets as data and the function that applies one to an assembled rig.
