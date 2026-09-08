@@ -1,4 +1,13 @@
 // physics.mjs — XPBD substepped rigid body core (SI units: m, kg, s, N, N.m)
+//
+// Second pass, the general parts order, phase A12. Substitutions, and only
+// these:
+// 1. GroundContacts reads groundY, default 0; collect's margin test and
+//    solve's depth read it in place of the ground plane fixed at 0.
+// 2. World reads groundY, default 0, and builds its GroundContacts with it.
+// 3. makeWorld(opts) added, returning new World(opts).
+// 4. BODY_CONTRACT added, naming the body's shape; checkBody(o) added,
+//    returning every problem in one pass.
 
 /* ---------------- vec3 ---------------- */
 const V = (x = 0, y = 0, z = 0) => ({ x, y, z });
@@ -399,6 +408,7 @@ class GroundContacts {
     this.mu = o.mu ?? 0.9;
     this.restitution = o.restitution ?? 0;
     this.compliance = o.compliance ?? 0;
+    this.groundY = o.groundY ?? 0;
     this.active = [];
   }
   /* Collected once per SUBSTEP with a speculative margin that scales with how far the
@@ -413,7 +423,7 @@ class GroundContacts {
       for (let i = 0; i < 8; i++) {
         const lp = V((i & 1 ? hx : -hx), (i & 2 ? hy : -hy), (i & 4 ? hz : -hz));
         const wp = b.toWorld(lp);
-        if (wp.y < margin) this.active.push({ b, lp, lambda: 0, lambdaT: 0 });
+        if (wp.y < this.groundY + margin) this.active.push({ b, lp, lambda: 0, lambdaT: 0 });
       }
     }
   }
@@ -421,7 +431,7 @@ class GroundContacts {
     for (const c of this.active) {
       const b = c.b;
       const wp = b.toWorld(c.lp);
-      const depth = -wp.y;
+      const depth = this.groundY - wp.y;
       if (depth <= 0) { c.lambda = 0; continue; }
       const r = qrot(b.q, c.lp);
       const n = V(0, 1, 0);
@@ -525,7 +535,8 @@ class World {
     this.joints = [];
     this.welds = [];
     this.pairs = [];
-    this.contacts = new GroundContacts(o.contact || {});
+    this.groundY = o.groundY ?? 0;
+    this.contacts = new GroundContacts({ ...(o.contact || {}), groundY: this.groundY });
     this.substeps = o.substeps ?? 20;
     this.iterations = o.iterations ?? 1;
     this.time = 0;
@@ -599,6 +610,18 @@ class World {
   }
 }
 
+function makeWorld(opts) { return new World(opts); }
+
+// The body's shape as data, and the check that counts every problem in one pass.
+const BODY_CONTRACT = { mass: "number > 0 unless kinematic", inertia: "9 finite numbers, optional", pos: "vector, optional", quat: "quaternion, optional" };
+function checkBody(o) {
+  const problems = [];
+  if (typeof o !== "object" || o === null) { problems.push("body: not an object"); return problems; }
+  if (!o.kinematic && !(typeof o.mass === "number" && o.mass > 0)) problems.push("body.mass: number > 0 required");
+  if (o.inertia !== undefined && !(Array.isArray(o.inertia) && o.inertia.length === 9 && o.inertia.every((v) => typeof v === "number" && Number.isFinite(v)))) problems.push("body.inertia: 9 finite numbers required");
+  return problems;
+}
+
 function integrate(b, h, g) {
   if (b.invMass === 0) { b.xp = b.x; b.qp = b.q; return; }
   b.v = vadd(b.v, vmul(vadd(g, vmul(b.fExt, b.invMass)), h));
@@ -642,4 +665,5 @@ export {
   Body, genInvMass, angInvMass, applyInvI, rotateBy,
   solvePositional, solveAngular, orientationError, structuralUtil, NO_LIMIT,
   Weld, Hinge, GroundContacts, PairCollision, World, integrate, updateVel,
+  makeWorld, BODY_CONTRACT, checkBody,
 };

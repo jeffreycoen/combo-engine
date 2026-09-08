@@ -134,7 +134,7 @@ Serving checklist items:
 - [x] ledger — the conservation ledger — 0.0.4
 - [x] weldstress — weld stress — 0.0.5; generalized 0.0.86
 - [x] tape — the input tape — 0.0.6
-- [x] physics-pb — the position-based physics core — 0.0.7
+- [x] physics-pb — the position-based physics core — 0.0.7; generalized 0.0.95
 - [x] rig — the rig table — 0.0.8
 - [x] solids — plane-set solids — 0.0.9; generalized 0.0.76
 - [x] ballistics — the ballistics solver — 0.0.10; generalized 0.0.83
