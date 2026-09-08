@@ -1,6 +1,6 @@
 # Phase 0.0.83 — ballistics: the tables handed in
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `df2308c`, 2026-09-08. Gate: 20 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 20 PASS / 0 FAIL; bracket unmoved. -->
 
 The second pass over the ballistics module under the general parts order, phase A3. The material table, the round table, the pool size, the event cap, the tick rate, and the hit record move from fixed numbers to options, each defaulting to the demo's own table or constant. A round can be fired by its name or its number. Two new checks count every broken field in a material table or a round table in one pass. The flight, ricochet, perforation, and embed arithmetic does not move.
