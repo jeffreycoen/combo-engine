@@ -11,6 +11,23 @@ import { V, vadd, vsub, vmul, vnorm, vcross, Q, qmul, qrot, qAxisAngle,
 //
 // Every link is a box: blocky by design, physics first. The visual mesh will later
 // hang off these proxies without touching the solver.
+//
+// Second pass, the general parts order, phase A13. Substitutions, and only
+// these:
+//   1. The limb chain becomes data: MECH_SPEC gains limbChain, the seven
+//      per-side rows verbatim, in order, with jpSide marking the two rows
+//      (upperArm, hipYoke) whose jp flips z with the side.
+//   2. sideChain(s, side, spec = MECH_SPEC) builds its rows from
+//      spec.limbChain: name is row.name + side, parent is row.parent + side
+//      when the parent names a row in the chain, else the parent as
+//      written; jp is a copy times s on z when jpSide, else a copy; every
+//      other field is copied.
+//   3. buildLinkTable(spec = MECH_SPEC) calls sideChain(s, side, spec).
+//   4. assembleMech names its links through options: opts.footLinks,
+//      opts.hipLinks, opts.pairs, each defaulted to the demo's own names.
+//      opts.footClearance keeps its meaning through the pairs default.
+//   5. RIG_SPEC_CONTRACT names the spec's shape; checkRigSpec(spec) returns
+//      every problem in one pass, empty when clean.
 
 
 const D = Math.PI / 180;
@@ -35,48 +52,68 @@ const MECH_SPEC = {
   limbs: [
     { side: 'L', s: +1 }, { side: 'R', s: -1 },
   ],
-};
-
-/* Per-side chain: parent -> child with joint spec. Lateral offsets are multiplied by s. */
-function sideChain(s, side) {
-  const S = (v) => [v[0], v[1], v[2] * s];
-  return [
-    { name: `upperArm${side}`, parent: 'torso', mass: 350, dim: [0.42, 0.95, 0.42],
-      type: 'hinge', axis: [0, 0, 1], angle0: 4 * D, jp: S([0, 0.12, 1.025]), jc: [0, 0.475, 0],
+  // Per-side chain, base names (no side letter): parent -> child with joint
+  // spec. jpSide marks the two rows whose jp the demo passes through S(),
+  // the lateral flip by s. Verbatim numbers, sideChain's own seven rows, in
+  // order.
+  limbChain: [
+    { name: 'upperArm', parent: 'torso', mass: 350, dim: [0.42, 0.95, 0.42],
+      type: 'hinge', axis: [0, 0, 1], angle0: 4 * D, jp: [0, 0.12, 1.025], jc: [0, 0.475, 0],
       tauMax: 12e3, range: [-150 * D, 60 * D],
-      lim: { tension: 220e3, shear: 180e3, bend: 95e3, torsion: 25e3 } },
-    { name: `foreArm${side}`, parent: `upperArm${side}`, mass: 200, dim: [0.36, 0.80, 0.36],
+      lim: { tension: 220e3, shear: 180e3, bend: 95e3, torsion: 25e3 }, jpSide: true },
+    { name: 'foreArm', parent: 'upperArm', mass: 200, dim: [0.36, 0.80, 0.36],
       type: 'hinge', axis: [0, 0, 1], angle0: -8 * D, jp: [0, -0.475, 0], jc: [0, 0.40, 0],
       tauMax: 6e3, range: [-140 * D, 0],
       lim: { tension: 180e3, shear: 150e3, bend: 70e3, torsion: 15e3 } },
 
-    { name: `hipYoke${side}`, parent: 'pelvis', mass: 120, dim: [0.40, 0.34, 0.40],
-      type: 'hinge', axis: [1, 0, 0], angle0: 0, jp: S([0, -0.31, 0.60]), jc: [0, 0, 0],
+    { name: 'hipYoke', parent: 'pelvis', mass: 120, dim: [0.40, 0.34, 0.40],
+      type: 'hinge', axis: [1, 0, 0], angle0: 0, jp: [0, -0.31, 0.60], jc: [0, 0, 0],
       tauMax: 70e3, range: [-35 * D, 35 * D],
-      lim: { tension: 420e3, shear: 340e3, bend: 210e3, torsion: 95e3 } },
-    { name: `thigh${side}`, parent: `hipYoke${side}`, mass: 450, dim: [0.50, 1.50, 0.50],
+      lim: { tension: 420e3, shear: 340e3, bend: 210e3, torsion: 95e3 }, jpSide: true },
+    { name: 'thigh', parent: 'hipYoke', mass: 450, dim: [0.50, 1.50, 0.50],
       type: 'hinge', axis: [0, 0, 1], angle0: -9 * D, jp: [0, 0, 0], jc: [0, 0.75, 0],
       tauMax: 95e3, range: [-45 * D, 110 * D],
       lim: { tension: 420e3, shear: 340e3, bend: 210e3, torsion: 130e3 } },
-    { name: `shin${side}`, parent: `thigh${side}`, mass: 300, dim: [0.42, 1.45, 0.42],
+    { name: 'shin', parent: 'thigh', mass: 300, dim: [0.42, 1.45, 0.42],
       type: 'hinge', axis: [0, 0, 1], angle0: 18 * D, jp: [0, -0.75, 0], jc: [0, 0.725, 0],
       tauMax: 95e3, range: [0, 130 * D],
       lim: { tension: 380e3, shear: 300e3, bend: 180e3, torsion: 130e3 } },
-    { name: `ankleYoke${side}`, parent: `shin${side}`, mass: 90, dim: [0.34, 0.30, 0.34],
+    { name: 'ankleYoke', parent: 'shin', mass: 90, dim: [0.34, 0.30, 0.34],
       type: 'hinge', axis: [0, 0, 1], angle0: -9 * D, jp: [0, -0.725, 0], jc: [0, 0, 0],
       tauMax: 40e3, range: [-40 * D, 30 * D],
       lim: { tension: 350e3, shear: 280e3, bend: 150e3, torsion: 55e3 } },
-    { name: `foot${side}`, parent: `ankleYoke${side}`, mass: 400, dim: [0.95, 0.30, 1.10],
+    { name: 'foot', parent: 'ankleYoke', mass: 400, dim: [0.95, 0.30, 1.10],
       type: 'hinge', axis: [1, 0, 0], angle0: 0, jp: [0, 0, 0], jc: [-0.10, 0.15, 0],
       tauMax: 28e3, range: [-25 * D, 25 * D],
       lim: { tension: 350e3, shear: 280e3, bend: 150e3, torsion: 40e3 } },
-  ];
+  ],
+};
+
+/* Per-side chain: parent -> child with joint spec. Lateral offsets are multiplied by s.
+   Built from spec.limbChain; jpSide rows have jp's z flip with the side. */
+function sideChain(s, side, spec = MECH_SPEC) {
+  const S = (v) => [v[0], v[1], v[2] * s];
+  const names = new Set(spec.limbChain.map((row) => row.name));
+  return spec.limbChain.map((row) => ({
+    name: row.name + side,
+    parent: names.has(row.parent) ? row.parent + side : row.parent,
+    mass: row.mass,
+    dim: [...row.dim],
+    type: row.type,
+    axis: [...row.axis],
+    angle0: row.angle0,
+    jp: row.jpSide ? S(row.jp) : [...row.jp],
+    jc: [...row.jc],
+    tauMax: row.tauMax,
+    range: [...row.range],
+    lim: { ...row.lim },
+  }));
 }
 
 function buildLinkTable(spec = MECH_SPEC) {
   const table = {};
   for (const [name, L] of Object.entries(spec.links)) table[name] = { name, ...L };
-  for (const { side, s } of spec.limbs) for (const L of sideChain(s, side)) table[L.name] = L;
+  for (const { side, s } of spec.limbs) for (const L of sideChain(s, side, spec)) table[L.name] = L;
   return table;
 }
 
@@ -92,9 +129,12 @@ function perpTo(axis) {
 function assembleMech(world, opts = {}) {
   const spec = opts.spec || MECH_SPEC;
   const table = buildLinkTable(spec);
+  const footLinks = opts.footLinks || ['footL', 'footR'];
+  const hipLinks = opts.hipLinks || ['hipYokeL', 'hipYokeR'];
+  const pairs = opts.pairs || [['footL', 'footR', opts.footClearance ?? 0.04], ['shinL', 'shinR', 0.02]];
   // geometry overrides for design sweeps
-  if (opts.footWidth) for (const s of ['L', 'R']) table[`foot${s}`].dim[2] = opts.footWidth;
-  if (opts.hipOffset) for (const s of ['L', 'R']) table[`hipYoke${s}`].jp[2] = Math.sign(table[`hipYoke${s}`].jp[2]) * opts.hipOffset;
+  if (opts.footWidth) for (const name of footLinks) table[name].dim[2] = opts.footWidth;
+  if (opts.hipOffset) for (const name of hipLinks) table[name].jp[2] = Math.sign(table[name].jp[2]) * opts.hipOffset;
   const bodies = {}, joints = {}, welds = {};
 
   const mk = (L, pos, quat) => {
@@ -156,8 +196,7 @@ function assembleMech(world, opts = {}) {
 
   // Feet (and shins) must not pass through each other. Nothing else in the solver
   // prevents it, and the walk drifts inward far enough to need it.
-  world.addPair(new PairCollision({ a: bodies.footL, b: bodies.footR, margin: opts.footClearance ?? 0.04 }));
-  world.addPair(new PairCollision({ a: bodies.shinL, b: bodies.shinR, margin: 0.02 }));
+  for (const [a, b, margin] of pairs) world.addPair(new PairCollision({ a: bodies[a], b: bodies[b], margin }));
 
   return { bodies, joints, welds, table, spec };
 }
@@ -207,6 +246,42 @@ function rigStats(rig) {
     }
   }
   return { mass: M, com: vmul(c, 1 / M), height: top - bottom, top, bottom };
+}
+
+// RIG_SPEC_CONTRACT: the rig spec's shape, plain field descriptions.
+export const RIG_SPEC_CONTRACT = {
+  root: 'names an existing link',
+  links: 'object of link rows: mass number > 0, dim 3 numbers, parent (when present) an existing link',
+  limbs: 'array',
+  limbChain: 'array of chain rows: name string, parent string, mass number > 0, dim 3 numbers, type hinge or weld, jp 3 numbers, jc 3 numbers',
+};
+
+// checkRigSpec(spec): every problem with a rig spec, in one pass, empty when clean.
+export function checkRigSpec(spec) {
+  if (typeof spec !== 'object' || spec === null) return ['rigSpec: not an object'];
+  const problems = [];
+  const linksOk = typeof spec.links === 'object' && spec.links !== null;
+  const linkNames = linksOk ? Object.keys(spec.links) : [];
+  if (!(typeof spec.root === 'string' && linkNames.includes(spec.root))) problems.push('rigSpec.root: names an existing link required');
+  if (!linksOk) problems.push('rigSpec.links: object required');
+  else for (const name of linkNames) {
+    const L = spec.links[name];
+    if (!(typeof L.mass === 'number' && L.mass > 0)) problems.push(`rigSpec.links.${name}.mass: number > 0 required`);
+    if (!(Array.isArray(L.dim) && L.dim.length === 3 && L.dim.every((n) => typeof n === 'number'))) problems.push(`rigSpec.links.${name}.dim: 3 numbers required`);
+    if ('parent' in L && !linkNames.includes(L.parent)) problems.push(`rigSpec.links.${name}.parent: an existing link required`);
+  }
+  if (!Array.isArray(spec.limbs)) problems.push('rigSpec.limbs: array required');
+  if (!Array.isArray(spec.limbChain)) problems.push('rigSpec.limbChain: array required');
+  else spec.limbChain.forEach((row, i) => {
+    if (typeof row.name !== 'string') problems.push(`rigSpec.limbChain.${i}.name: string required`);
+    if (typeof row.parent !== 'string') problems.push(`rigSpec.limbChain.${i}.parent: string required`);
+    if (!(typeof row.mass === 'number' && row.mass > 0)) problems.push(`rigSpec.limbChain.${i}.mass: number > 0 required`);
+    if (!(Array.isArray(row.dim) && row.dim.length === 3 && row.dim.every((n) => typeof n === 'number'))) problems.push(`rigSpec.limbChain.${i}.dim: 3 numbers required`);
+    if (!(row.type === 'hinge' || row.type === 'weld')) problems.push(`rigSpec.limbChain.${i}.type: hinge or weld required`);
+    if (!(Array.isArray(row.jp) && row.jp.length === 3 && row.jp.every((n) => typeof n === 'number'))) problems.push(`rigSpec.limbChain.${i}.jp: 3 numbers required`);
+    if (!(Array.isArray(row.jc) && row.jc.length === 3 && row.jc.every((n) => typeof n === 'number'))) problems.push(`rigSpec.limbChain.${i}.jc: 3 numbers required`);
+  });
+  return problems;
 }
 
 // COMBO-ENGINE export block — see the import note above.
