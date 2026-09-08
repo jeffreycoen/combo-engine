@@ -316,7 +316,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.87 opponent
 - [x] 0.0.88 senses
 - [x] 0.0.89 aim
-- [ ] 0.0.90 disc
+- [x] 0.0.90 disc
 - [ ] 0.0.91 voxel
 - [ ] 0.0.92 greybox
 - [ ] 0.0.93 cues

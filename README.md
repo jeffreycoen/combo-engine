@@ -92,7 +92,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 ### From the fleet demo
 
 - [x] The fleet order model: select, move, attack, guard — orders as data on units
-- [ ] The 3-D movement disc: order movement in three dimensions with a flat pointer
+- [x] The 3-D movement disc: order movement in three dimensions with a flat pointer
 - [x] Steering behaviors: acceleration, capped turning, banking, strafe and guard orbits
 - [ ] The selection and feedback layer: brackets, health ramps, order lines, formation links
 - [ ] The touch command grammar: the right mouse button, solved for a phone
@@ -162,6 +162,7 @@ Serving checklist items:
 - [x] render2d — the 2-D canvas renderer, with the gravity-warped grid — 0.0.74
 - [x] legik — leg inverse kinematics — 0.0.77
 - [x] presets — labeled-cheat presets, every relaxed rule named with its measured consequence — 0.0.82
+- [x] disc — the 3-D movement disc: order movement in three dimensions with a flat pointer — 0.0.90
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
