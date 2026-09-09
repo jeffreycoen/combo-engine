@@ -1,9 +1,10 @@
 // GRAVITY'S ARK — ground.js: the ground's screen, phase 0.1.1. Coldsnap's
 // drawing on its own canvas, its sound, the camera, the taps, the pane, the
-// buttons. The main file takes only the hookup lines.
+// buttons; the hull crashes onto the ground at entry. The main file takes only
+// the hookup lines.
 import { makeRenderer, makeGameAudio } from "../../src/depot/api.js";
 import { TOWER_SPECS } from "../../src/depot/specs.js";
-import { makeGround, order, tick, summary, price, GUNS } from "../../src/games/gravitys-ark/ground.js";
+import { makeGround, crashHull, order, tick, summary, price, GUNS } from "../../src/games/gravitys-ark/ground.js";
 import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -27,8 +28,10 @@ export function makeGroundScreen(ids, hooks) {
     return { x: px + f.x * t, z: pz + f.z * t };
   }
 
-  function enter(seed, w, scrapKg) {
+  function enter(seed, w, scrapKg, hull, v) {
     G = makeGround(seed, w, scrapKg);
+    const H = crashHull(G, hull, v);
+    say("the hull is down: " + H.bodies.length + " modules, " + H.loose.length + " loose");
     gv.style.display = "block";
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
     A = makeGameAudio(); A.setMuted(muted);
@@ -52,14 +55,14 @@ export function makeGroundScreen(ids, hooks) {
     const s = summary(G);
     return ["THE GROUND  t " + fmt(s.t, 1) + " s   assault " + s.bell + "   next in " + fmt(s.bellIn, 0) + " s",
       "scrap " + fmt(s.scrap) + " (" + fmt(s.scrapKg) + " kg)   guns " + s.guns + "   enemy afield " + s.foes,
-      "the hull stands " + fmt(s.standing * 100, 0) + "%" + (s.lost ? "   THE HULL IS LOST" : ""),
+      "modules " + (s.modules ? s.modules.alive + " of " + s.modules.total + " standing, " + s.modules.loose + " loose" : "none") + "   the hull stands " + fmt(s.standing * 100, 0) + "%" + (s.lost ? "   THE BRIDGE IS LOST" : ""),
       "tap the ground to place a " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap; two fingers turn and zoom"].join("\n");
   }
   function buttons() {
     if (!G) return;
     $(ids.kind).textContent = TOWER_SPECS[kind()].label + " " + fmt(price(G, kind()));
     $(ids.sound).textContent = muted ? "SOUND OFF" : "SOUND ON";
-    $(ids.takeoff).disabled = !!G.run.gameOver;
+    $(ids.takeoff).disabled = summary(G).lost;
   }
   $(ids.kind).onclick = () => { gunI = (gunI + 1) % GUNS.length; buttons(); };
   $(ids.sound).onclick = () => { muted = !muted; if (A) { A.ensure(); A.setMuted(muted); } buttons(); };
@@ -69,7 +72,7 @@ export function makeGroundScreen(ids, hooks) {
     twist: (a) => { if (R) R.rotateBy(a); },
   });
   addEventListener("keydown", (e) => { if (!R) return; if (e.key === "1") R.rotateBy(0.35); if (e.key === "3") R.rotateBy(-0.35); });
-  return { enter, leave, step, draw, pane, buttons, active: () => !!G,
+  return { enter, leave, step, draw, pane, buttons, active: () => !!G, lost: () => !!(G && summary(G).lost),
     zoomIn: () => { if (R) { zoom = Math.min(2.6, zoom * 1.25); R.setZoom(zoom); } },
     zoomOut: () => { if (R) { zoom = Math.max(0.5, zoom / 1.25); R.setZoom(zoom); } },
     takeoff: () => (G ? order(G, "takeoff") : { ok: false, reason: "not on the ground" }) };

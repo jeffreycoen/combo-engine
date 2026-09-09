@@ -18,7 +18,7 @@ import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFi
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
 import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS } from "../src/games/gravitys-ark/ground.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -1092,6 +1092,32 @@ const ticks = (H, n) => { const evs = []; for (let i = 0; i < n; i++) evs.push(.
   const up = groundOrder(A, "takeoff");
   check("ark: the hold's scrap is the purse, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms",
     purse0 === Math.floor(kg / GROUND_DIALS.kgPerScrap) && purse1 > purse0 && !!placed && placed.cost > 0 && Math.abs(A.run.resources - (purse1 - placed.cost)) < 1e-9 && guns === 1 && up.ok && up.scrapKg === A.run.resources * GROUND_DIALS.kgPerScrap);
+}
+
+{ // 40. ark: the crash puts the hull on the ground as bodies welded by the weld-stress rule at a rolled speed, and twin crashes agree
+  // 41. ark: TAKE OFF is refused while a module is loose, allowed once every loose module is welded back, and the dead are lost
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0], v = rng() * 30;
+  const mk = (speed) => { const G = makeGround(gSeed, w, 900); const H = crashHull(G, makeHull(STARTER_HULL), speed); return { G, H }; };
+  const A = mk(v), B = mk(v);
+  const hull = makeHull(STARTER_HULL), ws = hull.builder.weldsOf(hull.list);
+  const broken = new Set(breaking(weldLoads(hull.builder, MODULES, hull.list, ws, v / HULL_DIALS.crashStop, 1), ws));
+  const keep = hull.builder.connectedFrom(hull.list, ws.filter((x, k) => !broken.has(k)), 0);
+  const expectLoose = hull.list.map((m, i) => i).filter((i) => !keep.has(i));
+  const expectWelds = ws.filter((x, k) => !broken.has(k) && keep.has(x.a) && keep.has(x.b)).length;
+  const pos = (X) => JSON.stringify(X.H.bodies.map((b) => [b.pos.x, b.pos.y, b.pos.z, b.mass, b.alive]));
+  check("ark: the crash puts the hull on the ground as bodies welded by the weld-stress rule at a rolled speed, and twin crashes agree",
+    A.H.bodies.length === STARTER_HULL.length && A.H.bodies.every((b) => b.kind === "chunk" && b.alive && b.team === 1) && JSON.stringify(A.H.loose) === JSON.stringify(expectLoose) && A.H.welds.length === expectWelds && pos(A) === pos(B));
+  const C = mk(30);   // at 30 m/s the engine's weld breaks by the rule: 1400 kg at 100 m/s/s beats 120000 N
+  const refused = groundOrder(C.G, "takeoff");
+  for (const i of looseModules(C.G)) weldBack(C.G, i);
+  const allowed = groundOrder(C.G, "takeoff");
+  C.H.bodies[3].alive = false; C.H.bodies[3].hp = 0;
+  const lostPod = groundOrder(C.G, "takeoff");
+  C.H.bodies[0].alive = false; C.H.bodies[0].hp = 0;
+  const abandoned = groundOrder(C.G, "takeoff");
+  check("ark: TAKE OFF is refused while a module is loose, allowed once every loose module is welded back, and the dead are lost",
+    C.H.loose.length === 1 && C.H.loose[0] === 1 && !refused.ok && refused.loose.length === 1 && allowed.ok && allowed.lost.length === 0 && allowed.keptList.length === 4
+    && lostPod.ok && lostPod.lost.length === 1 && lostPod.lost[0] === "pod" && lostPod.keptList.length === 3 && !abandoned.ok && abandoned.abandoned === true);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
