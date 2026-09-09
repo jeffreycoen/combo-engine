@@ -1,6 +1,6 @@
 # Phase 0.0.101 — render3d, second half: the draw
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 19 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `22785ba`, 2026-09-08. Gate: 19 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 19 PASS / 0 FAIL; bracket unmoved. -->
 
 The second of two phases for the checklist box "The 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris"; the box flips here. Source: the shooting-range demo, read-only, the lines the task names. This half draws the law half's meshes and matrices to a handed WebGL context, one call per frame; the page keeps the canvas, the clock, and the frame scheduling.
