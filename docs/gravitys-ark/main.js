@@ -13,6 +13,9 @@ import { simStream } from "../../src/modules/determinism/determinism.js";
 import { MODULES } from "../../src/games/gravitys-ark/stations.js";
 import { WRECK_DIALS, ROPE, shell, shellOnHull, shedToWrecks, makeField, stepWrecks, makeGrappler, cast, stepGrappler, take } from "../../src/games/gravitys-ark/wrecks.js";
 import { PRICE_DIALS, makePirates, stepPirates, pay, cargoValue, hireOut, herReturns } from "../../src/games/gravitys-ark/price.js";
+import { listingsFor } from "../../src/games/gravitys-ark/price.js";
+import { makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as passGate, respawn, GATE_DIALS } from "../../src/games/gravitys-ark/gate.js";
+import { makeLog, logFromJSON, buildCard, ARK_LINES } from "../../src/games/gravitys-ark/card.js";
 
 const q = new URLSearchParams(location.search);
 const seed = q.has("seed") ? (parseInt(q.get("seed"), 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
@@ -36,6 +39,15 @@ function onCollapse() {
   if (r.shed.length) { wrecks.push(...shedToWrecks(r.shed, ship, fieldRng)); state.events.push({ k: "shell shed " + r.shed.map((m) => m.t).join(" "), t: state.t }); }
   wrecks.push(...makeField(star, fieldRng, WRECK_DIALS));
 }
+// phase 0.0.109's page step: the gate, the Fitters, the endings, the respawn, the log, the card
+const gs = makeGate(galaxy); let ending = null, seenEvents = 0;
+const LOG_KEY = "gravitys-ark-log-" + seed;
+let log = makeLog(); try { const saved = localStorage.getItem(LOG_KEY); if (saved) log = logFromJSON(saved); } catch (e) { /* no storage: the log lives for the session */ }
+function logAdd(type, data) { log.add(type, state.t, data); try { localStorage.setItem(LOG_KEY, log.toJSON()); } catch (e) { /* no storage */ } }
+const ROAD_TYPES = { land: "land", crash: "crash", takeoff: "takeoff", collapse: "collapse", swallow: "swallow", fell: "fell", death: "death" };
+function logRoadEvents() { for (; seenEvents < state.events.length; seenEvents++) { const e = state.events[seenEvents]; const type = ROAD_TYPES[e.k]; if (type) logAdd(type, { i: e.i, id: e.i !== undefined ? galaxy.worlds[e.i].id : undefined, v: e.v }); } }
+const PAGE_LINES = { ...ARK_LINES, land: (e) => `landed on ${e.id} at ${Math.round(e.v)} m/s`, crash: (e) => `crashed on ${e.id} at ${Math.round(e.v)} m/s`, takeoff: (e) => `took off from ${e.id}`, swallow: (e) => `the hole took ${e.id}` };
+function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, crew, end); $("cardBody").textContent = [c.ending.toUpperCase(), "", "hull: " + c.manifest.hull.join(" "), "hands: " + (c.manifest.hands.join(", ") || "none"), "scrap " + fmt(c.manifest.scrap) + " kg, spares " + (c.manifest.spares.join(" ") || "none") + ", people " + c.manifest.people, "the hole ate: " + (c.eaten.join(" ") || "nothing"), "", "the galaxy named you " + c.name, "", ...log.lines(PAGE_LINES).slice(-12)].join("\n"); $("card").style.display = "block"; }
 function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
 function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }
 function stationHere() { return ship.landed !== null ? galaxy.worlds[ship.landed].id : null; }
@@ -143,12 +155,12 @@ function hud() {
   $("land").disabled = ship.landed !== null || !ship.alive; $("takeoff").disabled = ship.landed === null || !ship.alive; $("burn").disabled = ship.landed !== null || !ship.alive;
   $("castB").disabled = ship.landed !== null || !!gr.g || !ship.alive; $("payB").disabled = !lockedPirate(); $("hireOut").disabled = ship.landed === null || !!her.away || her.taken;
   $("burn").classList.toggle("on", burning); $("aim").textContent = aimMode === "gate" ? "AIM: GATE" : "AIM: DRAG"; $("pause").classList.toggle("on", paused);
-  if (!ship.alive && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. The card of the crossing lands in a later phase."; $("card").style.display = "block"; }
+  if (!ship.alive && !ending && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. WAKE at a station still ahead of the edge, in a starter hull with " + GATE_DIALS.mercyFuel + " kg of fuel, in debt."; $("wake").style.display = "inline-block"; $("card").style.display = "block"; }
 }
 let collapseT = 0;
 
 // the controls: buttons for the phone, keys for the desktop, a drag for the aim
-$("land").onclick = () => { const r = road.land(); if (r.ok) { if (r.crash) state.events.push({ k: "crash-load " + fmt(r.load, 1), t: state.t }); const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); } };
+$("land").onclick = () => { const r = road.land(); if (r.ok) { if (r.crash) state.events.push({ k: "crash-load " + fmt(r.load, 1), t: state.t }); const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); } };
 $("takeoff").onclick = () => { const r = road.takeoff(); if (r.ok && r.collapse) collapseT = state.t; };
 $("burn").onpointerdown = (e) => { burning = true; e.preventDefault(); };
 addEventListener("pointerup", () => { burning = false; });
@@ -178,9 +190,11 @@ function frame(now) {
       if (state.hole.born && !collapsed) onCollapse();
       stepWrecks(wrecks, road.wells(), DT);
       const got = stepGrappler(gr, ship, ship.dry + ship.fuel, road.wells(), DT, WRECK_DIALS); if (got && got.taken) { const kind = take(hull, purse, got.taken); state.events.push({ k: "took " + kind + " " + fmt(got.taken.mass) + " kg", t: state.t }); }
-      for (const ev of stepPirates(P, ship, ringOf(), cargoValue(hull, 2), DT)) { if (ev.k === "lock") state.events.push({ k: "LOCK: they want " + ev.demand.takes + " (¢" + fmt(ev.demand.demand) + ")", t: state.t }); if (ev.k === "shot") { hullHp -= ev.damage; state.events.push({ k: "hit for " + ev.damage, t: state.t }); if (hullHp <= 0 && ship.alive) { ship.alive = false; state.events.push({ k: "death", t: state.t, v: 0 }); } } if (ev.k === "outrun") state.events.push({ k: "outran the lock", t: state.t }); }
-      const pay0 = herReturns(S.stations, her, purse, state.t, S.book.dials); if (pay0) state.events.push({ k: "she is back, paid " + fmt(pay0), t: state.t }); } acc -= DT; }
-  draw(); hud(); dockPane();
+      for (const ev of stepPirates(P, ship, ringOf(), cargoValue(hull, 2), DT)) { if (ev.k === "lock") { state.events.push({ k: "LOCK: they want " + ev.demand.takes + " (¢" + fmt(ev.demand.demand) + ")", t: state.t }); logAdd("lock", { takes: ev.demand.takes }); } if (ev.k === "shot") { hullHp -= ev.damage; state.events.push({ k: "hit for " + ev.damage, t: state.t }); logAdd("shot", { damage: ev.damage }); if (hullHp <= 0 && ship.alive) { ship.alive = false; state.events.push({ k: "death", t: state.t, v: 0 }); } } if (ev.k === "outrun") state.events.push({ k: "outran the lock", t: state.t }); }
+      const pay0 = herReturns(S.stations, her, purse, state.t, S.book.dials); if (pay0) { state.events.push({ k: "she is back, paid " + fmt(pay0), t: state.t }); logAdd("hireout", { pay: pay0 }); }
+      if (!gs.fixed && atGate(ship, galaxy, gs.dials)) { const was = gs.work; fixGate(gs, hull, her, DT); if (gs.fixed) { state.events.push({ k: "she fixed the gate", t: state.t }); logAdd("fix", {}); } else if (was === gs.work && ship.landed === null) { /* she is away or taken: the bill does not move */ } }
+      logRoadEvents(); } acc -= DT; }
+  draw(); hud(); dockPane(); gatePane();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -202,10 +216,10 @@ function dockPane() {
   $("buyFuel").disabled = ship.fuel >= cap; $("hireHand").disabled = st.parts.people.q <= 1; $("takePeople").disabled = st.parts.people.q <= 1;
   $("deliver").disabled = !(ct && hull.cargo.people >= ct.n); $("sellScrap").disabled = hull.scrap <= 0;
 }
-$("buyFuel").onclick = () => { const sid = stationHere(); if (!sid) return; const n = Math.min(500, Math.max(0, Math.floor(derive(hull).fuelCap - ship.fuel))); const cost = n > 0 ? buy(S, sid, "fuel", n, purse) : null; if (cost !== null) { ship.fuel += n; state.events.push({ k: "fuel +" + n + " kg for " + fmt(cost), t: state.t }); } };
-$("buyScrap").onclick = () => { const sid = stationHere(); if (!sid) return; const cost = buy(S, sid, "scrap", 500, purse); if (cost !== null) { hull.scrap += 500; state.events.push({ k: "scrap +500 kg for " + fmt(cost), t: state.t }); } };
-$("sellScrap").onclick = () => { const sid = stationHere(); if (!sid || hull.scrap <= 0) return; const n = Math.floor(hull.scrap); const out = sell(S, sid, "scrap", n, purse); if (out !== null) { hull.scrap -= n; state.events.push({ k: "sold " + n + " kg scrap for " + fmt(out), t: state.t }); } };
-$("hireHand").onclick = () => { const sid = stationHere(); if (!sid) return; const h = hire(S, sid, purse, nameRng, state.t); if (h) { crew.push(h); state.events.push({ k: "hired " + h.name, t: state.t }); } };
+$("buyFuel").onclick = () => { const sid = stationHere(); if (!sid) return; const n = Math.min(500, Math.max(0, Math.floor(derive(hull).fuelCap - ship.fuel))); const cost = n > 0 ? buy(S, sid, "fuel", n, purse) : null; if (cost !== null) { ship.fuel += n; state.events.push({ k: "fuel +" + n + " kg for " + fmt(cost), t: state.t }); logAdd("buy", { n, part: "fuel", cost }); } };
+$("buyScrap").onclick = () => { const sid = stationHere(); if (!sid) return; const cost = buy(S, sid, "scrap", 500, purse); if (cost !== null) { hull.scrap += 500; state.events.push({ k: "scrap +500 kg for " + fmt(cost), t: state.t }); logAdd("buy", { n: 500, part: "scrap", cost }); } };
+$("sellScrap").onclick = () => { const sid = stationHere(); if (!sid || hull.scrap <= 0) return; const n = Math.floor(hull.scrap); const out = sell(S, sid, "scrap", n, purse); if (out !== null) { hull.scrap -= n; state.events.push({ k: "sold " + n + " kg scrap for " + fmt(out), t: state.t }); logAdd("sell", { n, part: "scrap", out }); } };
+$("hireHand").onclick = () => { const sid = stationHere(); if (!sid) return; const h = hire(S, sid, purse, nameRng, state.t); if (h) { crew.push(h); state.events.push({ k: "hired " + h.name, t: state.t }); logAdd("hire", { name: h.name }); } };
 $("takePeople").onclick = () => { const sid = stationHere(); if (!sid) return; const cost = carryPeople(S, sid, hull, purse, 1); if (cost !== null) state.events.push({ k: "took 1 person aboard for " + fmt(cost), t: state.t }); };
 $("deliver").onclick = () => { const sid = stationHere(); if (!sid) return; const ct = openContractHere(sid); if (!ct) return; const pay = deliverPeople(S, ct, hull, purse); if (pay) state.events.push({ k: "delivered people for " + fmt(pay), t: state.t }); };
 
@@ -220,5 +234,27 @@ function drawWrecks() {
   void z;
 }
 $("castB").onclick = () => { if (ship.landed !== null || gr.g) return; const w = nearestWreck(); if (!w) { state.events.push({ k: "no wreck within " + ROPE.RANGE + " m", t: state.t }); return; } cast(gr, ship, ship.dry + ship.fuel, w, WRECK_DIALS); state.events.push({ k: "cast at " + w.kind, t: state.t }); };
-$("payB").onclick = () => { const p = lockedPirate(); if (!p) return; const takes = pay(P, p, hull, her); state.events.push({ k: "paid with " + takes, t: state.t }); };
+$("payB").onclick = () => { const p = lockedPirate(); if (!p) return; const takes = pay(P, p, hull, her); state.events.push({ k: "paid with " + takes, t: state.t }); logAdd("pay", { takes }); };
 $("hireOut").onclick = () => { const sid = stationHere(); if (!sid) return; const w = galaxy.worlds[ship.landed]; if (S.stations[sid].faction !== "charter") { state.events.push({ k: "only the Charter hires her out", t: state.t }); return; } const ct = hireOut(S.book, S.stations, sid, { x: w.x, y: w.y }, state.hole, her, state.t, PRICE_DIALS); if (ct) state.events.push({ k: "she went to work, escrow " + fmt(ct.escrow) + " for " + PRICE_DIALS.hireDuration + " s", t: state.t }); };
+
+// the gate pane, live within the gate's reach; the Fitters' buttons; passing; waking
+function gatePane() {
+  const near = ship.alive && atGate(ship, galaxy, gs.dials);
+  $("gatePane").style.display = near ? "block" : "none";
+  if (!near) return;
+  const n = need(gs), fit = gs.fitters.credits, herBid = listingsFor(ringOf(), cargoValue(hull, 2)).fitters.her;
+  $("gateBody").textContent = [
+    "THE GATE " + (gs.fixed ? "open" : "shut") + (gs.tolled ? ", toll paid" : ", toll ¢" + fmt(gs.toll)),
+    gs.fixed ? "" : "her bill: " + fmt(n.time) + " s, " + fmt(n.scrap) + " kg scrap, " + n.modules + " modules" + (her.taken ? "  (she is taken)" : her.away ? "  (she is away)" : her.sold ? "  (she is sold)" : ""),
+    "the Fitters hold ¢" + fmt(fit) + "; they pay " + Math.round(gs.dials.fittersCut * 100) + "% of the listing; for her ¢" + fmt(herBid),
+    "credits " + fmt(purse.credits) + "   hull scrap " + fmt(hull.scrap) + " kg   spares " + (hull.spares.join(" ") || "none") + "   people " + hull.cargo.people,
+  ].join("\n");
+  $("tollB").disabled = gs.tolled || purse.credits < gs.toll; $("passB").disabled = !(gs.fixed && gs.tolled); $("sellSpare").disabled = !hull.spares.length; $("sellScrapF").disabled = hull.scrap <= 0; $("sellPeople").disabled = hull.cargo.people <= 0; $("sellHer").disabled = her.sold || her.taken || her.away;
+}
+$("tollB").onclick = () => { const t = payToll(gs, purse); if (t) { state.events.push({ k: "paid the toll " + fmt(t), t: state.t }); logAdd("toll", { toll: t }); } };
+$("passB").onclick = () => { const end = passGate(gs, ship, galaxy, her); if (end) { logAdd("pass", { ending: end }); showCard(end); } };
+$("sellSpare").onclick = () => { const k = hull.spares[0]; const p = sellToFitters(gs, hull, purse, { kind: "spare", k }); if (p) { state.events.push({ k: "sold " + k + " to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: k, price: p }); } };
+$("sellScrapF").onclick = () => { const kg = Math.floor(hull.scrap); const p = sellToFitters(gs, hull, purse, { kind: "scrap", kg }); if (p) { state.events.push({ k: "sold " + kg + " kg scrap to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "scrap", price: p }); } };
+$("sellPeople").onclick = () => { const n = hull.cargo.people; const p = sellToFitters(gs, hull, purse, { kind: "people", n }); if (p) { state.events.push({ k: "sold " + n + " people to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "people", price: p }); } };
+$("sellHer").onclick = () => { const price = listingsFor(ringOf(), cargoValue(hull, 2)).fitters.her; const p = sellToFitters(gs, hull, purse, { kind: "her", price }); if (p) { her.sold = true; state.events.push({ k: "sold her to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "her", price: p }); } };
+$("wake").onclick = () => { const r = respawn(galaxy, ship, state, hull, purse, gs.dials); $("wake").style.display = "none"; if (r.ending) { logAdd("pass", { ending: r.ending }); showCard(r.ending); return; } hullHp = 1000; logAdd("respawn", { world: galaxy.worlds[r.world].id, debt: r.debt }); state.events.push({ k: "woke at " + galaxy.worlds[r.world].id + " in debt " + fmt(r.debt), t: state.t }); $("card").style.display = "none"; };
