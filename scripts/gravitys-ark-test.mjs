@@ -12,6 +12,8 @@ import { makeBuilder } from "../src/modules/builder/builder.js";
 import { weldLoads, breaking, splitByRoot } from "../src/modules/weldstress/weldstress.js";
 import { accel } from "../src/modules/wells/wells.js";
 import { WRECK_DIALS, shellDv, shell, shellOnHull, wreckOf, shedToWrecks, makeField, stepWrecks, makeGrappler, cast, stepGrappler, take, massOf } from "../src/games/gravitys-ark/wrecks.js";
+import { PRICE_DIALS, herPrice, listingsFor, makePirates, stepPirates, pay, killPirate, hireValue, hireOut, herReturns } from "../src/games/gravitys-ark/price.js";
+import { makeBook } from "../src/modules/escrow/escrow.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -539,6 +541,187 @@ const newHull = () => ({ builder: newBuilder(), list: STARTER_HULL.slice(), scra
   for (let i = 0; i < 60; i++) { stepWrecks(fieldA, wells, 1 / 60); stepWrecks(fieldB, wells, 1 / 60); }
   const ok = JSON.stringify(fieldA) === JSON.stringify(fieldB);
   check("ark: twin wreck fields from one rolled seed agree", ok);
+}
+
+
+
+
+
+
+
+{ // 23. the lock, the demand, pay or outrun, and the shot clock
+  const G = makeGalaxy(SEED);
+  if (!G.worlds.some((w) => w.holder === "wreckers")) G.worlds[1].holder = "wreckers";
+  const P = makePirates(G, rng);
+  const p = P.list[0];
+  const ring = G.worlds[p.i].ring;
+  let ok = true;
+
+  const ship = { x: p.x + 2000, y: p.y, vx: 0, vy: 0 };
+  const cargo = Math.round(rng() * 20000);
+  let ev = stepPirates(P, ship, ring, cargo, 1 / 60);
+  if (!ev.some((e) => e.k === "chase") || p.state !== "chase") ok = false;
+
+  ship.x = p.x + 100;
+  ev = stepPirates(P, ship, ring, cargo, 1 / 60);
+  const lockEv = ev.find((e) => e.k === "lock");
+  const wantDemand = Math.max(herPrice(ring), cargo);
+  if (!lockEv || lockEv.demand.demand !== wantDemand) ok = false;
+
+  ship.x = p.x + 5000;
+  ev = stepPirates(P, ship, ring, cargo, 1 / 60);
+  if (!ev.some((e) => e.k === "outrun") || p.state !== "roost" || p.demand !== null) ok = false;
+
+  ship.x = p.x + 100;
+  stepPirates(P, ship, ring, cargo, 1 / 60);
+  stepPirates(P, ship, ring, cargo, 1 / 60);
+  if (p.state !== "lock") ok = false;
+
+  const dt = 1 / 60;
+  let ticks = 0, fired = false, fireTicks = 0, shot = false;
+  for (let k = 0; k < 1200 && !shot; k++) {
+    ev = stepPirates(P, ship, ring, cargo, dt);
+    ticks++;
+    const t = ticks * dt;
+    const f = ev.find((e) => e.k === "fire");
+    if (f && !fired) {
+      fired = true; fireTicks = ticks;
+      if (Math.abs(t - PRICE_DIALS.lockT) > dt) ok = false;
+    }
+    const sh = ev.find((e) => e.k === "shot");
+    if (sh) {
+      shot = true;
+      const sinceFire = (ticks - fireTicks) * dt;
+      if (Math.abs(sinceFire - PRICE_DIALS.shotEvery) > dt) ok = false;
+      if (sh.damage !== 150) ok = false;
+    }
+  }
+  if (!fired || !shot) ok = false;
+
+  const hull = { scrap: 400, cargo: { people: 2 }, spares: ["s1", "s2"] };
+  p.demand = { takes: "cargo" };
+  const takes1 = pay(P, p, hull, {});
+  if (takes1 !== "cargo" || !p.loot || p.loot.scrap !== 400 || p.loot.people !== 2 ||
+      p.loot.spares.length !== 2 || hull.scrap !== 0 || hull.cargo.people !== 0 ||
+      hull.spares.length !== 0 || p.demand !== null) ok = false;
+
+  p.demand = { takes: "her" };
+  const herObj = {};
+  const takes2 = pay(P, p, hull, herObj);
+  if (takes2 !== "her" || herObj.taken !== true || p.demand !== null) ok = false;
+
+  check("ark: the lock, the demand, pay or outrun, and the shot clock", ok);
+}
+
+{ // 24. her price rises every ring and the listings follow it
+  const G = makeGalaxy(SEED);
+  if (!G.worlds.some((w) => w.holder === "wreckers")) G.worlds[1].holder = "wreckers";
+  const P = makePirates(G, rng);
+  void P;
+  let ok = true;
+  const h0 = herPrice(0), h1 = herPrice(1), h2 = herPrice(2);
+  if (!(h0 < h1 && h1 < h2)) ok = false;
+  for (let k = 0; k < 50 && ok; k++) {
+    const ring = Math.floor(rng() * 3);
+    const cargo = Math.round(rng() * 30000);
+    const her = herPrice(ring);
+    const L = listingsFor(ring, cargo);
+    if (L.wreckers.demand !== Math.max(her, cargo)) ok = false;
+    if (L.wreckers.takes !== (cargo > her ? "cargo" : "her")) ok = false;
+    if (!(L.fitters.her > her)) ok = false;
+  }
+  check("ark: her price rises every ring and the listings follow it", ok);
+}
+
+{ // 25. the bounty moves from the Authority's purse
+  const G = makeGalaxy(SEED);
+  if (!G.worlds.some((w) => w.holder === "wreckers")) G.worlds[1].holder = "wreckers";
+  const P = makePirates(G, rng);
+  const p = P.list[0];
+  const purse = { credits: 1000 };
+  const ledger = makeLedger({ dimensions: ["credits"] });
+  ledger.declare("credits", P.authority.credits + purse.credits);
+  ledger.seal();
+  ledger.source("authority", () => ({ credits: P.authority.credits }));
+  ledger.source("purse", () => ({ credits: purse.credits }));
+  let ok = true;
+  if (!ledger.audit().ok) ok = false;
+  const paid1 = killPirate(P, p, purse);
+  if (paid1 !== PRICE_DIALS.bounty) ok = false;
+  if (!ledger.audit().ok) ok = false;
+  const paid2 = killPirate(P, p, purse);
+  if (paid2 !== 0) ok = false;
+  if (!ledger.audit().ok) ok = false;
+  check("ark: the bounty moves from the Authority's purse", ok);
+}
+
+{ // 26. the hire-out pays more nearer the edge and pays once
+  const G = makeGalaxy(SEED);
+  if (!G.worlds.some((w) => w.holder === "wreckers")) G.worlds[1].holder = "wreckers";
+  const P = makePirates(G, rng);
+  void P;
+  const stations = {
+    near: { credits: 15000, cool: 0, parts: {} },
+    far: { credits: 15000, cool: 0, parts: {} },
+  };
+  const stationNear = { x: 30000, y: 0 };
+  const stationFar = { x: 120000, y: 0 };
+  const hole = { born: true, edge: 10000 };
+  let ok = true;
+  const vNear = hireValue(stationNear, hole);
+  const vFar = hireValue(stationFar, hole);
+  if (!(vNear > vFar)) ok = false;
+
+  const book = makeBook();
+  const purse = { credits: 0 };
+  const ledger = makeLedger({ dimensions: ["credits"] });
+  ledger.declare("credits", stations.near.credits + stations.far.credits + purse.credits);
+  ledger.seal();
+  ledger.source("stations", () => ({ credits: Object.values(stations).reduce((s, m) => s + m.credits, 0) }));
+  ledger.source("purse", () => ({ credits: purse.credits }));
+  ledger.source("escrow", () => ({ credits: book.list.reduce((s, c) => s + (c.open ? c.escrow : 0), 0) }));
+  if (!ledger.audit().ok) ok = false;
+
+  const her = {};
+  const creditsBefore = stations.near.credits;
+  const ct = hireOut(book, stations, "near", stationNear, hole, her, 0);
+  const wantEscrow = Math.min(creditsBefore, book.dials.rescueBase + Math.round(vNear * book.dials.rescueCut));
+  if (!ct || ct.escrow !== wantEscrow || !her.away) ok = false;
+  if (!ledger.audit().ok) ok = false;
+
+  const paid0 = herReturns(stations, her, purse, her.away.until - 1);
+  if (paid0 !== 0) ok = false;
+  if (!ledger.audit().ok) ok = false;
+
+  const until = her.away.until;
+  const paid1 = herReturns(stations, her, purse, until);
+  if (paid1 !== wantEscrow) ok = false;
+  if (!ledger.audit().ok) ok = false;
+
+  const paid2 = herReturns(stations, her, purse, until);
+  if (paid2 !== 0) ok = false;
+  if (!ledger.audit().ok) ok = false;
+
+  check("ark: the hire-out pays more nearer the edge and pays once", ok);
+}
+
+{ // 27. twin pirate fields from one rolled seed agree
+  const G = makeGalaxy(SEED);
+  if (!G.worlds.some((w) => w.holder === "wreckers")) G.worlds[1].holder = "wreckers";
+  const s = Math.floor(rng() * 2 ** 32);
+  const rngA = mulberry32(s);
+  const rngB = mulberry32(s);
+  const P1 = makePirates(G, rngA);
+  const P2 = makePirates(G, rngB);
+  const p0 = P1.list[0];
+  const ship = { x: p0.x + 2000, y: p0.y, vx: 0, vy: 0 };
+  const ring = G.worlds[p0.i].ring;
+  for (let k = 0; k < 120; k++) {
+    stepPirates(P1, ship, ring, 0, 1 / 60);
+    stepPirates(P2, ship, ring, 0, 1 / 60);
+  }
+  const ok = JSON.stringify(P1) === JSON.stringify(P2);
+  check("ark: twin pirate fields from one rolled seed agree", ok);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

@@ -94,7 +94,7 @@ The document marks BUILT what is not in this repository: the landing band, the h
 - [x] 0.0.105 the page
 - [x] 0.0.106 stations
 - [x] 0.0.107 wrecks
-- [ ] 0.0.108 price
+- [x] 0.0.108 price
 - [ ] 0.0.109 gate and card
 - [ ] 0.0.110 the hold
 - [ ] 0.0.111 the walker's stance

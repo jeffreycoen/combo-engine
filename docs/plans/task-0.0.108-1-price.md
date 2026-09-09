@@ -121,3 +121,10 @@ Do not push. Do not touch main.
 ## Report
 
 Read-confirmation first (each file, its line count). One line of outcome. Then bullets: both gate outputs whole; the diff summary (`git diff --stat $(git merge-base HEAD main)`); the commit hash on your branch; every nonconformity as its own labeled bullet. Fixture seeds: the two rolled seeds; no seed is special.
+
+## The report's gate lines
+
+- `node scripts/gravitys-ark-test.mjs` in the worktree over the five landed checks: seeds 713294148 and 3803199607; 10 PASS lines, `gravitys-ark-test: 10 PASS / 0 FAIL`, exit 0, twice, and eight more rolled runs clean. At the landing, joined after the landed checks: `gravitys-ark-test: 28 PASS / 0 FAIL`, twice.
+- Bracket at the landing: gravitys-ark, escrow, ledger, every tail PASS.
+- Branch commit 1458396 on phase/0.0.108-price, landed by squash into main; the gate joined by the orchestrator's helper.
+- Nonconformities the agent named: check 27 builds its pirates from twin streams off one rolled value, as its own sentence says, not from the shared stream; checks 24 and 26 build pirates they do not use; the rolled cargo values are in 0 to 20,000 and 0 to 30,000, the brief naming no scale; cargoValue is not exercised by a check; a floating-point drift in the check's own clock was fixed by counting ticks. None moved a law.
