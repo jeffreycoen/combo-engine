@@ -54,7 +54,7 @@ function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, cr
 // phase 0.1.1's page step: the ground on coldsnap
 const OPENING_CRASH = 30;   // the opening: the hull down at 30 m/s on the plague world, the engine off its weld, PROPOSED
 let view = "space";
-const GS = makeGroundScreen({ canvas: "gv", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
+const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
 function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 // leaveGround(g): the seam up, after the road has let the ship go: the purse back as kilograms, the modules lost gone from the build list
 function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
@@ -144,6 +144,7 @@ function draw() {
 
 // the panes: the ship's numbers, the clocks, the log
 function fmt(n, d = 0) { return Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d }); }
+const logLine = (e) => "t=" + fmt(e.t, 1) + " " + e.k + (e.i !== undefined ? " " + galaxy.worlds[e.i].id : "") + (e.v !== undefined ? " " + fmt(e.v, 1) + " m/s" : "");
 function hud() {
   const w = ship.landed !== null ? galaxy.worlds[ship.landed] : null;
   $("ship").textContent = [
@@ -163,12 +164,10 @@ function hud() {
     lines.push(e.index < galaxy.n ? "your edge " + galaxy.worlds[e.index].id : "no world you can leave");
   }
   $("clocks").textContent = lines.join("\n");
-  $("log").textContent = state.events.slice(-6).map((e) => "t=" + fmt(e.t, 1) + " " + e.k + (e.i !== undefined ? " " + galaxy.worlds[e.i].id : "") + (e.v !== undefined ? " " + fmt(e.v, 1) + " m/s" : "")).join("\n");
+  $("log").textContent = state.events.slice(-6).map(logLine).join("\n");
   $("land").disabled = ship.landed !== null || !ship.alive; $("takeoff").disabled = ship.landed === null || !ship.alive; $("burn").disabled = ship.landed !== null || !ship.alive;
   $("castB").disabled = ship.landed !== null || !!gr.g || !ship.alive; $("payB").disabled = !lockedPirate(); $("hireOut").disabled = ship.landed === null || !!her.away || her.taken;
-  const inGround = view === "ground";
-  $("btns").style.display = inGround ? "none" : "grid"; $("groundBtns").style.display = inGround ? "grid" : "none";
-  if (inGround) { $("clocks").textContent = GS.pane(); GS.buttons(); $("dock").style.display = "none"; cv.style.display = "none"; } else cv.style.display = "block";
+  if (view === "ground") GS.hud(state.events.slice(-8).map(logLine));   // the ground's own panes; the page's own hide by the body's ground class
   $("burn").classList.toggle("on", burning); $("aim").textContent = aimMode === "gate" ? "AIM: GATE" : "AIM: DRAG"; $("pause").classList.toggle("on", paused);
   if (!ship.alive && !ending && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. WAKE at a station still ahead of the edge, in a starter hull with " + GATE_DIALS.mercyFuel + " kg of fuel, in debt."; $("wake").style.display = "inline-block"; $("card").style.display = "block"; }
 }

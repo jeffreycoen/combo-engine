@@ -10,7 +10,7 @@ import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
-// makeGroundScreen(ids, hooks): ids names the canvas and the three buttons; hooks.log takes one line for the log pane.
+// makeGroundScreen(ids, hooks): ids names the canvas, the pane, the log, the stick, and the nine buttons; hooks.log takes one line for the log.
 export function makeGroundScreen(ids, hooks) {
   const $ = (id) => document.getElementById(id);
   const gv = $(ids.canvas);
@@ -37,14 +37,14 @@ export function makeGroundScreen(ids, hooks) {
     wreckWalker(G);
     say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + "; the walker lies wrecked");
     mode = "gun"; wallStart = null; held.clear(); stickVec = { x: 0, z: 0 }; setNub(0, 0);
-    gv.style.display = "block";
+    gv.style.display = "block"; document.body.classList.add("ground");
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
     A = makeGameAudio(); A.setMuted(muted);
     const f = G.run.focus; focus = { x: f.x, y: f.y, z: f.z }; aim = { x: f.x, z: f.z }; zoom = 1;
     A.setListener(focus.x, focus.z, 60);
     say("on the ground at " + w.id + ": " + fmt(scrapKg) + " kg of scrap is " + fmt(G.run.resources) + " scrap here");
   }
-  function leave() { if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; G = null; }
+  function leave() { if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; document.body.classList.remove("ground"); G = null; }
   function step(dt) {
     if (!G) return null;
     const r = tick(G, dt);
@@ -120,6 +120,8 @@ export function makeGroundScreen(ids, hooks) {
     $(ids.fire).disabled = !(s.walker && s.walker.possessed);
     stickEl.style.display = s.walker && s.walker.possessed ? "block" : "none";
   }
+  // hud(lines): the ground's own panes: the numbers at the top left, the log above the buttons, the buttons' labels and states
+  function hud(lines) { if (!G) return; $(ids.pane).textContent = pane(); $(ids.log).textContent = lines.join("\n"); buttons(); }
   $(ids.repairWalker).onclick = () => { if (!G) return; const r = order(G, "repairWalker"); if (!r.ok) say("no repair: " + r.reason); };
   $(ids.hold).onclick = () => { if (!G) return; const r = order(G, "hold"); if (!r.ok) say("no hold: " + r.reason); };
   $(ids.fire).onpointerdown = (e) => { e.preventDefault(); if (G) order(G, "fire", true); };
@@ -148,7 +150,7 @@ export function makeGroundScreen(ids, hooks) {
     twist: (a) => { if (R) R.rotateBy(a); },
   });
   addEventListener("keydown", (e) => { if (!R) return; if (e.key === "1") R.rotateBy(0.35); if (e.key === "3") R.rotateBy(-0.35); });
-  return { enter, leave, step, draw, pane, buttons, active: () => !!G, lost: () => !!(G && summary(G).lost), herDead: () => !!(G && G.her && !G.her.alive),
+  return { enter, leave, step, draw, pane, buttons, hud, active: () => !!G, lost: () => !!(G && summary(G).lost), herDead: () => !!(G && G.her && !G.her.alive),
     zoomIn: () => { if (R) { zoom = Math.min(2.6, zoom * 1.25); R.setZoom(zoom); } },
     zoomOut: () => { if (R) { zoom = Math.max(0.5, zoom / 1.25); R.setZoom(zoom); } },
     takeoff: () => (G ? order(G, "takeoff") : { ok: false, reason: "not on the ground" }) };
