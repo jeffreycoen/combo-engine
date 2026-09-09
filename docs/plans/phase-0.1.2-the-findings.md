@@ -1,6 +1,6 @@
 # Phase 0.1.2 — the five findings
 
-Status: SERVED. Task 1 served.
+Status: DISPATCHED. Task 1 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The five findings returned from the playtest of the landed ground, recorded under Acceptance in `phase-0.1.1-the-hold.md`, fixed in one phase of five tasks in the recorded order: the ground screen's layout, her clearance when the walker stands, the ship at its ground scale with the mech bay, the ship's look on the ground from deadweight's drawing, and space drawn as deadweight draws it. Each task is planned after the one before it lands, written once for one reader. The game stays playable at every landing.
@@ -21,7 +21,7 @@ SHAPED. The first three tasks are the ark's own layer, new code in its own files
 
 ## Tasks
 
-- 0.1.2-1 — the ground's layout: the ground's own pane, log, and button rows; the space panes hidden on the ground; the page's main file down to hookup lines. SERVED. → `task-0.1.2-1-the-ground-layout.md`
+- 0.1.2-1 — the ground's layout: the ground's own pane, log, and button rows; the space panes hidden on the ground; the page's main file down to hookup lines. DISPATCHED. → `task-0.1.2-1-the-ground-layout.md`
 - 0.1.2-2 — she steps aside: her stand off the wreck at coldsnap's room distance; anyone of hers inside it moved clear by coldsnap's own rule before the walker is built. Planned after task 1 lands.
 - 0.1.2-3 — the ship at scale and the mech bay: 10 m modules on a 10.7 m pitch, the crash site inside the rim, the footprints stamped into the grid, the bay on the starter hull, the walker in the bay. Planned after task 2 lands.
 - 0.1.2-4 — the ship's look on the ground: deadweight's module drawing as solid shapes in coldsnap's scene, through one listed door. Planned after task 3 lands.
