@@ -17,7 +17,7 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary } from "../src/games/gravitys-ark/ground.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -1182,6 +1182,18 @@ function rollArkFields(type, i, nWorlds) {
   check("ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
     /export function makeSpaceScreen\(/.test(space) && main.includes('from "./space.js"') && !/function drawDisc\(|drawWrecks\(|makeRender2d|prismAt\(/.test(main)
     && /export function makeHullLook\(/.test(look) && gscreen.includes('from "./hull-look.js"') && /export function makeGroundScreen\(/.test(gscreen) && main.includes('from "./ground.js"'));
+}
+
+{ // 54. ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 10); fieldCrew(G, [{ name: "Eir" }]);
+  const hb = herBody(G), hp = HER.squad.member.hp;
+  const men = G.guards.flatMap((sq) => sq.memberIds.map((id) => G.world.byId.get(id)));
+  const clear = (u) => G.hull.bodies.every((m) => Math.abs(u.pos.x - m.pos.x) > m.hx + u.hx || Math.abs(u.pos.z - m.pos.z) > m.hz + u.hz);
+  const s = groundSummary(G);
+  check("ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
+    !!hb && hb.hp === hp && hb.maxHp === hp && hp > 58 && G.guards.length === HER.guards && G.guards.every((sq) => sq.type === "rifles" && sq.team === 1 && sq.order === "defend")
+    && men.length === HER.guards * SQUAD_SPECS.rifles.n && men.every((u) => u && u.alive && u.team === 1 && clear(u)) && clear(hb) && s.guards.alive === men.length && s.guards.total === men.length && s.hands.total === 1);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

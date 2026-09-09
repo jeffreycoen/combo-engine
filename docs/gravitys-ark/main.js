@@ -52,7 +52,7 @@ function logRoadEvents() { for (; seenEvents < state.events.length; seenEvents++
 const PAGE_LINES = { ...ARK_LINES, land: (e) => `landed on ${e.id} at ${Math.round(e.v)} m/s`, crash: (e) => `crashed on ${e.id} at ${Math.round(e.v)} m/s`, takeoff: (e) => `took off from ${e.id}`, swallow: (e) => `the hole took ${e.id}` };
 function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, crew, end); $("cardBody").textContent = [c.ending.toUpperCase(), "", "hull: " + c.manifest.hull.join(" "), "hands: " + (c.manifest.hands.join(", ") || "none"), "scrap " + fmt(c.manifest.scrap) + " kg, spares " + (c.manifest.spares.join(" ") || "none") + ", people " + c.manifest.people, "the hole ate: " + (c.eaten.join(" ") || "nothing"), "", "the galaxy named you " + c.name, "", ...log.lines(PAGE_LINES).slice(-12)].join("\n"); $("card").style.display = "block"; }
 // phase 0.1.1's page step: the ground on coldsnap
-const OPENING_CRASH = 30;   // the opening: the hull down at 30 m/s on the plague world, the engine off its weld, PROPOSED
+const OPENING_CRASH = 30, OPENING_SCRAP_KG = 1500;   // the opening: the hull down at 30 m/s on the plague world, the crash shaking the ship's own stores loose as scrap for the ground, PROPOSED
 let view = "space";
 const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
 function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
@@ -212,4 +212,5 @@ $("sellHer").onclick = () => { const price = listingsFor(ringOf(), cargoValue(hu
 $("wake").onclick = () => { const r = respawn(galaxy, ship, state, hull, purse, gs.dials); $("wake").style.display = "none"; if (r.ending) { logAdd("pass", { ending: r.ending }); showCard(r.ending); return; } hullHp = 1000; logAdd("respawn", { world: galaxy.worlds[r.world].id, debt: r.debt }); state.events.push({ k: "woke at " + galaxy.worlds[r.world].id + " in debt " + fmt(r.debt), t: state.t }); $("card").style.display = "none"; };
 
 $("gTakeoff").onclick = () => { if (view !== "ground") return; const g = GS.takeoff(); if (!g.ok) { state.events.push({ k: "no takeoff: " + g.reason, t: state.t }); return; } const t = road.takeoff(); if (!t.ok) { state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); return; } if (t.collapse) collapseT = state.t; leaveGround(g); };
+hull.scrap += OPENING_SCRAP_KG; state.events.push({ k: "the crash shakes " + fmt(OPENING_SCRAP_KG) + " kg of scrap loose", t: state.t });
 enterHold(OPENING_CRASH);

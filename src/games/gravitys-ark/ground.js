@@ -59,7 +59,7 @@ export function makeGround(seed, w, scrapKg, opts) {
   // the build-line driver: her squad lays walls along a two-point line by coldsnap's own law, paid from the one purse
   const buildCtx = { objG, recomputeFlow, stampBag: (b, side) => stampBag(war.grid, b, side), setMines: () => {} };
   input.stepBuildLine = (sq) => stepBuildLine(world, war.grid, war.field, war.T, run, sq, buildCtx, (text) => say("toast", { text }), war.map);
-  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], walker: null, stick: { f: 0, l: 0, h: null }, site, recomputeFlow };
+  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], guards: [], walker: null, stick: { f: 0, l: 0, h: null }, site, recomputeFlow };
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
@@ -155,28 +155,38 @@ export function stampHull(G) {
 
 // HER: her row and her arms, installed into coldsnap's tables at the ground's boot so
 // its copies stay verbatim; her sidearm is the hunter's, her body the one MAN row.
-// reach: how close she must stand to a module to work on it; repairBase and
-// repairPerM: the weld-back's seconds, plus seconds per metre the module slid;
+// member: her own body, a man's size with her own hit points; guards: how many of
+// coldsnap's rifle squads stand guard beside her at the crash; guardOff: how far behind
+// her stand they stand. reach: how close she must stand to a module to work on it;
+// repairBase and repairPerM: the weld-back's seconds, plus seconds per metre the module slid;
 // standOff: how far off the bridge's face she stands at the crash, across the site line, the hands behind her. All PROPOSED.
 export const HER = {
-  squad: { n: 1, cost: 0, speed: 3.2, label: "THE ENGINEER" },
+  squad: { n: 1, cost: 0, speed: 3.2, label: "THE ENGINEER", member: { mass: 80, hx: 0.28, hy: 1.0, hz: 0.28, hp: 250 } },
   arms: { projSpeed: 80, kind: "mg", weapon: "sidearms", dmg: 5, dirDmg: 11, burst: 2, burstGap: 0.10, fireRate: 0.8, range: 12, acc: 0.075, occl: "arc", windF: 0.06, windComp: 0.6 },
-  reach: 2.5, repairBase: 5, repairPerM: 1.5, standOff: 4,
+  reach: 2.5, repairBase: 5, repairPerM: 0.5, standOff: 4, guards: 1, guardOff: 4,
 };
 export function installHer() { SQUAD_SPECS.her = { ...HER.squad }; INFANTRY_ARMS.her = { ...HER.arms }; }
 
 // fieldCrew(G, crew): she stands off the bridge as a squad of one on her own row; the
-// hands stand as rifle squads of up to four, each man carrying his name.
+// guard, coldsnap's own rifle squads, stands behind her; the hands stand behind the
+// guard as rifle squads of up to four, each man carrying his name.
 export function fieldCrew(G, crew) {
   installHer();
   const { run, world } = G, H = G.hull, d = HER;
   const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z }, r = H ? H.axis.r : { x: 0, z: 1 }, off = (H ? (r.x !== 0 ? H.bodies[0].hx : H.bodies[0].hz) : 0) + d.standOff;   // across the site line, on the bridge's free side, off its face
   const squad = makeSquad(run.nextSquadId++, "her", 1, at.x - r.x * off, at.z - r.z * off);
   spawnSquadMembers(world, squad); run.squads.push(squad);
+  const guards = [];
+  for (let k = 0; k < d.guards; k++) {
+    const o = off + d.guardOff + 3 * k;
+    const gq = makeSquad(run.nextSquadId++, "rifles", 1, at.x - r.x * o, at.z - r.z * o);
+    spawnSquadMembers(world, gq); run.squads.push(gq); guards.push(gq);
+  }
+  G.guards = guards;
   const names = (crew || []).map((h) => h.name), hands = [];
   for (let k = 0; k < names.length; k += 4) {
     const some = names.slice(k, k + 4);
-    const o = off + 3 + 3 * (k / 4);
+    const o = off + d.guardOff + 3 * d.guards + 3 * (k / 4);
     const sq = makeSquad(run.nextSquadId++, "rifles", 1, at.x - r.x * o, at.z - r.z * o);
     spawnSquadMembers(world, sq, some.length); run.squads.push(sq);
     sq.memberIds.forEach((id, j) => { const u = world.byId.get(id); if (u) u.handName = some[j]; hands.push({ id, name: some[j], alive: true }); });
@@ -501,7 +511,8 @@ export function summary(G) {
   const her = G.her ? { alive: !!herBody(G), act: G.her.act, actT: G.her.actT } : null;
   const walker = G.walker ? { wrecked: !G.walker.mech, alive: walkerAlive(G), hp: G.walker.mech ? G.walker.mech.hull.hp : 0, possessed: G.walker.possessed } : null;
   const hands = { alive: G.hands.filter((h) => h.alive).length, total: G.hands.length };
-  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules, her, hands, walker,
+  const gIds = G.guards.flatMap((sq) => sq.memberIds), guards = { alive: gIds.filter((id) => { const u = world.byId.get(id); return !!(u && u.alive); }).length, total: gIds.length };
+  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules, her, hands, guards, walker,
     standing: H ? alive / H.bodies.length : (run.depotStanding == null ? 1 : run.depotStanding), lost: !!(H && !H.bodies[0].alive), warOver: !!run.gameOver };
 }
 

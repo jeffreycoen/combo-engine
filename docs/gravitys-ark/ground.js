@@ -38,6 +38,7 @@ export function makeGroundScreen(ids, hooks) {
     fieldCrew(G, crew || []);
     const Wk = wreckWalker(G);
     say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + (Wk ? "; the walker lies wrecked at the bay's door" : "; no walker aboard"));
+    if (G.guards.length) say(summary(G).guards.total + " riflemen stand guard");
     mode = "gun"; wallStart = null; held.clear(); stickVec = { x: 0, z: 0 }; setNub(0, 0);
     gv.style.display = "block"; document.body.classList.add("ground");
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
@@ -105,7 +106,7 @@ export function makeGroundScreen(ids, hooks) {
     return ["THE GROUND  t " + fmt(s.t, 1) + " s   assault " + s.bell + "   next in " + fmt(s.bellIn, 0) + " s",
       "scrap " + fmt(s.scrap) + " (" + fmt(s.scrapKg) + " kg)   guns " + s.guns + "   enemy afield " + s.foes,
       "modules " + (s.modules ? s.modules.alive + " of " + s.modules.total + " standing, " + s.modules.loose + " loose" : "none") + "   the hull stands " + fmt(s.standing * 100, 0) + "%" + (s.lost ? "   THE BRIDGE IS LOST" : ""),
-      "she: " + (s.her ? (s.her.alive ? (s.her.act === "walker" ? "in the walker" : s.her.act + (s.her.act === "fix" || s.her.act === "repairWalker" ? " " + fmt(s.her.actT, 1) + " s" : "")) : "DEAD") : "not here") + "   hands " + s.hands.alive + " of " + s.hands.total
+      "she: " + (s.her ? (s.her.alive ? (s.her.act === "walker" ? "in the walker" : s.her.act + (s.her.act === "fix" || s.her.act === "repairWalker" ? " " + fmt(s.her.actT, 1) + " s" : "")) : "DEAD") : "not here") + "   hands " + s.hands.alive + " of " + s.hands.total + "   guards " + s.guards.alive + " of " + s.guards.total
         + "   walker " + (s.walker ? (s.walker.wrecked ? "wrecked" : s.walker.alive ? fmt(s.walker.hp) + " hp" : "DOWN") : "none"),
       mode === "wall" ? (wallStart ? "tap where the wall ends" : "tap where the wall starts") : "tap the ground to place a " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap; two fingers turn and zoom"].join("\n");
   }
