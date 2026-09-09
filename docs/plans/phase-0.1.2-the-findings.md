@@ -1,6 +1,6 @@
 # Phase 0.1.2 — the five findings
 
-Status: DISPATCHED. Task 2 landed, commit `664d6c6`, 2026-09-09; task 3 is planned next.
+Status: DISPATCHED. Task 3 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The five findings returned from the playtest of the landed ground, recorded under Acceptance in `phase-0.1.1-the-hold.md`, fixed in one phase of five tasks in the recorded order: the ground screen's layout, her clearance when the walker stands, the ship at its ground scale with the mech bay, the ship's look on the ground from deadweight's drawing, and space drawn as deadweight draws it. Each task is planned after the one before it lands, written once for one reader. The game stays playable at every landing.
@@ -23,7 +23,7 @@ SHAPED. The first three tasks are the ark's own layer, new code in its own files
 
 - 0.1.2-1 — the ground's layout: the ground's own pane, log, and button rows; the space panes hidden on the ground; the page's main file down to hookup lines. LANDED, commit `6e4bd59`. → `task-0.1.2-1-the-ground-layout.md`
 - 0.1.2-2 — she steps aside: her stand off the wreck at coldsnap's room distance; anyone of hers inside it moved clear by coldsnap's own rule before the walker is built. LANDED, commit `664d6c6`. → `task-0.1.2-2-she-steps-aside.md`
-- 0.1.2-3 — the ship at scale and the mech bay: 10 m modules on a 10.7 m pitch, the crash site inside the rim, the footprints stamped into the grid, the bay on the starter hull, the walker in the bay. Planned after task 2 lands.
+- 0.1.2-3 — the ship at scale and the mech bay: 10 m modules on a 10.7 m pitch, the crash site inside the rim, the footprints stamped into the grid, the bay on the starter hull, the walker in the bay. DISPATCHED. → `task-0.1.2-3-the-ship-at-scale.md`
 - 0.1.2-4 — the ship's look on the ground: deadweight's module drawing as solid shapes in coldsnap's scene, through one listed door. Planned after task 3 lands.
 - 0.1.2-5 — space as deadweight draws it: the drawing from the demo's lines 849 to 1461 in a space screen file of its own. Planned after task 4 lands.
 
@@ -62,3 +62,21 @@ Phone and desktop the same; nothing on the screen moves.
 - `node scripts/gate.mjs gravitys-ark` prints 45 PASS lines, two more than the recorded 43, then `gravitys-ark-test: 45 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
 - The parts build names 50 gates and every verdict is ok.
 - The two hash lines in the task print OK.
+
+## The walk, task 3
+
+Phone and desktop the same.
+
+- **The crash.** The hull's five modules, 10 m boxes on a 10.7 m pitch, 250 times their space mass, land on the line from the depot toward the map's centre, snapped to the nearest axis: the bridge 26 m out, the engine nearer the depot, the tank beyond, the pod and the bay across; a loose module slides on along that line. The log's counts as before. Coldsnap's grid is blocked under every module, so guns, walls, and paths go around the hull; a tap on a module says NO GROUND.
+- **The site.** Coldsnap's placement radius, 36 m, now centres on the bridge: a gun goes anywhere within it, held ground and a free cell as before.
+- **The crew.** She stands 9 m off the bridge's free face, across the line; the hands behind her. Every slot and spawn on the ground now treats a module as ground, coldsnap's own switch.
+- **FIX** walks her to the loose module's nearest face; her seconds run within 2.5 m of that face; the weld-back sets the module in its slot, moves anyone the box would land on off its face, welds it to every neighbour already joined to the bridge, and re-stamps the grid.
+- **The walker** lies at the mech bay's door, 9 m off the bay's open face, wherever the bay lies; the log says "the walker lies wrecked at the bay's door". REPAIR WALKER goes to the door's stand; "the bay is destroyed" refuses it when the bay is dead. A hull without a bay lands without a walker: the log says "no walker aboard", the pane's walker line says none, REPAIR WALKER stays dark.
+- **TAKE OFF** with the walker down marks it lost on the hull: the next crash lands without one until a mech bay is bought at a station, when a new walker comes with it.
+- **Space.** The starter hull carries the bay: the ship pane's mass reads 1,800 kg more, and the road flies it.
+
+## Acceptance arithmetic, task 3
+
+- `node scripts/gate.mjs gravitys-ark` prints 47 PASS lines, two more than the recorded 45, then `gravitys-ark-test: 47 PASS / 0 FAIL`, then `gravitys-ark-test PASS`. Four pins re-taught by this task's own change, each named in the task: the build check's masses, the crash check's loose set to the rule's own verdict, the FIX check's loose count, the WALL check's line.
+- The parts build names 50 gates and every verdict is ok.
+- The seven hash lines in the task print OK.
