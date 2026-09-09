@@ -3,8 +3,8 @@
 // its brain, its books and its bell, its build law for guns. This file is the
 // ark's layer over that engine and nothing more: the boot from the ark's own
 // world seed, the one purse the hold's scrap feeds, the hull as bodies on
-// welds, the orders, the take-off. The page's ground screen draws it. Every
-// number here is PROPOSED.
+// welds, her and the hands as troopers, the orders, the take-off. The page's
+// ground screen draws it. Every number here is PROPOSED.
 import { bootWar, tickWar, defaultTickInput, runHash, serializeRun } from "../../depot/api.js";
 import { buildSnapshotOf } from "../../depot/tick.js";
 import { buildEmitters } from "../../depot/boot.js";
@@ -15,6 +15,11 @@ import { TOWER_SPECS, TOWER_ORDER } from "../../depot/specs.js";
 import { worldHash, addBody, addWeld } from "../../engine/core.js";
 import { weldLoads, breaking } from "../../modules/weldstress/weldstress.js";
 import { MODULES } from "./stations.js";
+import { makeSquad, SQUAD_SPECS } from "../../depot/squads.js";
+import { spawnSquadMembers } from "../../depot/state.js";
+import { INFANTRY_ARMS } from "../../depot/specs.js";
+import { startBuildLine, stepBuildLine } from "../../depot/buildlines.js";
+import { stampBag } from "../../depot/boot.js";
 
 // kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's
 // scrap. heldSteps and heldStep: territory steps run at the boot, so the crash
@@ -47,7 +52,10 @@ export function makeGround(seed, w, scrapKg, opts) {
   input.bellCtx = { cue, toast: (text) => say("toast", { text }), townUV, buildSnapshot: () => buildSnapshotOf(war), nextApcSeq: () => ++war.seq.apc, saveFront: () => { serializeRun(war); }, possessed: () => false };
   const placement = makePlacement({ world, run, view: {}, input, map: war.map, grid: war.grid, field: war.field, T: war.T, R: null, dev: false,
     toast: (text) => say("toast", { text }), cue, setHud: () => {}, nextApcSeq: () => ++war.seq.apc, depotP, recomputeFlow });
-  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg };
+  // the build-line driver: her squad lays walls along a two-point line by coldsnap's own law, paid from the one purse
+  const buildCtx = { objG, recomputeFlow, stampBag: (b, side) => stampBag(war.grid, b, side), setMines: () => {} };
+  input.stepBuildLine = (sq) => stepBuildLine(world, war.grid, war.field, war.T, run, sq, buildCtx, (text) => say("toast", { text }), war.map);
+  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [] };
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
@@ -86,6 +94,66 @@ export function crashHull(G, hull, v, opts) {
   for (const w of held) if (keep.has(w.a) && keep.has(w.b)) welds.push({ a: w.a, b: w.b, weld: addWeld(world, bodies[w.a], bodies[w.b], w.strength * d.kgPerKg) });
   G.hull = { list, builder: hull.builder, bodies, slots, welds, v, a, broken: [...broken], loose: list.map((m, i) => i).filter((i) => !keep.has(i)), dials: d };
   return G.hull;
+}
+
+// HER: her row and her arms, installed into coldsnap's tables at the ground's boot so
+// its copies stay verbatim; her sidearm is the hunter's, her body the one MAN row.
+// reach: how close she must stand to a module to work on it; repairBase and
+// repairPerM: the weld-back's seconds, plus seconds per metre the module slid;
+// standOff: where she and the hands stand from the bridge at the crash. All PROPOSED.
+export const HER = {
+  squad: { n: 1, cost: 0, speed: 3.2, label: "THE ENGINEER" },
+  arms: { projSpeed: 80, kind: "mg", weapon: "sidearms", dmg: 5, dirDmg: 11, burst: 2, burstGap: 0.10, fireRate: 0.8, range: 12, acc: 0.075, occl: "arc", windF: 0.06, windComp: 0.6 },
+  reach: 2.5, repairBase: 5, repairPerM: 1.5, standOff: 4,
+};
+export function installHer() { SQUAD_SPECS.her = { ...HER.squad }; INFANTRY_ARMS.her = { ...HER.arms }; }
+
+// fieldCrew(G, crew): she stands off the bridge as a squad of one on her own row; the
+// hands stand as rifle squads of up to four, each man carrying his name.
+export function fieldCrew(G, crew) {
+  installHer();
+  const { run, world } = G, H = G.hull, d = HER;
+  const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z };
+  const squad = makeSquad(run.nextSquadId++, "her", 1, at.x, at.z + d.standOff);
+  spawnSquadMembers(world, squad); run.squads.push(squad);
+  const names = (crew || []).map((h) => h.name), hands = [];
+  for (let k = 0; k < names.length; k += 4) {
+    const some = names.slice(k, k + 4);
+    const sq = makeSquad(run.nextSquadId++, "rifles", 1, at.x, at.z - d.standOff - 2 * (k / 4));
+    spawnSquadMembers(world, sq, some.length); run.squads.push(sq);
+    sq.memberIds.forEach((id, j) => { const u = world.byId.get(id); if (u) u.handName = some[j]; hands.push({ id, name: some[j], alive: true }); });
+  }
+  G.her = { squad, act: "hold", target: null, actT: 0, alive: true };
+  G.hands = hands;
+  return G.her;
+}
+
+// herBody(G): her living body, or null.
+export function herBody(G) {
+  const id = G.her && G.her.squad.memberIds[0];
+  const b = id != null ? G.world.byId.get(id) : null;
+  return b && b.alive ? b : null;
+}
+
+// stepHer(G, dt): her act. Fixing, she stands within reach of her module and the
+// seconds run down, then the weld-back; a wall order ends when the line is laid. The
+// hands' deaths and hers come back as events by name.
+export function stepHer(G, dt) {
+  const out = [], her = G.her;
+  if (!her) return out;
+  const b = herBody(G);
+  const rest = () => { her.act = "hold"; her.target = null; her.squad.holdFire = false; if (her.squad.order === "move") { her.squad.order = "defend"; her.squad.dest = null; } };
+  if (!b) { if (her.alive) { her.alive = false; out.push({ k: "herDead", t: G.world.t }); } }
+  else if (her.act === "fix" && her.target != null) {
+    const m = G.hull.bodies[her.target];
+    if (!m.alive) rest();
+    else if (Math.hypot(m.pos.x - b.pos.x, m.pos.z - b.pos.z) <= HER.reach) {
+      her.actT -= dt;
+      if (her.actT <= 0) { weldBack(G, her.target); out.push({ k: "repaired", t: G.world.t, module: G.hull.list[her.target].t }); rest(); }
+    }
+  } else if (her.act === "wall" && !her.squad._build) rest();
+  for (const h of G.hands) { if (!h.alive) continue; const u = G.world.byId.get(h.id); if (!u || !u.alive) { h.alive = false; out.push({ k: "handDead", t: G.world.t, name: h.name }); } }
+  return out;
 }
 
 // joined(G): the modules joined to the bridge through unbroken welds between living modules.
@@ -138,6 +206,38 @@ export function order(G, kind, x, z, which) {
     const last = G.events.length > n0 ? G.events[G.events.length - 1] : null;
     return { ok: false, reason: last && last.k === "toast" ? last.text : "refused" };
   }
+  if (kind === "fix") {   // she fixes: she walks to the nearest loose module and welds it back, her fire held meanwhile
+    const b = herBody(G);
+    if (!b) return { ok: false, reason: "she is dead" };
+    const loose = looseModules(G);
+    if (!loose.length) return { ok: false, reason: "nothing loose" };
+    let best = null, bd = Infinity;
+    for (const i of loose) { const m = G.hull.bodies[i]; const dd = Math.hypot(m.pos.x - b.pos.x, m.pos.z - b.pos.z); if (dd < bd) { bd = dd; best = i; } }
+    const m = G.hull.bodies[best], sq = G.her.squad;
+    sq.order = "move"; sq.dest = { x: m.pos.x, z: m.pos.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
+    const slid = Math.hypot(m.pos.x - G.hull.slots[best].x, m.pos.z - G.hull.slots[best].z);
+    G.her.act = "fix"; G.her.target = best; G.her.actT = HER.repairBase + HER.repairPerM * slid;
+    G.events.push({ k: "fix", t: G.world.t, module: G.hull.list[best].t, seconds: G.her.actT });
+    return { ok: true, target: best, seconds: G.her.actT };
+  }
+  if (kind === "fight") {   // she fights: she stands where she is and her sidearm answers
+    const b = herBody(G);
+    if (!b) return { ok: false, reason: "she is dead" };
+    const sq = G.her.squad;
+    sq.order = "defend"; sq.dest = null; sq._build = null; sq.holdFire = false;
+    G.her.act = "fight"; G.her.target = null; G.her.actT = 0;
+    G.events.push({ k: "fightHer", t: G.world.t });
+    return { ok: true };
+  }
+  if (kind === "wall") {   // she lays a wall from (x, z) to which, by coldsnap's build line, one purse
+    const b = herBody(G);
+    if (!b) return { ok: false, reason: "she is dead" };
+    if (!which || typeof which.x !== "number") return { ok: false, reason: "no end" };
+    const sq = G.her.squad;
+    startBuildLine(war.grid, sq, "walls", { x, z }, { x: which.x, z: which.z }, (text) => G.events.push({ k: "toast", t: G.world.t, text }), 1);
+    sq.holdFire = true; G.her.act = "wall"; G.her.target = null; G.her.actT = 0;
+    return { ok: true, sections: sq._build.rows.length };
+  }
   if (kind === "takeoff") {
     const out = { ok: true, scrapKg: run.resources * G.dials.kgPerScrap, lost: [], keptList: null, abandoned: false };
     if (G.hull) {
@@ -160,6 +260,7 @@ export function price(G, key) { return G.placement.priceNow(key, TOWER_SPECS[key
 // tick(G, dt): one step of the war; the engine's events and the bell's cues come back for the page.
 export function tick(G, dt) {
   const r = tickWar(G.war, dt, G.input);
+  for (const e of stepHer(G, dt)) G.events.push(e);
   return { events: r.events, flags: r.flags, cues: G.cues.splice(0) };
 }
 
@@ -174,7 +275,9 @@ export function summary(G) {
   }
   const H = G.hull, alive = H ? H.bodies.filter((b) => b.alive).length : 0;
   const modules = H ? { total: H.bodies.length, alive, loose: looseModules(G).length } : null;
-  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules,
+  const her = G.her ? { alive: !!herBody(G), act: G.her.act, actT: G.her.actT } : null;
+  const hands = { alive: G.hands.filter((h) => h.alive).length, total: G.hands.length };
+  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules, her, hands,
     standing: H ? alive / H.bodies.length : (run.depotStanding == null ? 1 : run.depotStanding), lost: !!(H && !H.bodies[0].alive), warOver: !!run.gameOver };
 }
 

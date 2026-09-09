@@ -18,7 +18,9 @@ import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFi
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
 import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER } from "../src/games/gravitys-ark/ground.js";
+import { SQUAD_SPECS } from "../src/depot/squads.js";
+import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -1118,6 +1120,34 @@ const ticks = (H, n) => { const evs = []; for (let i = 0; i < n; i++) evs.push(.
   check("ark: TAKE OFF is refused while a module is loose, allowed once every loose module is welded back, and the dead are lost",
     C.H.loose.length === 1 && C.H.loose[0] === 1 && !refused.ok && refused.loose.length === 1 && allowed.ok && allowed.lost.length === 0 && allowed.keptList.length === 4
     && lostPod.ok && lostPod.lost.length === 1 && lostPod.lost[0] === "pod" && lostPod.keptList.length === 3 && !abandoned.ok && abandoned.abandoned === true);
+}
+
+{ // 42. ark: she takes the field as a squad of one on her own row and the hands as rifles by name, and twin fields agree
+  // 43. ark: FIX sends her to the nearest loose module with her fire held, the weld-back lands when her seconds run down within reach, and FIGHT frees her fire
+  // 44. ark: a WALL order gives her squad coldsnap's build line, section by section
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const crew = [{ name: "Aud" }, { name: "Bjorn" }];
+  const mk = () => { const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 30); fieldCrew(G, crew); return G; };
+  const A = mk(), B = mk();
+  const place = (G) => JSON.stringify(G.run.squads.map((sq) => [sq.type, sq.memberIds.map((id) => { const u = G.world.byId.get(id); return [u.pos.x, u.pos.z, u.handName || null]; })]));
+  const herSq = A.her.squad, hb = herBody(A);
+  const hands = A.hands.map((h) => A.world.byId.get(h.id));
+  check("ark: she takes the field as a squad of one on her own row and the hands as rifles by name, and twin fields agree",
+    SQUAD_SPECS.her && INFANTRY_ARMS.her && herSq.type === "her" && herSq.memberIds.length === 1 && !!hb && hb.utype === "her" && hb.team === 1
+    && A.hands.length === 2 && hands.every((u) => u && u.alive && u.utype === "rifles") && hands.map((u) => u.handName).join(",") === "Aud,Bjorn" && place(A) === place(B));
+  const fix = groundOrder(A, "fix");
+  const m = A.hull.bodies[fix.target], slid = Math.hypot(m.pos.x - A.hull.slots[fix.target].x, m.pos.z - A.hull.slots[fix.target].z);
+  const sent = fix.ok && fix.target === 1 && herSq.order === "move" && herSq.holdFire === true && A.her.act === "fix" && Math.abs(fix.seconds - (HER.repairBase + HER.repairPerM * slid)) < 1e-9;
+  hb.pos.x = m.pos.x + HER.reach * 0.5; hb.pos.z = m.pos.z;   // she stands within reach
+  const ev = stepHer(A, fix.seconds);
+  const welded = ev.some((e) => e.k === "repaired") && looseModules(A).length === 0 && A.her.act === "hold" && herSq.holdFire === false;
+  const fight = groundOrder(A, "fight");
+  check("ark: FIX sends her to the nearest loose module with her fire held, the weld-back lands when her seconds run down within reach, and FIGHT frees her fire",
+    sent && welded && fight.ok && herSq.holdFire === false && herSq.order === "defend" && A.her.act === "fight");
+  const s0 = A.hull.slots[0];
+  const wall = groundOrder(A, "wall", s0.x - 6, s0.z + 8, { x: s0.x + 6, z: s0.z + 8 });
+  check("ark: a WALL order gives her squad coldsnap's build line, section by section",
+    wall.ok && wall.sections > 0 && !!herSq._build && herSq._build.kind === "walls" && herSq._build.rows.length === wall.sections && herSq.order === "build" && A.her.act === "wall");
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

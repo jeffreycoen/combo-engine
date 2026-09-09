@@ -1,10 +1,10 @@
 // GRAVITY'S ARK — ground.js: the ground's screen, phase 0.1.1. Coldsnap's
 // drawing on its own canvas, its sound, the camera, the taps, the pane, the
-// buttons; the hull crashes onto the ground at entry. The main file takes only
-// the hookup lines.
+// buttons; the hull crashes onto the ground at entry and she and the hands take
+// the field. The main file takes only the hookup lines.
 import { makeRenderer, makeGameAudio } from "../../src/depot/api.js";
 import { TOWER_SPECS } from "../../src/depot/specs.js";
-import { makeGround, crashHull, order, tick, summary, price, GUNS } from "../../src/games/gravitys-ark/ground.js";
+import { makeGround, crashHull, fieldCrew, order, tick, summary, price, GUNS } from "../../src/games/gravitys-ark/ground.js";
 import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -14,7 +14,7 @@ export function makeGroundScreen(ids, hooks) {
   const $ = (id) => document.getElementById(id);
   const gv = $(ids.canvas);
   const say = (line) => { if (hooks && hooks.log) hooks.log(line); };
-  let G = null, R = null, A = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false;
+  let G = null, R = null, A = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false, mode = "gun", wallStart = null;
   const kind = () => GUNS[gunI];
 
   // a screen point to the ground: a point on the camera's near plane plus the view
@@ -28,10 +28,13 @@ export function makeGroundScreen(ids, hooks) {
     return { x: px + f.x * t, z: pz + f.z * t };
   }
 
-  function enter(seed, w, scrapKg, hull, v) {
+  function enter(seed, w, scrapKg, hull, v, crew) {
     G = makeGround(seed, w, scrapKg);
     const H = crashHull(G, hull, v);
     say("the hull is down: " + H.bodies.length + " modules, " + H.loose.length + " loose");
+    fieldCrew(G, crew || []);
+    say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone"));
+    mode = "gun"; wallStart = null;
     gv.style.display = "block";
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
     A = makeGameAudio(); A.setMuted(muted);
@@ -45,7 +48,15 @@ export function makeGroundScreen(ids, hooks) {
     const r = tick(G, dt);
     if (R) R.consume(r.events);
     if (A) { A.consume(r.events); if (r.cues.length) A.consume(r.cues); }
-    for (const e of G.events.splice(0)) { if (e.k === "toast") say(String(e.text).toLowerCase()); else if (e.k === "gun") say(TOWER_SPECS[e.key].label.toLowerCase() + " placed for " + e.cost + " scrap"); }
+    for (const e of G.events.splice(0)) {
+      if (e.k === "toast") say(String(e.text).toLowerCase());
+      else if (e.k === "gun") say(TOWER_SPECS[e.key].label.toLowerCase() + " placed for " + e.cost + " scrap");
+      else if (e.k === "fix") say("she goes to the " + e.module + ", " + fmt(e.seconds, 1) + " s of welding");
+      else if (e.k === "fightHer") say("she stands and fights");
+      else if (e.k === "repaired") say("the " + e.module + " is welded back");
+      else if (e.k === "herDead") say("SHE IS DEAD");
+      else if (e.k === "handDead") say(e.name + " is dead");
+    }
     if (r.flags.bell) say("the bell: assault " + G.run.bell);
     return r;
   }
@@ -56,23 +67,42 @@ export function makeGroundScreen(ids, hooks) {
     return ["THE GROUND  t " + fmt(s.t, 1) + " s   assault " + s.bell + "   next in " + fmt(s.bellIn, 0) + " s",
       "scrap " + fmt(s.scrap) + " (" + fmt(s.scrapKg) + " kg)   guns " + s.guns + "   enemy afield " + s.foes,
       "modules " + (s.modules ? s.modules.alive + " of " + s.modules.total + " standing, " + s.modules.loose + " loose" : "none") + "   the hull stands " + fmt(s.standing * 100, 0) + "%" + (s.lost ? "   THE BRIDGE IS LOST" : ""),
-      "tap the ground to place a " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap; two fingers turn and zoom"].join("\n");
+      "she: " + (s.her ? (s.her.alive ? s.her.act + (s.her.act === "fix" ? " " + fmt(s.her.actT, 1) + " s" : "") : "DEAD") : "not here") + "   hands " + s.hands.alive + " of " + s.hands.total,
+      mode === "wall" ? (wallStart ? "tap where the wall ends" : "tap where the wall starts") : "tap the ground to place a " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap; two fingers turn and zoom"].join("\n");
   }
   function buttons() {
     if (!G) return;
     $(ids.kind).textContent = TOWER_SPECS[kind()].label + " " + fmt(price(G, kind()));
     $(ids.sound).textContent = muted ? "SOUND OFF" : "SOUND ON";
-    $(ids.takeoff).disabled = summary(G).lost;
+    const s = summary(G);
+    $(ids.takeoff).disabled = s.lost;
+    $(ids.wall).textContent = mode === "wall" ? (wallStart ? "WALL: END" : "WALL: START") : "WALL";
+    $(ids.fix).disabled = !(s.her && s.her.alive && s.modules && s.modules.loose > 0);
+    $(ids.fight).disabled = !(s.her && s.her.alive);
   }
+  $(ids.wall).onclick = () => { mode = mode === "wall" ? "gun" : "wall"; wallStart = null; buttons(); };
+  $(ids.fix).onclick = () => { if (!G) return; const r = order(G, "fix"); if (!r.ok) say("no fix: " + r.reason); };
+  $(ids.fight).onclick = () => { if (!G) return; const r = order(G, "fight"); if (!r.ok) say("no fight: " + r.reason); };
   $(ids.kind).onclick = () => { gunI = (gunI + 1) % GUNS.length; buttons(); };
   $(ids.sound).onclick = () => { muted = !muted; if (A) { A.ensure(); A.setMuted(muted); } buttons(); };
   makeGestures(gv, {
-    tap: (x, y) => { if (!G || !R) return; if (A) A.ensure(); const p = screenToGround(x, y); aim = { x: p.x, z: p.z }; const r = order(G, "gun", p.x, p.z, kind()); if (!r.ok) say("no " + TOWER_SPECS[kind()].label.toLowerCase() + ": " + String(r.reason).toLowerCase()); },
+    tap: (x, y) => {
+      if (!G || !R) return;
+      if (A) A.ensure();
+      const p = screenToGround(x, y); aim = { x: p.x, z: p.z };
+      if (mode === "wall") {
+        if (!wallStart) { wallStart = p; buttons(); return; }
+        const r = order(G, "wall", wallStart.x, wallStart.z, p); wallStart = null; mode = "gun"; buttons();
+        say(r.ok ? "she lays a wall of " + r.sections + " sections" : "no wall: " + r.reason);
+        return;
+      }
+      const r = order(G, "gun", p.x, p.z, kind()); if (!r.ok) say("no " + TOWER_SPECS[kind()].label.toLowerCase() + ": " + String(r.reason).toLowerCase());
+    },
     pinch: (k) => { if (R) { zoom = Math.max(0.5, Math.min(2.6, zoom * k)); R.setZoom(zoom); } },
     twist: (a) => { if (R) R.rotateBy(a); },
   });
   addEventListener("keydown", (e) => { if (!R) return; if (e.key === "1") R.rotateBy(0.35); if (e.key === "3") R.rotateBy(-0.35); });
-  return { enter, leave, step, draw, pane, buttons, active: () => !!G, lost: () => !!(G && summary(G).lost),
+  return { enter, leave, step, draw, pane, buttons, active: () => !!G, lost: () => !!(G && summary(G).lost), herDead: () => !!(G && G.her && !G.her.alive),
     zoomIn: () => { if (R) { zoom = Math.min(2.6, zoom * 1.25); R.setZoom(zoom); } },
     zoomOut: () => { if (R) { zoom = Math.max(0.5, zoom / 1.25); R.setZoom(zoom); } },
     takeoff: () => (G ? order(G, "takeoff") : { ok: false, reason: "not on the ground" }) };
