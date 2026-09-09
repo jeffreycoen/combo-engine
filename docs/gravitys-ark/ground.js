@@ -34,8 +34,8 @@ export function makeGroundScreen(ids, hooks) {
     const H = crashHull(G, hull, v);
     say("the hull is down: " + H.bodies.length + " modules, " + H.loose.length + " loose");
     fieldCrew(G, crew || []);
-    wreckWalker(G);
-    say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + "; the walker lies wrecked");
+    const Wk = wreckWalker(G);
+    say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + (Wk ? "; the walker lies wrecked at the bay's door" : "; no walker aboard"));
     mode = "gun"; wallStart = null; held.clear(); stickVec = { x: 0, z: 0 }; setNub(0, 0);
     gv.style.display = "block"; document.body.classList.add("ground");
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });

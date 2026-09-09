@@ -14,7 +14,7 @@ export const MODULES = {
   shield: { kg: 1100, price: 11000, ports: ["W"] }, mount: { kg: 800, price: 7500, ports: ["W"] }, strut: { kg: 150, price: 900, weak: true, ports: ["E", "W", "N", "S"] },
   rcs: { kg: 250, price: 2600, ports: ["E", "W", "N", "S"] }, rack: { kg: 550, price: 6500, ports: ["W"] }, grapple: { kg: 400, price: 5200, ports: ["W"] }, mechbay: { kg: 1800, price: 8000, ports: ["W"] },
 };
-export const STARTER_HULL = [{ t: "bridge", gx: 0, gy: 0 }, { t: "engine", gx: -1, gy: 0 }, { t: "tank", gx: 1, gy: 0 }, { t: "pod", gx: 0, gy: 1 }];
+export const STARTER_HULL = [{ t: "bridge", gx: 0, gy: 0 }, { t: "engine", gx: -1, gy: 0 }, { t: "tank", gx: 1, gy: 0 }, { t: "pod", gx: 0, gy: 1 }, { t: "mechbay", gx: 1, gy: 1 }];   // the bay rides beside the tank and the pod: the walker comes with the ship
 export const PART_ORDER = ["people", "scrap", "fuel"];
 
 export function biasAt(w, d) {
@@ -112,6 +112,7 @@ export function derive(hull) {
 export function install(hull, t, gx, gy) {
   if (hull.builder.occupied(hull.list, gx, gy) || !hull.builder.adjacencyOK(hull.list, gx, gy, t)) return false;
   hull.list.push({ t, gx, gy });
+  if (t === "mechbay") hull.walkerLost = false;   // a new bay brings a walker
   return true;
 }
 

@@ -57,7 +57,7 @@ let view = "space";
 const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
 function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 // leaveGround(g): the seam up, after the road has let the ship go: the purse back as kilograms, the modules lost gone from the build list
-function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
+function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.walkerLost) hull.walkerLost = true; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
 function enterHold(v) { enterGround(v); }
 function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
 function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }

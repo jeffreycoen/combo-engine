@@ -48,26 +48,31 @@ export function makeGround(seed, w, scrapKg, opts) {
   const say = (k, extra) => { const e = { k, t: world.t, ...(extra || {}) }; events.push(e); return e; };
   const cue = (name) => { cues.push({ type: name }); };
   const depotP = war.map.TOWN.find((t) => t.depot && t.team !== 2);
+  const site = { x: depotP.x, z: depotP.z };   // the homeland's centre for coldsnap's placement radius: the depot's spot until the hull lands, then the bridge
+  world.slotTreesBlock = true;   // coldsnap's own switch: loose chunks and trees are ground too, so no slot or spawn ever lands a man inside a module
   const input = defaultTickInput();
   const townUV = war.town.map((b) => { const c = war.map.invW(b.x, b.z); return { id: b.id, x: c.u, z: c.v, marker: b.marker, get ruined() { return b.ruined; } }; });
   // the bell's context: its cues go to the page as sound events; the one save draw per bell stays coldsnap's own
   input.bellCtx = { cue, toast: (text) => say("toast", { text }), townUV, buildSnapshot: () => buildSnapshotOf(war), nextApcSeq: () => ++war.seq.apc, saveFront: () => { serializeRun(war); }, possessed: () => false };
   const placement = makePlacement({ world, run, view: {}, input, map: war.map, grid: war.grid, field: war.field, T: war.T, R: null, dev: false,
-    toast: (text) => say("toast", { text }), cue, setHud: () => {}, nextApcSeq: () => ++war.seq.apc, depotP, recomputeFlow });
+    toast: (text) => say("toast", { text }), cue, setHud: () => {}, nextApcSeq: () => ++war.seq.apc, depotP: site, recomputeFlow });
   // the build-line driver: her squad lays walls along a two-point line by coldsnap's own law, paid from the one purse
   const buildCtx = { objG, recomputeFlow, stampBag: (b, side) => stampBag(war.grid, b, side), setMines: () => {} };
   input.stepBuildLine = (sq) => stepBuildLine(world, war.grid, war.field, war.T, run, sq, buildCtx, (text) => say("toast", { text }), war.map);
-  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], walker: null, stick: { f: 0, l: 0, h: null } };
+  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], walker: null, stick: { f: 0, l: 0, h: null }, site, recomputeFlow };
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
 // kilogram lands as this many ground kilograms. box and pitch: a module's half size
-// and the grid step, in metres. lift: how far above the ground a module is set.
-// crashStop: the crash's stop time; the arrival speed over it is the deceleration.
-// slideFrac: how far a loose module slides, in metres per metre a second of arrival
-// speed. moduleHp: a module's hit points. offsetX, offsetZ: the crash site from the
-// depot's spot, in metres.
-export const HULL_DIALS = { kgPerKg: 250, box: 0.8, pitch: 1.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, offsetX: 14, offsetZ: 0 };
+// and the grid step, in metres: 250 times the mass is 6.3 times the length, so the
+// 1.6 m box of the seam's table lands as 10 m on a 10.7 m pitch. lift: how far above
+// the ground a module is set. crashStop: the crash's stop time; the arrival speed over
+// it is the deceleration. slideFrac: how far a loose module slides, in metres per metre
+// a second of arrival speed. moduleHp: a module's hit points. site: how far from the
+// depot's spot the bridge lands, along the line to the map's centre snapped to the
+// nearest axis; the hull's own gx axis runs on along that line, away from the depot,
+// and its gy axis across it, so the whole hull stands beyond the bridge, clear of the depot.
+export const HULL_DIALS = { kgPerKg: 250, box: 5, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26 };
 
 // crashHull(G, hull, v, opts): the hull's modules become bodies at the crash site,
 // set down at rest and asleep as coldsnap's masonry is, welded to their grid
@@ -84,25 +89,54 @@ export function crashHull(G, hull, v, opts) {
   const held = ws.filter((w, k) => !broken.has(k));
   const keep = hull.builder.connectedFrom(list, held, 0);
   const slide = d.slideFrac * v;
-  const slots = list.map((m) => ({ x: f.x + d.offsetX + m.gx * d.pitch, z: f.z + d.offsetZ + m.gy * d.pitch }));
+  // the site line: from the depot's spot toward the map's centre, snapped to the nearest axis; u runs on along it away from the depot, r across it
+  const u = Math.abs(f.x) >= Math.abs(f.z) ? { x: -Math.sign(f.x) || -1, z: 0 } : { x: 0, z: -Math.sign(f.z) || -1 };
+  const r = { x: -u.z, z: u.x };
+  const site = { x: f.x + u.x * d.site, z: f.z + u.z * d.site };
+  const slots = list.map((m) => ({ x: site.x + u.x * m.gx * d.pitch + r.x * m.gy * d.pitch, z: site.z + u.z * m.gx * d.pitch + r.z * m.gy * d.pitch }));
   const bodies = list.map((m, i) => {
     const loose = !keep.has(i);
-    const x = slots[i].x + (loose ? slide : 0), z = slots[i].z;
+    const x = slots[i].x + (loose ? u.x * slide : 0), z = slots[i].z + (loose ? u.z * slide : 0);
     const b = addBody(world, { kind: "chunk", team: 1, mass: MODULES[m.t].kg * d.kgPerKg, hx: d.box, hy: d.box, hz: d.box, x, y: war.field.heightAt(x, z) + d.box + d.lift, z, hp: d.moduleHp, friction: 0.65, restitution: 0.02 });
     b.sleeping = true; b.town = "hull"; b.module = m.t; b.maxHp = d.moduleHp; b.tint = loose ? "timber" : "wall";
     return b;
   });
   const welds = [];
   for (const w of held) if (keep.has(w.a) && keep.has(w.b)) welds.push({ a: w.a, b: w.b, weld: addWeld(world, bodies[w.a], bodies[w.b], w.strength * d.kgPerKg) });
-  G.hull = { list, builder: hull.builder, bodies, slots, welds, v, a, broken: [...broken], loose: list.map((m, i) => i).filter((i) => !keep.has(i)), dials: d };
+  G.site.x = site.x; G.site.z = site.z;   // the bridge is the homeland's centre for coldsnap's placement radius
+  G.hull = { list, builder: hull.builder, bodies, slots, welds, v, a, broken: [...broken], loose: list.map((m, i) => i).filter((i) => !keep.has(i)), dials: d, axis: { u, r }, site, walkerLost: !!hull.walkerLost, bay: -1, stamped: [] };
+  stampHull(G);
   return G.hull;
+}
+
+// stampHull(G): the hull's footprints in coldsnap's grid: every cell whose centre lies under a
+// living module is blocked, so guns, walls, and paths go around it; the old stamp is lifted
+// first, the cells the ground itself blocks are never touched, and the paths recompute.
+export function stampHull(G) {
+  const H = G.hull, grid = G.war.grid;
+  if (!H) return 0;
+  for (const i of H.stamped) grid.cells[i].blocked = false;
+  H.stamped = [];
+  for (const b of H.bodies) {
+    if (!b.alive) continue;
+    const cs = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz]) => grid.worldToGrid(b.pos.x + sx * b.hx, b.pos.z + sz * b.hz));
+    const gx0 = Math.min(...cs.map((c) => c.gx)), gx1 = Math.max(...cs.map((c) => c.gx)), gz0 = Math.min(...cs.map((c) => c.gz)), gz1 = Math.max(...cs.map((c) => c.gz));
+    for (let gz = gz0; gz <= gz1; gz++) for (let gx = gx0; gx <= gx1; gx++) {
+      if (!grid.inBounds(gx, gz)) continue;
+      const i = grid.idx(gx, gz), cell = grid.cells[i], p = grid.gridToWorld(gx, gz);
+      if (cell.blocked || Math.abs(p.x - b.pos.x) > b.hx || Math.abs(p.z - b.pos.z) > b.hz) continue;
+      cell.blocked = true; H.stamped.push(i);
+    }
+  }
+  G.recomputeFlow();
+  return H.stamped.length;
 }
 
 // HER: her row and her arms, installed into coldsnap's tables at the ground's boot so
 // its copies stay verbatim; her sidearm is the hunter's, her body the one MAN row.
 // reach: how close she must stand to a module to work on it; repairBase and
 // repairPerM: the weld-back's seconds, plus seconds per metre the module slid;
-// standOff: where she and the hands stand from the bridge at the crash. All PROPOSED.
+// standOff: how far off the bridge's face she stands at the crash, across the site line, the hands behind her. All PROPOSED.
 export const HER = {
   squad: { n: 1, cost: 0, speed: 3.2, label: "THE ENGINEER" },
   arms: { projSpeed: 80, kind: "mg", weapon: "sidearms", dmg: 5, dirDmg: 11, burst: 2, burstGap: 0.10, fireRate: 0.8, range: 12, acc: 0.075, occl: "arc", windF: 0.06, windComp: 0.6 },
@@ -115,13 +149,14 @@ export function installHer() { SQUAD_SPECS.her = { ...HER.squad }; INFANTRY_ARMS
 export function fieldCrew(G, crew) {
   installHer();
   const { run, world } = G, H = G.hull, d = HER;
-  const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z };
-  const squad = makeSquad(run.nextSquadId++, "her", 1, at.x, at.z + d.standOff);
+  const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z }, r = H ? H.axis.r : { x: 0, z: 1 }, off = (H ? H.dials.box : 0) + d.standOff;   // across the site line, on the bridge's free side, off its face
+  const squad = makeSquad(run.nextSquadId++, "her", 1, at.x - r.x * off, at.z - r.z * off);
   spawnSquadMembers(world, squad); run.squads.push(squad);
   const names = (crew || []).map((h) => h.name), hands = [];
   for (let k = 0; k < names.length; k += 4) {
     const some = names.slice(k, k + 4);
-    const sq = makeSquad(run.nextSquadId++, "rifles", 1, at.x, at.z - d.standOff - 2 * (k / 4));
+    const o = off + 3 + 3 * (k / 4);
+    const sq = makeSquad(run.nextSquadId++, "rifles", 1, at.x - r.x * o, at.z - r.z * o);
     spawnSquadMembers(world, sq, some.length); run.squads.push(sq);
     sq.memberIds.forEach((id, j) => { const u = world.byId.get(id); if (u) u.handName = some[j]; hands.push({ id, name: some[j], alive: true }); });
   }
@@ -131,17 +166,38 @@ export function fieldCrew(G, crew) {
 }
 
 // WALKER: hers, coldsnap's own mech at coldsnap's own scale, 5.4 m tall, two and a
-// half troopers; it lies wrecked beside the hull at the crash until she repairs it.
-// repair: her seconds at the wreck; spotX, spotZ: the wreck's spot from the bridge, in
-// metres; s: the scale. room: the room the walker needs around its spot, coldsnap's own
-// placement distance for a mech; standPad: how far past the room her stand is; reach: how
-// far from the spot her seconds still run. PROPOSED.
-export const WALKER = { s: 1, repair: 10, spotX: 0, spotZ: -8, room: 4.5, standPad: 0.5, reach: 10 };
+// half troopers; it rides in the mech bay and lies wrecked at the bay's door at the
+// crash until she repairs it. repair: her seconds at the wreck; s: the scale; door: how
+// far off the bay's open face it lies and stands; room: the room the walker needs around
+// its spot, coldsnap's own placement distance for a mech; standPad: how far past the room
+// her stand is; reach: how far from the spot her seconds still run. PROPOSED.
+export const WALKER = { s: 1, repair: 10, door: 4, room: 4.5, standPad: 0.5, reach: 10 };
 
-// wreckWalker(G): the walker lies wrecked at its spot; nothing stands until she repairs it.
+// bayDoor(G): the bay's open side: the first of across, back across, on, and back on the
+// site line with no module of the hull beside it, as a unit vector in the world.
+function bayDoor(G) {
+  const H = G.hull, b = H.list[H.bay], { u, r } = H.axis;
+  for (const [dgx, dgy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+    if (H.list.some((m) => m.gx === b.gx + dgx && m.gy === b.gy + dgy)) continue;
+    return { x: u.x * dgx + r.x * dgy, z: u.z * dgx + r.z * dgy };
+  }
+  return { x: r.x, z: r.z };
+}
+
+// walkerSpot(G): where the walker lies and stands: off the bay's open face, wherever the bay lies now.
+export function walkerSpot(G) {
+  const H = G.hull, bay = H.bodies[H.bay], s = bayDoor(G), k = H.dials.box + WALKER.door;
+  return { x: bay.pos.x + s.x * k, z: bay.pos.z + s.z * k };
+}
+
+// wreckWalker(G): the walker rides in the mech bay: with a bay aboard and the walker not
+// lost, it lies wrecked at the bay's door; nothing stands until she repairs it. Without a
+// bay, or with the walker lost on an earlier ground, there is no walker.
 export function wreckWalker(G) {
-  const s0 = G.hull ? G.hull.slots[0] : { x: G.run.focus.x, z: G.run.focus.z };
-  G.walker = { mech: null, spot: { x: s0.x + WALKER.spotX, z: s0.z + WALKER.spotZ }, wrecked: true, alive: false, possessed: false };
+  const H = G.hull, bay = H ? H.list.findIndex((m) => m.t === "mechbay") : -1;
+  if (bay < 0 || H.walkerLost) { G.walker = null; return null; }
+  H.bay = bay;
+  G.walker = { mech: null, bay, spot: walkerSpot(G), wrecked: true, alive: false, possessed: false };
   return G.walker;
 }
 
@@ -182,6 +238,7 @@ export function clearRoom(G) {
 export function raiseWalker(G) {
   const W = G.walker;
   if (!W || W.mech) return null;
+  W.spot = walkerSpot(G);
   clearRoom(G);
   const m = buildMech(G.world, { x: W.spot.x, z: W.spot.z, yaw: 0, team: 1, hp: MECH.hp, s: WALKER.s });
   m.thrustersOn = true; m.thrustAssist = true; m.hull.maxHp = MECH.hp;
@@ -234,13 +291,41 @@ export function stepHer(G, dt) {
   else if (her.act === "fix" && her.target != null) {
     const m = G.hull.bodies[her.target];
     if (!m.alive) rest();
-    else if (Math.hypot(m.pos.x - b.pos.x, m.pos.z - b.pos.z) <= HER.reach) {
+    else if (boxDist(m, b) <= HER.reach) {
       her.actT -= dt;
       if (her.actT <= 0) { weldBack(G, her.target); out.push({ k: "repaired", t: G.world.t, module: G.hull.list[her.target].t }); rest(); }
     }
   } else if (her.act === "wall" && !her.squad._build) rest();
   for (const h of G.hands) { if (!h.alive) continue; const u = G.world.byId.get(h.id); if (!u || !u.alive) { h.alive = false; out.push({ k: "handDead", t: G.world.t, name: h.name }); } }
   return out;
+}
+
+// boxDist(m, b): how far body b stands off module m's faces, zero inside its box.
+function boxDist(m, b) { return Math.hypot(Math.max(0, Math.abs(b.pos.x - m.pos.x) - m.hx), Math.max(0, Math.abs(b.pos.z - m.pos.z) - m.hz)); }
+
+// faceOf(G, m, b): the point just off module m's face nearest body b, a body's width and a
+// pad off the face, by coldsnap's clear-slot rule.
+function faceOf(G, m, b) {
+  const dx = b.pos.x - m.pos.x, dz = b.pos.z - m.pos.z, pad = b.hx + 0.6, cl = (v, h) => Math.max(-h, Math.min(h, v));
+  const p = Math.abs(dx) / m.hx >= Math.abs(dz) / m.hz
+    ? { x: m.pos.x + (dx < 0 ? -1 : 1) * (m.hx + pad), z: m.pos.z + cl(dz, m.hz) }
+    : { x: m.pos.x + cl(dx, m.hx), z: m.pos.z + (dz < 0 ? -1 : 1) * (m.hz + pad) };
+  return clearSlot(G.world, p.x, p.z, b.hx + 0.35);
+}
+
+// clearBox(G, m): everyone of hers inside module m's box, grown by a body's width and coldsnap's
+// pad, is moved off its nearest face, so a module set back in its slot never stands on anyone.
+export function clearBox(G, m) {
+  const moved = [];
+  for (const b of G.world.bodies) {
+    if (!b.alive || b.team !== 1 || b.kind !== "unit") continue;
+    if (Math.abs(b.pos.x - m.pos.x) > m.hx + b.hx + 0.35 || Math.abs(b.pos.z - m.pos.z) > m.hz + b.hz + 0.35) continue;
+    const p = faceOf(G, m, b);
+    b.pos.x = p.x; b.pos.z = p.z; b.pos.y = G.war.field.heightAt(p.x, p.z) + b.hy + 0.02;
+    b.v.x = 0; b.v.y = 0; b.v.z = 0;
+    moved.push(b);
+  }
+  return moved;
 }
 
 // joined(G): the modules joined to the bridge through unbroken welds between living modules.
@@ -266,11 +351,13 @@ export function weldBack(G, i) {
   const s = H.slots[i];
   b.pos.x = s.x; b.pos.z = s.z; b.pos.y = G.war.field.heightAt(s.x, s.z) + d.box + d.lift;
   b.v.x = 0; b.v.y = 0; b.v.z = 0; b.w.x = 0; b.w.y = 0; b.w.z = 0; b.sleeping = true; b.tint = "wall";
+  clearBox(G, b); stampHull(G);
+  const j = joined(G);   // only a neighbour joined to the bridge takes a weld; a loose neighbour gets its own weld-back
   let n = 0;
   for (const w of H.builder.weldsOf(H.list)) {
     if (w.a !== i && w.b !== i) continue;
-    const o = H.bodies[w.a === i ? w.b : w.a];
-    if (!o.alive) continue;
+    const k = w.a === i ? w.b : w.a, o = H.bodies[k];
+    if (!o.alive || !j.has(k)) continue;
     if (H.welds.some((x) => ((x.a === w.a && x.b === w.b) || (x.a === w.b && x.b === w.a)) && !x.weld.broken)) continue;
     H.welds.push({ a: w.a, b: w.b, weld: addWeld(G.world, H.bodies[w.a], H.bodies[w.b], w.strength * d.kgPerKg) }); n++;
   }
@@ -280,7 +367,8 @@ export function weldBack(G, i) {
 // order(G, kind, x, z, which): the player's orders. "gun" places one of coldsnap's
 // towers at the ground point by its build law: held ground, a free cell, the live
 // price, one purchase a second. "takeoff" hands the purse back as kilograms, names
-// the modules lost, and refuses while a living module is loose or the bridge is dead.
+// the modules lost and a walker down as lost, and refuses while a living module is
+// loose or the bridge is dead.
 export function order(G, kind, x, z, which) {
   const { war, run, placement } = G;
   if (kind === "gun") {
@@ -301,7 +389,8 @@ export function order(G, kind, x, z, which) {
     let best = null, bd = Infinity;
     for (const i of loose) { const m = G.hull.bodies[i]; const dd = Math.hypot(m.pos.x - b.pos.x, m.pos.z - b.pos.z); if (dd < bd) { bd = dd; best = i; } }
     const m = G.hull.bodies[best], sq = G.her.squad;
-    sq.order = "move"; sq.dest = { x: m.pos.x, z: m.pos.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
+    const fp = faceOf(G, m, b);
+    sq.order = "move"; sq.dest = { x: fp.x, z: fp.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
     const slid = Math.hypot(m.pos.x - G.hull.slots[best].x, m.pos.z - G.hull.slots[best].z);
     G.her.act = "fix"; G.her.target = best; G.her.actT = HER.repairBase + HER.repairPerM * slid;
     G.events.push({ k: "fix", t: G.world.t, module: G.hull.list[best].t, seconds: G.her.actT });
@@ -331,7 +420,9 @@ export function order(G, kind, x, z, which) {
     if (!b) return { ok: false, reason: "she is dead" };
     if (!G.walker) return { ok: false, reason: "no walker here" };
     if (walkerAlive(G)) return { ok: false, reason: "the walker stands" };
+    if (!G.hull.bodies[G.walker.bay].alive) return { ok: false, reason: "the bay is destroyed" };
     if (G.walker.possessed) leaveWalker(G);
+    G.walker.spot = walkerSpot(G);
     const sq = G.her.squad;
     const st = standOff(G, b);
     sq.order = "move"; sq.dest = { x: st.x, z: st.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
@@ -350,7 +441,7 @@ export function order(G, kind, x, z, which) {
     return { ok: true, sections: sq._build.rows.length };
   }
   if (kind === "takeoff") {
-    const out = { ok: true, scrapKg: run.resources * G.dials.kgPerScrap, lost: [], keptList: null, abandoned: false };
+    const out = { ok: true, scrapKg: run.resources * G.dials.kgPerScrap, lost: [], keptList: null, abandoned: false, walkerLost: !!(G.walker && G.walker.mech && !G.walker.mech.hull.alive) };
     if (G.hull) {
       const H = G.hull;
       if (!H.bodies[0].alive) return { ok: false, reason: "the bridge is lost", abandoned: true };

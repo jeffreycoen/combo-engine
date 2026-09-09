@@ -976,7 +976,13 @@
    "source": "ark",
    "group": "New",
    "name": "the mech bay",
-   "does": "The walker rides only if a mech bay is welded.",
+   "files": [
+    "src/games/gravitys-ark/stations.js",
+    "src/games/gravitys-ark/ground.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.1.2",
+   "does": "The walker rides only if a mech bay is welded: the starter hull carries one; the walker lies wrecked at its door; a hull without a bay lands without a walker; a walker down at TAKE OFF is lost until a new bay is bought.",
    "serves": [
     "bay",
     "wrecks"

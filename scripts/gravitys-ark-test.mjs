@@ -383,15 +383,15 @@ function runTrades(S, purse, hull, crew, rngX, count, afterEach) {
 { // 15. the build screen derives the starter's mass and thrust and refuses a loose module
   const hull = makeHull(STARTER_HULL);
   const d0 = derive(hull);
-  let ok = d0.m === 3400 && d0.F === 60000 && d0.fuelCap === 3000;
+  let ok = d0.m === 5200 && d0.F === 60000 && d0.fuelCap === 3000;   // the starter carries the mech bay: 3,400 kg and 1,800 more
   const strutIdx = hull.list.length;
   ok = ok && install(hull, "strut", 2, 0) === true;
-  ok = ok && derive(hull).m === 3550;
+  ok = ok && derive(hull).m === 5350;
   ok = ok && install(hull, "strut", 5, 5) === false;
   const bridgeIdx = hull.list.findIndex((m) => m.t === "bridge");
   ok = ok && remove(hull, bridgeIdx) === false;
   ok = ok && remove(hull, strutIdx) === true;
-  ok = ok && derive(hull).m === 3400;
+  ok = ok && derive(hull).m === 5200;
   check("ark: the build screen derives the starter's mass and thrust and refuses a loose module", ok);
 }
 
@@ -1032,7 +1032,9 @@ function rollArkFields(type, i, nWorlds) {
   const pos = (X) => JSON.stringify(X.H.bodies.map((b) => [b.pos.x, b.pos.y, b.pos.z, b.mass, b.alive]));
   check("ark: the crash puts the hull on the ground as bodies welded by the weld-stress rule at a rolled speed, and twin crashes agree",
     A.H.bodies.length === STARTER_HULL.length && A.H.bodies.every((b) => b.kind === "chunk" && b.alive && b.team === 1) && JSON.stringify(A.H.loose) === JSON.stringify(expectLoose) && A.H.welds.length === expectWelds && pos(A) === pos(B));
-  const C = mk(30);   // at 30 m/s the engine's weld breaks by the rule: 1400 kg at 100 m/s/s beats 120000 N
+  const C = mk(30);   // at 30 m/s the engine's weld breaks by the rule: 1400 kg at 100 m/s/s beats 120000 N; the rule says what else does
+  const ws30 = hull.builder.weldsOf(hull.list), broken30 = new Set(breaking(weldLoads(hull.builder, MODULES, hull.list, ws30, 30 / HULL_DIALS.crashStop, 1), ws30));
+  const keep30 = hull.builder.connectedFrom(hull.list, ws30.filter((x, k) => !broken30.has(k)), 0), expectLoose30 = hull.list.map((m, i) => i).filter((i) => !keep30.has(i));
   const refused = groundOrder(C.G, "takeoff");
   for (const i of looseModules(C.G)) weldBack(C.G, i);
   const allowed = groundOrder(C.G, "takeoff");
@@ -1041,8 +1043,8 @@ function rollArkFields(type, i, nWorlds) {
   C.H.bodies[0].alive = false; C.H.bodies[0].hp = 0;
   const abandoned = groundOrder(C.G, "takeoff");
   check("ark: TAKE OFF is refused while a module is loose, allowed once every loose module is welded back, and the dead are lost",
-    C.H.loose.length === 1 && C.H.loose[0] === 1 && !refused.ok && refused.loose.length === 1 && allowed.ok && allowed.lost.length === 0 && allowed.keptList.length === 4
-    && lostPod.ok && lostPod.lost.length === 1 && lostPod.lost[0] === "pod" && lostPod.keptList.length === 3 && !abandoned.ok && abandoned.abandoned === true);
+    JSON.stringify(C.H.loose) === JSON.stringify(expectLoose30) && C.H.loose.includes(1) && !refused.ok && refused.loose.length === C.H.loose.length && allowed.ok && allowed.lost.length === 0 && allowed.keptList.length === STARTER_HULL.length
+    && lostPod.ok && lostPod.lost.length === 1 && lostPod.lost[0] === "pod" && lostPod.keptList.length === STARTER_HULL.length - 1 && !abandoned.ok && abandoned.abandoned === true);
 }
 
 { // 42. ark: she takes the field as a squad of one on her own row and the hands as rifles by name, and twin fields agree
@@ -1058,17 +1060,18 @@ function rollArkFields(type, i, nWorlds) {
   check("ark: she takes the field as a squad of one on her own row and the hands as rifles by name, and twin fields agree",
     SQUAD_SPECS.her && INFANTRY_ARMS.her && herSq.type === "her" && herSq.memberIds.length === 1 && !!hb && hb.utype === "her" && hb.team === 1
     && A.hands.length === 2 && hands.every((u) => u && u.alive && u.utype === "rifles") && hands.map((u) => u.handName).join(",") === "Aud,Bjorn" && place(A) === place(B));
+  const loose0 = looseModules(A).length;
   const fix = groundOrder(A, "fix");
   const m = A.hull.bodies[fix.target], slid = Math.hypot(m.pos.x - A.hull.slots[fix.target].x, m.pos.z - A.hull.slots[fix.target].z);
   const sent = fix.ok && fix.target === 1 && herSq.order === "move" && herSq.holdFire === true && A.her.act === "fix" && Math.abs(fix.seconds - (HER.repairBase + HER.repairPerM * slid)) < 1e-9;
   hb.pos.x = m.pos.x + HER.reach * 0.5; hb.pos.z = m.pos.z;   // she stands within reach
   const ev = stepHer(A, fix.seconds);
-  const welded = ev.some((e) => e.k === "repaired") && looseModules(A).length === 0 && A.her.act === "hold" && herSq.holdFire === false;
+  const welded = ev.some((e) => e.k === "repaired") && looseModules(A).length === loose0 - 1 && A.her.act === "hold" && herSq.holdFire === false;
   const fight = groundOrder(A, "fight");
   check("ark: FIX sends her to the nearest loose module with her fire held, the weld-back lands when her seconds run down within reach, and FIGHT frees her fire",
     sent && welded && fight.ok && herSq.holdFire === false && herSq.order === "defend" && A.her.act === "fight");
-  const s0 = A.hull.slots[0];
-  const wall = groundOrder(A, "wall", s0.x - 6, s0.z + 8, { x: s0.x + 6, z: s0.z + 8 });
+  const s0 = A.hull.slots[0], ax = A.hull.axis, wz = A.hull.dials.box + 14;   // a line across the site line, well off the bridge's free side, clear of every module
+  const wall = groundOrder(A, "wall", s0.x - ax.r.x * wz - ax.u.x * 6, s0.z - ax.r.z * wz - ax.u.z * 6, { x: s0.x - ax.r.x * wz + ax.u.x * 6, z: s0.z - ax.r.z * wz + ax.u.z * 6 });
   check("ark: a WALL order gives her squad coldsnap's build line, section by section",
     wall.ok && wall.sections > 0 && !!herSq._build && herSq._build.kind === "walls" && herSq._build.rows.length === wall.sections && herSq.order === "build" && A.her.act === "wall");
 }
@@ -1124,6 +1127,41 @@ function rollArkFields(type, i, nWorlds) {
   check("ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
     ev.some((e) => e.k === "walkerUp") && walkerAlive(G) && all.every((b) => b.alive && !inside(b)) && hands[1].pos.x === far.x && hands[1].pos.z === far.z
     && [hb, hands[0]].every((b) => Math.max(Math.abs(b.pos.x - spot.x), Math.abs(b.pos.z - spot.z)) <= WALKER.room + 10));
+}
+
+{ // 50. ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the grid, and twin sites agree
+  // 51. ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and a new bay brings one
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const mk = (list) => { const G = makeGround(gSeed, w, 900); const H = crashHull(G, makeHull(list), 5); return { G, H }; };
+  const A = mk(STARTER_HULL), B = mk(STARTER_HULL), f = A.G.run.focus, d = HULL_DIALS;
+  const bridge = A.H.bodies[0], engine = A.H.bodies[1], bay = A.H.list.findIndex((m) => m.t === "mechbay");
+  const scale = A.H.bodies.every((b) => b.hx === d.box && b.hy === d.box && b.hz === d.box && b.mass === MODULES[b.module].kg * d.kgPerKg);
+  const onLine = Math.abs(Math.hypot(bridge.pos.x - f.x, bridge.pos.z - f.z) - d.site) < 1e-9 && Math.abs(Math.hypot(engine.pos.x - bridge.pos.x, engine.pos.z - bridge.pos.z) - d.pitch) < 1e-9
+    && (A.H.axis.u.x === 0 || A.H.axis.u.z === 0) && Math.hypot(engine.pos.x - f.x, engine.pos.z - f.z) < d.site;
+  const inRim = A.H.bodies.every((b) => A.G.world.inRim(b.pos.x, b.pos.z));
+  const centred = A.G.site.x === bridge.pos.x && A.G.site.z === bridge.pos.z;
+  const stamped = A.H.stamped.length > 0 && A.H.bodies.every((b) => A.G.war.grid.cellAt(b.pos.x, b.pos.z).blocked === true);
+  const onHull = groundOrder(A.G, "gun", bridge.pos.x, bridge.pos.z, "mg");
+  const twin = JSON.stringify(A.H.slots) === JSON.stringify(B.H.slots);
+  check("ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the grid, and twin sites agree",
+    scale && onLine && inRim && centred && stamped && !onHull.ok && twin);
+  fieldCrew(A.G, []);
+  const W = wreckWalker(A.G), bayB = A.H.bodies[bay];
+  const atDoor = !!W && W.bay === bay && Math.abs(Math.max(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) - (d.box + WALKER.door)) < 1e-9 && Math.min(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) < 1e-9;
+  const none = mk(STARTER_HULL.filter((m) => m.t !== "mechbay")); fieldCrew(none.G, []);
+  const noBay = wreckWalker(none.G) === null && none.G.walker === null && !groundOrder(none.G, "repairWalker").ok;
+  const lostHull = makeHull(STARTER_HULL); lostHull.walkerLost = true;
+  const L = makeGround(gSeed, w, 900); crashHull(L, lostHull, 5); fieldCrew(L, []);
+  const wasLost = wreckWalker(L) === null && L.hull.walkerLost === true;
+  const rested = groundOrder(A.G, "takeoff").walkerLost === false;   // still wrecked in its bay: it rides
+  const r = groundOrder(A.G, "repairWalker"); const hb = herBody(A.G); hb.pos.x = W.spot.x + 1; hb.pos.z = W.spot.z; stepHer(A.G, r.seconds);
+  const up = walkerAlive(A.G);
+  A.G.walker.mech.hull.alive = false; A.G.walker.mech.hull.hp = 0;
+  const down = groundOrder(A.G, "takeoff");
+  const bought = makeHull(STARTER_HULL.filter((m) => m.t !== "mechbay")); bought.walkerLost = true;
+  const brings = install(bought, "mechbay", 1, 1) === true && bought.walkerLost === false;
+  check("ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and a new bay brings one",
+    atDoor && noBay && wasLost && rested && r.ok && up && down.ok && down.walkerLost === true && brings);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
