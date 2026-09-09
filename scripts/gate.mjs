@@ -56,6 +56,7 @@ const GATES = {
   "backdrop": ["scripts/backdrop-test.mjs"],
   "gait": ["scripts/gait-test.mjs"],
   "render3d": ["scripts/render3d-test.mjs"],
+  "yard": ["scripts/yard-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
