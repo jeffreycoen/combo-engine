@@ -1,6 +1,6 @@
 # Phase 0.1.0 — the spine: coldsnap at 111b9cb
 
-Status: SERVED. Served for review on 2026-09-09; no task dispatched.
+Status: DISPATCHED. Approved 2026-09-09; task 0.1.0-1 dispatched to Sonnet 5.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Bracket: eleven gates at their recorded counts; the parts build 49 gates, every verdict ok. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The first phase of the build of GRAVITY'S ARK, frame by frame in the player's order. Frames 1 and 2, the bay and the hold, stand on coldsnap's engine, and nothing of them is built until the engine is current. Coldsnap's taken files come in whole from the local checkout at `/home/batman/coldsnap`, commit `111b9cb`, replacing the copies this tree took at `82b5524`. Head brings the walker's leap with its gas store, piston, aimed nozzles, and braked landing; the jeep on springs; real tanks with hull-borne launch loads, twist and pinch; the order chain, the roster, and the credit trail; and coldsnap's own housekeeping, where the order layer, the placement layer, the harness, the palette, and the styles walked out of the shell into plain files. Fifty-five commits.
