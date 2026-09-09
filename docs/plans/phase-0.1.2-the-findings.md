@@ -1,6 +1,6 @@
 # Phase 0.1.2 — the five findings
 
-Status: DISPATCHED. Task 4 landed, commit `98e11e5`, 2026-09-09; task 5 is planned next.
+Status: DISPATCHED. Task 5 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The five findings returned from the playtest of the landed ground, recorded under Acceptance in `phase-0.1.1-the-hold.md`, fixed in one phase of five tasks in the recorded order: the ground screen's layout, her clearance when the walker stands, the ship at its ground scale with the mech bay, the ship's look on the ground from deadweight's drawing, and space drawn as deadweight draws it. Each task is planned after the one before it lands, written once for one reader. The game stays playable at every landing.
@@ -25,7 +25,7 @@ SHAPED. The first three tasks are the ark's own layer, new code in its own files
 - 0.1.2-2 — she steps aside: her stand off the wreck at coldsnap's room distance; anyone of hers inside it moved clear by coldsnap's own rule before the walker is built. LANDED, commit `664d6c6`. → `task-0.1.2-2-she-steps-aside.md`
 - 0.1.2-3 — the ship at scale and the mech bay: 10 m modules on a 10.7 m pitch, the crash site inside the rim, the footprints stamped into the grid, the bay on the starter hull, the walker in the bay. LANDED, commit `76f5262`. → `task-0.1.2-3-the-ship-at-scale.md`
 - 0.1.2-4 — the ship's look on the ground: deadweight's module drawing as solid shapes in coldsnap's scene, through one listed door. LANDED, commit `98e11e5`. → `task-0.1.2-4-the-ships-look.md`
-- 0.1.2-5 — space as deadweight draws it: the drawing from the demo's lines 849 to 1461 in a space screen file of its own. Planned after task 4 lands.
+- 0.1.2-5 — space as deadweight draws it: the drawing from the demo's lines 849 to 1461 in a space screen file of its own. DISPATCHED. → `task-0.1.2-5-space-as-deadweight.md`
 
 Suggested model: Sonnet 5 — every edit is in the plan; nothing is designed.
 
@@ -95,3 +95,24 @@ Phone and desktop the same.
 - `node scripts/gate.mjs gravitys-ark` prints 48 PASS lines, one more than the recorded 47, then `gravitys-ark-test: 48 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
 - The parts build names 50 gates and every verdict is ok.
 - The seven hash lines in the task print OK; the new file's hash among them.
+
+## The walk, task 5
+
+Phone and desktop the same; the controls, the panes, the dock, the gate pane, and the card are as they were.
+
+- **Space** is drawn by `docs/gravitys-ark/space.js`, hooked from the main file, which hands it one snapshot of the page's state each frame and draws nothing of space itself. The grid, the pits, and the projection are the render2d module's, lifted from the demo earlier; the rest is the demo's drawing at the ark's scale.
+- **The worlds** are faceted planets in their pits, each lit from one side, with an atmosphere and a rim toward the sun, coloured by climate; a world the hole took is a dark disc. The label under each names it, its climate, its holder, and EDGE where the road says so. Four rings on the net around every well say where its pull bites.
+- **The sun** has its glow, its body reddening one step per takeoff, and its kill ring riding the pit, dashed red at the radius the road kills at. After the collapse the hole is a black disc with a turning dashed disc around it and its edge drawn as before.
+- **The gate** stands as two lit posts and a lintel where the galaxy's gate is; the lanes as before.
+- **The ship** is its modules as the demo's prisms around its balance point, at sixteen pixels a pitch at any zoom, turned to its velocity or, at rest, to its aim, with the demo's glyph and letter on each top face and a coupler on every weld; while it burns, a plume behind every engine along the burn's own line, with the demo's bloom, cone, shock diamonds, core, and occasional flare. Its heading line is amber, brighter while burning; its velocity line blue; the balance mark at its centre; a red ring when the ship is lost.
+- **The coast line** runs six minutes ahead by the road's own gravity law, a dot every third second, red where a well would take it, ending where it would.
+- **Wrecks** are prisms at their kind: a module by its shape, a crate golden with its kilograms, scrap and hulls grey with an amber ring. **Pirates** are the demo's two-prism boats with a hunting glow off the roost, their roost ringed, and the lock ring around the ship while one holds it. **The grapple** line sags to its hook.
+- **The ship panel** at the bottom right draws the hull's modules on their grid with their glyphs and the welds between them, the frame coloured by the hull's health. **The map** at the top left draws the galaxy: every world by its climate, the sun or the hole and its edge, the gate, the pirates, the wrecks, the ship, and the coast half an hour ahead.
+- **Nothing else moves:** no order, spend, or number changes; the camera, the zoom cluster, the drag to aim, and the keys are the page's as before.
+
+## Acceptance arithmetic, task 5
+
+- `node scripts/gate.mjs gravitys-ark` prints 49 PASS lines, one more than the recorded 48, then `gravitys-ark-test: 49 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
+- The parts build names 50 gates and every verdict is ok.
+- The six hash lines in the task print OK; the new file's hash among them.
+- The phase lands with this task: the status line and the version to 0.1.2 ride the landing.
