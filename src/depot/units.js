@@ -105,7 +105,7 @@ function faceTravel(u, dt) {
 // target than any wall — IF our side can SEE him (VISION mk0.72: one law,
 // men and masonry alike). fieldReaches is read with the ATTACKER's own team
 // (2); arcClears threads the shooter's own id (self-hit law).
-// mk2.52 (owner): THE ONE TARGET LAW — the enemy's soft-target set is the
+// mk2.52: THE ONE TARGET LAW — the enemy's soft-target set is the
 // player's own (state.js squadFire's scan): men, hulls, and mechs alike.
 const soft = (b) => b.kind === "unit" || b.kind === "vehicle" || b.kind === "mech";
 function nearestPlayerUnit(world, u, muzzle, fspec, R2, urgency, T, toUV) {
@@ -133,7 +133,7 @@ function unitTargetValid(world, u, muzzle, tgt, fspec, R2, T, toUV) {
   return arcClears(world, muzzle, tgt.pos, fspec, u.id);
 }
 
-// mk2.51 (owner): THE URGENCY LAW — a man in weapon range outranks any
+// mk2.51: THE URGENCY LAW — a man in weapon range outranks any
 // structure at FULL effective range, the player's own squadFire law
 // mirrored (units first, structures on an empty scan). The old 0.6 radius
 // refused 62% of the enemy's real in-range shots at player men (the
@@ -279,7 +279,7 @@ function stepRifleman(world, u, spec, cell, dt, fwdDir, T, toUV = (x, z) => ({ u
       u.flashT = world.t;
       // unit target: NO hitOnly — the round hits whatever it physically
       // hits (law of the world). Structure target: hitOnly kept. Both carry
-      // owner: u.id (self-hit law — uniform muzzle-clearing immunity).
+      // u.id (self-hit law — uniform muzzle-clearing immunity).
       shooterFire(world, u, muzzle, tgt, fspec, soft(tgt)
         ? { attacker: "enemy", owner: u.id }
         : { attacker: "enemy", hitStruct: true, hitOnly: "structure", owner: u.id });
@@ -389,7 +389,7 @@ function stepGrenadier(world, u, cell, dt, fwdDir, T, toUV = (x, z) => ({ u: x, 
   if (tgt && u.grenCd <= 0) {
     u.grenCd = 3.0 + world.rng() * 0.6;
     u.flashT = world.t;
-    // owner: u.id — without it the lofted shell has no muzzle-clearing
+    // u.id — without it the lofted shell has no muzzle-clearing
     // immunity against the grenadier's own body (core.js's owner-immunity
     // gate, ~:698) and detonates at the launch point on the very first
     // tick, same failure mode as stepTank's shell needed owner: t.id for.
@@ -450,9 +450,9 @@ function stepSapper(world, u, dt) {
   return false; // otherwise runs with the flow like everyone else
 }
 
-// mk2.08 (owner): ITS ATOMIC CREW — the sapper's shape, the davy's round.
+// mk2.08: ITS ATOMIC CREW — the sapper's shape, the davy's round.
 // Fires when a seen player target or structure is inside range. mk2.12
-// (owner): no fatal trigger — the blast alone rules; the pair reloads as
+//: no fatal trigger — the blast alone rules; the pair reloads as
 // one, DAVY_FIRE.reloadS seconds (_davyReadyAt per man, the generic body
 // sweep).
 function stepDavy(world, u, dt, T, toUV) {
@@ -539,7 +539,7 @@ export function stepUnits(world, grid, fwdDir, T, toUV = (x, z) => ({ u: x, v: z
     }
     if (u.tag === "sapper" && stepSapper(world, u, dt)) continue;
     if (u.tag === "davy" && stepDavy(world, u, dt, T, toUV)) continue;
-    // P7.1 T6 (owner): his engineers — unarmed shovels until Task 7 arms
+    // P7.1 T6: his engineers — unarmed shovels until Task 7 arms
     // their build lines. A held engineer stands; an unheld one marches.
     if (u.tag === "eng" && u.hold) {
       u.settled = true;

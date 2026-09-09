@@ -74,7 +74,7 @@ const SCOPE = { off: onBarrel(-0.10, 0.055), s: [0.75, 0.75, 2.6], aim: "barrel"
 // reach is a second barrel segment butted onto its muzzle
 const LONGBARREL = { off: onBarrel(MUZZLE - 0.22), s: [0.4, 0.4, 4.4], aim: "barrel" };
 const SATCHEL = { off: [0, 0.10, -0.22], s: [2.2, 1.6, 0.8] };
-// P7.2 T6 (owner): the medic's dress — white uniform, red cross front and
+// P7.2 T6: the medic's dress — white uniform, red cross front and
 // back, black bag. The two cross bars pass THROUGH the torso and protrude
 // on both faces, so one pair of props reads as a cross from either side.
 // role is the COLOR key (the renderer and portrait honor it over the part
@@ -84,7 +84,7 @@ const MEDIC_BAG = { off: [0.17, 0.02, 0.0], s: [1.4, 1.8, 1.1], role: "gun" };
 const CROSS_V = { off: [0, 0.32, 0], s: [0.7, 2.6, 2.9], role: "acc" };
 const CROSS_H = { off: [0, 0.32, 0], s: [2.2, 0.7, 2.9], role: "acc" };
 const TOOLBOX = { off: [0.17, 0.0, 0.05], s: [1.6, 1.2, 1.0], role: "gun" }; // P7.2 T7: the mechanic's black box — side coats stay, the tool is the identity
-// mk2.12 (owner): THE ATOMIC CREW'S DRESS — orange jumpsuits, the radiation
+// mk2.12: THE ATOMIC CREW'S DRESS — orange jumpsuits, the radiation
 // mark. The mark is a yellow chest placard with a black center (box props
 // cannot draw lobes; the owner's eye rules the placard live). The tube is
 // the mortar's carried-prop idiom, fatter. // provisional (F5), every hex
@@ -147,7 +147,7 @@ export function troopKit(b, depot, sil = false) {
   // slate, so he is unchanged; androids ignore both and keep their silver.
   const pal = (b.utype === "medics" || b.tag === "medic") ? "medic"
     : (b.utype === "davy" || b.tag === "davy") ? "davy" // mk2.12: the orange outranks the coat — both sides' atomic crews
-    : gren || b.team === 2 ? "gren" : "con"; // P7.2 T6 (owner): the cross outranks the coat — both sides' medics wear the white
+    : gren || b.team === 2 ? "gren" : "con"; // P7.2 T6: the cross outranks the coat — both sides' medics wear the white
   const bulk = BULK[b.tag] || null;
   let bw = bulk ? bulk[0] : 1, bh = bulk ? bulk[1] : 1;
   // P7.2 T6/T7: the kneel — the medic and the mechanic drop low while

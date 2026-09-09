@@ -18,7 +18,7 @@ import { clearSlot } from "./squads.js";
 import { spawnUnit } from "./units.js";
 import { parkArmor, parkMech, mirrorFieldKey } from "./muster.js";
 import { mineSeedRoll, mineSeedPlace, MINE_COST } from "./mines.js";
-import { MASON, BISON, APC, MECH } from "./specs.js";
+import { MASON, BISON, APC, JEEP, MECH } from "./specs.js";
 import { startBuildLine } from "./buildlines.js";
 import { fieldPrices } from "./market.js";
 
@@ -40,7 +40,7 @@ export function ringBell(world, grid, field, T, run, ctx, map) {
     reg: run.reg, snap: ctx.buildSnapshot(), rng: world.rng, t: world.t,
     priceOf: (t) => (run._market ? run._market.foe[t === "tank" ? "tank" : t] : undefined),
     // P7.2 T4: HIS HAND pays the PLAYER'S OWN price table — one table to
-    // the letter (owner). Null before the market's first tick: his walk
+    // the letter. Null before the market's first tick: his walk
     // then buys nothing, and the five draws still burn (the law).
     priceP: (k) => (run._market && run._market.player[k] != null ? run._market.player[k] : null),
     possessed: !!(ctx.possessed && ctx.possessed()),
@@ -53,7 +53,7 @@ export function ringBell(world, grid, field, T, run, ctx, map) {
     if (grid && field && depotH) for (const k of run.foe.hired) mirrorFieldKey(world, run, depotH, grid, field, k, ctx.nextApcSeq, map);
     run.foe.hired = [];
   }
-  // P7 T6 (owner): THE DEFENSIVE OPENING — part of an early muster
+  // P7 T6: THE DEFENSIVE OPENING — part of an early muster
   // digs in at home instead of marching. Pure post-muster split: no
   // planWave draw moves. Rifle-family only; capped at HOME_GUARD_CAP
   // live defenders; spawn draws (3/man) are deterministic from the
@@ -129,14 +129,16 @@ export function ringBell(world, grid, field, T, run, ctx, map) {
   // same table, one hull a bell, Bison first. The commander's own
   // doctrine finds the new hull on its own (it scans live bodies).
   {
-    const heroPrice = (k) => (run._market ? run._market.foe[k] : (k === "hero_bison" ? BISON.cost : k === "hero_mech" ? MECH.cost : APC.cost));
+    const heroPrice = (k) => (run._market ? run._market.foe[k] : (k === "hero_bison" ? BISON.cost : k === "hero_mech" ? MECH.cost : k === "hero_jeep" ? JEEP.cost : APC.cost));
     const has = (vt) => world.bodies.some((b) => b.kind === "vehicle" && b.team === 2 && b.vtype === vt && b.alive);
-    const open = (tag) => run.foe.unlocked.indexOf(tag) >= 0; // P7.2 T4 (owner): a bought hero plan re-parks at ANY bell — the clamp is dead
+    const open = (tag) => run.foe.unlocked.indexOf(tag) >= 0; // P7.2 T4: a bought hero plan re-parks at ANY bell — the clamp is dead
     const depotE4 = map.TOWN.find((tt) => tt.depot && tt.team === 2);
     if (depotE4 && !has("bison") && open("hero_bison") && run.reg.scrap >= heroPrice("hero_bison")) {
       run.reg.scrap -= heroPrice("hero_bison"); parkArmor(world, grid, field, depotE4, 2, "bison", ctx.nextApcSeq, map);
     } else if (depotE4 && !has("apc") && open("hero_apc") && run.reg.scrap >= heroPrice("hero_apc")) {
       run.reg.scrap -= heroPrice("hero_apc"); parkArmor(world, grid, field, depotE4, 2, "apc", ctx.nextApcSeq, map);
+    } else if (depotE4 && !has("jeep") && open("hero_jeep") && run.reg.scrap >= heroPrice("hero_jeep")) {
+      run.reg.scrap -= heroPrice("hero_jeep"); parkArmor(world, grid, field, depotE4, 2, "jeep", ctx.nextApcSeq, map); // mk3.03: symmetry — its scouts ride too
     } else if (depotE4 && !(world.mechs || []).some((m) => m.team === 2 && m.hull.alive) && open("hero_mech") && run.reg.scrap >= heroPrice("hero_mech")) {
       run.reg.scrap -= heroPrice("hero_mech"); parkMech(world, grid, field, depotE4, 2, map);
     }

@@ -7,7 +7,9 @@
 // zero rng; DepotGame wires them.
 import { applyDamage } from "../../engine/core.js";
 import { clearSlot } from "../../depot/squads.js";
-import { APC } from "../../depot/specs.js";
+import { APC, JEEP } from "../../depot/specs.js";
+const seatsOf = (v) => v.vtype === "jeep" ? JEEP.seats : APC.seats; // mk2.98: seats come from the spec
+export { seatsOf };
 
 const RIDE_Y = -60;
 const BOARD_R = 2.5;        // m from the rally point — the formation has closed up // provisional (F5)
@@ -23,7 +25,7 @@ const HATCH_R = 14;         // m — the ramp drops when the boarders close to t
 const STANDOFF = 2.2;
 
 export function apcBySeq(world, seq) {
-  for (const b of world.bodies) if (b.kind === "vehicle" && b.vtype === "apc" && b.apcSeq === seq && b.alive) return b;
+  for (const b of world.bodies) if (b.kind === "vehicle" && (b.vtype === "apc" || b.vtype === "jeep") && b.apcSeq === seq && b.alive) return b; // mk2.99: the jeep boards too
   return null;
 }
 export function apcSeated(world, squads, seq) {
@@ -33,7 +35,7 @@ export function apcSeated(world, squads, seq) {
   return n;
 }
 export function stepTransports(world, squads) {
-  for (const b of world.bodies) if (b.vtype === "apc") b._hatch = (world.t - (b._unloadT || -9) < 1.5) ? 1 : 0;
+  for (const b of world.bodies) if (b.vtype === "apc" || b.vtype === "jeep") b._hatch = (world.t - (b._unloadT || -9) < 1.5) ? 1 : 0;
   // P7 T8: THE FERRY'S HOLD — enemy riders are loose units, seated by
   // u.rideApc (the seat number), not a squad roster. Same stash (y RIDE_Y),
   // same seal, same grave: the hull gone kills every rider it still carries.
@@ -82,7 +84,7 @@ export function stepTransports(world, squads) {
         if (d < BOARD_R) near++;
       }
       if (nearest < HATCH_R) v._hatch = 1;
-      const free = APC.seats - apcSeated(world, squads, v.apcSeq);
+      const free = seatsOf(v) - apcSeated(world, squads, v.apcSeq);
       if (live === 0 || live > free) { sq._boarding = null; sq.order = "defend"; sq.dest = null; continue; }
       if (near === live) {
         sq.ridingIn = v.apcSeq; sq._boarding = null;
@@ -110,7 +112,7 @@ export function unloadApc(world, squads, v) {
     for (const id of sq.memberIds) {
       const u = world.byId.get(id);
       if (!u || !u.alive) continue;
-      const a = (i++ / APC.seats) * Math.PI * 2;
+      const a = (i++ / seatsOf(v)) * Math.PI * 2;
       const p = clearSlot(world, v.pos.x + Math.sin(a) * 3.4, v.pos.z + Math.cos(a) * 3.4, (u.hx || 0.28) + 0.35);
       u.riding = false; u.pinned = false; u.sleeping = false;
       u.pos.x = p.x; u.pos.z = p.z; u.pos.y = world.field.heightAt(p.x, p.z) + 0.74;

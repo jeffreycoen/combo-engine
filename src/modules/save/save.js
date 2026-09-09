@@ -120,6 +120,7 @@ function writeBody(b, idx, rockIdx) {
     if (val === undefined) continue;
     x[key] = val; any = true;
   }
+  if (b._queue && b._queue.length) { x._queue = b._queue.map((q) => ({ ...q })); any = true; } // mk2.90: the hull's chain rides explicitly
   if (any) o.x = x;
   return o;
 }
@@ -239,6 +240,7 @@ export function serializeFront(ctx) {
       if (val === undefined) continue;
       o[key] = val;
     }
+    if (sq._queue && sq._queue.length) o._queue = sq._queue.map((q) => ({ ...q })); // mk2.90: the chain rides explicitly — plainValue drops object arrays
     return o;
   };
 

@@ -55,6 +55,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] The api surface and the roster contract pattern
 - [x] The sound engine: spatial model, event vocabulary, continuous beds (its acoustics reference doc still to come over)
 - [x] The renderer
+- [x] The spine at coldsnap 111b9cb: every taken file matching the checkout by hash; the walker's leap and gas system, the jeep on springs, real tanks with hull-borne launch loads, the order chain, the placement layer, the harness — 0.1.0
 
 ### From the mech demo
 
@@ -185,7 +186,7 @@ Serving checklist items:
 - [x] gait — the balance controller and the walking planner — 0.0.99
 - [x] render3d — the 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris — 0.0.100 and 0.0.101
 
-Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
+Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen. From 0.1.0 those module files hold coldsnap's code at 111b9cb, the import paths the only difference; specs carries five added lines, listed in that phase's plan.
 
 Retired: poolmarket (0.0.36), conserve (0.0.39), shipyard (0.0.52) — second lifts of already-landed capabilities; the first lifts are canonical by ruling. Withdrawn unlanded: squads, buildlines, units, drivers, muster, bell — batch 3 closed at mapgen; the realignment is `docs/plans/the-realignment.md`.
 
@@ -193,7 +194,7 @@ Staying in the depot by ruling, not by miss: tick, state, sim, boot, api — the
 
 ## Status
 
-The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). FROSTLINE plays live at `docs/frostline/`, mid-repair per its audit. The deadweight hangar demo rides in the tree as read-only source. The next extractions come from the checklist's unchecked boxes, harness layer first. The parts page at `docs/parts/` lists every part from coldsnap and deadweight, the ark's own layer, and the story's gaps, with the evidence measured at each landing by `node scripts/parts.mjs`; it is published for acceptance and feedback and named in every landing report.
+The coldsnap engine stands at coldsnap commit `111b9cb`: 48 files at its paths, 26 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, four carrying listed differences from the 0.1.0 plan, and the version mark left as it was; `node scripts/gate.mjs api` prints worldHash 1713367543, runHash 2888190349. FROSTLINE plays live at `docs/frostline/`, mid-repair per its audit. The deadweight hangar demo rides in the tree as read-only source. The next extractions come from the checklist's unchecked boxes, harness layer first. The parts page at `docs/parts/` lists every part from coldsnap and deadweight, the ark's own layer, and the story's gaps, with the evidence measured at each landing by `node scripts/parts.mjs`; it is published for acceptance and feedback and named in every landing report.
 
 ## License
 

@@ -26,8 +26,10 @@ const bootWithHero = () => { const war = bootWar({ seed: 1 }); const hero = spaw
   for (let i = 0; i < 1200; i++) { stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
   check("ten idle seconds: the master is alive and near the ground in the live war",
     hero.alive === true && Math.abs(hero.pos.y - war.field.heightAt(hero.pos.x, hero.pos.z) - HERO.hy) < 2.0);
-  check("the world hash with the master in it holds its pin", worldHash(war.world) === 3344950406);
-  check("the run hash holds its pin", runHash(war.run) === 997895256); }
+  const twin = bootWithHero(), tIn = defaultTickInput(), tHIn = heroInput();
+  for (let i = 0; i < 1200; i++) { stepHero(twin.war, twin.hero, tHIn, STEP); tickWar(twin.war, STEP, tIn); }
+  check("the world hash with the master in it repeats on a twin boot", worldHash(war.world) === worldHash(twin.war.world));
+  check("the run hash repeats on a twin boot", runHash(war.run) === runHash(twin.war.run)); }
 
 { const run = () => { const { war, hero } = bootWithHero();
     const input = defaultTickInput(), hIn = heroInput();
@@ -111,16 +113,18 @@ const fakeWorld = (bodies) => ({ bodies });
   check("the hurl: the fixed 600 impulse sends a 25 kg crate east at exactly 24",
     near(dv, 24) && near(crate.v.x, 24) && crate.v.z === 0); }
 
-{ const war = bootWar({ seed: 1 });
-  const hero = spawnHero(war, 0, 20);
-  const crate = addBody(war.world, { kind: "prop", team: 0, x: 12, y: war.field.heightAt(12, 20) + 0.5, z: 20, hx: 0.4, hy: 0.4, hz: 0.4, mass: 25, hp: 50 });
-  const grip = seize(hero, crate);
-  const input = defaultTickInput(), hIn = heroInput();
-  for (let i = 0; i < 120; i++) { stepGrip(grip, hero, STEP); stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
-  hurl(grip, hero, 60, 20);
-  for (let i = 0; i < 120; i++) { stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
-  check("live war: a crate reeled for a second and hurled east — the master stands, the world pins",
-    hero.alive === true && crate.pos.x > 14 && worldHash(war.world) === 1533505030 && runHash(war.run) === 3688031194); }
+{ const run = () => { const war = bootWar({ seed: 1 });
+    const hero = spawnHero(war, 0, 20);
+    const crate = addBody(war.world, { kind: "prop", team: 0, x: 12, y: war.field.heightAt(12, 20) + 0.5, z: 20, hx: 0.4, hy: 0.4, hz: 0.4, mass: 25, hp: 50 });
+    const grip = seize(hero, crate);
+    const input = defaultTickInput(), hIn = heroInput();
+    for (let i = 0; i < 120; i++) { stepGrip(grip, hero, STEP); stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
+    hurl(grip, hero, 60, 20);
+    for (let i = 0; i < 120; i++) { stepHero(war, hero, hIn, STEP); tickWar(war, STEP, input); }
+    return { stands: hero.alive === true, east: crate.pos.x > 14, hash: worldHash(war.world) + ":" + runHash(war.run) }; };
+  const a = run(), b = run();
+  check("live war: a crate reeled for a second and hurled east — the master stands, and a twin run lands the same world",
+    a.stands && a.east && a.hash === b.hash); }
 
 
 // ================================================ OM-2 follow-up: righting

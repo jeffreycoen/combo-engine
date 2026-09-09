@@ -157,16 +157,15 @@ export function makeField(n, cs, seed = 7) {
 
 // ------------------------------------------------------------------ bodies
 export const CAUSE = { PROJECTILE: "PROJECTILE", BLAST: "BLAST", CRUSH: "CRUSH", FLIP: "FLIP", DROWN: "DROWN", TOSS: "TOSS", COLLAPSE: "COLLAPSE", IMPACT: "IMPACT" };
-let BODY_ID = 1;
 function boxInertiaInv(m, hx, hy, hz) {
   if (m <= 0) return v3(0, 0, 0);
   const k = 3 / m; // invI = 3/(m*(a^2+b^2)) with half extents
   return v3(k / (hy * hy + hz * hz), k / (hx * hx + hz * hz), k / (hx * hx + hy * hy));
 }
-export function makeBody(o) {
+export function makeBody(o, id) {
   const m = o.mass || 0;
   const b = {
-    id: BODY_ID++, kind: o.kind || "prop", team: o.team || 0, tag: o.tag || "",
+    id, kind: o.kind || "prop", team: o.team || 0, tag: o.tag || "",
     hx: o.hx, hy: o.hy, hz: o.hz, mass: m, invM: m > 0 ? 1 / m : 0,
     invIb: boxInertiaInv(m, o.hx, o.hy, o.hz),
     pos: v3(o.x || 0, o.y || 0, o.z || 0), q: o.q ? qNorm({ ...o.q }) : qIdent(),
@@ -400,13 +399,13 @@ export function makeWorld(opts = {}) {
     bodies: [], byId: new Map(), welds: [], projectiles: [], events: [],
     rng: mulberry32(opts.seed != null ? opts.seed : 1234),
     warm: new Map(), contacts: [], control: { throttle: 0, steer: 0, brake: 0 },
-    bisonId: 0, volleySeq: 1, killCount: 0, seq: 0,
+    bisonId: 0, volleySeq: 1, killCount: 0, seq: 0, nextId: 1, nextMechId: 1,
     ach: null,
   };
   world.ach = makeAch();
   return world;
 }
-export function addBody(world, o) { const b = makeBody(o); b.seq = world.seq++; world.bodies.push(b); world.byId.set(b.id, b); return b; } // seq is world-local (unlike the module-global id) so parity-keyed AI stays deterministic across rebuilds
+export function addBody(world, o) { const id = world.nextId || 1; world.nextId = id + 1; const b = makeBody(o, id); b.seq = world.seq++; world.bodies.push(b); world.byId.set(b.id, b); return b; } // the id and the seq are both the world's own: every world numbers from one, so two boots from one seed are twins in every record that names a body
 export function addWeld(world, a, b, breakF = 4.0e4) {
   const rA = v3(), rB = v3(), mid = v3();
   V.add(mid, a.pos, b.pos); V.scale(mid, mid, 0.5);
@@ -658,7 +657,7 @@ export function explode(world, x, y, z, spec) {
   if (spec.hitStruct || world._tdStruct) {
     for (const b of world.bodies) {
       if (!b.alive) continue;
-      // DIVERGENCE (guarded, mk1.66 — the owner's ruling): SANDBAGS ARE
+      // DIVERGENCE (guarded, mk1.66): SANDBAGS ARE
       // MORTAL. A bag takes blast damage like the walls beside it — its 60hp
       // was unreachable by any path since the first bag. b.sandbag exists
       // only on depot bodies; every other mode is byte-identical (golden).
@@ -888,6 +887,9 @@ function killBody(world, b, info) {
     ev.team = b.team; ev.tag = b.tag; ev.utype = b.utype;
     ev.vtype = b.vtype; ev.towerType = b.towerType;
     if (b.sandbag) { ev.sandbag = 1; ev.bagSide = b.bagSide || 1; }
+    // mk2.95: the kill names its shooter (the srcId the damage paths carry)
+    // so the game layer can credit the killer's squad or hull.
+    if (info.srcId != null) ev.srcId = info.srcId;
   }
   world.events.push(ev);
   achOnKill(world, ev);
@@ -971,9 +973,15 @@ function driveHull(world, b, c) {
   const upY = b.R[4];
   const traction = (b.grounded || b.onBody) ? Math.max(0, Math.min(1, (upY - 0.25) / 0.45)) : 0;
   const vA = V.dot(b.v, fwd);
-  const target = c.throttle >= 0 ? c.throttle * 9.5 : c.throttle * 4.5;
+  // mk2.97: per-body drive numbers — the defaults ARE the old constants, so
+  // every body not carrying them is numerically identical (golden). The
+  // grade term applies to suspension bodies only, AFTER the cap: a slope can
+  // beat an engine, which is the transfer case's whole mechanism.
+  const target = c.throttle >= 0 ? c.throttle * (b.spdF || 9.5) : c.throttle * (b.spdR || 4.5);
   let acc = (target - vA) * 2.6;
-  acc = Math.max(-9, Math.min(9, acc));
+  const cap = b.accCap || 9;
+  acc = Math.max(-cap, Math.min(cap, acc));
+  if (b.susp && traction > 0) acc -= world.gravity * fwd.y;
   if (traction > 0) V.addScaled(b.v, b.v, fwd, acc * dt * traction);
   // track grip: kill lateral slide (only as much as the treads can bite)
   const vS = V.dot(b.v, side);
@@ -983,6 +991,49 @@ function driveHull(world, b, c) {
     b.w.y += (wT - b.w.y) * Math.min(1, 9 * dt) * traction;
   }
   if (c.brake) { b.v.x *= Math.exp(-5 * dt); b.v.z *= Math.exp(-5 * dt); }
+}
+
+// DIVERGENCE (guarded, mk2.97): THE SUSPENSION. A body carrying
+// b.susp rides four spring-and-damper wheels instead of slamming its box
+// onto terrain contacts: each wheel samples the ground under itself and
+// answers with a vertical force at its point, so the hull pitches, rolls,
+// and rocks one wheel at a time. The box's own terrain contacts remain as
+// the bump stop beneath the springs. No demo, TD, or campaign body carries
+// the field — golden proves the frozen path. b.susp = { kx, kz, rest,
+// travel, rate, damp } (flat numbers — it rides the save's generic bag);
+// per-wheel compression lands in b._wheelC for the renderer; _suspGround
+// feeds the grounded commit so the drive has traction on its wheels.
+const _suspWheels = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+function stepSuspension(world) {
+  const dt = world.dt;
+  for (const b of world.bodies) {
+    const s = b.susp;
+    if (!s || !b.alive || b.sleeping || b.invM === 0) continue;
+    const R = b.R;
+    if (!b._wheelC) b._wheelC = [0, 0, 0, 0];
+    let touching = false;
+    for (let i = 0; i < 4; i++) {
+      const lx = _suspWheels[i][0] * s.kx, ly = -b.hy, lz = _suspWheels[i][1] * s.kz;
+      const rx = R[0] * lx + R[3] * ly + R[6] * lz;
+      const ry = R[1] * lx + R[4] * ly + R[7] * lz;
+      const rz = R[2] * lx + R[5] * ly + R[8] * lz;
+      const px = b.pos.x + rx, py = b.pos.y + ry, pz = b.pos.z + rz;
+      const h = world.field.heightAt(px, pz);
+      let comp = (h + s.rest) - py;
+      if (comp <= 0) { b._wheelC[i] = 0; continue; }
+      if (comp > s.travel) comp = s.travel;
+      b._wheelC[i] = comp;
+      touching = true;
+      const vpy = b.v.y + (b.w.z * rx - b.w.x * rz);
+      let F = s.rate * comp - s.damp * vpy;
+      if (F < 0) F = 0;
+      b.v.y += F * dt * b.invM;
+      const L = v3(-rz * F * dt, 0, rx * F * dt);
+      const dw = v3(); iMulVec(b.invIw, L, dw);
+      b.w.x += dw.x; b.w.y += dw.y; b.w.z += dw.z;
+    }
+    b._suspGround = touching;
+  }
 }
 
 function aiDrive(world, b) {
@@ -1476,8 +1527,12 @@ function collectContacts(world) {
     if (wl) for (const wd of wl) if (!wd.broken) return true;
     return false;
   };
+  // DIVERGENCE (guarded, mk2.87): a walking man does not wake a
+  // tree either — under depotCombat a sleeping tree ignores contact-wake
+  // from units, so a leaned-on treeline stays asleep and cheap.
   const wakeExempt = (s, mover) =>
-    world.depotCombat && s.kind === "chunk" && mover.mass < 200 && weldedAsleep(s);
+    world.depotCombat && ((s.kind === "tree" && mover.kind === "unit") ||
+      (s.kind === "chunk" && mover.mass < 200 && weldedAsleep(s)));
   const seen = new Set();
   const merged = _bpMerged;
   for (const c of grid.values()) {
@@ -1558,17 +1613,28 @@ function prepContacts(world) {
   const dt = world.dt;
   for (const c of world.contacts) {
     const a = c.a, b = c.b;
+    // DIVERGENCE (guarded, mk2.87): A WALKING MAN DOES NOT FELL A
+    // TREE. Under depotCombat a unit↔tree contact is one-sided: the tree's
+    // terms leave the effective-mass sums and applyImpulse never writes its
+    // velocity, so the man is pushed off the trunk at full strength and the
+    // trunk takes nothing. Vehicles, mechs, wrecks, blasts, gunfire and fire
+    // fell trees as before. No tree exists outside depot worlds (golden).
+    c.lockA = world.depotCombat && b && a.kind === "tree" && b.kind === "unit" ? 1 : 0;
+    c.lockB = world.depotCombat && b && b.kind === "tree" && a.kind === "unit" ? 1 : 0;
     if (world.mechs) c.mech = (a.mechRef || (b && b.mechRef)) ? 1 : 0; // DIVERGENCE: mech-owned contacts solve in the fixed-iteration island, not the LOD-tiered pass
     c.rA = v3(); V.sub(c.rA, c.p, a.pos);
     if (b) { c.rB = v3(); V.sub(c.rB, c.p, b.pos); }
     const n = c.n;
     // kn (scratch hoisted — this was the last per-step v3() churn in a hot loop)
-    let kn = a.invM + (b ? b.invM : 0);
-    const raxn = _pcRaxn; V.cross(raxn, c.rA, n);
-    const tmp = _pcTmp; iMulVec(a.invIw, raxn, tmp);
-    const t2v = _pcT2; V.cross(t2v, tmp, c.rA);
-    kn += V.dot(t2v, n);
-    if (b) {
+    let kn = (c.lockA ? 0 : a.invM) + (b && !c.lockB ? b.invM : 0);
+    const raxn = _pcRaxn, tmp = _pcTmp, t2v = _pcT2;
+    if (!c.lockA) {
+      V.cross(raxn, c.rA, n);
+      iMulVec(a.invIw, raxn, tmp);
+      V.cross(t2v, tmp, c.rA);
+      kn += V.dot(t2v, n);
+    }
+    if (b && !c.lockB) {
       const rbxn = v3(); V.cross(rbxn, c.rB, n);
       iMulVec(b.invIw, rbxn, tmp);
       V.cross(t2v, tmp, c.rB);
@@ -1582,9 +1648,9 @@ function prepContacts(world) {
     const tB = v3(); V.cross(tB, n, t1);
     c.t1 = t1; c.t2 = tB;
     const kt = (tv) => {
-      let k = a.invM + (b ? b.invM : 0);
-      V.cross(raxn, c.rA, tv); iMulVec(a.invIw, raxn, tmp); V.cross(t2v, tmp, c.rA); k += V.dot(t2v, tv);
-      if (b) { V.cross(raxn, c.rB, tv); iMulVec(b.invIw, raxn, tmp); V.cross(t2v, tmp, c.rB); k += V.dot(t2v, tv); }
+      let k = (c.lockA ? 0 : a.invM) + (b && !c.lockB ? b.invM : 0);
+      if (!c.lockA) { V.cross(raxn, c.rA, tv); iMulVec(a.invIw, raxn, tmp); V.cross(t2v, tmp, c.rA); k += V.dot(t2v, tv); }
+      if (b && !c.lockB) { V.cross(raxn, c.rB, tv); iMulVec(b.invIw, raxn, tmp); V.cross(t2v, tmp, c.rB); k += V.dot(t2v, tv); }
       return 1 / Math.max(1e-9, k);
     };
     c.invKt1 = kt(t1); c.invKt2 = kt(tB);
@@ -1618,13 +1684,13 @@ function relVelAt(c) {
 }
 function applyImpulse(c, J) {
   const a = c.a, b = c.b;
-  if (!a.sleeping) {
+  if (!a.sleeping && !c.lockA) {
     V.addScaled(a.v, a.v, J, -a.invM);
     const L = v3(); V.cross(L, c.rA, J);
     const dw = v3(); iMulVec(a.invIw, L, dw);
     V.addScaled(a.w, a.w, dw, -1);
   }
-  if (b && !b.sleeping) {
+  if (b && !b.sleeping && !c.lockB) {
     const L = v3(), dw = v3();
     V.addScaled(b.v, b.v, J, b.invM);
     V.cross(L, c.rB, J); iMulVec(b.invIw, L, dw);
@@ -1768,7 +1834,7 @@ function classifyImpacts(world) {
   const best = new Map(); // victimId -> {dmg, info}
   for (const { victim, other, pn } of agg.values()) {
     const dv = pn * victim.invM;
-    // DIVERGENCE (guarded, mk1.11 — the owner's ruling): A SLEEPING STONE IS
+    // DIVERGENCE (guarded, mk1.11): A SLEEPING STONE IS
     // NOT A WEAPON. Under depotCombat, a chunk that is ASLEEP — a standing
     // wall face, settled rubble — can neither slam a living man dead (the
     // depenetration ejection read as lethal IMPACT below) nor count as
@@ -1912,7 +1978,7 @@ function stepStatus(world) {
       b.buriedNow = false;
       if (b.buryT > 1.1) applyDamage(world, b, 1e6, { cause: CAUSE.COLLAPSE, attacker: b.lastImp && world.t - b.lastImp.t < 6 ? b.lastImp.attacker : "world", buildingId: b.buriedBy || "" });
     }
-    if (b.groundedNow || b.bodyGroundedNow) { b.airT = 0; b.grounded = true; } else { b.airT += dt; b.grounded = false; }
+    if (b.groundedNow || b.bodyGroundedNow || b._suspGround) { b.airT = 0; b.grounded = true; } else { b.airT += dt; b.grounded = false; }
     b.bodyGroundedLast = b.bodyGroundedNow; // #6c reads this: standing-on-a-body units skip sleep
     b.bodyGroundedNow = false; // DIVERGENCE #6a: pair-contact grounding, consumed per step
     // water
@@ -1940,7 +2006,7 @@ function stepStatus(world) {
         b.v.x *= 1 - Math.min(1, 3 * dt); b.v.z *= 1 - Math.min(1, 3 * dt);
         b.v.y *= 1 - Math.min(1, 1.5 * dt);
         if (b.subT === dt) world.events.push({ type: "splash", x: b.pos.x, z: b.pos.z });
-        if (b.subT > 0.9 && b.id !== world.bisonId) applyDamage(world, b, 1e6, { cause: CAUSE.DROWN, attacker: b.lastImp && world.t - b.lastImp.t < 4 ? b.lastImp.attacker : "world" }); // the Bison floods but survives — it has to climb out
+        if (b.subT > 0.9 && b.id !== world.bisonId && !b.fords) applyDamage(world, b, 1e6, { cause: CAUSE.DROWN, attacker: b.lastImp && world.t - b.lastImp.t < 4 ? b.lastImp.attacker : "world" }); // the Bison floods but survives — it has to climb out; mk2.98: a fording body shares its law
       } else b.subT = 0;
       // arctic water: a man treading at the surface doesn't get to swim it out.
       // Buoyancy holds bobbers just above the full-submersion line forever, so
@@ -2018,6 +2084,7 @@ export function stepWorld(world) {
   const dt = world.dt;
   world.t += dt;
   stepDrive(world);
+  stepSuspension(world);
   stepUnits(world);
   // integrate velocities + refresh frames
   for (const b of world.bodies) {

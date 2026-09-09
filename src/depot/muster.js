@@ -9,7 +9,7 @@
 // stay 45; the T9(e3)/(f)/(f2) and T19(b) pins prove it. Zero behavior
 // change.
 import { addBody, heading, mulberry32 } from "../engine/core.js";
-import { BISON, APC, MECH, MASON, ENEMY_SPECS, TOWER_SPECS, HAND_TAGS } from "./specs.js";
+import { BISON, APC, JEEP, MECH, MASON, ENEMY_SPECS, TOWER_SPECS, HAND_TAGS, fitJeep } from "./specs.js";
 import { clearSlot, makeSquad, slotBlockedPublic, SQUAD_SPECS } from "./squads.js";
 import { spawnUnit } from "./units.js";
 import { spawnSandbag, spawnSquadMembers, SANDBAG_HX, effRange } from "./state.js";
@@ -18,17 +18,17 @@ import { planRoute } from "./route.js";
 import { buildMech } from "../engine/mech.js";
 
 // P7 T2/T3/T4: THE STARTING ARMOR — a Bison AND an APC parked by
-// each depot, the enemy's ARMED AT POST (owner) — driving doctrine
+// each depot, the enemy's ARMED AT POST — driving doctrine
 // still waits for its commander (Task 6). FAIL-PROOF (P7 T3): a
 // widened fixed ring (10-26m) first, then a brute nearest-clear-cell
 // sweep (8-30m) backstops it — a hemmed ring must never leave a side
-// tankless. AMENDMENT 1 (P7 T4, owner): armor parks STABLE — every
+// tankless. AMENDMENT 1 (P7 T4): armor parks STABLE — every
 // clear cell is also vetted for a flat footprint (stableAt), and the
 // hull spawns asleep (no creep, no slide, no jitter). The brute
 // sweep tracks the flattest clear cell it sees as its own backstop —
 // stability is preferred, never blocking. Deterministic; no rng
 // stream is touched.
-// P7 T9 (owner): HOISTED TO MOUNT SCOPE — parkArmor/apcSeqN/depotP/
+// P7 T9: HOISTED TO MOUNT SCOPE — parkArmor/apcSeqN/depotP/
 // depotE used to be boot-local (the `else` branch below, fresh boot
 // only). The hero tier's player buy and the enemy's draw-free
 // replacement both need to park a fresh hull long after boot, off
@@ -44,10 +44,10 @@ export function armorSpread(field, bx, bz, spec) {
   }
   return hi - lo;
 }
-export const armorStable = (field, bx, bz, spec) => armorSpread(field, bx, bz, spec) < 0.28; // AMENDMENT 1 (owner): flat ground, no sliding boots // provisional (F5)
+export const armorStable = (field, bx, bz, spec) => armorSpread(field, bx, bz, spec) < 0.28; // AMENDMENT 1: flat ground, no sliding boots // provisional (F5)
 export function parkArmor(world, grid, field, depotT, team, kind, nextSeq, map) {
   if (!depotT) return;
-  const spec = kind === "apc" ? APC : BISON;
+  const spec = kind === "apc" ? APC : kind === "jeep" ? JEEP : BISON;
   const place = (bx, bz) => {
     const v = addBody(world, { kind: "vehicle", team, mass: spec.mass, hx: spec.hx, hy: spec.hy, hz: spec.hz,
       x: bx, y: field.heightAt(bx, bz) + spec.hy + 0.05, z: bz, hp: spec.hp, friction: 0.85,
@@ -58,11 +58,12 @@ export function parkArmor(world, grid, field, depotT, team, kind, nextSeq, map) 
     // or jitter at boot. Every wake path already exists (the first
     // order, the safety brake, the possession stick).
     v.sleeping = true;
-    if (kind === "apc") v.apcSeq = nextSeq();
+    if (kind === "apc" || kind === "jeep") v.apcSeq = nextSeq();
     // Both kinds, both teams: armed at post (Task 3's shape) — the
     // enemy's parks armed too (coax defends it) but driverless-in-
     // doctrine until Task 6.
-    v.drv = kind === "apc" ? "apc" : "armor"; v.depotDrive = "auto"; v.order = "defend"; v.tracks = "careful";
+    v.drv = kind === "apc" ? "apc" : kind === "jeep" ? "jeep" : "armor"; v.depotDrive = "auto"; v.order = "defend"; v.tracks = "careful";
+    if (kind === "jeep") fitJeep(v);
     if (team === 1) v.driver = "player";
     else v.bounty = spec.bounty;
     return v;
@@ -159,7 +160,7 @@ export function parkTower(world, grid, field, depotT, team, towerType, map) {
   return best ? place(best.x, best.z) : null;
 }
 
-// THE MECH PARKS (owner, 2026-08-20): the armor law at crown scale.
+// THE MECH PARKS: the armor law at crown scale.
 export const MECH_SPREAD = { hx: 2.2, hy: 1, hz: 2.2 }; // footprint vet // provisional (F5)
 export function parkMech(world, grid, field, depotT, team, map) {
   if (!depotT) return null;
@@ -239,7 +240,7 @@ export function seedBags(world, grid, depotT, streamKey, stampBag, map) {
   }
 }
 
-// P7.1 T6 (owner): THE BARE OPENING's pool — fifteen unique picks, one
+// P7.1 T6: THE BARE OPENING's pool — fifteen unique picks, one
 // table both sides. kind routes the placer; tag/n shape the enemy's men.
 export const PICK_POOL = [
   { key: "sq_rifles", kind: "squad", type: "rifles", tag: "", n: 4 },
@@ -255,11 +256,12 @@ export const PICK_POOL = [
   { key: "sq_davy", kind: "squad", type: "davy", tag: "davy", n: 2 },
   { key: "hero_bison", kind: "hull", vtype: "bison" },
   { key: "hero_apc", kind: "hull", vtype: "apc" },
+  { key: "hero_jeep", kind: "hull", vtype: "jeep" },
   { key: "hero_mech", kind: "mech" },
   { key: "mg", kind: "tower" }, { key: "gun", kind: "tower" }, { key: "mortar", kind: "tower" },
   { key: "rocket", kind: "tower" }, { key: "tesla", kind: "tower" },
 ];
-// P7.2 T8 (owner): THE OPENING DRAFT — seven cards each side, seven splice
+// P7.2 T8: THE OPENING DRAFT — seven cards each side, seven splice
 // draws, seven DISTINCT types; each card's unit-or-plan kind derives from
 // the SAME draw's residual fraction (no extra draws — the engBuildKind
 // idiom). Heroes deal at plain odds (owner: a drafted Bison is a lucky
@@ -293,7 +295,7 @@ export function musterFreshStart(world, S, depotP, grid, field, nextApcSeq, map)
   // P7 T8: THE COMMANDER — one draw per war, after makeRegiment's 2.
   // A RESUME never reaches this branch.
   S.cmdr = cmdrOf(world.rng);
-  // P7.2 T8 (owner): THE OPENING DRAFT — the player's seven (held for the
+  // P7.2 T8: THE OPENING DRAFT — the player's seven (held for the
   // pick screen; nothing player-side fields at boot), then its seven,
   // picked commander-colored (zero draws) and applied: plans push its
   // ledgers (a tower plan starts the one-build-a-bell engine from bell

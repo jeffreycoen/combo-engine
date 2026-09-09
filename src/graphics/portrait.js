@@ -7,7 +7,7 @@
 import * as THREE from "three";
 import { INFANTRY } from "../engine/core.js";
 import { troopKit, MEDIC_HEX, DAVY_HEX } from "./troopkit.js";
-import { toon, buildBison, buildApc, buildTowerMesh } from "./renderer.js";
+import { toon, buildBison, buildApc, buildJeep, buildTowerMesh } from "./renderer.js";
 
 const SIZE = 128;
 let P = null; // the one painter: { renderer, scene, cam, mount }
@@ -75,7 +75,7 @@ export function buildPortraitMan(utype) {
   }
   return g;
 }
-// THE MECH (owner, 2026-08-20): boxes-first miniature — grey toon slabs at
+// THE MECH: boxes-first miniature — grey toon slabs at
 // the walker's own proportions (mech.js RIG, literal numbers — this card
 // never moves, so no rig import is worth the coupling).
 export function buildPortraitMech() {
@@ -105,6 +105,7 @@ export function buildPortraitModel(key) {
   if (key && key.startsWith("sq_")) return buildPortraitMan(key.slice(3));
   if (key === "hero_bison") return buildBison(1);
   if (key === "hero_apc") return buildApc(1);
+  if (key === "hero_jeep") return buildJeep(1);
   if (key === "hero_mech") return buildPortraitMech();
   return buildTowerMesh(key); // mg | gun | mortar | rocket | frost
 }

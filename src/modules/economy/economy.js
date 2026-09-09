@@ -28,21 +28,21 @@ export function makeRegiment(rng) {
   return { heads, tanks, heads0: heads, tanks0: tanks, scrap: 60 };
 }
 
-export const STIPEND = 90; // mk2.49 (owner): RETIRED FROM THE BELL — income is the per-second clock, both sides, ground-scaled (groundRate below). The constant stands as the fixtures' floor-income shorthand (1/second x the 90-second bell) and for the one source pin that guards it.
+export const STIPEND = 90; // mk2.49: RETIRED FROM THE BELL — income is the per-second clock, both sides, ground-scaled (groundRate below). The constant stands as the fixtures' floor-income shorthand (1/second x the 90-second bell) and for the one source pin that guards it.
 
-// THE GROUND PAYS (mk2.49, owner): income is the clock, scaled by held
+// THE GROUND PAYS (mk2.49): income is the clock, scaled by held
 // ground — one law, one schedule, both sides. INCOME_CELLS is the ground
 // worth 1 scrap/second: one full depot-emitter disc of territory cells
 // (radius EMIT.depot.r, cell area 4 m^2) — a shared number derived from
 // the same table both depots emit with, so neither side's divisor can
-// drift. groundRate never falls under 1 (owner: the floor) and scales
+// drift. groundRate never falls under 1 and scales
 // continuously above it, fractions included.
 export const INCOME_CELLS = Math.round(Math.PI * EMIT.depot.r * EMIT.depot.r / 4);
 export function groundRate(heldCells) {
   return Math.max(1, heldCells / INCOME_CELLS);
 }
 
-// THE KILL CUT (owner, 2026-08-20): the fraction of a victim's live market
+// THE KILL CUT: the fraction of a victim's live market
 // price the killing side banks. The score ledger takes the whole price;
 // the books take this cut of it. // provisional (F5)
 export const KILL_CUT = 0.30;

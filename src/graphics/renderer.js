@@ -63,7 +63,7 @@ export function buildBison(team) {
   blade.position.set(0, -0.45, 3.5); blade.rotation.x = -0.24; blade.castShadow = true; g.add(blade);
   const tur = new THREE.Group(); tur.position.y = 1.35;
   const turBox = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.95, 2.7), toon(team === 2 ? 0x5a2f2a : 0x2a5082)); turBox.castShadow = true; tur.add(turBox);
-  // mk2.03 (owner): the barrel rises and falls — a pivot at the mantlet,
+  // mk2.03: the barrel rises and falls — a pivot at the mantlet,
   // the tube a child, pitch driven by b._aimPitch in the sync below.
   const gpiv = new THREE.Group(); gpiv.position.set(0, 0.12, 0.6); tur.add(gpiv); g.userData.gunPitch = gpiv;
   const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.36, 3.6), toon(0x33383d)); barrel.position.set(0, 0, 1.8); barrel.castShadow = true; gpiv.add(barrel);
@@ -72,7 +72,7 @@ export function buildBison(team) {
   const coax = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.5, 6), tur.material);
   coax.rotation.x = Math.PI / 2; coax.position.set(0.55, 0.3, 1.5);
   tur.add(coax);
-  // THE BULB (P7 T2, owner, 2026-08-14): a small lamp on the turret rear —
+  // THE BULB (P7 T2): a small lamp on the turret rear —
   // GREEN with the tracks safety on (CAREFUL), RED with it off (FREE).
   // Bodies with no b.tracks field (the demo, the enemy's Bison before
   // Task 5) read green — see the vehicle sync loop below.
@@ -82,7 +82,7 @@ export function buildBison(team) {
   g.add(tur); g.userData.turret = tur;
   return g;
 }
-// mk2.03 (owner): the wave tank finally shows its gun — hull, turret, and a
+// mk2.03: the wave tank finally shows its gun — hull, turret, and a
 // barrel that elevates. DEPOT-only (vtype "tank"); the demo's scouts and
 // trucks render untouched.
 export function buildWaveTank(team) {
@@ -92,6 +92,33 @@ export function buildWaveTank(team) {
   const box = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.7, 2.0), toon(team === 2 ? 0x5a2f2a : 0x2a5082)); box.castShadow = true; tur.add(box);
   const gp = new THREE.Group(); gp.position.set(0, 0.1, 0.5); tur.add(gp); g.userData.gunPitch = gp;
   const bar = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 2.8), toon(0x33383d)); bar.position.z = 1.4; bar.castShadow = true; gp.add(bar);
+  return g;
+}
+// mk2.98: THE JEEP — open hull, four sprung wheels. The suspension
+// pass writes b._wheelC (per-wheel compression); the sync loop drops each
+// wheel by its spring and rolls it with the hull's speed. Dials provisional (F5).
+export function buildJeep(team) {
+  const g = new THREE.Group();
+  const hullC = team === 2 ? 0x6e3a34 : 0x4a5d3a;
+  const hull = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.6, 3.2), toon(hullC));
+  hull.position.y = 0.15; hull.castShadow = true; g.add(hull);
+  const hood = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.25, 1.0), toon(hullC));
+  hood.position.set(0, 0.55, 1.0); g.add(hood);
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 0.08), toon(0x28303a));
+  screen.position.set(0, 0.85, 0.5); screen.rotation.x = -0.15; g.add(screen);
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.4, 1.1), toon(0x2a2f27));
+  seat.position.set(0, 0.5, -0.5); g.add(seat);
+  const pintle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.5, 6), toon(0x33383d));
+  pintle.position.set(0, 0.95, -0.9); g.add(pintle);
+  const mg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.7, 6), toon(0x14171a));
+  mg.rotation.x = Math.PI / 2; mg.position.set(0, 1.2, -0.6); g.add(mg);
+  g.userData.wheels = [];
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const wh = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.3, 10), toon(0x1b1e22));
+    wh.rotation.z = Math.PI / 2; wh.position.set(sx * 0.88, -0.3, sz * 1.3);
+    wh.castShadow = true; g.add(wh);
+    g.userData.wheels.push(wh);
+  }
   return g;
 }
 // P7 T4 (mk1.33): the APC — four seats, one coax. team parameterizes the
@@ -113,7 +140,7 @@ export function buildApc(team) {
     const fender = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.14, 6.2), toon(fenderC));
     fender.position.set(sx * 1.6, 0.22, 0); g.add(fender);
   }
-  // THE RAMP (owner, 2026-08-14): CLOSED on the march, OPEN when troops
+  // THE RAMP: CLOSED on the march, OPEN when troops
   // are loading or unloading — hinged at the tail's foot, swinging down
   // to the snow. The game layer stamps b._hatch; the sync loop eases it.
   const hinge = new THREE.Group(); hinge.position.set(0, -0.5, -2.8); g.add(hinge);
@@ -267,7 +294,7 @@ function makeSplat(town, span) {
     cx.strokeRect(uu(-8.6), vv2(19.4), 17.2 * W2U, 17.2 * W2U);
   };
   paintBase();
-  // ---- THE ROAD PAINTED (mk2.67, owner): roads are ground paint, not
+  // ---- THE ROAD PAINTED (mk2.67): roads are ground paint, not
   // bodies — stamped over the base art so fades keep them, under the smear
   // ledger's replay. fillRect only (the jsdom stub has no paths). A KEPT
   // road is a solid packed-earth ribbon with a worn center; a BROKEN road
@@ -938,7 +965,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
   const mkPal = (o) => { const p = {}; for (const k in o) p[k] = new THREE.Color(o[k]); return p; };
   const AND_LIVE = mkPal({ dom: 0xdde3ea, sec: 0x9aa6b2, acc: 0xc0cbd6, skin: 0xeef2f6, gun: 0x2a2e34 });
   const AND_DEAD = mkPal({ dom: 0x6d747c, sec: 0x474d54, acc: 0x596069, skin: 0x8b929a, gun: 0x14171a });
-  // P7.2 T6 (owner): the medic's whites — MEDIC_HEX over the con palette
+  // P7.2 T6: the medic's whites — MEDIC_HEX over the con palette
   // (skin inherits), and a winter-kill grey of the same dress for the dead.
   const MED_LIVE = mkPal({ ...INFANTRY.pal.con, ...MEDIC_HEX });
   const MED_DEAD = mkPal({ ...INFANTRY.dead.con, dom: 0x8f9498, sec: 0x7d8286, acc: 0x6e3531, gun: 0x101214 });
@@ -973,20 +1000,20 @@ export function makeRenderer(canvas, world0, opts = {}) {
   // guard and this allocation had drifted apart). If the map ever exceeds
   // this again, the on-screen stones counter (DepotGame HUD) shows it
   // saturating — that readout is the alarm.
-  // T4 (mk1.03, owner's ruling): 2000 -> 3000. The proving-grounds forms
+  // T4 (mk1.03): 2000 -> 3000. The proving-grounds forms
   // (2-4 big buildings, columns in the wide templates, field walls) push a
   // dense seed's boot stones past the old pool. The Pi collapse capture is
   // the judge of the raised cap; the stones counter stays the alarm.
-  // Settled Ground T1 (mk2.61, owner 2026-08-26): 3000 -> 4000 beside
+  // Settled Ground T1 (mk2.61): 3000 -> 4000 beside
   // TOWN_STONE_CAP 3000 (mapgen.js) — physics sleeps boot stones, the pool
   // is a draw limit. Provisional until the Pi collapse capture; the stones
   // counter stays the alarm.
-  // mk2.65 (owner): the crowded valley — 6000 town + depots + rubble headroom.
+  // mk2.65: the crowded valley — 6000 town + depots + rubble headroom.
   const CHUNK_CAP = 7000;
   let chunkStats = { drawn: 0, cap: CHUNK_CAP, total: 0 };
   const chunkMesh = pool(chunkGeo, toon(0xa6b2c0), CHUNK_CAP, true);
   chunkMesh.receiveShadow = true;
-  // mk2.66 (owner): THE TWO TINTS — slate roofs, dark timber. Per-instance
+  // mk2.66: THE TWO TINTS — slate roofs, dark timber. Per-instance
   // color on the one chunk pool; wall stones stay the material's own gray.
   const CHUNK_WALL_C = new THREE.Color(0xffffff), CHUNK_ROOF_C = new THREE.Color(0x5a626e), CHUNK_TIMBER_C = new THREE.Color(0x33291f);
   // mech walker links: plain instanced steel boxes (rig art comes later)
@@ -1011,7 +1038,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
   iceMesh.receiveShadow = false;
   const wreckTint = new THREE.Color(0x3c4046);
   const debrisMesh = pool(new THREE.BoxGeometry(0.18, 0.18, 0.18), toon(0x6a6f76), 200, false);
-  // mk2.13 (owner): THE WHITE CLOUD — the material goes white and every
+  // mk2.13: THE WHITE CLOUD — the material goes white and every
   // instance paints itself (instance color multiplies material color, the
   // infantry pools' rule). Battle smoke keeps the old dark grey; the
   // mushroom cloud's drift particles wear white. // provisional (F5)
@@ -1114,7 +1141,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
   const debris = [], smoke = [], fire = [];
   // mk2.16: TESLA BOLTS. Each row is one live bolt (strike, hop, idle arc or
   // pond flash), REGENERATED EVERY FRAME from fresh Math.random midpoint
-  // displacement — no two frames, no two strikes alike (owner). Renderer
+  // displacement — no two frames, no two strikes alike. Renderer
   // dice are lawful; the sim never reads any of this.
   const bolts = [];
   const BOLT_SEGS = 14, BOLT_CAP = 48;
@@ -1156,7 +1183,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
       if (b.age >= b.life) { bolts.splice(i, 1); continue; }
       const fade = 1 - b.age / b.life;
       const th = 0.34 * sMin * (0.55 + 0.45 * fade) * (0.8 + Math.random() * 0.4);
-      // Amendment 3 (owner): FRACTAL GROWTH. Recursive midpoint splitting:
+      // Amendment 3: FRACTAL GROWTH. Recursive midpoint splitting:
       // each level displaces the midpoint and may throw a fork that splits
       // again, thinner each generation. Fresh dice every frame — the bolt
       // crawls and crackles for its whole life.
@@ -1216,7 +1243,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
       fire.push({ x: x + (Math.random() - 0.5) * r * 0.9, y: y + 0.3 + Math.random() * 1.6, z: z + (Math.random() - 0.5) * r * 0.9, s: 1.4 + Math.random() * r * 0.8, life: 0.5, age: 0 });
     }
   }
-  // mk2.12 (owner): THE ATOMIC BLAST — the demolition column's idiom driven
+  // mk2.12: THE ATOMIC BLAST — the demolition column's idiom driven
   // to the sky. A stem climbs hard from the crater; the cap spawns high,
   // spreads wide, hangs (long life), and the smoke step below drifts every
   // `drift` particle with the wind until it thins to nothing. Fire floods
@@ -1227,13 +1254,13 @@ export function makeRenderer(canvas, world0, opts = {}) {
       if (smoke.length >= SMOKE_CAP) break;
       const t = i / 90;
       smoke.push({ x: x + (Math.random() - 0.5) * (2 + t * 3), y: y + 0.5 + t * 20, z: z + (Math.random() - 0.5) * (2 + t * 3),
-        vy: 2.2 + Math.random() * 1.2, s: 2.2 + Math.random() * 2 + t * 2, life: 12 + Math.random() * 6, age: 0, drift: true }); // mk2.13 (owner): half the climb, twice the life // provisional (F5)
+        vy: 2.2 + Math.random() * 1.2, s: 2.2 + Math.random() * 2 + t * 2, life: 12 + Math.random() * 6, age: 0, drift: true }); // mk2.13: half the climb, twice the life // provisional (F5)
     }
     for (let i = 0; i < 140; i++) {                    // the cap
       if (smoke.length >= SMOKE_CAP) break;
       const a = Math.random() * Math.PI * 2, rr = Math.pow(Math.random(), 0.5) * 11;
       smoke.push({ x: x + Math.cos(a) * rr, y: y + 20 + Math.random() * 5 - rr * 0.18, z: z + Math.sin(a) * rr,
-        vy: 0.35 + Math.random() * 0.3, s: 3.5 + Math.random() * 3, life: 26 + Math.random() * 10, age: 0, drift: true }); // mk2.13 (owner): the cap hangs twice as long // provisional (F5)
+        vy: 0.35 + Math.random() * 0.3, s: 3.5 + Math.random() * 3, life: 26 + Math.random() * 10, age: 0, drift: true }); // mk2.13: the cap hangs twice as long // provisional (F5)
     }
     for (let i = 0; i < 24; i++) {                     // the base fire
       if (fire.length >= 96) break;
@@ -1371,7 +1398,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
         fire.push({ x: e.x, y: e.y + 0.4, z: e.z, s: 0.8, life: 0.1, age: 0 });
       } else if (e.type === "weldbreak") puff(e.x, e.y, e.z, e.ice ? 3 : 2, e.ice ? 0xe8f4fb : 0x8a8f96);
       else if (e.type === "zap") {
-        // Amendment 3 (owner): the strike bolt lives ONE FULL SECOND and
+        // Amendment 3: the strike bolt lives ONE FULL SECOND and
         // crackles (re-jagged every frame); hops ride shorter so the march
         // still reads. Amplitude scales with span — long bolts fork wide.
         const span = Math.hypot(e.x2 - e.x, e.z2 - e.z);
@@ -1428,11 +1455,11 @@ export function makeRenderer(canvas, world0, opts = {}) {
   // trees (tower defense): snow-laden pine — trunk + canopy pools, colored
   // per body (alive dark spruce, dead winter-kill brown); pose comes from
   // the BODY, so a blasted tree lies where physics dropped it
-  // T5 (mk1.04, owner's ruling): copses + rare forests — the tree pool
+  // T5 (mk1.04): copses + rare forests — the tree pool
   // rises behind ONE constant (trunk, canopy, canopy colors, flames, and
   // both loop guards read it; a missed site silently truncates). The old
   // cap was a set of bare literals; the suite forbids them returning.
-  // mk2.65 (owner): four times the trees.
+  // mk2.65: four times the trees.
   const TREE_CAP = 800;
   const treeTrunkMesh = pool(new THREE.BoxGeometry(0.3, 1.4, 0.3), toon(0x4a3626), TREE_CAP, true);
   const treeCanopyMesh = pool(new THREE.ConeGeometry(1.05, 2.6, 6), toon(0xffffff), TREE_CAP, true);
@@ -1536,7 +1563,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
   let townFlags = [];
   function setTownFlags(list) { townFlags = list || []; }
 
-  // mk2.04 (owner): THE GRENADE, SEEN — green, blinking red, and the blink
+  // mk2.04: THE GRENADE, SEEN — green, blinking red, and the blink
   // QUICKENS as the fuse runs out (per grenade, its own clock). Instanced
   // box fed per frame by the game layer (R.setGrenades). Render-only; the
   // 2.0 here is a display mirror of GRENADE.fuse. // provisional (F5)
@@ -1605,7 +1632,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
     // the build ghost. Lazy like everything here; the game layer drives it
     // only while a possession is live.
     // mk1.99: solid, spread-sized, and standing on a wall hit.
-    // mk2.00 (owner): band 30% of radius, red brightened.
+    // mk2.00: band 30% of radius, red brightened.
     setReticle(on, x, z, y, r, hit, pts) {
       if (!retRing) {
         const rmat = new THREE.MeshBasicMaterial({ color: 0xf0143c, depthWrite: false, side: THREE.DoubleSide, fog: false });
@@ -1737,7 +1764,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
       }
     },
     // mk1.95: THE PLACEMENT ZONE — the ground a confirm placement may take,
-    // shown while one is armed. mk1.97 (owner): the whole field's verdict,
+    // shown while one is armed. mk1.97: the whole field's verdict,
     // two colors — legal in the passed color (the buildable green), everything
     // else in the refusal red, 0.5 both. Merged vertex-colored quads over
     // the game layer's passed grid mask; rebuilt only at its ~4Hz zone tick.
@@ -1915,7 +1942,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
         // sides) joins the demo-global bisonId path — buildBison/buildApc
         // dress each side; the demo's undefined team is untouched (parity
         // by construction).
-        g = b.vtype === "apc" ? buildApc(b.team) : b.vtype === "tank" ? buildWaveTank(b.team) : (b.vtype === "bison" || b.id === world.bisonId) ? buildBison(b.team) : (b.vtype === "truck" ? buildTruck() : buildScout());
+        g = b.vtype === "apc" ? buildApc(b.team) : b.vtype === "jeep" ? buildJeep(b.team) : b.vtype === "tank" ? buildWaveTank(b.team) : (b.vtype === "bison" || b.id === world.bisonId) ? buildBison(b.team) : (b.vtype === "truck" ? buildTruck() : buildScout());
         vehMap.set(b.id, g); scene.add(g);
       }
       // DEPOT fog (opts.territory, gated by fogOn): unheld enemy vehicles
@@ -1936,6 +1963,15 @@ export function makeRenderer(canvas, world0, opts = {}) {
       if (fogHide) continue;
       g.position.set(b.pos.x, b.pos.y, b.pos.z);
       g.quaternion.set(b.q.x, b.q.y, b.q.z, b.q.w);
+      // mk2.98: the jeep's wheels ride their springs and roll with speed
+      if (g.userData.wheels && b._wheelC) {
+        const spd = Math.hypot(b.v.x, b.v.z) * (b.v.x * b.R[6] + b.v.z * b.R[8] >= 0 ? 1 : -1);
+        for (let wi = 0; wi < 4; wi++) {
+          const wh = g.userData.wheels[wi];
+          wh.position.y = -0.7 + Math.min(0.4, b._wheelC[wi]);
+          wh.rotateY(spd * 0.04); // mk2.99: local space — the wheel rolls about its own axle, not a top's spin
+        }
+      }
       if (b.kind === "vehicle") pushBar(b, 2.6, 1.0); // provisional (F5)
       if ((b.kind === "wreck" || (b.kind === "truck" && !b.alive)) && !g.userData.dead) {
         g.userData.dead = true;
@@ -2161,7 +2197,7 @@ export function makeRenderer(canvas, world0, opts = {}) {
       // (core.js applyDamage); every other mode renders byte-identical.
       const hurtAge = world.depotCombat && b.alive && b.dmgT != null ? world.t - b.dmgT : 1;
       const hurtK = hurtAge < 0.18 ? 1 - hurtAge / 0.18 : 0;
-      // mk2.02: TWO-METER MEN (owner) — depot bodies are 2m (hy 1.0); the
+      // mk2.02: TWO-METER MEN — depot bodies are 2m (hy 1.0); the
       // drawn man stretches to match. Demo modes render byte-identical.
       const bw = KIT.bw, bh = KIT.bh * (world.depotCombat ? 2.0 / 1.44 : 1);
       const kitPal = KIT.pal;

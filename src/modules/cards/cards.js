@@ -4,7 +4,7 @@
 // teaching table — empty until Task 2 writes the owner-ruled copy. Numbers
 // are READ from the live spec tables at load — a card can never drift from
 // the gun it describes. Pure data.
-import { TOWER_SPECS, INFANTRY_ARMS, BISON, APC, MECH, SATCHEL } from "../../depot/specs.js";
+import { TOWER_SPECS, INFANTRY_ARMS, BISON, APC, JEEP, MECH, SATCHEL } from "../../depot/specs.js";
 import { SQUAD_SPECS, squadSpeed } from "../../depot/squads.js";
 
 const ORDERS_ARMED = ["DEFEND", "MOVE", "ATTACK", "PATROL", "ATTACK STRUCTURES", "TAKE CONTROL"];
@@ -43,6 +43,8 @@ export const CARDS = {
     n: null, hp: BISON.hp, dmg: null, range: null, speed: null, skills: ORDERS_HULL },
   hero_apc:   { label: "APC", role: "The transport. Four sealed seats — riders see nothing, fire nothing, and die with the hull.",
     n: null, hp: APC.hp, dmg: null, range: null, speed: null, skills: [...ORDERS_HULL, "LOAD / UNLOAD"] },
+  hero_jeep: { label: "JEEP", role: "The Willys. A coax, two seats, and the spotter's eye on wheels. It fords the stream, and 4L climbs what 2H cannot.",
+    n: null, hp: JEEP.hp, dmg: null, range: null, speed: null, skills: [...ORDERS_HULL, "LOAD / UNLOAD", "2H / 4L"] },
   hero_mech: { label: "MECH", role: "The crown machine. A walking siege engine — cannon, rocket salvo, and a saturation barrage; men die under its feet. Slow, dear, and answered only by another.",
     n: null, hp: MECH.hp, dmg: null, range: null, speed: null, skills: ["DEFEND", "MOVE", "PATROL", "ESCORT", "TRACKS SAFETY", "TAKE CONTROL"] },
 };
@@ -71,6 +73,8 @@ export const TEACH = {
   attack: { label: "ATTACK", role: "Tap the ground. They fight their way there.", hint: "The same ring.", skills: [] },
   possess_squad: { label: "TAKE CONTROL", role: "WASD walks. Mouse aims; hold left to fire. RELEASE hands them back.", roleTouch: "Left stick walks. Right stick aims; hold FIRE. RELEASE hands them back.", skills: [] },
   select_all: { label: "SELECT ALL", role: "Every squad of this type joins the order.", hint: "The same ring.", skills: [] },
+  queue_chain: { label: "QUEUE", role: "Light it, then aim orders — each lands at the end of the chain. A patrol closes it.", hint: "The chain ends at a patrol.", skills: [] },
+  clear_chain: { label: "CLEAR", role: "Drops every queued leg. The current order keeps running.", hint: "The chain only.", skills: [] },
   patrol: { label: "PATROL", role: "Two taps: start, far end. ✓ and they walk it forever.", hint: "The same ring.", skills: [] },
   structures: { label: "STRUCTURES", role: "On: walls and towers before men.", hint: "The ring, armed squads only.", skills: [] },
   engineer_lines: { label: "THE LINES", role: "Two taps: start, far end. The ghost shows pieces and price. ✓ and they lay.", hint: "The engineers' own ring.", skills: [] },

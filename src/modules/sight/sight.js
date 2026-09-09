@@ -30,7 +30,7 @@ export function eyeOf(b) {
   if (b.kind === "tower") return { x: b.pos.x, y: b.pos.y + b.hy + 0.45, z: b.pos.z, r: SIGHT.tower };
   if (b.kind === "flag")  return { x: b.pos.x, y: b.pos.y + 4.0, z: b.pos.z, r: SIGHT.flag };
   if (b.kind === "mech") return { x: b.pos.x, y: b.pos.y + 2.6, z: b.pos.z, r: SIGHT.mech };
-  if (b.kind === "vehicle") return { x: b.pos.x, y: b.pos.y + 1.4, z: b.pos.z, r: SIGHT.vehicle };
+  if (b.kind === "vehicle") return { x: b.pos.x, y: b.pos.y + 1.4, z: b.pos.z, r: b.eyeR || SIGHT.vehicle }; // mk2.98: the jeep's spotter eye rides the body
   const r = b.role === "spotter" ? SIGHT.spotter
           : (b.role === "sniper" || b.tag === "sniper") ? SIGHT.sniper : SIGHT.unit;
   return { x: b.pos.x, y: b.pos.y + 0.8, z: b.pos.z, r }; // mk2.02: the 2m man's eye — 1.8m over his feet
@@ -108,7 +108,7 @@ export function canSee(SG, eye, tu, tv) {
   if (n * SG.cs > eye.r + SG.cs) return false;          // coarse reject, in cells
   const cu = -SG.halfU + (tu + 0.5) * SG.cs, cv = -SG.halfV + (tv + 0.5) * SG.cs;
   if (Math.hypot(cu - eye.u, cv - eye.v) > eye.r) return false;   // the true reach, in meters
-  // mk2.57 (owner): THE LIT ROOF — an occupied cell is seen at its SURFACE.
+  // mk2.57: THE LIT ROOF — an occupied cell is seen at its SURFACE.
   // The old law tested the ground under the building (always walled off by
   // the building itself), so every roof was dark and the possessed reticle
   // stopped at the wall's base while the owner looked straight at the roof.
@@ -181,7 +181,7 @@ export function steerReticle(SG, team, center, radius, off, vx, vz, dt, toUV) {
   let dx = off.dx + vx * RETICLE_SPEED * dt, dz = off.dz + vz * RETICLE_SPEED * dt;
   const d = Math.hypot(dx, dz);
   if (d > radius && d > 1e-9) { dx *= radius / d; dz *= radius / d; }
-  // mk2.58 (owner): THE COMMANDER'S EYE — the possessed reticle is the
+  // mk2.58: THE COMMANDER'S EYE — the possessed reticle is the
   // player's own sight; it roams the whole circle, dark ground included.
   // The radius clamp above is the only law left here.
   return { dx, dz };
@@ -190,7 +190,7 @@ export function reclampReticle(SG, team, center, radius, off, toUV) {
   let dx = off.dx, dz = off.dz;
   const d = Math.hypot(dx, dz);
   if (d > radius && d > 1e-9) { dx *= radius / d; dz *= radius / d; }
-  return { dx, dz }; // mk2.58 (owner): THE COMMANDER'S EYE — no dark-ground home; the circle is the only law
+  return { dx, dz }; // mk2.58: THE COMMANDER'S EYE — no dark-ground home; the circle is the only law
 }
 
 // mk2.01: THE SURFACE LAW. What the reticle rests on is what the guns aim

@@ -70,7 +70,7 @@ function dominantCounter(sig) {
 // Base doctrine, then additive counter deltas, then renormalized — additive
 // deltas only ever push shares up, so renormalizing dilutes everything
 // else proportionally: a blend, never a pure hard-counter swap.
-// mk2.02 (owner): the roster surgery — rockets take the fast seat, the
+// mk2.02: the roster surgery — rockets take the fast seat, the
 // mortar team joins, sappers inherit the heavy's wall signal (the breach
 // role). // provisional (F5)
 function computeShares(snap, jitter) {
@@ -195,7 +195,7 @@ export function planWave(reg, snap, bell, rng, tags = null, priceOf = null) {
   const tanksOpen = allow("tank");
   const snipersOpen = allow("sniper");
 
-  // mk2.53 (owner): THE EARNED MUSTER — the budget is what the ground paid
+  // mk2.53: THE EARNED MUSTER — the budget is what the ground paid
   // since the last bell (reg.earned, accrued at every credit site, zeroed by
   // fireBell after the spend). A regiment with no accumulator — every test
   // fixture, an old save's first resumed bell — takes the old curve exactly.
@@ -270,7 +270,7 @@ export function planWave(reg, snap, bell, rng, tags = null, priceOf = null) {
   return { buys, banked };
 }
 
-// P7 T6 (mk1.35, owner): THE DEFENSIVE OPENING. Half of an early muster
+// P7 T6 (mk1.35): THE DEFENSIVE OPENING. Half of an early muster
 // stays home and digs in; the share fades to nothing by ~bell 8 and the
 // war matures into full assaults. Pure math here — the game layer applies
 // it AFTER planWave, so the 4-draw contract above is untouched.
@@ -311,7 +311,7 @@ export function cmdrBellOrders(profile, ctx) {
   return ctx.fielded ? "forward" : "home";                          // rides with assaults; home between them
 }
 
-// P7.2 T8 (owner): THE DRAFT PICK, commander-colored — pure, ZERO draws.
+// P7.2 T8: THE DRAFT PICK, commander-colored — pure, ZERO draws.
 // Bold takes units; cautious takes towers and plans; stubborn takes
 // standing defensive iron first. Stable sort; deal order breaks ties.
 const DRAFT_TOWERS = ["mg", "gun", "mortar", "rocket", "tesla"];

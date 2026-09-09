@@ -14,7 +14,7 @@ import { makeSight } from "./sight.js";
 import { makeRegiment } from "./economy.js";
 import { musterFreshStart } from "./muster.js";
 
-// P7 T17 (owner): HULLS RESPECT FRIENDLY SANDBAGS — a bag claims its
+// P7 T17: HULLS RESPECT FRIENDLY SANDBAGS — a bag claims its
 // cell for HULL routing only (men still fight over bags; foot routing,
 // the enemy flow, and connectivity never read c.bag). The side rides
 // the body (bagSide) so a resumed war re-stamps honestly — b.team is 1
@@ -93,7 +93,7 @@ export function bootWar(opts = {}) {
   const seed = opts.seed;
   const map = makeMap(seed);
   const field = makeField(181, 2.0, map.MAP_SEED);
-  // mk2.07 (owner): THE DEEP FLOOR — the atomic crater needs room. Base
+  // mk2.07: THE DEEP FLOOR — the atomic crater needs room. Base
   // ground sits near +2; -12 leaves the full 10m pit plus overlap slack.
   field.carveFloor = -12; // provisional (F5)
   buildDepotTerrain(field, map.MAP_SEED);
@@ -108,7 +108,7 @@ export function bootWar(opts = {}) {
   }
   const grid = makeGrid(field);
   const world = makeWorld({ field, seed: map.MAP_SEED });
-  // P7 T17 (owner): HULLS RESPECT FRIENDLY SANDBAGS — a bag claims its
+  // P7 T17: HULLS RESPECT FRIENDLY SANDBAGS — a bag claims its
   // cell for HULL routing only (men still fight over bags; foot routing,
   // the enemy flow, and connectivity never read c.bag). The side rides
   // the body (bagSide) so a resumed war re-stamps honestly — b.team is 1
@@ -142,17 +142,17 @@ export function bootWar(opts = {}) {
     if (!run.reg || run.reg.scrap < n) return false; run.reg.scrap -= n; return true;
   } };
   // P7 T2/T3/T4: THE STARTING ARMOR — a Bison AND an APC parked by
-  // each depot, the enemy's ARMED AT POST (owner) — driving doctrine
+  // each depot, the enemy's ARMED AT POST — driving doctrine
   // still waits for its commander (Task 6). FAIL-PROOF (P7 T3): a
   // widened fixed ring (10-26m) first, then a brute nearest-clear-cell
   // sweep (8-30m) backstops it — a hemmed ring must never leave a side
-  // tankless. AMENDMENT 1 (P7 T4, owner): armor parks STABLE — every
+  // tankless. AMENDMENT 1 (P7 T4): armor parks STABLE — every
   // clear cell is also vetted for a flat footprint (stableAt), and the
   // hull spawns asleep (no creep, no slide, no jitter). The brute
   // sweep tracks the flattest clear cell it sees as its own backstop —
   // stability is preferred, never blocking. Deterministic; no rng
   // stream is touched.
-  // P7 T9 (owner): HOISTED TO MOUNT SCOPE — apcSeqN/depotP/
+  // P7 T9: HOISTED TO MOUNT SCOPE — apcSeqN/depotP/
   // depotE used to be boot-local (the `else` branch below, fresh boot
   // only). The hero tier's player buy and the enemy's draw-free
   // replacement both need to park a fresh hull long after boot, off
@@ -172,7 +172,7 @@ export function bootWar(opts = {}) {
     restoreWelds(world, RES, resBodies);
     // P7 T17: resumed bags re-claim their ground for hull routing.
     for (const b of resBodies) if (b.sandbag && b.alive) stampBag(grid, b, b.bagSide || 1);
-    // THE MECH RESUMES STANDING (owner's save law: never raw physics) — rebuilt
+    // THE MECH RESUMES STANDING — rebuilt
     // at its spot and heading with its wounds, orders back on the hull.
     for (const ms of RES.mechs || []) {
       const m = buildMech(world, { x: ms.x, z: ms.z, yaw: ms.yaw, team: ms.tm, hp: ms.hp });
@@ -180,7 +180,7 @@ export function bootWar(opts = {}) {
       m.hull.maxHp = MECH.hp;
       if (ms.ex) for (const k in ms.ex) m.hull[k] = ms.ex[k]; // A1: the orders bag, own key
     }
-    // P7 T9 (owner): RESUME SEAT-COLLISION GUARD — the mount-scope
+    // P7 T9: RESUME SEAT-COLLISION GUARD — the mount-scope
     // apcSeqN counter (hoisted above) must not hand out a seat number a
     // restored APC already carries, or a hero-tier replacement's riders
     // could stash onto the wrong hull. Seeded past the highest restored
@@ -200,7 +200,7 @@ export function bootWar(opts = {}) {
       const saved = (RES.towns || []).find((s) => s.id === t.id) || {};
       const cells = townFootprint(grid, t, map);
       const ruined = !!saved.ruined;
-      if (!ruined || t.form === "mound") for (const ci of cells) { const c = grid.cells[ci]; c.blocked = true; c.building = t.id; c.bTeam = t.team === 2 ? 2 : (t.depot ? 1 : 0); } // the mound's exception (owner, 2026-08-26)
+      if (!ruined || t.form === "mound") for (const ci of cells) { const c = grid.cells[ci]; c.blocked = true; c.building = t.id; c.bTeam = t.team === 2 ? 2 : (t.depot ? 1 : 0); } // the mound's exception
       const stones = stonesBy.get(t.id) || [];
       return { id: t.id, cells, stones, n0: saved.n0 != null ? saved.n0 : stones.length, ruined, marker: !!t.marker, x: t.x, z: t.z };
     });
@@ -280,7 +280,7 @@ export function bootWar(opts = {}) {
   };
   if (!RES) {
     for (const k of map.ROCKS) {
-      const b = addBody(world, { kind: "rock", team: 0, mass: 0, hx: k.r * 0.55, hy: k.h * 0.8, hz: k.r * 0.55, x: k.x, y: field.heightAt(k.x, k.z) - k.h * 0.2, z: k.z, hp: 90 + k.r * 20 }); // mk2.14 (owner): one atomic blast breaks a near rock // provisional (F5)
+      const b = addBody(world, { kind: "rock", team: 0, mass: 0, hx: k.r * 0.55, hy: k.h * 0.8, hz: k.r * 0.55, x: k.x, y: field.heightAt(k.x, k.z) - k.h * 0.2, z: k.z, hp: 90 + k.r * 20 }); // mk2.14: one atomic blast breaks a near rock // provisional (F5)
       b.maxHp = b.hp; b.rockRef = k;
       b.seatY = b.pos.y - field.heightAt(k.x, k.z); // mk2.14: the crater re-seat drops a surviving rock to the carved ground, not half-height up
     }
@@ -290,7 +290,7 @@ export function bootWar(opts = {}) {
     for (const p of planTrees()) treeAt(p.x, p.z);
     // P1.5 T4 (mk0.60) — THE DEPOT COMES WITH COVER. Four to six sandbags
     // ringed on each depot at map-build time, so a fresh front opens with
-    // something to lie behind instead of bare ground. P7 T3 (owner):
+    // something to lie behind instead of bare ground. P7 T3:
     // generalized to both depots — the enemy's was never dressed before,
     // symmetry now — same rules, its own derived stream.
     //
@@ -308,7 +308,7 @@ export function bootWar(opts = {}) {
     // azimuth) because the depot's own approach road and mound reject a lot
     // of the ring; a bag that clears none of the twelve is simply dropped.
     // Ring radius grown to 7.8m (P7 T3) — the depots got bigger.
-    // P7.1 T6 (owner): THE BARE OPENING — the seeded bag rings and the
+    // P7.1 T6: THE BARE OPENING — the seeded bag rings and the
     // free starting armor die here. seedBags/parkArmor stay exported
     // (parkArmor still parks the enemy's
     // draw-free replacement; seedBags' export survives for Task 7).
@@ -319,11 +319,11 @@ export function bootWar(opts = {}) {
   // fields save.js touches plus the unsaved sim-side fields the tick
   // reads and writes.
   const run = {
-    score: { p: { kills: 0, value: 0 }, e: { kills: 0, value: 0 } }, resources: 250, // the draft's richer opening (owner) // provisional (F5)
+    score: { p: { kills: 0, value: 0 }, e: { kills: 0, value: 0 } }, resources: 250, // the draft's richer opening // provisional (F5)
     cmdr: null, // P7 T8: the drawn armor doctrine — one boot draw (fresh war), restored on RESUME
     ws: makeDepotAssaultState(), spawnRR: 0,
     arcs: [], // mk2.20: live tesla chains — THE game state's row (state.js makeRunState serves fixtures only; Amendment 5)
-    holdArea: { 1: false, 2: false }, // mk2.18 (owner): area weapons hold fire with a friendly in the spread
+    holdArea: { 1: false, 2: false }, // mk2.18: area weapons hold fire with a friendly in the spread
     mode: null,
     started: false, gameOver: false, victory: false,
     // The clock (P1 Task 1): bellAt is the absolute SIM-clock stamp the

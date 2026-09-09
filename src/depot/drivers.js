@@ -16,11 +16,11 @@ import { planRoute } from "./route.js";
 import { clearSlot } from "./squads.js";
 import { buildMech, mechCommand, respawnMech, mechFallen, mechFire, mechMissiles, mechBarrage, mechAimDir } from "../engine/mech.js";
 
-// mk2.05 (owner): barrelTip — where the drawn tube ends, yaw toward the
+// mk2.05: barrelTip — where the drawn tube ends, yaw toward the
 // aim, pitch estimated from the low root capped at the elevation cap. The
 // muzzle the sim fires from and the muzzle the laser projects from are the
 // same point. Zero draws.
-// mk2.55 (owner): THE LOBBED SHELL — the cap is the spec's own (elevCapOf),
+// mk2.55: THE LOBBED SHELL — the cap is the spec's own (elevCapOf),
 // and a caller that has already solved the shot passes its pitch so the
 // tube ends where the drawn barrel ends. No pitch given: the low-root
 // estimate as before.
@@ -35,7 +35,7 @@ export function barrelTip(v, aim, spec, B, pitch) {
   const c = Math.cos(p);
   return { x: px + Math.sin(yaw) * B.len * c, y: py + B.len * Math.sin(p), z: pz + Math.cos(yaw) * B.len * c };
 }
-// mk2.55 (owner): THE TIP FOLLOWS THE PITCH (the mk2.05 true-muzzle law
+// mk2.55: THE TIP FOLLOWS THE PITCH (the mk2.05 true-muzzle law
 // kept for a lob) — solve once from the flat tip, then place the tip at the
 // found pitch; shooterFire solves again from there and may settle one 3°
 // step away (0.19 m of tube). No lawful arc: the flat tip, and shooterFire
@@ -75,7 +75,7 @@ function tankGuns(world, t, dt, T, toUV) {
   const fspec = ENEMY_FIRE.tank;
   const muzzle = { x: t.pos.x, y: t.pos.y + 1.2, z: t.pos.z };
   const eR = effRange(world, muzzle, fspec);
-  // mk2.52 (owner): THE ONE TARGET LAW — the wave tank fights like the rest
+  // mk2.52: THE ONE TARGET LAW — the wave tank fights like the rest
   // of the armor: soft targets first (the shared armor scan, draw-free),
   // masonry only when none stands. The 07 T1 pin holds: its fixture fields
   // no player soft body, so the scan finds nothing and nothing moves.
@@ -99,7 +99,7 @@ function tankGuns(world, t, dt, T, toUV) {
   }
   if (!tgt) { t.gunT = 0.5; return; }
   t.gunT = fspec.cd + world.rng() * (fspec.cdVar || 0);
-  // owner: t.id — the muzzle sits inside the tank's own hitbox and
+  // t.id — the muzzle sits inside the tank's own hitbox and
   // hitStruct is required to hit the target at all; without owner immunity
   // the round detonates on its own hull on the first tick, every time
   // (found by the tank-vs-tower fixture; full note in the mk1.21 units.js).
@@ -115,7 +115,7 @@ export const DRIVERS = {
 // scalars and flat objects, they ride the save's generic sweep): DEFEND
 // holds, MOVE and PATROL run planRoute legs on the movement grid with the
 // squads' own stall watch, ESCORT trails a squad at a respectful offset.
-// THE OVERRUN SAFETY (owner): under tracks "careful" (the default) the hull
+// THE OVERRUN SAFETY: under tracks "careful" (the default) the hull
 // brakes rather than roll over its OWN side's men — it flips depotDrive to
 // "manual" with the brake on while blocked, back to "auto" when the lane
 // clears (Task 1's own mechanism, no engine edit). "free" takes the safety
@@ -128,6 +128,7 @@ const YIELD_M = 3.2, YIELD_S = 2.5, PATIENCE_S = 4;   // provisional (F5)
 const KEEP_RIGHT_D = 14, KEEP_RIGHT_M = 3.0;   // provisional (F5)
 const HUNT_HOLD_S = 12, HUNT_MAX_M = 45;   // provisional (F5) — P7.2 T5, the hunt
 export { HUNT_HOLD_S };
+const ATTACK_HOLD_S = 3.5;   // provisional (F5) — mk2.88: the attack halt outlasts the Bison gun's 2.6s scan cycle, so the hull stands rather than creeps between shells
 // P7 T16: the cone now REPORTS who blocks it — the yield order needs names,
 // not just a verdict. Same reach, same width, same team filter.
 function armorBlockers(world, v) {
@@ -189,7 +190,7 @@ function armorGoal(world, grid, v, dt, fwdDir, opts) {
   }
   const order = v.order || "defend";
   if (order === "defend") {
-    // P7.2 T5: THE HUNT (owner) — a defending GUN hull under fire drives at
+    // P7.2 T5: THE HUNT — a defending GUN hull under fire drives at
     // the fire's origin; its guns answer the moment the shooter crosses its
     // own sight (the scan already runs every tick, sight-gated as ever).
     // Quiet ground for HUNT_HOLD_S sends it back to its park. The transport
@@ -225,6 +226,17 @@ function armorGoal(world, grid, v, dt, fwdDir, opts) {
     // P7 T13: the escort leg ROUTES now (ordered driving goes around
     // masonry) — the trail point is a moving dest on the same machinery.
     v.dest = { x: sq.anchor.x - (dx / d) * ARMOR_ESCORT_BACK, z: sq.anchor.z - (dz / d) * ARMOR_ESCORT_BACK };
+  }
+  // mk2.88: ATTACK — the move that stops to fight. Same road as
+  // MOVE, but while a live foe stands in the guns' reach (the gun scans
+  // stamp _foeT) the hull halts and lets the guns work; quiet ground rolls
+  // it on. Arrival is MOVE's own: the order becomes "defend". Enemy masonry
+  // on the road still rams exactly as MOVE does — structures never halt.
+  if (order === "attack" && world.t - (v._foeT || 0) < ATTACK_HOLD_S) {
+    v.depotDrive = "manual";
+    v.ctl = { throttle: 0, steer: 0, brake: true };
+    v.goal = null;
+    return;
   }
   if (!v.dest) { v.order = "defend"; v.goal = null; return; }
   // MOVE/PATROL/ESCORT: route legs — stepSquadRouting's shape, on the body.
@@ -278,9 +290,18 @@ function armorGoal(world, grid, v, dt, fwdDir, opts) {
       v.dest = goingToB ? { x: v._patA.x, z: v._patA.z } : { x: v._patB.x, z: v._patB.z };
       v._route = null; v._routeDest = null; v._stuckN = 0;
     } else if (v.order === "escort") { v.goal = null; return; }
+    else if (v._queue && v._queue.length) {
+      // mk2.90: THE CHAIN — the hull's arrival takes the next queued order.
+      const q = v._queue.shift();
+      v._route = null; v._routeDest = null; v._stuckN = 0;
+      if (q.kind === "patrol") { v._patA = { x: q.ax, z: q.az }; v._patB = { x: q.bx, z: q.bz }; v.order = "patrol"; v.dest = { x: q.ax, z: q.az }; }
+      else if (q.kind === "escort") { v.order = "escort"; v.escortId = q.escortId; v.dest = null; v.goal = null; } // mk2.93: the terminal escort link
+      else { v.order = q.kind; v.dest = { x: q.x, z: q.z }; }
+      return;
+    }
     else { v.order = "defend"; v.dest = null; v.goal = null; return; }
   }
-  // P7 T24, amended (owner, C): ARRIVAL outranks the STAND — a leg that just
+  // P7 T24, amended: ARRIVAL outranks the STAND — a leg that just
   // settled (the three-strike clamp above sets dest=pos) must reach "defend",
   // not get caught standing on a stale no-route flag from the abandoned leg.
   if (v._noRoute) {
@@ -308,7 +329,7 @@ function armorGoal(world, grid, v, dt, fwdDir, opts) {
       return;
     }
   }
-  // P7 T16: KEEP RIGHT (owner) — same-team hulls closing head-on each ease
+  // P7 T16: KEEP RIGHT — same-team hulls closing head-on each ease
   // to their own right and pass port-to-port. Deterministic, both sides.
   for (const o of world.bodies) {
     if (o === v || o.kind !== "vehicle" || !o.alive || o.team !== v.team) continue;
@@ -399,6 +420,7 @@ function armorGuns(world, v, dt, T, toUV) {
   if (v.gunT <= 0) {
     const gun = BISON_FIRE.gun;
     let tgt = armorScanFoes(world, v, muzzle, gun, false, T, toUV), struct = false;
+    if (tgt) v._foeT = world.t; // mk2.88: a live foe in reach — the attack halt reads this clock
     if (!tgt) { tgt = armorScanStructs(world, v, muzzle, gun, T, toUV); struct = !!tgt; }
     if (tgt) {
       v.gunT = gun.cd;
@@ -411,6 +433,7 @@ function armorGuns(world, v, dt, T, toUV) {
   if (v.mgT <= 0) {
     const mg = BISON_FIRE.mg;
     const tgt = armorScanFoes(world, v, muzzle, mg, true, T, toUV);   // the coax shoots men, not dirt
+    if (tgt) v._foeT = world.t; // mk2.88: the coax counts too
     if (tgt) {
       v.mgT = mg.cd;
       v._aimYaw = Math.atan2(tgt.pos.x - v.pos.x, tgt.pos.z - v.pos.z);
@@ -430,6 +453,7 @@ function apcGuns(world, v, dt, T, toUV) {
   const mg = BISON_FIRE.mg;
   const muzzle = { x: v.pos.x, y: v.pos.y + 1.3, z: v.pos.z };
   const tgt = armorScanFoes(world, v, muzzle, mg, true, T, toUV);
+  if (tgt) v._foeT = world.t; // mk2.88: the attack halt's clock
   if (tgt) {
     v.mgT = mg.cd;
     v._aimYaw = Math.atan2(tgt.pos.x - v.pos.x, tgt.pos.z - v.pos.z);
@@ -437,9 +461,10 @@ function apcGuns(world, v, dt, T, toUV) {
   } else v.mgT = 0.4;
 }
 DRIVERS.apc = { goal: armorGoal, guns: apcGuns };
+DRIVERS.jeep = { goal: armorGoal, guns: apcGuns }; // mk2.98: the jeep — armor's legs, the coax alone
 // (stepDrivers' possessed skip already decays mgT — no change.)
 
-// ---- THE MECH (owner, 2026-08-20): the crown's seat. Goal = the armor's
+// ---- THE MECH: the crown's seat. Goal = the armor's
 // route legs actuated as walker commands (the tower-defense boss precedent:
 // heading slewed, travel cut through turns). Fall tending per the ruling:
 // helpless, then stands where it fell — the fall itself never wounds.
@@ -481,6 +506,7 @@ function mechGoal(world, grid, b, dt, fwdDir, opts) {
     return;
   }
   const order = b.order || "defend";
+  if (order === "attack" && world.t - (b._foeT || 0) < ATTACK_HOLD_S) { mechCommand(m, { travel: 0, lateral: 0 }); return; } // mk2.88: the halt, in the walker's form
   if (order === "defend" || !b.dest) { mechCommand(m, { travel: 0, lateral: 0 }); return; }
   // MOVE/PATROL/ESCORT route legs — armorGoal's own bookkeeping shape on the hull
   if (order === "escort") {
@@ -503,6 +529,13 @@ function mechGoal(world, grid, b, dt, fwdDir, opts) {
       const goingToB = Math.hypot(b.dest.x - b._patB.x, b.dest.z - b._patB.z) < 0.5;
       b.dest = goingToB ? { x: b._patA.x, z: b._patA.z } : { x: b._patB.x, z: b._patB.z };
       b._route = null; b._routeDest = null;
+    } else if (b._queue && b._queue.length) {
+      const q = b._queue.shift(); // mk2.90: the chain, in the walker's form
+      b._route = null; b._routeDest = null;
+      if (q.kind === "patrol") { b._patA = { x: q.ax, z: q.az }; b._patB = { x: q.bx, z: q.bz }; b.order = "patrol"; b.dest = { x: q.ax, z: q.az }; }
+      else if (q.kind === "escort") { b.order = "escort"; b.escortId = q.escortId; b.dest = null; } // mk2.93
+      else { b.order = q.kind; b.dest = { x: q.x, z: q.z }; }
+      mechCommand(m, { travel: 0, lateral: 0 }); return;
     } else { b.order = "defend"; b.dest = null; mechCommand(m, { travel: 0, lateral: 0 }); return; }
   }
   const wp = b._route && b._route.length ? b._route[0] : b.dest;
@@ -520,6 +553,7 @@ function mechGuns(world, b, dt, T, toUV) {
   if (!m || mechFallen(m)) return;
   const muzzle = { x: b.pos.x, y: b.pos.y + 2.0, z: b.pos.z };
   let tgt = armorScanFoes(world, b, muzzle, MECH_GUN, false, T, toUV);
+  if (tgt) b._foeT = world.t; // mk2.88: the attack halt's clock
   let struct = false;
   if (!tgt) { tgt = armorScanStructs(world, b, muzzle, MECH_GUN, T, toUV); struct = !!tgt; }
   if (!tgt) return;
@@ -569,9 +603,9 @@ export function possessedArmorFire(world, v, aim, T, toUV = (x, z) => ({ u: x, v
   const gun = BISON_FIRE.gun;
   v.gunT = v.gunT || 0;
   if (v.gunT > 0) return false;
-  const live = snapTargetNear(world, aim, T, toUV); // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
+  const live = snapTargetNear(world, aim, T, toUV); // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
   const sy = aim.y != null ? aim.y : world.field.heightAt(aim.x, aim.z);
-  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE (owner) — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
+  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
   v.gunT = gun.cd;
   v._aimYaw = Math.atan2(aim.x - v.pos.x, aim.z - v.pos.z);
   shooterFire(world, v, liftedTip(world, v, tgt.pos, gun, BARRELS.bison), tgt, { ...gun, acc: gun.acc * POSSESS_ACC }, { attacker: "player", hitStruct: true, owner: v.id }); // mk2.55: the tip follows the pitch
@@ -582,15 +616,15 @@ export function possessedArmorFire(world, v, aim, T, toUV = (x, z) => ({ u: x, v
 // solves at the commanded range. Headless-testable in isolation; the game
 // layer (DepotGame.jsx) only decides which engine call to attempt.
 export function mechSighted(world, mech, T, toUV = (x, z) => ({ u: x, v: z })) {
-  return true; // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim (mechAimDir's aim point included; the five triggers all read this)
+  return true; // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim (mechAimDir's aim point included; the five triggers all read this)
 }
 export function possessedArmorMg(world, v, aim, T, toUV = (x, z) => ({ u: x, v: z })) {
   const mg = BISON_FIRE.mg;
   v.mgT = v.mgT || 0;
   if (v.mgT > 0) return false;
-  const live = snapTargetNear(world, aim, T, toUV); // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
+  const live = snapTargetNear(world, aim, T, toUV); // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
   const sy = aim.y != null ? aim.y : world.field.heightAt(aim.x, aim.z);
-  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE (owner) — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
+  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
   v.mgT = mg.cd;
   v._aimYaw = Math.atan2(aim.x - v.pos.x, aim.z - v.pos.z);
   shooterFire(world, v, { x: v.pos.x, y: v.pos.y + 1.4, z: v.pos.z }, tgt, { ...mg, acc: mg.acc * POSSESS_ACC, volley: mg.burst }, { attacker: "player", owner: v.id, volleyDelay: mg.burstGap, muzzleStep: 0 });

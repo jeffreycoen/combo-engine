@@ -59,6 +59,7 @@ const GATES = {
   "yard": ["scripts/yard-test.mjs"],
   "gravitys-ark": ["scripts/gravitys-ark-test.mjs"],
   "parts": ["scripts/parts-test.mjs"],
+  "spine": ["scripts/spine-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {

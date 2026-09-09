@@ -386,14 +386,14 @@ export function stepWallSupport(world) {
 //         building squadFire below) }
 export function shooterFire(world, shooter, muzzle, target, spec, opts = {}) {
   let high = !!opts.high;
-  // mk2.03 (owner): ACTUAL ELEVATION — no mortar root for guns. An "auto"
+  // mk2.03: ACTUAL ELEVATION — no mortar root for guns. An "auto"
   // spec raises the barrel inside the 35° cap at a fitted speed (elevSolve);
   // with no lawful arc the gun HOLDS its fire.
-  // mk2.55 (owner): THE LOBBED SHELL — the cap is the spec's own
+  // mk2.55: THE LOBBED SHELL — the cap is the spec's own
   // (accuracy.js elevCapOf): the Bison's gun rises to 85°, the field gun
   // keeps 35°. Same search, same hold.
   let elev = null;
-  // mk2.56 (owner): THE TIGHTEST ARC — a spec carrying chargeSig solves
+  // mk2.56: THE TIGHTEST ARC — a spec carrying chargeSig solves
   // charge and angle together (accuracy.js tightSolve) and fires the arc
   // with the tightest landing group; the mortar root and the flattest-first
   // walk both retire for these guns. With no lawful arc the gun HOLDS.
@@ -448,7 +448,7 @@ export function shooterFire(world, shooter, muzzle, target, spec, opts = {}) {
   const volleyDelay = opts.volleyDelay != null ? opts.volleyDelay : 0.12;
   for (let si = 0; si < shots; si++) {
     const dir = applyScatter(world, rawDir, sigma);
-    // mk2.56 (owner): the propellant varies — one bounded uniform draw per
+    // mk2.56: the propellant varies — one bounded uniform draw per
     // round on chargeSig specs (the third draw; applyScatter keeps its two).
     const chg = spec.chargeSig != null ? 1 + (world.rng() * 2 - 1) * spec.chargeSig * CHARGE_CAP : 1;
     fireProjectile(world, { x: muzzle.x, y: muzzle.y + si * muzzleStep, z: muzzle.z }, dir, (elev ? elev.v : spec.projSpeed) * chg,
@@ -475,8 +475,8 @@ export function shooterFire(world, shooter, muzzle, target, spec, opts = {}) {
 // export (depot-test.mjs and DepotGame.jsx's stepTowers call it by name).
 export function towerShot(world, tower, target, spec) {
   const muzzle = { x: tower.pos.x, y: tower.pos.y + tower.hy + 0.45, z: tower.pos.z };
-  const high = tower.towerType === "mortar"; // P7.1 T9 (owner): rockets fly the GENTLE ARC — the flat solve
-  // owner: now that every shooterFire round carries hitStruct (Task 4), a
+  const high = tower.towerType === "mortar"; // P7.1 T9: rockets fly the GENTLE ARC — the flat solve
+  // now that every shooterFire round carries hitStruct (Task 4), a
   // tower's own hull is a shootable structure to its own muzzle-adjacent
   // round — thread the uniform muzzle-clearing immunity (self-hit law).
   shooterFire(world, tower, muzzle, target, spec, { high, attacker: tower.team === 2 ? "enemy" : "player", owner: tower.id });
@@ -560,7 +560,7 @@ export function hostileStructure(b, team) {
   return b.kind === "chunk" && b.town === "depot";
 }
 
-// mk2.06 (owner): THE ROOFTOP AIM. A lofted shot at a structure aims at its
+// mk2.06: THE ROOFTOP AIM. A lofted shot at a structure aims at its
 // TOP — the roof — not a center the lead refresh flattens to the base. hy
 // carries roof-over-ground so shooterFire's ay2 refresh lands on the roof
 // (the mk2.02 surface-aim convention). Zero draws.
@@ -713,10 +713,10 @@ export function friendInBlast(world, x, z, team, exceptSquad) {
   return false;
 }
 
-// mk2.08 (owner): THE DAVY CROCKETT'S SHOT. Under the ATTACK order only
+// mk2.08: THE DAVY CROCKETT'S SHOT. Under the ATTACK order only
 // (the sapper's rule), the crew's lead man fires the atomic round at the
 // nearest target its side SEES — man, machine, or hostile structure — inside
-// the elevation-scaled range. mk2.12 (owner): THE ESCAPE AND THE RELOAD —
+// the elevation-scaled range. mk2.12: THE ESCAPE AND THE RELOAD —
 // the trigger no longer kills; the blast alone rules, and the crew reloads
 // DAVY_FIRE.reloadS seconds (_davyReadyAt, a world-time stamp riding the
 // generic squad serializer). Draws: exactly the round's own 2 (applyScatter).
@@ -755,7 +755,7 @@ export function stepDavyShot(world, squad, dt, T, toUV = (x, z) => ({ u: x, v: z
   squad._davyReadyAt = world.t + spec.reloadS;
   const attacker = squad.team === 1 ? "player" : "enemy";
   shooterFire(world, shooter, muzzle, best.kind !== "unit" && best.kind !== "vehicle" && best.kind !== "mech" ? aimTop(world, best) : best, spec, { high: true, attacker, hitStruct: true, owner: shooter.id });
-  // mk2.12 (owner): THE ESCAPE — no fatal trigger. Outrun the blast or die
+  // mk2.12: THE ESCAPE — no fatal trigger. Outrun the blast or die
   // inside it with everyone else.
 }
 
@@ -823,13 +823,13 @@ export function mateBlocks(world, squad, shooter, muzzle, aimPos) {
 // exactly as they do to every other shot in the game. Sight-gated at the
 // aim cell: you shoot only what your side sees. Returns muzzles fired.
 export function possessedVolley(world, squad, aim, T, toUV = (x, z) => ({ u: x, v: z })) {
-  // mk2.11 (owner): THE CREW FIRES UNDER THE STICK like every unit — the
+  // mk2.11: THE CREW FIRES UNDER THE STICK like every unit — the
   // one atomic round at the reticle, sight-gated at the aim like every
   // possessed shot. The _davyReadyAt reload clock is shared with the
   // ATTACK path (stepDavyShot): one reload clock, whichever path fires
   // starts it. mk2.12: the trigger no longer kills.
   if (squad.type === "davy") {
-    if ((squad._davyReadyAt || 0) > world.t) return 0; // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
+    if ((squad._davyReadyAt || 0) > world.t) return 0; // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
     const shooter = squad.memberIds.map((id) => world.byId.get(id)).find((u) => u && u.alive);
     if (!shooter) return 0;
     squad._davyReadyAt = world.t + DAVY_FIRE.reloadS;
@@ -841,7 +841,7 @@ export function possessedVolley(world, squad, aim, T, toUV = (x, z) => ({ u: x, 
     return 1;
   }
   const spec = INFANTRY_ARMS[squad.type];
-  if (!spec) return 0; // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
+  if (!spec) return 0; // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
   const fspec = { ...spec, acc: spec.acc * POSSESS_ACC, volley: spec.burst || 1,
     blastR: spec.blastR != null ? spec.blastR : INFANTRY_BLAST_R,
     kv: spec.kv != null ? spec.kv : INFANTRY_KV };
@@ -850,7 +850,7 @@ export function possessedVolley(world, squad, aim, T, toUV = (x, z) => ({ u: x, 
   // the synthetic ground point exactly as before when nothing is near.
   const live = snapTargetNear(world, aim, T, toUV);
   const sy = aim.y != null ? aim.y : world.field.heightAt(aim.x, aim.z);
-  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE (owner) — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
+  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
   let fired = 0;
   for (const id of squad.memberIds) {
     const u = world.byId.get(id);
@@ -879,16 +879,16 @@ export function possessedTowerFire(world, tower, aim, T, toUV = (x, z) => ({ u: 
   const spec = TOWER_SPECS[tower.towerType];
   if (!spec || spec.fireRate <= 0) return false;
   tower.fireCd = tower.fireCd || 0;
-  if (tower.fireCd > 0) return false; // mk2.58 (owner): THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
+  if (tower.fireCd > 0) return false; // mk2.58: THE COMMANDER'S EYE — possession is the player's own sight; no seen-gate on a possessed aim
   const live = snapTargetNear(world, aim, T, toUV);
-  // Amendment 3 (owner): the possessed coil ALWAYS discharges — at the
+  // Amendment 3: the possessed coil ALWAYS discharges — at the
   // snapped enemy when one is near the reticle, into the ground at the
   // reticle otherwise. The chain walks from wherever the bolt lands.
   if (spec.tesla) {
     if (!arcs) return false;
     tower.fireCd = spec.fireRate;
     tower.flashT = world.t;
-    // Amendment 4 (owner): the possessed coil strikes ANY living body under
+    // Amendment 4: the possessed coil strikes ANY living body under
     // the crosshair — his own men included. snapTargetNear only locks
     // enemies, so scan both sides here; sight is already ruled at the aim.
     let mark = live;
@@ -910,14 +910,14 @@ export function possessedTowerFire(world, tower, aim, T, toUV = (x, z) => ({ u: 
     return true;
   }
   const sy = aim.y != null ? aim.y : world.field.heightAt(aim.x, aim.z);
-  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE (owner) — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
+  const tgt = live || { pos: { x: aim.x, y: sy, z: aim.z }, v: { x: 0, y: 0, z: 0 }, hy: sy - world.field.heightAt(aim.x, aim.z) }; // mk2.02: ground aim targets the SURFACE — the phantom body is dead; hy carries roof height over field ground through shooterFire's lead refresh
   tower.fireCd = spec.fireRate;
   tower.flashT = world.t;
   towerShot(world, tower, tgt, { ...spec, acc: spec.acc * POSSESS_ACC });
   return true;
 }
 
-// mk2.03 (owner): THE GRENADE — a thrown BODY on a 2.0s fuse from release.
+// mk2.03: THE GRENADE — a thrown BODY on a 2.0s fuse from release.
 // Physics owns the flight and the roll (bounce, settle, slide downhill);
 // stepGrenades owns the clock. Airbursts happen; impact detonation never
 // does. One throw, both sides. Two draws per throw (applyScatter's own),
@@ -959,7 +959,7 @@ export function stepGrenades(world) {
   }
 }
 
-// mk2.15 (owner): THE TESLA COIL. The tower's trigger starts a chain row on
+// mk2.15: THE TESLA COIL. The tower's trigger starts a chain row on
 // S.arcs; stepTesla walks the rows against LIVE positions, one hop every
 // TESLA.hopS seconds — nearest body not yet hit, TESLA.hopR meters from the
 // last victim, TESLA.maxHits total, damage stepping down TESLA.dmgStep to
@@ -972,7 +972,7 @@ export function stepGrenades(world) {
 export const TESLA = { hopR: 8, maxHits: 8, dmgStep: 5, dmgFloor: 10, hopS: 0.15 }; // provisional (F5)
 
 // what the chain may touch: units, crews, vehicles, mechs, towers, walls,
-// masonry chunks, rocks, trees — "anything" (owner). Mech limbs resolve to
+// masonry chunks, rocks, trees — "anything". Mech limbs resolve to
 // the hull through applyDamage; the visited set tracks the HULL id so a
 // mech is one body to the chain, not five.
 function chainBody(b) {
@@ -1158,7 +1158,7 @@ export function spawnSandbag(world, x, z, orient = 0, team = 1) {
   return b;
 }
 
-// P7 T17 (owner): ENGINEERS BUILD WITH THEIR HANDS — the reach test, pure
+// P7 T17: ENGINEERS BUILD WITH THEIR HANDS — the reach test, pure
 // and exported for the suite (the T8/T10 factoring precedent). A live squad
 // member within reach meters of the row's spot.
 export function memberNearRow(world, sq, row, reach) {
@@ -1169,7 +1169,7 @@ export function memberNearRow(world, sq, row, reach) {
   return false;
 }
 
-// P7.2 T1 (owner): EASIER SELECTION — the field tap radii, one home.
+// P7.2 T1: EASIER SELECTION — the field tap radii, one home.
 // Squad was a hard-coded 1.6 in squadAtPoint, hull 3.2 in vehicleAtPoint;
 // towers had no proximity pick at all (exact cell only). // provisional (F5)
 export const TAP_SQUAD_M = 2.4;
@@ -1188,7 +1188,7 @@ export function nextPick(cands, curKey) {
   return sorted[(i + 1) % sorted.length]; // absent current (-1) lands on the nearest
 }
 
-// SELECT ALL OF TYPE (owner): every squad of the type still holding a live
+// SELECT ALL OF TYPE: every squad of the type still holding a live
 // member. Sealed riders (P7 T4) are not tappable and not selectable here.
 export function squadIdsOfType(world, squads, type) {
   const out = [];
@@ -1308,7 +1308,7 @@ export function friendlyFouls(world, muzzle, target, spec, selfId) {
 // alive and asleep somewhere downrange (matches the campaign's demolition
 // semantics — displacement counts as destruction, not survival).
 export const DEPOT_STANDING_TOL = 1.2; // meters
-export const DEPOT_BREACH_FRAC = 0.40; // P7 T3 (owner): really knocked down — was 0.58 // provisional (F5)
+export const DEPOT_BREACH_FRAC = 0.40; // P7 T3: really knocked down — was 0.58 // provisional (F5)
 export const DEPOT_CENSUS_HZ = 1; // census cadence — NOT per frame
 export const STAND_SLIDE_M = 4;    // P7 T6: an UPRIGHT piece slid this far still stands // provisional (F5)
 export const STAND_UPRIGHT = 0.7;  // R[4] above this reads as upright // provisional (F5)
@@ -1377,7 +1377,7 @@ export function depotStandingFraction(census, byId) {
     if (!b || b.alive === false) continue;
     const dx = b.pos.x - c.home.x, dy = b.pos.y - c.home.y, dz = b.pos.z - c.home.z;
     const near = Math.sqrt(dx * dx + dy * dy + dz * dz) <= DEPOT_STANDING_TOL;
-    // P7 T6 (owner): an upright piece merely SLID is still the building —
+    // P7 T6: an upright piece merely SLID is still the building —
     // topple it or bury it to erase it. Horizontal band, small drop, upright.
     const slidUpright = !near && b.R && b.R[4] > STAND_UPRIGHT &&
       Math.hypot(dx, dz) <= STAND_SLIDE_M && Math.abs(dy) < 1.0;
@@ -1449,7 +1449,7 @@ export function stepDepotCensus(S, dt, computeFraction) {
 export const BELL_PERIOD_S = 90;   // provisional (F5)
 
 // Bell index at which the enemy's tiers 1/2/3/4 open. Bell 1 is the FIRST
-// bell of a match, so tier 1 marches with the opening assault. P7 T9 (owner):
+// bell of a match, so tier 1 marches with the opening assault. P7 T9:
 // the 4th tier, the hero tier, opens dear and late. // provisional (F5)
 export const TIER_BELLS = [1, 3, 5, 10];
 
@@ -1461,7 +1461,7 @@ export const ENEMY_TIERS = [
   ["rocket", "gren"],   // tier 1 — rocket troops, grenadiers (mk2.02: the roster surgery)
   ["mortar", "sapper"], // tier 2 — mortar team, sappers
   ["sniper", "tank"],   // tier 3 — marksmen, armour
-  ["hero_bison", "hero_apc"], // tier 4 — THE HERO TIER (owner): lost armor returns off the convoy, dear
+  ["hero_bison", "hero_apc"], // tier 4 — THE HERO TIER: lost armor returns off the convoy, dear
 ];
 
 // ---------------------------------------------------------------- the ladder
@@ -1488,7 +1488,7 @@ export function enemyTierOf(tag) {
 // unlocked); an empty/omitted list means they have picked nothing yet, so the
 // assault is conscripts only. Pure, no rng.
 export function enemyTierState(bell, unlocked = []) {
-  // P7.2 T4 (owner): the bell clamp is DEAD — a bought plan fields at
+  // P7.2 T4: the bell clamp is DEAD — a bought plan fields at
   // once, the full mirror of the player's instant build rights. The
   // signature keeps the bell for its callers; membership in his unlocked
   // list is the whole gate now.
@@ -1505,7 +1505,7 @@ export function enemyTierState(bell, unlocked = []) {
 // DRAW-COUNT LAW: both hands consume a fixed HAND_DRAWS (5) each side, drawn
 // up front and then clamped/spliced, never drawn-if; an exhausted pool still
 // burns its draws so two clients on the same seed stay in step forever.
-// P7.2 T2 (owner): THE HAND — five draws per bell, the fixed split: three
+// P7.2 T2: THE HAND — five draws per bell, the fixed split: three
 // plan draws over the not-yet-unlocked pool, two hire draws over the full
 // list. Draw-then-clamp: an exhausted plans pool still burns its three.
 export const HAND_DRAWS = 5;
@@ -1521,7 +1521,7 @@ export function makeFoeState() {
 // Exactly HAND_DRAWS draws, always: three spliced plan picks over the
 // unowned pool, two spliced hire picks over the full list. A plan and a
 // hire may name the same type — different products (one teaches, one
-// delivers). No bell gate anywhere (owner).
+// delivers). No bell gate anywhere.
 export function dealConvoyHand(unlocked, keys, rng) {
   const plans = keys.filter((k) => unlocked.indexOf(k) < 0);
   const hand = [];
@@ -1541,7 +1541,7 @@ export function dealConvoyHand(unlocked, keys, rng) {
 }
 
 // takeHandCard(M, key, hire): one row leaves the hand — multi-buy is the
-// law (owner), so nothing else closes. The last row leaving drops the card.
+// law, so nothing else closes. The last row leaving drops the card.
 export function takeHandCard(M, key, hire) {
   if (!M || !M.hand) return false;
   const i = M.hand.findIndex((c) => c.k === key && c.hire === (hire ? 1 : 0));
@@ -1567,12 +1567,12 @@ export function makeAssaultState() {
 // break contact and withdraw in order.
 export const ASSAULT_TIMEOUT = 75;
 
-export function makeRunState({ startResources = 250 } = {}) { // P7.2 T8 (owner): the draft's richer opening // provisional (F5)
+export function makeRunState({ startResources = 250 } = {}) { // P7.2 T8: the draft's richer opening // provisional (F5)
   return {
     resources: startResources, score: { p: { kills: 0, value: 0 }, e: { kills: 0, value: 0 } },
     ws: makeAssaultState(), spawnRR: 0,
     arcs: [], // mk2.15: live tesla chains — plain rows, saved as they stand
-    holdArea: { 1: false, 2: false }, // mk2.18 (owner): area weapons hold fire with a friendly in the spread — tesla chain + davy blast; per side, both start OFF; nothing flips side 2 today
+    holdArea: { 1: false, 2: false }, // mk2.18: area weapons hold fire with a friendly in the spread — tesla chain + davy blast; per side, both start OFF; nothing flips side 2 today
     mode: "wall", sellMode: false, inspectId: null,
     started: false, gameOver: false, victory: false, attrition: false, ledgerLoss: false,
     starvedStreak: 0, spent: false,
@@ -1720,7 +1720,7 @@ export function makeEndDispatch({ victory, score = null }) {
   };
 }
 
-// THE KILL LAW (owner, 2026-08-20): one attributed kill — the victim's live
+// THE KILL LAW: one attributed kill — the victim's live
 // market price scores the killer's ledger WHOLE, and KILL_CUT of it lands on
 // the killer's books. Attribution is the event's own attacker: "player" and
 // "enemy" are the two sides; "world" (craters, drowning, collapses, fire)
@@ -1729,6 +1729,25 @@ export function makeEndDispatch({ victory, score = null }) {
 // — one wall, one death (the WALL_UPPER_GROUP rule). A sandbag's side is
 // bagSide, never team (spawnSandbag stamps team 1 on every bag).
 // Pure over (S, ev, counts); returns what it did, or null. No rng.
+// mk2.95: THE CREDIT TRAIL — a kill of an enemy man, vehicle, or
+// mech credits the killer's squad or hull with one. Structures, bags, and
+// trucks are not kills; mines, wires, towers, and falling stone credit
+// nobody on the roster; friendly fire credits nobody. Team-agnostic — the
+// enemy's squads (foeSquads) accrue through the same trail.
+export function creditKill(world, squads, foeSquads, ev) {
+  if (ev.type !== "kill") return;
+  if (ev.kind !== "unit" && ev.kind !== "vehicle" && ev.kind !== "mech") return;
+  const kid = ev.srcId != null ? ev.srcId : ev.killerId;
+  if (!kid) return;
+  const kb = world.byId.get(kid);
+  if (kb && (kb.kind === "vehicle" || kb.kind === "mech")) {
+    if (kb.team !== ev.team) kb.kills = (kb.kills || 0) + 1;
+    return;
+  }
+  if (ev.team !== 1 && squads) for (const sq of squads) if (sq.memberIds.includes(kid)) { sq.kills = (sq.kills || 0) + 1; return; }
+  if (ev.team !== 2 && foeSquads) for (const sq of foeSquads) if (sq.memberIds.includes(kid)) { sq.kills = (sq.kills || 0) + 1; return; }
+}
+
 export function scoreKill(S, ev, counts) {
   if (ev.type !== "kill") return null;
   const att = ev.attacker === "player" ? 1 : ev.attacker === "enemy" ? 2 : 0;
@@ -1847,7 +1866,7 @@ export function fireBell(S, opts = {}) {
     const M = S.manifest;
     M.hand = dealConvoyHand(M.unlocked, HAND_KEYS, rng);
     M.offerBell = S.bell;
-    M.cardUp = M.hand.length > 0 && !opts.possessed; // mk2.02: THE CONVOY WAITS (owner) — no deal opens over a live possession; release opens it (the fact rides opts since the T3 split)
+    M.cardUp = M.hand.length > 0 && !opts.possessed; // mk2.02: THE CONVOY WAITS — no deal opens over a live possession; release opens it (the fact rides opts since the T3 split)
     M.armedAt = nowT + PENDING_ARM_S;
   }
 
@@ -1855,7 +1874,7 @@ export function fireBell(S, opts = {}) {
   // the step-4 shape; the buys are a deterministic walk in dealt order
   // (zero draws): every card he can afford while keeping a muster floor
   // in the till. Squad and hero plans push his tags — his waves field
-  // them AT ONCE (the bell clamp is dead, owner 2026-08-20); tower plans
+  // them AT ONCE (the bell clamp is dead); tower plans
   // join S.foe.towers, his plans ledger; hires queue on S.foe.hired and
   // the game layer fields them at his depot right after the ring. The
   // conscript key is BORN-OWNED (the never-gated law): his conscripts
@@ -1940,7 +1959,7 @@ export function fireBell(S, opts = {}) {
   // Starvation keeps its muster-time solvency rule: a muster that fielded
   // anything always resets the streak.
   if (reg) {
-    // mk1.13 AMENDMENT 1 (owner): spent is spent — a regiment with no men
+    // mk1.13 AMENDMENT 1: spent is spent — a regiment with no men
     // is as done as one with no money; the scrap path stays for form though
     // the clock stipend keeps it funded.
     const starved = (ws.fielded || 0) === 0 &&

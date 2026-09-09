@@ -206,7 +206,7 @@ export function stepBuildLine(world, grid, field, T, S, sq, ctx, toast, map) {
     while (job.i < job.rows.length) {
       const row = job.rows[job.i];
       if (!arrived && row.t > t + LAY_AHEAD) break;
-      // P7 T17 (owner): ENGINEERS BUILD WITH THEIR HANDS — a row lays
+      // P7 T17: ENGINEERS BUILD WITH THEIR HANDS — a row lays
       // only while a live member stands within reach; no one near, this
       // row and every row behind it wait for the men. The anchor keeps
       // walking (its escape stands) — rows it outruns lay late, when

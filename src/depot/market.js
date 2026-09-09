@@ -3,7 +3,7 @@
 // cost times min(4, 1 + standing/K) — both armies' standing stock counted
 // together, one shared table both sides pay. Pure counting and arithmetic:
 // no rng, no world mutation, recomputed each second by the game layer.
-import { TOWER_SPECS, ENEMY_SPECS, TANK, BISON, APC, MECH } from "./specs.js";
+import { TOWER_SPECS, ENEMY_SPECS, TANK, BISON, APC, JEEP, MECH } from "./specs.js";
 import { SQUAD_SPECS } from "./squads.js";
 
 // THE TWO WALLS (mk1.20, owner's rulings): both pressures are the same
@@ -23,12 +23,12 @@ export const MARKET_K = {
   mgtower: 4, guntower: 4, mortartower: 3, rockettower: 3, teslatower: 4,
   wall: 30, sandbag: 40,
   // P7 T9 set the hero tier at K 1 — one hull doubled, two hit the clamp.
-  // SUPERSEDED KNOWINGLY (owner, 2026-08-21, mk1.95): hero prices behave
+  // SUPERSEDED KNOWINGLY: hero prices behave
   // like every other price, symmetrically — K 3, the tank family's machine
   // precedent. One shared table, both sides' iron, unchanged below.
-  heroBison: 3, heroApc: 3,
+  heroBison: 3, heroApc: 3, heroJeep: 4,
   heroMech: 3, // provisional (F5)
-  // P7 T10 (owner): mine/wire families — a per-side budget rides the market
+  // P7 T10: mine/wire families — a per-side budget rides the market
   // so a mine war stays under the engine ceiling. Both sides' LIVE devices
   // count together, one shared table (provisional F5).
   mine: 12, wire: 16,
@@ -65,6 +65,7 @@ export function marketCounts(world, squads, mines) {
     // has to see both sides' iron).
     else if (b.kind === "vehicle" && b.vtype === "bison") add("heroBison", 1);
     else if (b.kind === "vehicle" && b.vtype === "apc") add("heroApc", 1);
+    else if (b.kind === "vehicle" && b.vtype === "jeep") add("heroJeep", 1);
     else if (b.kind === "mech" && b.alive) add("heroMech", 1);
     else if (b.kind === "tower" && FAMILY_OF_TOWER[b.towerType]) add(FAMILY_OF_TOWER[b.towerType], 1);
     else if (b.kind === "wall" && !b.course) add("wall", 1);
@@ -94,12 +95,14 @@ export function computePrices(counts) {
   // P7 T9: THE HERO TIER — one price table, both sides, off the specs' own cost.
   player.hero_bison = priced(BISON.cost, "heroBison", counts);
   player.hero_apc = priced(APC.cost, "heroApc", counts);
+  player.hero_jeep = priced(JEEP.cost, "heroJeep", counts);
   player.hero_mech = priced(MECH.cost, "heroMech", counts);
   const foe = {};
   for (const t in FAMILY_OF_TAG) foe[t] = priced(ENEMY_SPECS[t].bounty, FAMILY_OF_TAG[t], counts);
   foe.tank = priced(TANK.bounty, "tank", counts);
   foe.hero_bison = priced(BISON.cost, "heroBison", counts);
   foe.hero_apc = priced(APC.cost, "heroApc", counts);
+  foe.hero_jeep = priced(JEEP.cost, "heroJeep", counts);
   foe.hero_mech = priced(MECH.cost, "heroMech", counts);
   return { player, foe, counts };
 }
@@ -109,7 +112,7 @@ export function fieldPrices(counts, wallBase, bagBase) {
   return { wall: priced(wallBase, "wall", counts), bag: priced(bagBase, "sandbag", counts) };
 }
 
-// THE KILL PRICE (owner, 2026-08-20): what one death is worth — the victim's
+// THE KILL PRICE: what one death is worth — the victim's
 // live market price at the moment it dies, resolved from the kill event's own
 // identity fields (core.js stamps them under depotCombat). Men price per
 // head: a squad-family price over the men one buy fields (the sniper-pair
@@ -138,6 +141,7 @@ export function killPrice(ev, counts, wallBase, bagBase) {
   if (ev.kind === "vehicle") {
     if (ev.vtype === "bison") return { price: priced(BISON.cost, "heroBison", c), counted: true };
     if (ev.vtype === "apc") return { price: priced(APC.cost, "heroApc", c), counted: true };
+    if (ev.vtype === "jeep") return { price: priced(JEEP.cost, "heroJeep", c), counted: true };
     if (ev.tag === "tank") return { price: priced(TANK.bounty, "tank", c), counted: true };
     return null;
   }

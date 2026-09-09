@@ -95,7 +95,7 @@ export function stepTowers(world, T, discipline, possessedId, arcs, holdArea, ma
     // mk2.26: a dummy enemy tower holds everything — no scan, no trigger;
     // cooldown decays so the flip back to FIGHT resumes clean.
     if (world._devDummies && b.team === 2) { b.fireCd = (b.fireCd || 0) - dt; continue; }
-    // P7.1 T6 (owner): THE TOWER BRAIN LEARNS ITS TEAM — every tower targets
+    // P7.1 T6: THE TOWER BRAIN LEARNS ITS TEAM — every tower targets
     // the OPPOSITE team and sight-gates on its OWN side. tTeam is the
     // tower's own side, foeTeam who it hunts.
     const tTeam = b.team === 2 ? 2 : 1; const foeTeam = tTeam === 1 ? 2 : 1;
@@ -231,7 +231,7 @@ export function buildTown(world, grid, field, map) {
       : () => false;
     // T4: drive doors run down the LONG axis — derived from live dims too.
     const driveZ = t.drive && t.nz >= t.nx;
-    // P7 T5 (mk1.34, owner): THE PRECAST DEPOT — column-and-panel, the
+    // P7 T5 (mk1.34): THE PRECAST DEPOT — column-and-panel, the
     // warehouse lesson at fortress scale. A quarter the lattice's bodies
     // (the measured boom at the wall drops 5.3 -> 1.6 ms); demolition goes
     // structural — shear a panel's welds and it falls as ONE piece, drop
@@ -311,7 +311,7 @@ export function buildTown(world, grid, field, map) {
         }
       }
     } else if (t.dead) {
-      // BORN RUINS (Settled Ground T2, mk2.62, owner): a dead entry lays as
+      // BORN RUINS (Settled Ground T2, mk2.62): a dead entry lays as
       // one of four ruin forms instead of the live lay. No draw: the form
       // rides the entry (mapgen derives it from already-drawn values).
       // Welded by the same neighbor pass the live lay uses — except the
@@ -373,7 +373,7 @@ export function buildTown(world, grid, field, map) {
         const stone0 = t.stones && iy === 0 && !perim && ((ix * 31 + iz * 7) % 100) / 100 < 0.35;
         if (iy < t.ny && !perim && !colAt(ix, iz) && !part && !stone0) continue;
         const pitchedForm = /^(croft|shed|house|long|granary|mill|smithy|inn|spring|row|chapel|warehouse|watch)/.test(t.id || "");
-        if (iy === t.ny && (t.roof === false || t.slab || pitchedForm)) continue; // T4/mk2.66: NO STONE LIDS (owner) — a slab or plates on structure, never a layer of cubes
+        if (iy === t.ny && (t.roof === false || t.slab || pitchedForm)) continue; // T4/mk2.66: NO STONE LIDS — a slab or plates on structure, never a layer of cubes
         if (t.cren && iy === t.ny && (!perim || (ix + iz) % 2)) continue; // mk2.66: the keep's crenellations
         if (ix === t.door && (iz === 1 || iz === 2) && iy <= 2) continue;
         // T4: drive-through — doors carved through BOTH end walls of the long
@@ -396,7 +396,7 @@ export function buildTown(world, grid, field, map) {
       }
       const key = (a, b, c2) => a + "," + b + "," + c2;
       const map = new Map(grid3.map((c) => [key(c.gpos[0], c.gpos[1], c.gpos[2]), c]));
-      const townBreakF = breakF; // P7 T3 (owner): normal welds — the depot is big, not magic; the breach bar is what makes it a siege
+      const townBreakF = breakF; // P7 T3: normal welds — the depot is big, not magic; the breach bar is what makes it a siege
       for (const c of grid3) {
         const g = c.gpos;
         for (const d of [[1, 0, 0], [0, 1, 0], [0, 0, 1]]) {
@@ -423,7 +423,7 @@ export function buildTown(world, grid, field, map) {
     }
     if (!t.depot) layDress(t, grid3, field.heightAt(t.x, t.z) + hcs + 0.02); // mk2.66: the carpenter dresses every standing and shell form
     const cells = townFootprint(grid, t, map);
-    if (!t.dead || t.form === "mound") for (const ci of cells) { const c = grid.cells[ci]; c.blocked = true; c.building = t.id; c.bTeam = t.team === 2 ? 2 : (t.depot ? 1 : 0); } // T2: a born ruin blocks no cell — EXCEPT the mound (owner, 2026-08-26): too dense to walk, the router goes around
+    if (!t.dead || t.form === "mound") for (const ci of cells) { const c = grid.cells[ci]; c.blocked = true; c.building = t.id; c.bTeam = t.team === 2 ? 2 : (t.depot ? 1 : 0); } // T2: a born ruin blocks no cell — EXCEPT the mound: too dense to walk, the router goes around
     if (t.depot) {
       // roof-peak flag anchor: kinematic marker body, no collision role —
       // the renderer draws pole+cloth at any body with flagPole === true
@@ -553,7 +553,7 @@ export function stepDepot(world, grid, onStructureLost, town, onRuin, T, discipl
         else b.ferry = null;
       }
     }
-    // VISION T4 (mk0.74, owner's ruling): an attacking squad that SEES an
+    // VISION T4 (mk0.74): an attacking squad that SEES an
     // enemy in weapon reach halts and fights — the halt is the squad's own
     // leg-pause field held open, so the fire rule and the leg machinery are
     // untouched and no rng is drawn. MOVE and BUILD stay quiet; sappers
@@ -617,6 +617,9 @@ export function stepDepot(world, grid, onStructureLost, town, onRuin, T, discipl
       // because it spends scrap and places bodies — both barred from
       // squads.js by that module's law. Squads with no job cost one test.
       if (sq._build && input.stepBuildLine) input.stepBuildLine(sq);
+      // mk2.94: the chain's queued line starts game-side — priced, waited
+      // on, and started by the hook DepotGame installs beside the driver.
+      if (!sq._build && input.stepChainBuild) input.stepChainBuild(sq);
       // P7.2 T6: the medics make their rounds — after the squad's own step,
       // so a tending man's goal overrides this tick's slot seek.
       if (sq.type === "medics") stepMedicTendSquad(world, sq, world.dt);

@@ -32,18 +32,18 @@
 // tesla carries weapon:"tesla" from mk2.15 — the tag names the voice; the
 // chain itself never fires a projectile (state.js teslaStrike/stepTesla).
 export const TOWER_SPECS = {
-  // mk0.99 (owner's lethality ruling): 3.4 -> 8 — the MG tower rises flatter
+  // mk0.99: 3.4 -> 8 — the MG tower rises flatter
   // than rifles; a six-round burst kills a conscript. The ±10% replaces-not-
   // adds calibration this line once carried is superseded.
   mg:     { range: 15, fireRate: 0.17, projSpeed: 95, dmg: 5, dirDmg: 8, blastR: 0.3, kv: 0.5, cost: 23, hp: 80,  crater: 0, label: "SPITTER",     icon: "⊞", kind: "mg",    weapon: "mg",     hy: 1.0, acc: 0.090, windF: 0.06, windComp: 0,   blurb: "Fast, cheap, short reach", occl: "arc" },
-  gun:    { range: 19, fireRate: 1.05, projSpeed: 58, dmg: 25, blastR: 2.3, kv: 8,   cost: 38, hp: 130, crater: 0.55, label: "FIELD GUN",    icon: "⚑", kind: "shell", weapon: "shell",  hy: 1.5, acc: 0.07, windF: 0.9,  windComp: 0.6, blurb: "Flat-trajectory workhorse", occl: "auto" /* mk2.02 (owner): THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot */ },
-  mortar: { range: 26, fireRate: 4.6 /* halved cadence (C0 T4) // provisional (F5) */ /* mk1.74 (owner): tightened 0.020 -> 0.005 — the lob lands where it looks */,  projSpeed: 33, dmg: 38, blastR: 3.8, kv: 10,  cost: 53, hp: 95,  crater: 0.8, label: "MORTAR", icon: "◎", kind: "shell", weapon: "mortar", hy: 0.8, acc: 0.005, windF: 0.04, windComp: 0.6, blurb: "Arcs over walls, big blast", occl: "lofted", elevCap: 85, chargeSig: 0.01 },  // mk2.56 (owner): THE TIGHTEST ARC — the tube solves charge and angle together (accuracy.js tightSolve) // provisional (F5)
-  rocket: { range: 23, fireRate: 8.8 /* halved cadence (C0 T4) // provisional (F5) */,  projSpeed: 18, dmg: 27, blastR: 3.4, kv: 9,   cost: 75, hp: 110, volley: 4, crater: 0.7, label: "SALVO RACK", icon: "▲", kind: "shell", weapon: "rocket", hy: 1.2, acc: 0.021, windF: 1.3  /* lobbed retune (mk0.25): swept 0.020-0.035 vs the pinned flat baseline 2.4592, curve in the F1.5 artillery plan // provisional (F5) */, windComp: 0.5, blurb: "Four-round salvo, slow reload", occl: "arc" /* mk1.74 (owner): THE GENTLE ARC — flat solve at 18 m/s, ~22° and a 2.3m apex at full reach; terrain checks honest */, elevCap: 85, chargeSig: 0.01 },  // mk2.56 (owner): THE TIGHTEST ARC // provisional (F5)
-  tesla:  { range: 16, fireRate: 5, projSpeed: 95, dmg: 35, blastR: 0, kv: 0, cost: 55, hp: 85, label: "TESLA COIL", icon: "⚡", kind: "mg", weapon: "tesla", acc: 0.02, windF: 0, windComp: 0, tesla: true, hy: 1.35, blurb: "Chain lightning arcs to everything near" }, // mk2.15 (owner): THE TESLA COIL replaces frost — key renamed, no save migration (standing orders). projSpeed is sight-math only (arcClears/effRange run the mg's flat check); no projectile ever flies.
+  gun:    { range: 19, fireRate: 1.05, projSpeed: 58, dmg: 25, blastR: 2.3, kv: 8,   cost: 38, hp: 130, crater: 0.55, label: "FIELD GUN",    icon: "⚑", kind: "shell", weapon: "shell",  hy: 1.5, acc: 0.07, windF: 0.9,  windComp: 0.6, blurb: "Flat-trajectory workhorse", occl: "auto" /* mk2.02: THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot */ },
+  mortar: { range: 26, fireRate: 4.6 /* halved cadence (C0 T4) // provisional (F5) */ /* mk1.74: tightened 0.020 -> 0.005 — the lob lands where it looks */,  projSpeed: 33, dmg: 38, blastR: 3.8, kv: 10,  cost: 53, hp: 95,  crater: 0.8, label: "MORTAR", icon: "◎", kind: "shell", weapon: "mortar", hy: 0.8, acc: 0.005, windF: 0.04, windComp: 0.6, blurb: "Arcs over walls, big blast", occl: "lofted", elevCap: 85, chargeSig: 0.01 },  // mk2.56: THE TIGHTEST ARC — the tube solves charge and angle together (accuracy.js tightSolve) // provisional (F5)
+  rocket: { range: 23, fireRate: 8.8 /* halved cadence (C0 T4) // provisional (F5) */,  projSpeed: 18, dmg: 27, blastR: 3.4, kv: 9,   cost: 75, hp: 110, volley: 4, crater: 0.7, label: "SALVO RACK", icon: "▲", kind: "shell", weapon: "rocket", hy: 1.2, acc: 0.021, windF: 1.3  /* lobbed retune (mk0.25): swept 0.020-0.035 vs the pinned flat baseline 2.4592, curve in the F1.5 artillery plan // provisional (F5) */, windComp: 0.5, blurb: "Four-round salvo, slow reload", occl: "arc" /* mk1.74: THE GENTLE ARC — flat solve at 18 m/s, ~22° and a 2.3m apex at full reach; terrain checks honest */, elevCap: 85, chargeSig: 0.01 },  // mk2.56: THE TIGHTEST ARC // provisional (F5)
+  tesla:  { range: 16, fireRate: 5, projSpeed: 95, dmg: 35, blastR: 0, kv: 0, cost: 55, hp: 85, label: "TESLA COIL", icon: "⚡", kind: "mg", weapon: "tesla", acc: 0.02, windF: 0, windComp: 0, tesla: true, hy: 1.35, blurb: "Chain lightning arcs to everything near" }, // mk2.15: THE TESLA COIL replaces frost — key renamed, no save migration (standing orders). projSpeed is sight-math only (arcClears/effRange run the mg's flat check); no projectile ever flies.
 };
 export const TOWER_ORDER = ["mg", "gun", "mortar", "rocket", "tesla"];
 
-// mk2.02: ONE BODY TABLE (owner) — every man, both sides, reads this row;
+// mk2.02: ONE BODY TABLE — every man, both sides, reads this row;
 // the player's numbers seed it and every man stands 2m. Speeds/bounties
 // stay per-side rows; the speed audit is the roster-mirror closing task.
 export const MAN = {
@@ -72,7 +72,7 @@ export const ENEMY_SPECS = {
   // deletion re-dresses the whole pair. Campaign androids are unaffected —
   // that dress lives on scenario bodies (src/game/scenario.js), not here.
   sniper: { ...MAN.rifle, bounty: 45, speed: 2.9, gain: 14, label: "sniper" },
-  // P7.1 T6 (owner): the pick pool is the player's full list — his MG team
+  // P7.1 T6: the pick pool is the player's full list — his MG team
   // and his engineers join the roster. Bounties provisional (F5).
   mg:  { ...MAN.rifle, bounty: 8, speed: 3.2, gain: 14, label: "gunners" },
   eng: { ...MAN.rifle, bounty: 6, speed: 3.2, gain: 14, label: "engineer" },
@@ -82,12 +82,12 @@ export const ENEMY_SPECS = {
   // P7.2 T7: his mechanic — the conscript frame, no weapon (units.js's
   // mechanic branch never fires). Bounty is the kill payout. // provisional (F5)
   mechanic: { ...MAN.rifle, bounty: 8, speed: 3.2, gain: 14, label: "mechanic" },
-  // mk2.02 (owner): the roster surgery — rocket troops replace runners,
+  // mk2.02: the roster surgery — rocket troops replace runners,
   // the mortar team joins so the player's tube has its mirror. Dials
   // provisional (F5).
   rocket: { ...MAN.rifle, bounty: 8, speed: 3.2, gain: 16, label: "rocket team" },
   mortar: { ...MAN.rifle, bounty: 8, speed: 3.2, gain: 14, label: "mortar team" },
-  // mk2.08 (owner): THE DAVY CROCKETT — the atomic crew, both sides, one
+  // mk2.08: THE DAVY CROCKETT — the atomic crew, both sides, one
   // price. bounty equals the player's 450 so the shared market prices the
   // two sides identically. The slowest men on the map. // provisional (F5)
   davy: { ...MAN.rifle, bounty: 450, speed: 2.0, gain: 14, label: "atomic crew" },
@@ -102,7 +102,7 @@ export const TANK = { mass: 3400, hx: 1.5, hy: 0.8, hz: 2.4, hp: 260, bounty: 25
 // depot at war start. ONE row, both sides — symmetry is law; the enemy's is
 // this same machine (its commander arrives in Task 5). Killable and dear:
 // replacement is the hero tier's business. All dials provisional (F5).
-// P7 T9 (owner): cost is the HERO TIER's convoy price — the wall (market.js's
+// P7 T9: cost is the HERO TIER's convoy price — the wall (market.js's
 // heroBison family, K 1) plus the field wall are what make it ruinous; this
 // is the base the curve multiplies. // provisional (F5)
 export const BISON = { mass: 3800, hx: 2.2, hy: 0.95, hz: 3.3, hp: 420, armor: 160, bounty: 60, cost: 200 };
@@ -110,10 +110,10 @@ export const BISON = { mass: 3800, hx: 2.2, hy: 0.95, hz: 3.3, hp: 420, armor: 1
 // DEPOT. The main gun is the wave tank's round on a hero cadence; the coax
 // is the mg family's stream. weapon tags are voice only.
 export const BISON_FIRE = {
-  gun: { projSpeed: 85, dmg: TANK.dmg, kind: "shell", weapon: "tank", blastR: TANK.blastR, kv: 8, crater: 0.5, acc: 0.070, windF: 0.9, windComp: 0.6, cd: 2.6, range: 30, occl: "auto", elevCap: 85, chargeSig: 0.01 },  // mk2.02 (owner): THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot // mk2.55 (owner): THE LOBBED SHELL — elevCap in degrees, this gun alone; the barrel rises to 85° at a fitted speed and the shell lands where the reticle stands (accuracy.js elevCapOf). The wind stays on the shell (owner, 2026-08-25): the ring shows the drift. // provisional (F5)
+  gun: { projSpeed: 85, dmg: TANK.dmg, kind: "shell", weapon: "tank", blastR: TANK.blastR, kv: 8, crater: 0.5, acc: 0.070, windF: 0.9, windComp: 0.6, cd: 2.6, range: 30, occl: "auto", elevCap: 85, chargeSig: 0.01 },  // mk2.02: THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot // mk2.55: THE LOBBED SHELL — elevCap in degrees, this gun alone; the barrel rises to 85° at a fitted speed and the shell lands where the reticle stands (accuracy.js elevCapOf). The wind stays on the shell: the ring shows the drift. // provisional (F5)
   mg:  { projSpeed: 100, dmg: 5, dirDmg: 8, kind: "mg", weapon: "mg", blastR: 0.3, kv: 0.5, crater: 0, acc: 0.080, burst: 6, burstGap: 0.17, cd: 1.6, range: 18, occl: "arc", windF: 0.06, windComp: 0 },  // provisional (F5)
 };
-// mk2.05 (owner): THE TRUE MUZZLE — the shot and the laser leave the barrel
+// mk2.05: THE TRUE MUZZLE — the shot and the laser leave the barrel
 // TIP. Numbers mirror the drawn meshes (renderer buildBison/buildWaveTank):
 // pivot height over hull center, pivot forward offset, tube length. The
 // Bison coax keeps its hull offset — a stub, not a tube. // provisional (F5)
@@ -125,12 +125,27 @@ export const BARRELS = {
 // P7 T4 (mk1.33): THE APC — the starting transport, one parked at each
 // depot beside the Bison. Four seats: one squad of four or two teams of
 // two. Riders are SEALED — no eyes, no fire — and die with the vehicle;
-// loading is a real decision (owner). Its only gun is the coax
+// loading is a real decision. Its only gun is the coax
 // (BISON_FIRE.mg — one mg table, every hull). All dials provisional (F5).
-// P7 T9 (owner): cost — the hero tier's convoy price, same story as BISON.cost above. // provisional (F5)
+// P7 T9: cost — the hero tier's convoy price, same story as BISON.cost above. // provisional (F5)
 export const APC = { mass: 2600, hx: 1.6, hy: 1.0, hz: 3.0, hp: 300, armor: 120, bounty: 45, seats: 4, cost: 140 };
 
-// THE MECH (owner, 2026-08-20): the crown machine, both sides — the engine
+// mk2.98: THE JEEP — the Willys. Coax only, two seats, the spotter's
+// eye, springs under it (mk2.97), 2H runs and 4L climbs, and it fords the
+// stream as the Bison does. All dials provisional (F5).
+export const JEEP = { mass: 1100, hx: 0.85, hy: 0.55, hz: 1.6, hp: 180, bounty: 15, seats: 2, cost: 60, eye: 46,
+  spd2h: 14, cap2h: 3.5, spd4l: 4, cap4l: 7,
+  susp: { kx: 0.85, kz: 1.3, rest: 0.48, travel: 0.4, rate: 66000, damp: 6000 } }; // mk2.99: grown to the Willys' real footprint // mk3.00: hp doubled; stance widened to the hull's edge and ride height dropped against the rollover
+
+// mk3.03: one fit for every spawned jeep, either team — springs, gears,
+// the fording flag, the spotter's eye. "2h" standing.
+export const fitJeep = (v) => {
+  v.susp = { ...JEEP.susp };
+  v.fords = true; v.eyeR = JEEP.eye; v.gear = "2h";
+  v.spdF = JEEP.spd2h; v.spdR = 3; v.accCap = JEEP.cap2h;
+};
+
+// THE MECH: the crown machine, both sides — the engine
 // walker fielded as a hero. Dear, slow, unanswerable except by another.
 export const MECH = { hp: 900, cost: 400, bounty: 120 }; // provisional (F5)
 
@@ -152,15 +167,15 @@ export const MECH = { hp: 900, cost: 400, bounty: 120 }; // provisional (F5)
 // own rifles rescale. See depot-test.mjs's "==== TASK 4A" parity assert.
 // The wall path is unaffected (dirDmg still inert there).
 export const ENEMY_FIRE = {
-  // mk0.99 (owner's lethality ruling): 4.5 -> 15 — symmetry holds, both
+  // mk0.99: 4.5 -> 15 — symmetry holds, both
   // sides rise. The ±10% replaces-not-adds calibration above is superseded.
   rifle: { projSpeed: 70, dmg: 5, dmgHeavy: 9, dirDmg: 15, kind: "mg", weapon: "rifle", blastR: 0.6, kv: 1.0, crater: 0, acc: 0.090, windF: 0.06, windComp: 0, cd: 1.5, cdVar: 0.5, range: 13, occl: "arc" },
   // lob cd 3.0 -> 6.0 (C0 T4, mk0.33): the grenadier's tube halves its cadence
   // alongside TOWER_SPECS.mortar and INFANTRY_ARMS.mortars — symmetry is law,
   // so their lob slows exactly as much as ours. cdVar is a separate dial and
   // was not moved. // provisional (F5)
-  lob:   { projSpeed: 28, dmg: 20, kind: "shell", weapon: "mortar", blastR: 2.6, kv: 6, crater: 0.45, acc: 0.005 /* mk1.74 (owner): tightened 0.020 -> 0.005 — the lob lands where it looks */, windF: 0.04, windComp: 0.6, cd: 6.0, cdVar: 0.6, range: 21, occl: "lofted", elevCap: 85, chargeSig: 0.01 },  // mk2.56 (owner): THE TIGHTEST ARC — mirrors INFANTRY_ARMS.mortars, aim fully equal // provisional (F5)
-  tank:  { projSpeed: 85, dmg: TANK.dmg, kind: "shell", weapon: "tank", blastR: TANK.blastR, kv: 8, crater: 0.5, acc: 0.070, windF: 0.9, windComp: 0.6, cd: TANK.gunCd, cdVar: 1.2, range: TANK.gunRange, occl: "auto" }, // mk2.02 (owner): THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot
+  lob:   { projSpeed: 28, dmg: 20, kind: "shell", weapon: "mortar", blastR: 2.6, kv: 6, crater: 0.45, acc: 0.005 /* mk1.74: tightened 0.020 -> 0.005 — the lob lands where it looks */, windF: 0.04, windComp: 0.6, cd: 6.0, cdVar: 0.6, range: 21, occl: "lofted", elevCap: 85, chargeSig: 0.01 },  // mk2.56: THE TIGHTEST ARC — mirrors INFANTRY_ARMS.mortars, aim fully equal // provisional (F5)
+  tank:  { projSpeed: 85, dmg: TANK.dmg, kind: "shell", weapon: "tank", blastR: TANK.blastR, kv: 8, crater: 0.5, acc: 0.070, windF: 0.9, windComp: 0.6, cd: TANK.gunCd, cdVar: 1.2, range: TANK.gunRange, occl: "auto" }, // mk2.02: THE AUTOMATIC LOB — flat when the flat arc reaches, mortar root when it cannot
 };
 
 // The 50-row WAVES table is DELETED (P1 Task 1, mk0.40). Nothing composes an
@@ -193,29 +208,29 @@ export const ENEMY_FIRE = {
 // bar from bell 0 and never has to be won off the convoy. The enemy column is
 // untouched: engineers build, they do not fight, so nothing on the other side
 // mirrors them (the sapper split is the "Engineers & Arms" phase's business).
-export const PLAYER_START = []; // P7.2 T3 (owner): THE BAR STARTS EMPTY — the free starting plans die; every build option is bought off the hand. Supersedes the mk0.60/mk1.12 starting kit.
+export const PLAYER_START = []; // P7.2 T3: THE BAR STARTS EMPTY — the free starting plans die; every build option is bought off the hand. Supersedes the mk0.60/mk1.12 starting kit.
 export const PLAYER_TIERS = [
-  // P7 T7 (mk1.36, owner): the tier-1 mirror closes — sq_rockets and
+  // P7 T7 (mk1.36): the tier-1 mirror closes — sq_rockets and
   // sq_grenadiers join mg/sq_mg/frost, matching the enemy's own rocket/gren.
   // P7.2 T6: the medic's price-family seat — rows gate nothing since T2
   ["mg", "sq_mg", "tesla", "sq_rockets", "sq_grenadiers", "sq_medics"],
   ["gun", "sq_sniper", "sq_mortars"],
   // P7.2 T7: the mechanic's price-family seat — the ruled tier-3 row
   ["mortar", "rocket", "sq_sappers", "sq_mechanics"],
-  // P7 T9 (owner): THE HERO TIER — bell 10, replacement armor off the
+  // P7 T9: THE HERO TIER — bell 10, replacement armor off the
   // convoy at a ruinous, market-walled price.
   ["hero_bison", "hero_apc", "sq_davy"],
 ];
 
-// P7.2 T2 (owner): THE HAND IS UNGATED — the full fifteen, one table, from
+// P7.2 T2: THE HAND IS UNGATED — the full fifteen, one table, from
 // bell one; price and the market wall do all the refusing. The tier ladders
 // above stop gating offers (they remain as rows and price families).
-export const HAND_KEYS = ["mg", "gun", "mortar", "rocket", "tesla", "sq_sniper", "sq_rifles", "sq_mg", "sq_sappers", "sq_mortars", "sq_engineers", "sq_rockets", "sq_grenadiers", "sq_medics", "sq_mechanics", "sq_davy", "hero_bison", "hero_apc", "hero_mech"];
+export const HAND_KEYS = ["mg", "gun", "mortar", "rocket", "tesla", "sq_sniper", "sq_rifles", "sq_mg", "sq_sappers", "sq_mortars", "sq_engineers", "sq_rockets", "sq_grenadiers", "sq_medics", "sq_mechanics", "sq_davy", "hero_bison", "hero_apc", "hero_jeep", "hero_mech"];
 
 // P7.2 T4: the key -> enemy-tag map for HIS side of the hand. Tower keys
 // are deliberately absent — a tower is not a wave tag: his tower plans
 // ROUTE to S.foe.towers (the plans ledger he builds from), full symmetry.
-export const HAND_TAGS = { sq_rifles: "", sq_rockets: "rocket", sq_grenadiers: "gren", sq_sappers: "sapper", sq_mortars: "mortar", sq_sniper: "sniper", sq_mg: "mg", sq_engineers: "eng", sq_medics: "medic", sq_mechanics: "mechanic", sq_davy: "davy", hero_bison: "hero_bison", hero_apc: "hero_apc", hero_mech: "hero_mech" };
+export const HAND_TAGS = { sq_rifles: "", sq_rockets: "rocket", sq_grenadiers: "gren", sq_sappers: "sapper", sq_mortars: "mortar", sq_sniper: "sniper", sq_mg: "mg", sq_engineers: "eng", sq_medics: "medic", sq_mechanics: "mechanic", sq_davy: "davy", hero_bison: "hero_bison", hero_apc: "hero_apc", hero_jeep: "hero_jeep", hero_mech: "hero_mech" };
 
 export const MASON = { hcs: 0.40, pitch: 0.83, mass: 100, breakF: 8.0e4 };
 
@@ -268,16 +283,16 @@ export const INFANTRY_ARMS = {
   // the pre-wiring baseline — dirDmg scaled down here (4.1/3.6) to bring
   // flagged DPS back within the ±10% replaces-not-adds contract (measured
   // +0.5%/-1.2%). See scripts/depot-test.mjs's squadFire DPS assert.
-  // mk0.99 (owner's lethality ruling): 4.1 -> 15 — rifles kill now; the
+  // mk0.99: 4.1 -> 15 — rifles kill now; the
   // ±10% replaces-not-adds calibration above is superseded.
   rifles: { projSpeed: 90, kind: "mg", weapon: "rifle", dmg: 5, dirDmg: 15, fireRate: 1.3, range: 15,
             acc: 0.090, occl: "arc", windF: 0.06, windComp: 0.6 },
-  // FROSTLINE FL-9 (owner): THE TWIN SIDEARMS — the hunter's own irons. A
+  // FROSTLINE FL-9: THE TWIN SIDEARMS — the hunter's own irons. A
   // two-round pull (one from each hand), short reach, quick cadence, real
   // hurt up close. Additive row: no depot code names it. // provisional (F5)
   hunter: { projSpeed: 80, kind: "mg", weapon: "sidearms", dmg: 5, dirDmg: 11, burst: 2, burstGap: 0.10,
             fireRate: 0.8, range: 12, acc: 0.075, occl: "arc", windF: 0.06, windComp: 0.6 },
-  // mk0.99 (owner's lethality ruling): 3.6 -> 8 — the MG family rises
+  // mk0.99: 3.6 -> 8 — the MG family rises
   // flatter than rifles; a six-round burst kills roughly one conscript.
   mg:     { projSpeed: 100, kind: "mg", weapon: "mg", dmg: 5, dirDmg: 8, burst: 6, burstGap: 0.17, fireRate: 2.2,
             range: 17, acc: 0.070, occl: "arc", windF: 0.06, windComp: 0.6 },
@@ -287,24 +302,24 @@ export const INFANTRY_ARMS = {
   // fireRate (squadFire's cooldown field), so it tracks ENEMY_FIRE.lob.cd
   // one-for-one: 3.0 -> 6.0 with the C0 T4 cadence halving. // provisional (F5)
   mortars: { projSpeed: 28, kind: "shell", weapon: "mortar", dmg: 20, blastR: 2.6, kv: 6, crater: 0.45,
-             fireRate: 6.0, range: 21, acc: 0.005 /* mk1.74 (owner): tightened 0.020 -> 0.005 — the lob lands where it looks */, occl: "lofted", windF: 0.04, windComp: 0.6, elevCap: 85, chargeSig: 0.01 },  // mk2.56 (owner): THE TIGHTEST ARC // provisional (F5)
-  // mk2.02 (owner): THE SHOULDER ROCKET — rocket troops replace runners,
+             fireRate: 6.0, range: 21, acc: 0.005 /* mk1.74: tightened 0.020 -> 0.005 — the lob lands where it looks */, occl: "lofted", windF: 0.04, windComp: 0.6, elevCap: 85, chargeSig: 0.01 },  // mk2.56: THE TIGHTEST ARC // provisional (F5)
+  // mk2.02: THE SHOULDER ROCKET — rocket troops replace runners,
   // both sides, one row. The tower rocket's round on infantry legs. // provisional (F5)
   rockets: { projSpeed: 18, kind: "shell", weapon: "rocket", dmg: 27, blastR: 3.4, kv: 9, crater: 0.7,
-             fireRate: 8.8, range: 18, acc: 0.021, occl: "arc", windF: 1.3, windComp: 0.5, elevCap: 85, chargeSig: 0.01 },  // mk2.56 (owner): THE TIGHTEST ARC // provisional (F5)
+             fireRate: 8.8, range: 18, acc: 0.021, occl: "arc", windF: 1.3, windComp: 0.5, elevCap: 85, chargeSig: 0.01 },  // mk2.56: THE TIGHTEST ARC // provisional (F5)
   // mk2.03: thrown — see GRENADE; projectile fields below are dead weight
   // kept for the pie/reach displays.
   grenadiers: { projSpeed: 20, kind: "shell", weapon: "mortar", dmg: 16, blastR: 2.0, kv: 5, crater: 0.3,
                 fireRate: 3.2, range: 12, acc: 0.010, occl: "lofted", windF: 0.03, windComp: 0.6, thrown: true },
 };
 
-// mk2.03 (owner): THE GRENADE — one body, both sides. Fuse 2.0s from
+// mk2.03: THE GRENADE — one body, both sides. Fuse 2.0s from
 // release. // provisional (F5)
 export const GRENADE = { v: 11, fuse: 2.0, r: 2.0, dmg: 16, kv: 5, crater: 0.3, mass: 0.4, hx: 0.09, hy: 0.09, hz: 0.09 };
 
-// mk2.08 (owner): THE DAVY CROCKETT'S ROUND — one table, both sides. The
+// mk2.08: THE DAVY CROCKETT'S ROUND — one table, both sides. The
 // biggest blast in the game; crater 10 carves the ruled bowl (10 deep,
 // shallow rise to the blast's edge — the engine's standard carve shape).
-// mk2.12 (owner): the trigger no longer kills — the blast alone rules, and
+// mk2.12: the trigger no longer kills — the blast alone rules, and
 // a surviving crew reloads reloadS seconds, both sides. // provisional (F5)
 export const DAVY_FIRE = { projSpeed: 28, kind: "shell", weapon: "davy", dmg: 200, blastR: 25, kv: 40, crater: 10, range: 20, acc: 0.005, occl: "lofted", windF: 0.04, windComp: 0.6, reloadS: 30 };

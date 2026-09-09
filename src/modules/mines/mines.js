@@ -1,10 +1,10 @@
 // COLDSNAP DEPOT — mines.js (P7 T10): watched points, never bodies. The
-// TRIGGER is the protection (owner, 2026-08-17): a device fires only on an
+// TRIGGER is the protection: a device fires only on an
 // other-team crosser — but a tripped blast is a blast, anyone in the area,
 // both sides, through the engine's own explode.
 import { explode, addBody } from "../../engine/core.js";
 export const MINE_TRIG = 1.4, WIRE_TRIG = 1.0, FLARE_S = 6;          // provisional (F5)
-export const MINE_BLAST = { r: 3.4, kv: 20, dmg: 90, crater: 0.4 };  // a real blast — anyone in the area (owner) // provisional (F5)
+export const MINE_BLAST = { r: 3.4, kv: 20, dmg: 90, crater: 0.4 };  // a real blast — anyone in the area // provisional (F5)
 export const WIRE_BLAST = { r: 2.2, kv: 3, dmg: 25, crater: 0 };     // the small charge // provisional (F5)
 export const MINE_COST = 6, WIRE_COST = 4;                            // provisional (F5)
 export function stepMines(world, mines) {
@@ -22,7 +22,7 @@ export function stepMines(world, mines) {
     const gy = world.field.heightAt(m.x, m.z);
     const attacker = m.team === 1 ? "player" : "enemy";
     if (m.kind === "mine") {
-      // the trigger was the protection; the blast is a blast (owner, 2026-08-17)
+      // the trigger was the protection; the blast is a blast
       explode(world, m.x, gy + 0.2, m.z, { ...MINE_BLAST, attacker });
     } else {
       world.events.push({ type: "flare", x: m.x, z: m.z });

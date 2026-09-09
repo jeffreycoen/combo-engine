@@ -52,20 +52,20 @@ export const SQUAD_SPECS = {           // costs are scrap; members spawn as unit
   // BUILD order (DepotGame.jsx): walk a line and lay bags or walls along it.
   // Every match starts with a team (PLAYER_START, specs.js). // provisional (F5)
   engineers: { n: 2, cost: 30, label: "ENGINEER TEAM" },
-  rockets: { n: 2, cost: 45, label: "ROCKET TEAM" },        // mk2.02 (owner): rocket troops replace runners // provisional (F5)
-  grenadiers: { n: 2, cost: 40, label: "GRENADIER SQUAD" }, // mk2.03 (owner): a pair // provisional (F5)
-  // P7.2 T6 (owner): THE MEDIC TEAM — two medics with a bag; they walk to
+  rockets: { n: 2, cost: 45, label: "ROCKET TEAM" },        // mk2.02: rocket troops replace runners // provisional (F5)
+  grenadiers: { n: 2, cost: 40, label: "GRENADIER SQUAD" }, // mk2.03: a pair // provisional (F5)
+  // P7.2 T6: THE MEDIC TEAM — two medics with a bag; they walk to
   // the wounded and kneel to treat. Tools, not shooters: no INFANTRY_ARMS
   // row, so squadFire skips them by membership. // provisional (F5)
   medics: { n: 2, cost: 55, label: "MEDIC TEAM" },
-  // FROSTLINE FL-9 (owner): THE HUNTER — one armored man, twin sidearms,
+  // FROSTLINE FL-9: THE HUNTER — one armored man, twin sidearms,
   // the jetpack line. Additive row: no depot code names it. // provisional (F5)
   hunter: { n: 1, cost: 120, speed: 3.6, label: "THE HUNTER" },
-  // P7.2 T7 (owner): THE MECHANIC TEAM — two mechanics with a toolbox. Tools,
+  // P7.2 T7: THE MECHANIC TEAM — two mechanics with a toolbox. Tools,
   // not shooters: no INFANTRY_ARMS row, so squadFire skips them by
   // membership. // provisional (F5)
   mechanics: { n: 2, cost: 55, label: "MECHANIC TEAM" },
-  // mk2.08 (owner): THE DAVY CROCKETT — two men and the atomic tube. Tools,
+  // mk2.08: THE DAVY CROCKETT — two men and the atomic tube. Tools,
   // not shooters: no INFANTRY_ARMS row, so squadFire skips them; the one
   // shot lives in state.js's stepDavyShot. The slowest crew on the map.
   davy: { n: 2, cost: 450, speed: 2.0, label: "DAVY CROCKETT" }, // provisional (F5)
@@ -667,6 +667,22 @@ export function stepSquad(world, squad, dt) {
       squad._legTarget = null;
       squad._route = null;
       squad._cohesionHoldT = 0;
+    } else if (dToDest <= ARRIVE_TOL && squad._queue && squad._queue.length && squad._queue[0].kind !== "line") {
+      // mk2.94: a line entry is the game layer's to start (economy and
+      // placement are barred here) — the squad digs in and the hook takes it.
+      // mk2.90: THE CHAIN — an arrival with queued orders takes the
+      // next one instead of digging in. move/attack walk on; a queued patrol
+      // lands as acceptLine lands one (both ends set, near end first) and is
+      // terminal. The game layer wipes the queue on any plain order, so this
+      // branch only ever runs a chain the player built.
+      const q = squad._queue.shift();
+      squad._legTarget = null; squad._route = null; squad._pauseT = 0; squad._cohesionHoldT = 0; squad._build = null;
+      if (q.kind === "patrol") {
+        squad._patA = { x: q.ax, z: q.az }; squad._patB = { x: q.bx, z: q.bz };
+        squad.order = "patrol"; squad.dest = { x: q.ax, z: q.az };
+      } else {
+        squad.order = q.kind; squad.dest = { x: q.x, z: q.z };
+      }
     } else if (dToDest <= ARRIVE_TOL) {
       squad.order = "defend";
       squad.anchor = { x: squad.dest.x, z: squad.dest.z };
@@ -912,7 +928,7 @@ export function stepMedicTendSquad(world, squad, dt) {
 }
 
 // ------------------------------------------------------ the mechanic (P7.2 T7)
-// The medic's tend template with three deltas (owner's rulings): TARGETS are
+// The medic's tend template with three deltas: TARGETS are
 // own-side machines and masonry with an hp ledger (hulls, towers, wall
 // courses, bags — depot stones carry no ledger and are excluded by
 // construction); UNDER FIRE THE WORK PAUSES (a fresh dmgT stands him down

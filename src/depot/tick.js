@@ -6,7 +6,7 @@ import { addBody } from "../engine/core.js";
 import { mechFire, mechMissiles, mechBarrage, mechPunt, mechAboutFace } from "../engine/mech.js";
 import { possessedArmorFire, possessedArmorMg, mechSighted } from "./drivers.js";
 import { stepDepot, spawnEnemy } from "./sim.js";
-import { stepBell, nextSpawnTag, withdrawDue, executeWithdrawal, checkLoss, stampEnd, stepDepotCensus, depotStandingFraction, possessedVolley, possessedTowerFire, scoreKill } from "./state.js";
+import { stepBell, nextSpawnTag, withdrawDue, executeWithdrawal, checkLoss, stampEnd, stepDepotCensus, depotStandingFraction, possessedVolley, possessedTowerFire, scoreKill, creditKill } from "./state.js";
 import { ringBell as ringBellOut } from "./bell.js";
 import { stepTerritory } from "./territory.js";
 import { stepSight } from "./sight.js";
@@ -91,7 +91,7 @@ function drainEvents(war, flags) {
       world.bodies.splice(i, 1);
     }
   }
-  // mk2.14 (owner): a davy burst carved the ground — re-lay the rock
+  // mk2.14: a davy burst carved the ground — re-lay the rock
   // dressing so surviving boulders sink to the new surface instead of
   // floating over the crater. Bodies re-seat in the engine; this is
   // their drawn twin.
@@ -118,6 +118,7 @@ function drainEvents(war, flags) {
     if (e.type !== "kill") continue;
     // THE KILL LAW (mk1.93): every attributed death pays and scores here.
     scoreKill(run, e, run._market ? run._market.counts : null);
+    creditKill(world, run.squads, run.foeSquads, e); // mk2.95: the killer's squad or hull takes its one
     // Town buildings are unpriced — their hand-set pay is the named edge
     // outside the law. The branch is preserved as it was, not fixed.
     if (e.attacker === "enemy" && run.ws.results && e.kind === "building") run.ws.results.buildingKills++;
@@ -201,7 +202,7 @@ export function tickWar(war, sdt, input) {
     }
     // Between bells nothing pauses: build, orders and combat with
     // whatever is still standing all run straight through.
-    run.resources += run._groundRate1 * sdt; // mk2.49 (owner): income is the clock, scaled by held ground — floor 1/second
+    run.resources += run._groundRate1 * sdt; // mk2.49: income is the clock, scaled by held ground — floor 1/second
     if (run.reg) { run.reg.scrap += run._groundRate2 * sdt; run.reg.earned = (run.reg.earned || 0) + run._groundRate2 * sdt; } // one law, one schedule, both sides — and the earned till the muster budgets from (mk2.53)
   }
   war.clock.terrAcc += sdt;
@@ -235,7 +236,7 @@ export function tickWar(war, sdt, input) {
     const b = world.byId.get(c.bagId);
     if (!b || !b.alive) { c.bag = null; c.bagId = null; }
   }
-  // P7 T13 (owner): THE GREEN THREADS — every friendly ordered path,
+  // P7 T13: THE GREEN THREADS — every friendly ordered path,
   // green on the ground, refreshed with the other derived overlays.
   if (terrGuard > 0) flags.orderPaths = true;
   if (terrGuard > 0) flags.territory = true;
@@ -286,7 +287,7 @@ export function tickWar(war, sdt, input) {
     if (pv) {
       // P7 T4: the APC's only gun is the coax — FIRE streams it (no
       // main gun to fire), and there is no separate MG trigger.
-      if (input.fireHeld) { if (pv.vtype === "apc") possessedArmorMg(world, pv, input.reticle, T, map.invW); else possessedArmorFire(world, pv, input.reticle, T, map.invW); }
+      if (input.fireHeld) { if (pv.vtype === "apc" || pv.vtype === "jeep") possessedArmorMg(world, pv, input.reticle, T, map.invW); else possessedArmorFire(world, pv, input.reticle, T, map.invW); } // mk2.99: coax-only hulls fire the coax — the APC's one-gun law
       if (input.mgHeld && pv.vtype !== "apc") possessedArmorMg(world, pv, input.reticle, T, map.invW);
     }
   }

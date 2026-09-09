@@ -8,7 +8,7 @@ import { applyDamage } from "../../engine/core.js";
 
 export const FOG_R = 6, FOG_DPS = 4, FOG_S = 25; // provisional (F5)
 
-// addFogPatch: a fresh blast on old ground RESTARTS the patch (owner) — any
+// addFogPatch: a fresh blast on old ground RESTARTS the patch — any
 // patch whose center lies inside the new one is absorbed, never stacked.
 export function addFogPatch(list, x, z, t) {
   for (let i = list.length - 1; i >= 0; i--) {

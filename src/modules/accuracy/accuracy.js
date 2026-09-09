@@ -312,11 +312,11 @@ export function applyScatter(world, dir, sigma) {
 // rides applyScatter's hard cap: its deflection magnitude can never exceed
 // SCATTER_CAP x sigma (the 1e-4 tail of the draw), so cap rays integrated
 // to the ground bound every possible impact. Landing points only — blast
-// reaches beyond the ring (owner, 2026-08-21). Solids are map-resolution
+// reaches beyond the ring. Solids are map-resolution
 // (the sight grid's occ), the accepted trade everywhere in sight. Pure,
 // zero rng draws.
 export const SCATTER_CAP = Math.sqrt(-2 * Math.log(1e-4)) * 0.6;
-// mk2.03 (owner): ACTUAL ELEVATION. For a chosen pitch the speed landing the
+// mk2.03: ACTUAL ELEVATION. For a chosen pitch the speed landing the
 // shell on the target is fixed by the parabola; raising the barrel lowers
 // the fitted speed toward the 45° minimum. elevSolve walks pitch from the
 // low root to the 35° cap in 3° steps and returns the first arc that clears
@@ -324,7 +324,7 @@ export const SCATTER_CAP = Math.sqrt(-2 * Math.log(1e-4)) * 0.6;
 // mortar root belongs to the mortars alone. Zero draws.
 export const ELEV_CAP = 35 * Math.PI / 180;
 export const ELEV_STEP = 3 * Math.PI / 180;
-// mk2.55 (owner): THE LOBBED SHELL — a spec may carry its own cap in
+// mk2.55: THE LOBBED SHELL — a spec may carry its own cap in
 // degrees (elevCap); every other auto gun keeps ELEV_CAP. The Bison's gun
 // rises to 85° so the shell clears roofs and walls and lands where the
 // reticle stands. The search below is unchanged: the flattest lawful arc
@@ -335,7 +335,7 @@ export function speedForPitch(d, dy, p, g = 9.8) {
   if (den <= 0) return null;
   return Math.sqrt(g * d * d / den);
 }
-// mk2.55 (owner): THE LANE POOL — one pass over the solids keeps only those a
+// mk2.55: THE LANE POOL — one pass over the solids keeps only those a
 // sample on the muzzle→target lane could sit inside (center within
 // hypot(hx,hz) of the lane's ground segment). Every pitch of the search then
 // tests its samples against this short list instead of the whole town
@@ -392,7 +392,7 @@ export function elevSolve(world, muzzle, target, spec, selfId) {
   }
   return null;
 }
-// mk2.55 (owner): THE LAWFUL SHOT — one gate for every armor target scan.
+// mk2.55: THE LAWFUL SHOT — one gate for every armor target scan.
 // Only a spec carrying its own cap (the Bison's gun) asks elevSolve — any
 // pitch under that cap counts; every other spec, the wave tank's auto gun
 // included, asks arcClears exactly as today (owner, 2026-08-25: Bison
@@ -403,7 +403,7 @@ export function shotClears(world, muzzle, target, spec, selfId) {
   return arcClears(world, muzzle, target, spec, selfId);
 }
 
-// mk2.56 (owner): THE TIGHTEST ARC — the gun chooses charge and angle
+// mk2.56: THE TIGHTEST ARC — the gun chooses charge and angle
 // TOGETHER to land the tightest possible group on the aim. Every lawful
 // pitch keeps one fitted speed; each candidate is scored by how far the
 // landing moves under the shot's two real errors — barrel wobble (the
@@ -411,7 +411,7 @@ export function shotClears(world, muzzle, target, spec, selfId) {
 // spec's chargeSig, a relative speed error) — and the minimizer fires.
 // A short lob needs little charge, and a small error on a small charge is
 // a small miss: accuracy at short lobs comes from firing WEAKLY, not from
-// a steadier barrel (owner, 2026-08-25). The landing plane is the aim's
+// a steadier barrel. The landing plane is the aim's
 // own height (a roof counts); a candidate whose weak-side charge cannot
 // even reach that plane scores Infinity and is never chosen while any
 // honest arc stands. Zero draws.
@@ -497,7 +497,7 @@ export function deflect(dir, a, m) {
 // r bounds every possible landing; rawDir feeds the renderer's face yaw.
 // mk2.02: 16-point footprint returned as pts; "auto" specs mirror
 // shooterFire's lob rule.
-// mk2.05 (owner): THE LASER FOOTPRINT — the bound draws as projected light,
+// mk2.05: THE LASER FOOTPRINT — the bound draws as projected light,
 // so it walks enough rays to hug the surfaces it lands on. // provisional (F5)
 export const RING_RAYS = 48;
 export function predictRing(SG, muzzle, aim, spec, sigma, wind, toUV) {
@@ -524,7 +524,7 @@ export function predictRing(SG, muzzle, aim, spec, sigma, wind, toUV) {
   let rawDir = solve(high);
   let center = flightImpact(SG, muzzle, rawDir, spec.projSpeed, spec, wind, toUV);
   let fireV = spec.projSpeed;
-  // mk2.56 (owner): THE TIGHTEST ARC — a chargeSig spec's ring mirrors
+  // mk2.56: THE TIGHTEST ARC — a chargeSig spec's ring mirrors
   // tightSolve on the sight map: every pitch from the low root up is scored
   // by rangeSigma, candidates must land on the aim in STILL air, and the
   // minimizer wins — clear ground lobs gently now too, so this walk runs on
@@ -554,10 +554,10 @@ export function predictRing(SG, muzzle, aim, spec, sigma, wind, toUV) {
       // mk2.03: raise the barrel inside the cap, speed fitted — the SG-map
       // mirror of elevSolve; null keeps the low root and the ring parks on
       // the obstruction, saying "no lawful arc".
-      // mk2.55 (owner): the cap is the spec's own (elevCapOf), and the arc
+      // mk2.55: the cap is the spec's own (elevCapOf), and the arc
       // is CHOSEN in still air exactly as elevSolve chooses it — then the
       // chosen arc is flown once more in the wind for the ring's center.
-      // The wind stays on the shell (owner, 2026-08-25): a lob drifts, and
+      // The wind stays on the shell: a lob drifts, and
       // the ring shows where it lands, not where the reticle stands. The
       // azimuth is shooterFire's own wind-held aim (its low-root hold-off).
       const d = Math.max(2, Math.hypot(aim.x - muzzle.x, aim.z - muzzle.z));

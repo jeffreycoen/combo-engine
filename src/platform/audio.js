@@ -756,6 +756,28 @@ export function makeGameAudio() {
         const L = getLoop(id, 900, "bandpass", 0.7);
         setLoop(L, Math.min(0.35, burn * 0.4) * att(dist(hx, hz)), 700 + burn * 900, dt);
       }
+      // T7: the gas system — vent roar by real joule flow, a thin charge
+      // hiss while the store fills, and the piston report at release
+      const gasF = mech._gasFlow || 0;
+      const idG = "gas" + (mech.hull.id || 0);
+      if (gasF > 2e5 || loops.has(idG)) {
+        seen.add(idG);
+        const Lg = getLoop(idG, 500, "bandpass", 0.5);
+        setLoop(Lg, Math.min(0.5, gasF / 6e6) * att(dist(hx, hz)), 380 + Math.min(1, gasF / 4e6) * 500, dt);
+      }
+      const chg = mech.gasJ != null && !mech.leap && mech.gasJ < mech.gasMax - 1e4;
+      const idH = "gaschg" + (mech.hull.id || 0);
+      if (chg || loops.has(idH)) {
+        seen.add(idH);
+        const Lh = getLoop(idH, 2400, "highpass", 1);
+        setLoop(Lh, (chg ? 0.03 : 0) * att(dist(hx, hz)), 2400, dt);
+      }
+      const ph9 = mech.leap && mech.leap.phase;
+      if (ph9 === "drive" && mech._sndLeap !== "drive") {
+        tone(hx, hz, { f0: 70, f1: 38, dur: 0.5, gain: 0.5, atk: 0.005 });
+        noise(hx, hz, { f0: 1600, f1: 300, dur: 0.45, gain: 0.4, wet: 0.4 });
+      }
+      mech._sndLeap = ph9;
     }
     for (const [id, L] of loops) {
       if (seen.has(id)) continue;

@@ -36,7 +36,7 @@ export const clampToRim = (x, z) => clampToRimFor(ORIENT, x, z, RIM_HALF_U, RIM_
 export let OBJ_POS = { x: 0, z: 49 };
 export let SPAWN_POINTS = [], PONDS = [], ROCKS = [], TOWN = [], ROADS = [], PASSES = [], BANDS = [], MAP_SEED = 0, SPAWN_U = [];
 export let STREAM = null; // T3: { pts:[{u,v}...], w, v, bridgeU } — canonical, regrown from seed
-// STREAM OFF (mk1.94, owner): the water made too many impassable places. One
+// STREAM OFF (mk1.94): the water made too many impassable places. One
 // switch guards the draw, the road bend and every clearance in genMap; the
 // downstream machinery (the carve, grid water, slot and order refusals, the
 // ribbons) already keys off STREAM staying null and waits dormant. Flip to
@@ -48,7 +48,7 @@ export let CLUSTERS = []; // mk2.63: [{kind, x, z, r, n}] — the named ground
 export const TOWN_STONE_CAP = 6000; // owner, 2026-08-26 — provisional until the Pi collapse capture // provisional (F5)
 export function genMap(seed) {
   const r = mulberry32(seed);
-  // THE SEAT OF THE WAR (P7 T3, owner): the depots press into OPPOSITE
+  // THE SEAT OF THE WAR (P7 T3): the depots press into OPPOSITE
   // CORNERS, point-symmetric — the longest front the square holds. Depth
   // hugs the rim; the u side is drawn once and mirrored with a hair of
   // jitter. genMap's rng is its own free stream — draw shape is ours.
@@ -120,7 +120,7 @@ export function genMap(seed) {
     }
     if (STREAM_ON && !bridged) pts.push([bridgeU, streamV]);
     pts.push([objU, objV]);
-    // mk2.67 (owner): a road is KEPT or BROKEN, drawn here — the paint
+    // mk2.67: a road is KEPT or BROKEN, drawn here — the paint
     // reads the flag; the flag rides the array (survives the world transform).
     roads.push(Object.assign(pts, { broken: r() < 0.45 }));
   }
@@ -160,7 +160,7 @@ export function genMap(seed) {
     hills.push({ u: hu, v: hv, r: hr, h: hh });
     placed++;
   }
-  // THE FORM BOOK (mk2.63, owner): every shape the valley can lay. The old
+  // THE FORM BOOK (mk2.63): every shape the valley can lay. The old
   // ten stay; the new forms join — row houses with partition walls, the inn
   // with its yard, the smithy with its chimney, the well, the mill, the bell
   // tower and graveyard as chapel children, the wayside cross, the gateposts,
@@ -209,7 +209,7 @@ export function genMap(seed) {
     ponds.some((q) => Math.hypot(d.x - q.x, d.z - q.z) < q.r + dHalfDiag) ||
     rocks.some((q) => Math.hypot(d.x - q.x, d.z - q.z) < q.r + dHalfDiag);
   const depotFoul = dFoul(town[0], false) || dFoul(town[1], true);
-  // T4: THE BIG FORMS (owner's ruling: 2-4 per map) — the proving grounds'
+  // T4: THE BIG FORMS — the proving grounds'
   // slab-roof drive-through hangar and columned warehouse, placed before the
   // benches so the landmarks go down first and the benches fill around them.
   // The shape flags (slab/drive/cols) are read by buildTown.
@@ -241,7 +241,7 @@ export function genMap(seed) {
     plannedStones += stoneCount(eBig); // mk2.64: EVERYTHING counts against the cap
     placed++;
   }
-  // THE SETTLED VALLEY (mk2.63, owner): clusters replace the bench scatter —
+  // THE SETTLED VALLEY (mk2.63): clusters replace the bench scatter —
   // one town, hamlets, dead hamlets, singles. Places, not sprinkles.
   // Placement plans in stones (stoneCount) and stops at TOWN_STONE_CAP.
   const benches = [];
@@ -438,7 +438,7 @@ export function genMap(seed) {
     const x = -76 + r() * 152, z = -66 + r() * 126;
     put(FILL_POOL[Math.floor(r() * FILL_POOL.length)], x, z, null);
   }
-  // T4: FIELD WALLS (owner's rulings: they block the grid; axis-aligned) —
+  // T4: FIELD WALLS —
   // freestanding masonry screens, 3-8 stones long, 2-4 courses, one stone
   // thick. Town entries like any building: footprint claim, ruin bookkeeping.
   const nWalls = 2 + Math.floor(r() * 4);
@@ -484,7 +484,7 @@ export function makeMap(seed) {
     SPAWN_U = m.spawnU; STREAM = m.stream; HILLS = m.hills; CLUSTERS = m.clusters;
     const g = makeGrid(null);
     for (const t of TOWN) {
-      if (t.dead && t.form !== "mound") continue; // T2: a born ruin blocks no cell — except the mound (owner): the router goes around
+      if (t.dead && t.form !== "mound") continue; // T2: a born ruin blocks no cell — except the mound: the router goes around
       const hx = (t.nx * MASON.pitch) / 2, hz = (t.nz * MASON.pitch) / 2;
       for (let gz = 0; gz < GRID_H; gz++) for (let gx = 0; gx < GRID_W; gx++) {
         const wp = g.gridToWorld(gx, gz);
@@ -703,7 +703,7 @@ export function stoneCount(t) {
     const stone0 = t.stones && iy === 0 && !perim && ((ix * 31 + iz * 7) % 100) / 100 < 0.35;
     if (iy < t.ny && !perim && !colAt(ix, iz) && !part && !stone0) continue;
     const pitchedForm = /^(croft|shed|house|long|granary|mill|smithy|inn|spring|row|chapel|warehouse|watch)/.test(t.id || "");
-    if (iy === t.ny && (t.roof === false || t.slab || pitchedForm)) continue; // mk2.66: NO STONE LIDS (owner) — plates on structure, never a layer of cubes
+    if (iy === t.ny && (t.roof === false || t.slab || pitchedForm)) continue; // mk2.66: NO STONE LIDS — plates on structure, never a layer of cubes
     if (t.cren && iy === t.ny && (!perim || (ix + iz) % 2)) continue; // mk2.66: the keep's crenellations
     if (ix === t.door && (iz === 1 || iz === 2) && iy <= 2) continue;
     if (t.drive && iy < t.ny - 1 && (driveZ
@@ -800,7 +800,7 @@ export function planTrees() {
     const w = fwdU(tu + (rT() - 0.5) * 1.6, -84.5 + rT() * 3.2);
     if (clearAt(w.x, w.z)) out.push({ x: w.x, z: w.z });
   }
-  // a copse on every hill's flanks (the owner's wooded hills) — these RETRY
+  // a copse on every hill's flanks — these RETRY
   // until planted (free stream) so a hill is never bald by bad luck.
   for (const hb of HILLS) {
     const n = 24 + Math.floor(rT() * 16);
@@ -935,12 +935,12 @@ export function checkConnectivity(grid, spawns, objGx, objGz) {
   }
   return true;
 }
-// THE CARPENTER (mk2.66, owner): every beam, plate, and trim body a form
+// THE CARPENTER (mk2.66): every beam, plate, and trim body a form
 // wears, as ONE walker shared by buildTown (which lays real bodies) and
 // stoneCount (which counts them) — plan and lay cannot drift by construction.
 // THE BEAM is the working member: a long narrow box, shrunk or grown — ridge
 // beams, lintels, sail arms, joists, posts, the windlass, the bell's yoke.
-// NO STONE LIDS (owner): no roof is a layer of cubes; every roof is plates
+// NO STONE LIDS: no roof is a layer of cubes; every roof is plates
 // on structure. All dials provisional (F5).
 export function formOf(t) { return (t.id || "").replace(/[0-9]+$/, ""); }
 export function layDressing(t, put) {

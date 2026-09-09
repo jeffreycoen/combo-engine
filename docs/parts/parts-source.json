@@ -205,7 +205,8 @@
    "id": "cs-mech-bench",
    "name": "The walker's bench",
    "match": [
-    "src/game/mechReadout.js"
+    "src/game/mechReadout.js",
+    "src/ui/theme.js"
    ],
    "serves": [
     "hold"
