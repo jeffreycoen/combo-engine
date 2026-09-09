@@ -28,3 +28,5 @@ Each entry: the time on the owner's clock, the issue in one sentence, the judgem
 ## The morning
 
 Nine phases, 0.0.103 through 0.0.111, landed and pushed, package.json 0.0.111. The page: https://jeffreycoen.github.io/combo-engine/docs/gravitys-ark/ (a seed in the address, `?seed=N`, makes the same galaxy for anyone). What to look at first: the opening on the ground, then TAKE OFF, then the road with BURN and LAND, the dock pane at a landing, CAST at a wreck after the collapse, and the gate at the far end. What needs your word: the scale table's numbers, all PROPOSED; the walker at trooper scale; the three gaps in the order.
+
+- 03:35, the owner awake. Finding: the page looks nothing like coldsnap or deadweight; the graphics are placeholders. True: every drawn thing but the grid is the orchestrator's wireframe; no presentation phase was planned. Recorded in the order's gaps with the next order's shape.
