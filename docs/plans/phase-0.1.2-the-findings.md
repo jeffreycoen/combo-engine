@@ -116,3 +116,17 @@ Phone and desktop the same; the controls, the panes, the dock, the gate pane, an
 - The parts build names 50 gates and every verdict is ok.
 - The six hash lines in the task print OK; the new file's hash among them.
 - The phase lands with this task: the status line and the version to 0.1.2 ride the landing.
+
+## Acceptance
+
+Nine findings from the owner's playtest of the landed phase, each returned with its finding; the fixes are decided when the owner asks for the questions.
+
+- scr-ground: returned, the screen is still too busy. What is useful: scrap, the seconds to the next assault, how many modules are loose, what she is doing and her seconds, the walker's state. The five-line pane, the five-line log, and the thirteen buttons carry more than that.
+- ark-ground: returned, the depot building is unnecessary. Coldsnap's map puts its depot and town on the field and its attacker marches on the depot; the ark's ground has only the ship to defend.
+- ark-ground: returned, the placement limits are too tight. Coldsnap's placement refuses a gun more than 36 m from the homeland's centre, the bridge; the ship needs very generous room for defences around it.
+- ark-ground: returned, nobody guards the ship. A few troops, a minimal crew, should stand guard against the attacks from the first frame.
+- scr-ground: returned, nothing tells the player what happened. A popup at the landing should say the ship and the mech were both damaged and that the mechanic must fix them.
+- scr-ground: returned, the mechanic has no look of her own. She is to wear a purple jumpsuit and have longish brown hair.
+- ark-ground: returned, she keeps dying, so TAKE OFF has not been reached. Behind it: the opening crash at 30 m/s leaves four of five modules loose by the weld rule, each about 32 s of welding; the purse opens at 0 scrap, so no gun can be bought until coldsnap's pay accrues; she stands alone with a sidearm and 58 hit points, the same body as any rifleman, and the assault hunts her.
+- ark-ground: returned, defences do not persist. Every landing boots a fresh ground; guns and walls built on a world should be abandoned at departure and still stand there on return.
+- ark-ground: returned, the crash leaves no mark. The ground should be deeply gouged along the line the ship came in on, and the trees near the gouge knocked down.
