@@ -27,7 +27,7 @@ SHAPED. Coldsnap's laws are carried through its own doors, the boot, the tick, t
 
 ## Tasks
 
-- 0.1.1-1 — the ground boots: coldsnap's war on the ark's page, guns by its build law, the one purse, sound, TAKE OFF. LANDED, commit stamped below. → `task-0.1.1-1-the-ground-boots.md`
+- 0.1.1-1 — the ground boots: coldsnap's war on the ark's page, guns by its build law, the one purse, sound, TAKE OFF. LANDED, commit `d793896`. → `task-0.1.1-1-the-ground-boots.md`
 - 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, her repair, TAKE OFF gated on every surviving module welded, the seam up and down. PLANNED.
 - 0.1.1-3 — her and the hands: her row and her squad of one, the hands as troopers by name, fight or fix, walls by coldsnap's build lines. PLANNED.
 - 0.1.1-4 — the walker and the boss: coldsnap's mech at twice a trooper's height at least, dead until repaired, hers to possess; the boss on the enemy's side; the stance measured. PLANNED.
