@@ -1,6 +1,6 @@
 # Phase 0.0.109 — gate and card: the bill, the toll, the Fitters, passing, respawn, the log, the card
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 33 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `bb8e873`, 2026-09-09. Gate: 33 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 32 PASS / 0 FAIL; bracket unmoved. -->
 
 The seventh phase of GRAVITY'S ARK under the order batch-ark-1: frames 8 and 9 headless. The gate stays shut until she pays its bill in her time, scrap, and modules, set by the seed; the toll goes to the Authority; the Fitters at the gate buy spares, scrap, people, and her at their cut; passing needs the fix, the toll, and the place, and names its ending; a lost ship wakes at a station still ahead of the edge with mercy fuel and a debt, or the road ends; the log's lines come from the receipts module and the card is built from it, with the galaxy's name from what was done. A later phase wires these into the page: the bill and the Fitters' stall at the gate, the ending screen, and the card shown at the run's end.
