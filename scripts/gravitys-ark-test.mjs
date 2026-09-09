@@ -3,6 +3,7 @@
 // identity, the layout laws, the name draws, the galaxy contract, the
 // import fence.
 import { makeGalaxy, checkGalaxy, rollPerson, FACTIONS, WOMEN, MEN, FAMILY } from "../src/games/gravitys-ark/galaxy.js";
+import { makeRoad, STARTER } from "../src/games/gravitys-ark/road.js";
 import { simStream } from "../src/modules/determinism/determinism.js";
 import { readFileSync } from "node:fs";
 
@@ -98,6 +99,117 @@ const rng = mulberry32(SEED);
   const specifiers = [...src.matchAll(/^import\s+.*?\bfrom\s+["']([^"']+)["']/gm)].map((m) => m[1]);
   const ok = specifiers.every((spec) => /^\.\.\/\.\.\/modules\/[a-z0-9-]+\//.test(spec) || /^\.\//.test(spec));
   check("ark: the game's files import only from the engine's modules or their own folder", ok);
+}
+
+const rollSeed = () => (rng() * 0xffffffff) >>> 0;
+
+{ // 6. ark: twin roads from one rolled seed end with one hash
+  // 7. ark: fuel is conserved on the road (shares the tape with check 6)
+  const gSeed = rollSeed();
+  const galaxyA = makeGalaxy(gSeed);
+  const galaxyB = makeGalaxy(gSeed);
+  const tape = [];
+  for (let i = 0; i < 300; i++) {
+    const burn = rng() < 0.1;
+    let ux = 0, uy = 0;
+    if (burn) { const a = rng() * 2 * Math.PI; ux = Math.cos(a); uy = Math.sin(a); }
+    tape.push({ burn, ux, uy });
+  }
+
+  const roadA = makeRoad(galaxyA);
+  const roadB = makeRoad(galaxyB);
+  roadA.takeoff(); roadB.takeoff();
+  for (const e of tape) {
+    if (e.burn) { roadA.burn(e.ux, e.uy, 1 / 60); roadB.burn(e.ux, e.uy, 1 / 60); }
+    roadA.tick(1 / 60); roadB.tick(1 / 60);
+  }
+  const twin = roadA.hash() === roadB.hash() && JSON.stringify(roadA.state.events) === JSON.stringify(roadB.state.events);
+  check("ark: twin roads from one rolled seed end with one hash", twin);
+
+  const galaxyC = makeGalaxy(rollSeed());
+  const roadC = makeRoad(galaxyC);
+  roadC.takeoff();
+  for (const e of tape) {
+    if (e.burn) roadC.burn(e.ux, e.uy, 1 / 60);
+    roadC.tick(1 / 60);
+  }
+  const conserved = Math.abs((roadC.ship.fuel + roadC.state.spent) - STARTER.fuel) < 1e-9;
+  check("ark: fuel is conserved on the road", conserved);
+}
+
+{ // 8. ark: the collapse fires on the seeded takeoff
+  const galaxyD = makeGalaxy(rollSeed());
+  const roadD = makeRoad(galaxyD);
+  const w0 = galaxyD.worlds[0];
+  let ok = true;
+  for (let i = 0; i < 4; i++) {
+    const res = roadD.takeoff();
+    if (!res.ok) ok = false;
+    if (roadD.state.hole.born !== (roadD.state.takeoffs >= galaxyD.collapseAt)) ok = false;
+    if (roadD.state.takeoffs === galaxyD.collapseAt && res.collapse !== true) ok = false;
+    roadD.ship.x = w0.x; roadD.ship.y = w0.y + w0.r + 10; roadD.ship.vx = 0; roadD.ship.vy = 0;
+    const landRes = roadD.land();
+    if (!landRes.ok) ok = false;
+  }
+  check("ark: the collapse fires on the seeded takeoff", ok);
+}
+
+{ // 9. ark: the hole's schedule is computable ahead and swallows worlds in distance order
+  const galaxyE = makeGalaxy(rollSeed());
+  const roadE = makeRoad(galaxyE);
+  roadE.takeoff();
+  roadE.collapse();
+  const sch = roadE.schedule();
+  const target = sch[0];
+  const w = galaxyE.worlds.find(x => x.i === target.i);
+  let aliveBefore = null;
+  while (roadE.state.t <= target.after) {
+    aliveBefore = (w.state === "alive");
+    roadE.tick(1 / 60);
+  }
+  const expectMu = galaxyE.star.mu + w.mu;
+  const muOk = Math.abs(roadE.state.hole.mu - expectMu) <= 1e-9 * Math.abs(expectMu);
+  const swallowedOk = JSON.stringify(roadE.state.hole.swallowed) === JSON.stringify([target.i]);
+  const ok = w.state === "gone" && aliveBefore === true && muOk && swallowedOk;
+  check("ark: the hole's schedule is computable ahead and swallows worlds in distance order", ok);
+}
+
+{ // 10. ark: the landing band
+  let ok = true;
+  for (let iter = 0; iter < 100; iter++) {
+    const galaxyF = makeGalaxy(rollSeed());
+    const roadF = makeRoad(galaxyF);
+    const k = Math.floor(rng() * galaxyF.n);
+    const w = galaxyF.worlds[k];
+    roadF.ship.landed = null;
+    roadF.ship.x = w.x; roadF.ship.y = w.y + w.r + 20;
+    let v;
+    do { v = rng() * 30; } while (Math.abs(v - 7.5) < 1e-6 || Math.abs(v - 22.5) < 1e-6);
+    roadF.ship.vx = 0; roadF.ship.vy = -v;
+    const res = roadF.land();
+    if (v < 7.5) {
+      if (!(res.ok === true && res.crash === false)) ok = false;
+    } else if (v < 22.5) {
+      if (!(res.ok === true && res.crash === true && Math.abs(res.load - v) < 1e-9)) ok = false;
+    } else {
+      if (!(res.ok === false && res.reason === "death" && roadF.ship.alive === false)) ok = false;
+    }
+  }
+  check("ark: the landing band", ok);
+}
+
+{ // 11. ark: the edge moves nearer for a heavier hull
+  const galaxyG = makeGalaxy(rollSeed());
+  const roadG = makeRoad(galaxyG);
+  roadG.takeoff();
+  roadG.collapse();
+  const light = roadG.edgeFor({ dry: 3400, fuel: 2500 });
+  const heavy = roadG.edgeFor({ dry: 6800, fuel: 2500 });
+  const empty = roadG.edgeFor({ dry: 3400, fuel: 0 });
+  const allNeeds = [...light.needs, ...heavy.needs, ...empty.needs];
+  const needsOk = allNeeds.every(nv => Number.isFinite(nv) && nv > 0);
+  const ok = light.index <= heavy.index && empty.index === galaxyG.n && needsOk;
+  check("ark: the edge moves nearer for a heavier hull", ok);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
