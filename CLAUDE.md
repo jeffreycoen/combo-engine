@@ -26,7 +26,8 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - Atomic steps carrying the actual code and exact file/line anchors, in execution order, failing asserts first, a plain sentence above each. Agents execute plans; they never design.
 - Every task plan carries its required-reading list and a suggested model (Sonnet or Fable, one-line reason); the owner decides it at approval.
 - Verbatim-move tasks carry an INVENTORY of what moves, a SUBSTITUTION TABLE of every token allowed to differ (an unlisted difference stops the agent), and an ARITHMETIC acceptance — keystone hash and draw count, or the suite's exact pass count. Numbers ratify moves, never judgment.
-- **Before any plan is served,** the plan-writer proves it: every file the plan writes is assembled and RUN in a scratch trial first, and every acceptance number in the plan is that run's output, never a prediction. Every key name, field, and anchor is grepped against the live tree. A plan whose code has not run never reaches the owner.
+- **Before any plan is served,** the plan-writer checks it: every code block gets a syntax pass, and every key name, field, and anchor in it is grepped against the live tree. A plan with unchecked code never reaches the owner. Acceptance numbers come from the source and the record: hashes computed from the checkout, gate counts as last recorded. The agent's run at landing is the proof.
+- In physics, symmetry is the law: every force acts on both bodies, and what one body can do to another the other can do back. A plan that finds this inconvenient asks.
 - The owner approves the plan before any code. No open design questions inside a plan.
 - Pause between the design questions and the writing — the owner says when the plan gets written. Every time.
 - Every amendment is served for review before any dispatch on it; approval of the original does not carry.
@@ -44,13 +45,13 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 - **The README governs extraction.** Its checklist is the roadmap: every batch order and every phase names the checklist item it serves, and nothing is extracted that serves no item. The README's modules list carries the progress, flipped in each landing. Reading the README alone must show what is extracted, what is in flight, and why.
 - Every lift names its kind in the phase document: VERBATIM (file inventory with hashes), VERBATIM MATH (named substitutions, and only those — an unlisted difference stops the agent), or SHAPED (the law carried, the code new, said plainly). The kind decides the acceptance; arithmetic ratifies all three.
 - Demo files are source material, read-only, cited by line. No task ever edits a demo.
-- **Demos are harvested, never committed.** Their code is lifted into modules; the demo file stays outside the record. A gate never reads a demo file — fidelity is proven in the trial at lift time; the gate holds laws. (The one demo already in git predates this rule and stays; its readers are grandfathered.)
+- **Demos are harvested, never committed.** Their code is lifted into modules; the demo file stays outside the record. A gate never reads a demo file — fidelity is the lift's own acceptance arithmetic, proven by the agent's run at landing; the gate holds laws. (The one demo already in git predates this rule and stays; its readers are grandfathered.)
 - Every task is bracketed by the prior gates: asserted green as step 1, re-asserted before the commit. A moved number is a finding against the task, never something to fix in flight.
 - The record close rides the landing: when every gate is green, the phase status line and the README checklist boxes flip in the same landing, not on a later word.
 
 ## Versioning
 
-- Versions are three-part. Phases bump the third part: 0.0.1, 0.0.2, ... sequential, never skipped. Tasks are suffixes: task 0.0.5-1. The middle digit marks eras — 0.1.0 when the described-world boot lands; 1.0.0 when the engine is general. `package.json` version tracks the last landed phase.
+- Versions are three-part. Phases bump the third part: 0.0.1, 0.0.2, ... sequential, never skipped. Tasks are suffixes: task 0.0.5-1. The middle digit marks eras — 0.1.0 opens the build of GRAVITY'S ARK, frame by frame in the player's order; 1.0.0 when the engine is general. `package.json` version tracks the last landed phase.
 
 ## Dispatch
 
@@ -67,8 +68,8 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 
 - Test only what changed; run ONLY the gates the brief lists. No scripted playtesting, ever. The full suite rides CI.
 - **NO HARDWIRED SEEDS.** A test rolls its seeds fresh at run time and prints them; every check is a law that must hold at any seed. A pinned literal that is one seed's own output (a fixed hash, an exact price) is forbidden — twin-run identity, band checks, and self-consistency replace pinned numbers.
-- No full-gameplay runs in gates or trials — a full mission replay is never a per-task test. Test the changed code functionally; long replays belong to CI alone.
-- The work process: the plan-writer writes the code and functionally tests every change in the trial, then hands it to Sonnet to implement. The assistant never plays the game and never takes screenshots unless directed.
+- No full-gameplay runs in gates — a full mission replay is never a per-task test. Test the changed code functionally; long replays belong to CI alone.
+- The work process: the plan-writer writes the code and checks it, then hands it to Sonnet to implement and prove with the listed gates. The assistant never plays the game and never takes screenshots unless directed.
 - Functionality only, never playability. The assistant and its agents test that code does what it claims — arithmetic, asserts, exit codes. Whether it plays well, reads well, or feels right is the owner's alone, at the live page.
 - NEVER run timed simulations in tests. Ever. A test proves a call fires correctly — one call, one tick, direct asserts on the result. Whether something works out over seconds of play is the owner's playtest, not a test. Test only the areas the task touched.
 - The sweep license: a plan may pre-license re-teaching tests that pin literal text the task itself moves or re-signs — asserted content stays identical, every re-teach reported old→new. Any other failure stops the task. The license never covers behavior.

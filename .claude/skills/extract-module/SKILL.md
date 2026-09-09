@@ -1,11 +1,11 @@
 ---
 name: extract-module
-description: Use when extracting a system from a demo into src/modules/ — the proven phase workflow: trial first, plan from templates, serve for review, dispatch, land with record close.
+description: Use when extracting a system from a demo into src/modules/ — the proven phase workflow: scope, plan from templates, check, serve for review, dispatch, land with record close.
 ---
 
 # Extract a module
 
-The workflow that landed phases 0.2–0.4 (market, builder, ledger). Follow it in order; the owner's word rules at every gate marked RULING.
+The workflow that landed phases 0.2–0.4 (market, builder, ledger). Follow it in order; the owner's word decides at every step marked DECISION.
 
 ## 1. Scope with the owner
 
@@ -14,24 +14,24 @@ Name the organ, its source file and line range, and its lift kind:
 - **VERBATIM MATH** — formulas copied exactly; a short numbered substitution table (globals to options, module state to arguments) and nothing else may differ.
 - **SHAPED** — the demo's law carried, the code new; say plainly what is law and what is new.
 
-RULING: the owner approves scope before anything is written.
+DECISION: the owner approves scope before anything is written.
 
-## 2. Build the trial
+## 2. Check the plan's code
 
-In the session scratchpad (never the repo), assemble the exact module file and the exact gate script, and RUN them. Iterate here until green. Every acceptance number in the plan must be an output of this run — never a prediction. Anchor claims (source line numbers, export names, known values from the demo's own self-tests) are grepped against the live tree now.
+Nothing runs. Every code block in the plan gets a syntax pass in the session scratchpad. Every source line number, export name, key name, field, and anchor is grepped against the live tree and the checkout it reads. Acceptance numbers come from the source and the record: a verbatim file's hash is computed from the checkout; a gate's count is the count last recorded in the parts table. The agent's run at landing proves them; a moved number is a finding.
 
 ## 3. Write the plan from the templates
 
-- Phase document from `templates/phase.md` — status PLANNED, lift kind, source anchors, acceptance arithmetic (the trial's outputs), task index.
-- Task document from `templates/task.md` — full file contents embedded byte-for-byte from the trial, atomic steps, failing asserts first, prior-gate brackets on both ends, the record-close step, the report format.
+- Phase document from `templates/phase.md` — status PLANNED, lift kind, source anchors, acceptance arithmetic (from the source and the record), task index.
+- Task document from `templates/task.md` — full file contents embedded byte-for-byte, atomic steps, failing asserts first, prior-gate brackets on both ends, the record-close step, the report format.
 
 File naming: `docs/plans/phase-0.0.N-<name>.md`, `docs/plans/task-0.0.N-M-<name>.md`. Phases bump the third part, sequential, never skipped; tasks are -M suffixes.
 
-## 4. Rehearse, then serve for review
+## 4. Serve for review
 
-Before serving, REHEARSE the plan against its own text: extract the task document's shell blocks and run the file-producing steps in a fresh scratch directory; every hash check must print OK from the rehearsal alone. This has caught real plan defects twice (a truncated heredoc in 0.0.8, proven by a FAILED hash). Then serve the phase document and the task document ALONE, as rendered files, stating the pre-serve checks: trial green, anchors grepped, numbers are outputs, rehearsal passed.
+Serve the phase document and the task document ALONE, as rendered files, stating the checks: syntax passed, anchors grepped, numbers sourced.
 
-RULING: the owner's review rules the dispatch. Any amendment is re-served before dispatch.
+DECISION: the owner's review decides the dispatch. Any amendment is re-served before dispatch.
 
 ## 5. Dispatch
 

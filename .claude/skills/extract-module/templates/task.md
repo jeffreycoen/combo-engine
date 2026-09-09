@@ -19,13 +19,13 @@ Run from `/home/batman/combo-engine`. A failed assert stops the task; report the
 2. Write `src/modules/<name>/<name>.js`, exactly:
 
 ```js
-<the trial-verified module file, byte for byte>
+<the module file, byte for byte>
 ```
 
 3. Write `scripts/<name>-test.mjs`, exactly:
 
 ```js
-<the trial-verified gate file, byte for byte>
+<the gate file, byte for byte>
 ```
 
 4. In `scripts/gate.mjs`, in the `GATES` table (currently <k> entries ending with `"<last>"`), add one line after the `"<last>"` entry:
