@@ -1,6 +1,6 @@
 # Phase 0.0.105 — the page: the galaxy on the warped grid, the ship, the clocks, LAND, TAKE OFF, a burn
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 12 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `2d484aa`, 2026-09-09. Gate: 12 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 12 PASS / 0 FAIL; bracket unmoved. -->
 
 The third phase of GRAVITY'S ARK under the order batch-ark-1, the orchestrator's page step: the first deploy of the game at https://jeffreycoen.github.io/combo-engine/docs/gravitys-ark/ . The page binds the events and draws; every law lives in `src/games/gravitys-ark/` and the engine's modules. This phase also carries three amendments to the landed law, found by the page's own trial: the galaxy's mu formula, the road's surface arrival and landing band, and the takeoff's leaving speed; each is recorded below and in the night log.
