@@ -14,16 +14,17 @@ No demo file is read or written by this task. The coldsnap checkout at `/home/ba
 
 Run from `/home/batman/combo-engine`. A failed assert or a FAILED hash line stops the task; report the step and its verbatim output, run nothing further.
 
-1. Assert the ground: the manifest gate green, the parts folder absent, no parts gate registered, and the record edits present in the working tree, which this task commits and never edits.
+1. Assert the ground: the manifest gate green, the parts folder absent, no parts gate registered, and the record already committed at e5d2300 with a clean tracked tree.
 
 ```sh
 node scripts/gate.mjs manifest | tail -1
 ls docs/parts 2>/dev/null || echo absent
 grep -c '"parts"' scripts/gate.mjs
-git status --short | grep -E "CLAUDE.md|ark-shelf.md|ark-parts.md" | wc -l
+git status --short | grep -v "^??" | wc -l
+git log --oneline -1 -- docs/plans/ark-shelf.md | cut -c1-7
 ```
 
-Required: `manifest-test PASS`, `absent`, `0`, and `3`.
+Required: `manifest-test PASS`, `absent`, `0`, `0`, and `e5d2300`.
 
 2. Write `docs/parts/parts-source.json`, exactly. The hash line must print OK.
 
@@ -2212,7 +2213,7 @@ test "$(sha256sum README.md | cut -c1-16)" = "4f57d693a57e84f5" && echo OK READM
 grep -c '"version": "0.0.112"' package.json
 ```
 
-15. Commit and push the landing, then stamp the real hash in a second small commit. Never amend after stamping. The standing-orders edits and the two shelf documents already in the working tree ride this commit as the record; do not edit them.
+15. Commit and push the landing, then stamp the real hash in a second small commit. Never amend after stamping. The standing orders and the two shelf documents are already committed at e5d2300; the add below finds them unchanged, and the task does not edit them.
 
 ```sh
 git add CLAUDE.md README.md package.json docs/plans docs/parts docs/gravitys-ark/seed.js docs/gravitys-ark/index.html docs/gravitys-ark/main.js scripts/parts.mjs scripts/parts-test.mjs scripts/gate.mjs scripts/manifest.mjs .claude/skills/extract-module/templates
