@@ -1,6 +1,6 @@
 # Phase 0.0.111 — the walker's stance at the ruled scale
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 16 PASS / 0 FAIL; gait 11 PASS and 0 FAIL; the stance at 0.607 does not hold, the walker ships at trooper scale by the ruling.
+Status: LANDED, commit `d6ca236`, 2026-09-09. Gate: 16 PASS / 0 FAIL; gait 11 PASS and 0 FAIL; the stance at 0.607 does not hold, the walker ships at trooper scale by the ruling.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gates: rig <16 or 17> PASS / 0 FAIL, gait 11 PASS / 0 FAIL; bracket unmoved. -->
 
 The ninth phase of GRAVITY'S ARK under the order batch-ark-1, the physics phase the owner ruled: a scale option across the rig, the balance controller, and the leg lengths, with one scaling law for lengths, masses, actuators, gains, and limits; the law proven at rolled scales; the stance at the ruled scale 0.607, twice a trooper's height, measured under gravity for ten seconds. It does not stand: zero break events, but the right foot leaves the ground at 7.42 s, after the first 0.5 s; the pelvis itself holds within 1.2 percent, 2.1248 m to 2.1000 m.
