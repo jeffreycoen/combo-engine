@@ -1,6 +1,6 @@
 # Phase 0.0.107 — wrecks: the collapse shell, welds under it, wreck fields, the grappler
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 23 PASS / 0 FAIL; the full self-test all gates PASS.
+Status: LANDED, commit `efc13a7`, 2026-09-09. Gate: 23 PASS / 0 FAIL; the full self-test all gates PASS.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 22 PASS / 0 FAIL; the full self-test all gates PASS. -->
 
 The fifth phase of GRAVITY'S ARK under the order batch-ark-1: frames 4 and 6 headless. At the collapse a shell shoves every body outward, weaker with distance, and never worlds or stations; the hull's welds take the shove as a load by the weldstress module's law and shed what breaks as wrecks with their mass; a field of wrecks falls back toward the pit under the wells law; the grappler casts on the grapple module's rope, bites, reels with the pull both ways, and takes what comes within reach: scrap by the kilogram, crates with credits, modules as spares. A later page step will show the shell's push, the wreck field drifting near the ship, and a grapple control that fires the rope and reels in what it catches.
