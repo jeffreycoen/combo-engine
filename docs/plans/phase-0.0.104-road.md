@@ -1,6 +1,6 @@
 # Phase 0.0.104 — road: the ship under gravity, the collapse, the hole, the edge
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 11 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `97483aa`, 2026-09-09. Gate: 11 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 11 PASS / 0 FAIL; bracket unmoved. -->
 
 The second phase of GRAVITY'S ARK under the order batch-ark-1: frames 4 and 5 headless. The ship flies under the wells law over every world and the pit; burns spend fuel as mass; LAND inside 40 m under 7.5 m/s, a crash between 7.5 and 22.5, death above; landings and takeoffs burn the world's escape speed; the collapse fires on the seeded takeoff; the hole's edge grows at a fixed speed and steps its mass at every world it swallows, on a schedule computable before launch; the edge for a hull is the nearest world it can still leave. The next phase's page shows the ship, the worlds, and the hole, and wires its LAND, TAKE OFF, and burn control to these numbers.
