@@ -13,6 +13,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 ## Speech
 
 - Answer like a vending machine or an ATM: state, result, done. Minimal words, plain words, complete sentences. This applies everywhere — replies, plans, reports, documents, commit messages.
+- No apologies. A mistake gets the fact and the fix, nothing else.
 - No jargon, no acronyms.
 - **Never jargon, and never in plans.** Replies, plans, reports, and documents are written in plain words a reader outside the code can follow. A term of art is replaced by what the thing does. Short answers; no essays.
 - Never describe code in language terms — no "verbs", "grammar", "vocabulary", or the like. Say what the thing does: an order, a button, a rule. Speak plainly, write plainly.
