@@ -861,17 +861,14 @@
    "source": "ark",
    "group": "Retire",
    "name": "hold",
-   "does": "The flat field: waves, claws, repair, walls and guns, the mast, the boss; the ground moves to coldsnap.",
-   "files": [
-    "src/games/gravitys-ark/hold.js"
-   ],
-   "gate": "gravitys-ark",
+   "does": "The flat field of batch-ark-1, retired in 0.1.1: the ground runs on coldsnap.",
+   "files": [],
    "phase": "0.0.110",
    "serves": [
     "bay",
     "hold"
    ],
-   "plan": "retire"
+   "plan": "leave"
   },
   {
    "id": "ark-walker-scale",

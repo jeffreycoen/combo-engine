@@ -17,7 +17,6 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";
 import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER } from "../src/games/gravitys-ark/ground.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
@@ -1001,82 +1000,6 @@ function rollArkFields(type, i, nWorlds) {
 
 
 
-// the hold's fixtures: the starter hull, a crew of three, a hold at a speed v from the run's stream
-const HOLD_HULL = () => ({ list: [{ t: "bridge", gx: 0, gy: 0 }, { t: "engine", gx: -1, gy: 0 }, { t: "tank", gx: 1, gy: 0 }, { t: "pod", gx: 0, gy: 1 }] });
-const HOLD_CREW = () => [{ name: "Ada Aske" }, { name: "Bram Brandt" }, { name: "Carys Corvin" }];
-const holdAt = (v, seed) => makeHold(HOLD_HULL(), HOLD_CREW(), v, mulberry32(seed === undefined ? SEED : seed));
-const ticks = (H, n) => { const evs = []; for (let i = 0; i < n; i++) evs.push(...tick(H, 1 / 60)); return evs; };
-
-{ // 33. ark: the crash sets the hull down by the pose and the slide
-  let ok = true;
-  for (let i = 0; i < 50 && ok; i++) {
-    const v = rng() * 30, H = holdAt(v), loads = crashLoads(HOLD_HULL(), v);
-    if (H.pitch !== 0.35) ok = false;
-    for (const c of loads) { const m = H.modules[c.i]; const gx = HOLD_HULL().list[c.i].gx * 1.7;
-      if (c.broken) { if (!(m.welded === false && Math.abs(m.slid - 0.6 * v) < 1e-9 && Math.abs(m.x - (gx + 0.6 * v)) < 1e-9)) ok = false; }
-      else if (!(m.welded === true && m.slid === 0 && Math.abs(m.x - gx) < 1e-9)) ok = false; }
-  }
-  const H0 = holdAt(0), H30 = holdAt(30);
-  if (H0.modules.some((m) => !m.welded)) ok = false;
-  if (!(H30.modules[1].t === "engine" && H30.modules[1].welded === false)) ok = false;
-  check("ark: the crash sets the hull down by the pose and the slide", ok);
-}
-
-{ // 34. ark: the waves come on the clock and never stop, and the boss walks in on the fourth
-  let ok = true; const H = holdAt(0); const counts = [];
-  const stepTo = (tSec) => { while (H.t < tSec + 1e-9) { const evs = tick(H, 1 / 60); for (const e of evs) if (e.k === "wave") counts.push({ n: e.n, count: e.count, at: H.t }); } };   // by the hold's own clock: the tick that reaches tSec fires its wave
-  stepTo(8 - 1 / 60); if (H.grip.length !== 0) ok = false;
-  stepTo(8); if (!(H.grip.length === 4 && counts.length === 1 && counts[0].count === 4)) ok = false;
-  stepTo(28); if (!(counts.length === 2 && counts[1].count === 6)) ok = false;
-  stepTo(48); if (!(counts.length === 3 && counts[2].count === 8)) ok = false;
-  stepTo(68); if (!(counts.length === 4 && counts[3].count === 10 && H.boss && Math.abs(Math.hypot(H.boss.x, H.boss.y) - 44) < 0.05 && H.boss.hp === 950)) ok = false;   // within one tick's walk of 44 m
-  H.boss.hp = 0; tick(H, 1 / 60); if (H.boss.alive) ok = false;
-  stepTo(88); if (!(counts.length === 5 && counts[4].count === 12)) ok = false;
-  check("ark: the waves come on the clock and never stop, and the boss walks in on the fourth", ok);
-}
-
-{ // 35. ark: the Grip claws at the stated rates and their dead do not rise
-  let ok = true; const H = holdAt(0); H.her.x = 30; H.her.y = 30; H.nextWaveAt = 1e9;
-  H.walker.dead = false; const m = H.modules[2], w = H.walker, h = H.hands[0];
-  H.grip.push({ x: m.x + 1, y: m.y, hp: 58, alive: true }, { x: w.x + 1, y: w.y, hp: 58, alive: true }, { x: h.x + 1, y: h.y, hp: 58, alive: true });
-  const m0 = m.hp, w0 = w.hp, h0 = h.hp; for (const hand of H.hands) { hand.x = -50; hand.fireT = 1e9; hand.satchelT = 1e9; }   // the other hands well away, and no hand shoots in this check
-  h.x = 20; h.y = -20; H.grip[2].x = h.x + 1; H.grip[2].y = h.y; m.x = -20; m.y = 20; H.grip[0].x = m.x + 1; H.grip[0].y = m.y; w.x = 20; w.y = 20; H.grip[1].x = w.x + 1; H.grip[1].y = w.y;
-  ticks(H, 60);
-  if (!(Math.abs((m0 - m.hp) - 6) < 1e-9 && Math.abs((w0 - w.hp) - 2) < 1e-9 && Math.abs((h0 - h.hp) - 12) < 1e-9)) ok = false;
-  const g = H.grip[0]; g.hp = 0; tick(H, 1 / 60); if (g.alive) ok = false; const n = H.grip.length; ticks(H, 100); if (g.alive || H.grip.length !== n) ok = false;
-  check("ark: the Grip claws at the stated rates and their dead do not rise", ok);
-}
-
-{ // 36. ark: she fights or she fixes, and every act and order keeps its number
-  let ok = true; const H = holdAt(0); H.nextWaveAt = 1e9; for (const hand of H.hands) { hand.fireT = 1e9; hand.satchelT = 1e9; }   // no hand shoots in this check: her walker and the mast are what it measures
-  if (!order(H, "repairWalker")) ok = false;
-  let n = 0; while (H.walker.dead && n++ < 700) tick(H, 1 / 60);
-  if (!(Math.abs(n / 60 - 10) <= 1 / 60 + 1e-9)) ok = false;                       // up on the tick 10 s is reached
-  const loose = H.modules[3]; loose.welded = false; loose.slid = 4; loose.x += 4;
-  if (!order(H, "repair")) ok = false; n = 0; while (!loose.welded && n++ < 1000) tick(H, 1 / 60);
-  if (!(Math.abs(n / 60 - 11) <= 1 / 60 + 1e-9)) ok = false;                       // 5 s plus 1.5 per metre slid
-  const near = { x: H.walker.x + 1, y: H.walker.y, hp: 58, alive: true }; H.grip.push(near);
-  loose.welded = false; loose.slid = 4; order(H, "repair"); ticks(H, 60); if (near.hp !== 58 - 0) { /* the walker dealt damage while she repaired */ }
-  if (near.hp < 58) ok = false;
-  if (!order(H, "fight")) ok = false; const hp0 = near.hp; ticks(H, 60); if (!(Math.abs((hp0 - near.hp) - 30) < 1e-9 || Math.abs((hp0 - near.hp) - 60) < 1e-9)) ok = false;   // 30 per second, the first hit at once
-  const scrap0 = H.scrap; if (order(H, "wall", 1, 1) !== null) ok = false; if (!order(H, "wall", 6, 0) || H.scrap !== scrap0 - 300) ok = false;
-  if (!order(H, "gun", 0, 6) || H.scrap !== scrap0 - 900) ok = false;
-  if (order(H, "fire", 2, 2) !== null) ok = false;
-  const far = { x: 12, y: 0, hp: 58, alive: true }; H.grip.push(far); H.mastT = 0; const shot = order(H, "fire", 12, 0); if (!shot) ok = false;
-  const tf = Math.sqrt(2 * 12 / 9.8); const t0 = H.t; n = 0; while (H.shots.length && n++ < 200) tick(H, 1 / 60);
-  if (!(Math.abs((H.t - t0) - tf) <= 1 / 60 + 1e-9 && far.hp <= 58 - 40 + 1e-9)) ok = false;
-  if (order(H, "takeoff").ok !== false) ok = false; H.her.act = "idle"; H.her.inWalker = false; order(H, "repair"); n = 0; while (!loose.welded && n++ < 1000) tick(H, 1 / 60);
-  for (const g of H.grip) g.hp = 0; tick(H, 1 / 60);
-  if (order(H, "takeoff").ok !== true) ok = false;
-  H.modules[0].hp = 0; tick(H, 1 / 60); if (!H.abandoned) ok = false;
-  check("ark: she fights or she fixes, and every act and order keeps its number", ok);
-}
-
-{ // 37. ark: twin holds from one rolled seed agree
-  const v = rng() * 30, seedH = (rng() * 0xffffffff) >>> 0;
-  const run = () => { const H = holdAt(v, seedH); for (let i = 0; i < 600; i++) { if (i === 30) order(H, "repairWalker"); if (i === 300) order(H, "wall", 6, 0); if (i === 400) order(H, "fire", 12, 0); tick(H, 1 / 60); } const { rng: _r, ...rest } = H; return JSON.stringify(rest); };
-  check("ark: twin holds from one rolled seed agree", run() === run());
-}
 
 { // 38. ark: the ground boots on coldsnap from the galaxy's seed, and twin boots are twins in every hash after one tick
   // 39. ark: the hold's scrap is the purse, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms

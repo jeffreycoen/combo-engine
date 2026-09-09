@@ -1,6 +1,6 @@
 # Phase 0.1.1 — the hold on coldsnap
 
-Status: DISPATCHED. Task 0.1.1-1 amended, approved 2026-09-09, and dispatched to Sonnet 5 on the resume.
+Status: LANDED, commit stamped below, 2026-09-09. Five tasks landed; the ark's gate 43 PASS / 0 FAIL; the parts build 50 gates, every verdict ok.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 Frames 1 and 2, the bay and the hold, move onto coldsnap's engine, whole. The crash world is one of coldsnap's own war maps, made from the galaxy's seed; the war on it is coldsnap's whole, its attacker with its brain, its books, and its bell; its guns and walls are placed by its build law; its drawing and its sound are the ground's. Over that engine sits the ark's own layer: the hull as bodies on broken welds, her as one trooper with her own row, the hands as troopers, the walker at twice a trooper's height, the one purse the hold's scrap feeds, and TAKE OFF when every surviving module is welded. The ark's own hold from batch-ark-1 retires when the last task lands.
@@ -43,7 +43,7 @@ Phone and desktop as task 1.
 - 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, the weld-back mechanism, TAKE OFF gated on every living module welded and naming the lost, the seam up and down. LANDED, commit `ebbcd81`. → `task-0.1.1-2-the-hull-on-the-ground.md`
 - 0.1.1-3 — her and the hands: her row and her squad of one, her repair through the weld-back, the hands as troopers by name, fight or fix, walls by coldsnap's build lines. LANDED, commit `f1ec7ab`. → `task-0.1.1-3-her-and-the-hands.md`
 - 0.1.1-4 — the walker and the boss: coldsnap's mech at twice a trooper's height at least, dead until repaired, hers to possess; the boss on the enemy's side; the stance measured. LANDED, commit `65c9104`. → `task-0.1.1-4-the-walker.md`
-- 0.1.1-5 — the hold retires: the flag removed, the ark's own hold file and its checks retired, the parts source and the README's claims brought to the ground as built, the version to 0.1.1. DISPATCHED. → `task-0.1.1-5-the-hold-retires.md`
+- 0.1.1-5 — the hold retires: the flag removed, the ark's own hold file and its checks retired, the parts source and the README's claims brought to the ground as built, the version to 0.1.1. LANDED, commit stamped below. → `task-0.1.1-5-the-hold-retires.md`
 
 ## The walk, task 1
 
