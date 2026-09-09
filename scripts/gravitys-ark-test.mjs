@@ -14,6 +14,9 @@ import { accel } from "../src/modules/wells/wells.js";
 import { WRECK_DIALS, shellDv, shell, shellOnHull, wreckOf, shedToWrecks, makeField, stepWrecks, makeGrappler, cast, stepGrappler, take, massOf } from "../src/games/gravitys-ark/wrecks.js";
 import { PRICE_DIALS, herPrice, listingsFor, makePirates, stepPirates, pay, killPirate, hireValue, hireOut, herReturns } from "../src/games/gravitys-ark/price.js";
 import { makeBook } from "../src/modules/escrow/escrow.js";
+import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
+import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
+import { receiptLog } from "../src/modules/receipts/receipts.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -724,6 +727,247 @@ const newHull = () => ({ builder: newBuilder(), list: STARTER_HULL.slice(), scra
   check("ark: twin pirate fields from one rolled seed agree", ok);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+function arkFixture() {
+  const G = makeGalaxy(SEED);
+  const w0 = G.worlds[0];
+  const ship = { x: w0.x, y: w0.y + w0.r, vx: 0, vy: 0, dry: 3400, fuel: 3000, thrust: 60000, landed: 0, alive: true };
+  const hull = { list: [{ t: "bridge", gx: 0, gy: 0 }, { t: "engine", gx: -1, gy: 0 }, { t: "tank", gx: 1, gy: 0 }, { t: "pod", gx: 0, gy: 1 }], scrap: 0, spares: [], cargo: { people: 0 } };
+  const purse = { credits: 20000, debt: 0, lastDock: 0 };
+  const her = { taken: false, away: null, sold: false };
+  const gs = makeGate(G);
+  return { G, ship, hull, purse, her, gs };
+}
+
+const keysARK = Object.keys(ARK_LINES);
+function rollArkFields(type, i, nWorlds) {
+  switch (type) {
+    case "land": case "crash": return { i: i % nWorlds, v: rng() * 30 };
+    case "takeoff": case "swallow": return { i: i % nWorlds };
+    case "death": return { v: rng() * 30 };
+    case "hire": return { name: "Rolled Hand " + i };
+    case "dock": return { due: Math.round(rng() * 500) };
+    case "buy": return { n: 1 + Math.floor(rng() * 10), part: "scrap", cost: Math.round(rng() * 5000) };
+    case "sell": return { n: 1 + Math.floor(rng() * 10), part: "scrap", out: Math.round(rng() * 5000) };
+    case "lock": case "pay": return { takes: "cargo" };
+    case "shot": return { damage: Math.round(rng() * 100) };
+    case "kill": return { bounty: 3000 };
+    case "hireout": return { pay: Math.round(rng() * 5000) };
+    case "toll": return { toll: Math.round(rng() * 12000) };
+    case "sold": return { kind: "scrap", price: Math.round(rng() * 5000) };
+    case "pass": return { ending: ENDINGS[Math.floor(rng() * ENDINGS.length)] };
+    case "respawn": return { world: i % nWorlds, debt: 5000 };
+    default: return {};
+  }
+}
+
+{ // 28. ark: the gate opens only when she has paid its bill in time, scrap, and modules
+  let ok = true;
+  const dt = 1 / 60;
+
+  const f1 = arkFixture();
+  f1.hull.scrap = f1.gs.bill.scrap;
+  f1.hull.spares = new Array(f1.gs.bill.modules).fill("strut");
+  let crossedRight = false, needAtFix = null;
+  const cap1 = Math.ceil(f1.gs.bill.time / dt) + 5;
+  for (let i = 0; i < cap1; i++) {
+    const wasFixed = f1.gs.fixed;
+    const n = fixGate(f1.gs, f1.hull, f1.her, dt);
+    if (!wasFixed && f1.gs.fixed) { crossedRight = true; needAtFix = n; break; }
+  }
+  if (!crossedRight) ok = false;
+  if (needAtFix && (needAtFix.time !== 0 || needAtFix.scrap !== 0 || needAtFix.modules !== 0)) ok = false;
+
+  const f2 = arkFixture();
+  f2.hull.scrap = f2.gs.bill.scrap;
+  f2.hull.spares = new Array(f2.gs.bill.modules).fill("strut");
+  f2.her.taken = true;
+  const snapshot = JSON.stringify(f2.gs);
+  for (let i = 0; i < 600; i++) fixGate(f2.gs, f2.hull, f2.her, dt);
+  if (JSON.stringify(f2.gs) !== snapshot) ok = false;
+
+  const f3 = arkFixture();
+  f3.hull.scrap = f3.gs.bill.scrap;
+  f3.hull.spares = [];
+  const cap3 = Math.ceil(f3.gs.bill.time / dt) + 5;
+  let n3;
+  for (let i = 0; i < cap3; i++) n3 = fixGate(f3.gs, f3.hull, f3.her, dt);
+  if (f3.gs.fixed !== false) ok = false;
+  if (n3.modules !== f3.gs.bill.modules) ok = false;
+
+  check("ark: the gate opens only when she has paid its bill in time, scrap, and modules", ok);
+}
+
+{ // 29. ark: the toll moves to the Authority and passing needs the fix, the toll, and the place
+  let ok = true;
+  const { G, ship, hull, purse, her, gs } = arkFixture();
+  hull.scrap = gs.bill.scrap + 50;
+  hull.spares = new Array(gs.bill.modules).fill("strut").concat(["engine"]);
+  hull.cargo.people = 4;
+
+  const ledger = makeLedger({ dimensions: ["credits"] });
+  ledger.declare("credits", purse.credits + gs.authority.credits + gs.fitters.credits);
+  ledger.source("purse", () => ({ credits: purse.credits }));
+  ledger.source("authority", () => ({ credits: gs.authority.credits }));
+  ledger.source("fitters", () => ({ credits: gs.fitters.credits }));
+  ledger.seal();
+
+  ship.x = G.gate.x; ship.y = G.gate.y;
+  if (gatePass(gs, ship, G, her) !== null) ok = false; // before the fix
+
+  const dt = 1 / 60;
+  const cap = Math.ceil(gs.bill.time / dt) + 5;
+  for (let i = 0; i < cap && !gs.fixed; i++) fixGate(gs, hull, her, dt);
+  if (!gs.fixed) ok = false;
+
+  if (gatePass(gs, ship, G, her) !== null) ok = false; // before the toll
+
+  const p1 = payToll(gs, purse);
+  if (p1 !== gs.toll) ok = false;
+  const p2 = payToll(gs, purse);
+  if (p2 !== 0) ok = false;
+
+  const priceSpare = sellToFitters(gs, hull, purse, { kind: "spare", k: "strut" });
+  const priceScrap = sellToFitters(gs, hull, purse, { kind: "scrap", kg: 50 });
+  const pricePeople = sellToFitters(gs, hull, purse, { kind: "people", n: 4 });
+  if (priceSpare === null || priceScrap === null || pricePeople === null) ok = false;
+
+  const audit = ledger.audit();
+  if (!audit.ok) ok = false;
+
+  ship.x = G.gate.x + 1e6; ship.y = G.gate.y;
+  if (gatePass(gs, ship, G, her) !== null) ok = false; // away from the gate
+
+  ship.x = G.gate.x; ship.y = G.gate.y;
+  const ending1 = gatePass(gs, ship, G, her);
+  if (ending1 !== ENDINGS[0]) ok = false;
+
+  her.sold = true;
+  const ending2 = gatePass(gs, ship, G, her);
+  if (ending2 !== ENDINGS[2]) ok = false;
+
+  check("ark: the toll moves to the Authority and passing needs the fix, the toll, and the place", ok);
+}
+
+{ // 30. ark: death wakes at a station ahead of the edge with mercy fuel and debt, or ends the road
+  let ok = true;
+  const { G, ship, hull, purse } = arkFixture();
+  const state = { hole: { born: true, edge: 0, swallowed: [] } };
+
+  ship.landed = null;
+  ship.x = G.worlds[1].x + 500;
+  ship.y = G.worlds[1].y + G.worlds[1].r + 500;
+  ship.alive = false;
+  const sx = ship.x, sy = ship.y;
+
+  let expected = G.worlds[0], bestDist = Infinity;
+  for (const w of G.worlds) {
+    const dist = Math.hypot(sx - w.x, sy - w.y);
+    if (dist < bestDist) { bestDist = dist; expected = w; }
+  }
+
+  const lostParts = hull.list.map((m) => m.t);
+  const res = respawn(G, ship, state, hull, purse, GATE_DIALS);
+
+  if (res.world !== expected.i) ok = false;
+  if (ship.landed !== expected.i) ok = false;
+  if (Math.abs(ship.x - expected.x) > 1e-9 || Math.abs(ship.y - (expected.y + expected.r)) > 1e-9) ok = false;
+  if (ship.alive !== true) ok = false;
+  if (ship.fuel !== GATE_DIALS.mercyFuel) ok = false;
+  if (ship.dry !== GATE_DIALS.starterDry) ok = false;
+  if (purse.debt !== GATE_DIALS.respawnDebt) ok = false;
+  if (res.debt !== purse.debt) ok = false;
+  if (JSON.stringify(G.worlds[expected.i].left) !== JSON.stringify(lostParts)) ok = false;
+
+  const f2 = arkFixture();
+  const farEdge = Math.max(...f2.G.worlds.map((w) => Math.hypot(w.x, w.y) - w.r)) + 1e6;
+  const state2 = { hole: { born: true, edge: farEdge, swallowed: [] } };
+  const res2 = respawn(f2.G, f2.ship, state2, f2.hull, f2.purse, GATE_DIALS);
+  if (res2.ending !== ENDINGS[4]) ok = false;
+
+  check("ark: death wakes at a station ahead of the edge with mercy fuel and debt, or ends the road", ok);
+}
+
+{ // 31. ark: the log's lines come from the receipts module and the card carries the name from the log
+  let ok = true;
+  const { G, hull } = arkFixture();
+
+  const log = makeLog();
+  for (let i = 0; i < 20; i++) {
+    const type = keysARK[Math.floor(rng() * keysARK.length)];
+    log.add(type, i, rollArkFields(type, i, G.n));
+  }
+  const linesA = log.lines();
+  const linesB = receiptLog(log.events, ARK_LINES);
+  if (JSON.stringify(linesA) !== JSON.stringify(linesB)) ok = false;
+
+  const log2 = logFromJSON(log.toJSON());
+  if (JSON.stringify(log2.lines()) !== JSON.stringify(linesA)) ok = false;
+
+  const nameLog = makeLog();
+  nameLog.add("land", 0, { i: 1, v: 5 });
+  nameLog.add("land", 1, { i: 1, v: 5 });
+  nameLog.add("land", 2, { i: 0, v: 5 });
+  nameLog.add("kill", 3, { bounty: 3000 });
+  nameLog.add("kill", 4, { bounty: 3000 });
+  nameLog.add("shot", 5, { damage: 10 });
+  nameLog.add("buy", 6, { n: 10, part: "scrap", cost: 100 });
+  nameLog.add("buy", 7, { n: 3, part: "people", cost: 100 });
+  const name = galaxyName(nameLog, G);
+  if (name !== G.worlds[1].climate + " · HUNTER · SCRAP") ok = false;
+
+  const G2worlds = G.worlds.map((w, idx) => (idx === 2 ? { ...w, state: "gone" } : w));
+  const G2 = { ...G, worlds: G2worlds };
+  const crew = [{ name: "Ada Aske" }, { name: "Bram Brandt" }];
+  const ending = ENDINGS[0];
+  const card = buildCard(nameLog, G2, hull, crew, ending);
+  if (card.ending !== ending) ok = false;
+  if (JSON.stringify(card.manifest.hull) !== JSON.stringify(hull.list.map((m) => m.t))) ok = false;
+  if (JSON.stringify(card.manifest.hands) !== JSON.stringify(crew.map((h) => h.name))) ok = false;
+  if (JSON.stringify(card.eaten) !== JSON.stringify([G2.worlds[2].id])) ok = false;
+  if (checkCard(card).length !== 0) ok = false;
+  if (checkCard(null).length !== 1) ok = false;
+
+  check("ark: the log's lines come from the receipts module and the card carries the name from the log", ok);
+}
+
+{ // 32. ark: twin cards from one rolled seed agree
+  const seed32 = rollSeed();
+  const galaxyH = makeGalaxy(seed32);
+  const galaxyI = makeGalaxy(seed32);
+
+  const events = [];
+  for (let i = 0; i < 20; i++) {
+    const type = keysARK[Math.floor(rng() * keysARK.length)];
+    events.push({ type, t: i, data: rollArkFields(type, i, galaxyH.n) });
+  }
+
+  const logH = makeLog();
+  const logI = makeLog();
+  for (const e of events) { logH.add(e.type, e.t, e.data); logI.add(e.type, e.t, e.data); }
+
+  const hullTwin = { list: [{ t: "bridge", gx: 0, gy: 0 }, { t: "engine", gx: -1, gy: 0 }, { t: "tank", gx: 1, gy: 0 }, { t: "pod", gx: 0, gy: 1 }], scrap: 40, spares: ["strut"], cargo: { people: 2 } };
+  const crewTwin = [{ name: "Ada Aske" }];
+  const ending = ENDINGS[1];
+
+  const cardH = buildCard(logH, galaxyH, hullTwin, crewTwin, ending);
+  const cardI = buildCard(logI, galaxyI, hullTwin, crewTwin, ending);
+
+  const ok = JSON.stringify(cardH) === JSON.stringify(cardI);
+  check("ark: twin cards from one rolled seed agree", ok);
+}
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
 console.log("gravitys-ark-test PASS");

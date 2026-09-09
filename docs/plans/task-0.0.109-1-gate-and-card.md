@@ -135,3 +135,10 @@ Do not push. Do not touch main.
 ## Report
 
 Read-confirmation first (each file, its line count). One line of outcome. Then bullets: both gate outputs whole; the diff summary (`git diff --stat $(git merge-base HEAD main)`); the commit hash on your branch; every nonconformity as its own labeled bullet. Fixture seeds: the two rolled seeds; no seed is special.
+
+## The report's gate lines
+
+- `node scripts/gravitys-ark-test.mjs` in the worktree over the twelve landed checks: seeds 905414099 and 25050496; 17 PASS lines, `gravitys-ark-test: 17 PASS / 0 FAIL`, exit 0, twice, and five more rolled runs clean. At the landing, joined after the twenty-eight landed checks: `gravitys-ark-test: 33 PASS / 0 FAIL`, twice.
+- Bracket at the landing: gravitys-ark, receipts, ledger, every tail PASS.
+- Branch commit caad120 on phase/0.0.109-gate-and-card, landed by squash into main; the gate module's copies of the price and mass tables swapped for the stations import; the gate joined by the orchestrator's helper.
+- Nonconformities the agent named: the worktree carried twelve landed checks, so its count line read 17; sellToFitters cannot mark her sold, its fixed signature carrying no her, so the page marks her sold itself when it sells her; the card's endings list is a local copy of the gate module's, the card's imports being fixed to one; the gate module's pass is imported under another name in the gate, the gate's own counter being called pass; the imports came as several lines. None moved a law.
