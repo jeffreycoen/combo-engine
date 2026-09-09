@@ -45,6 +45,7 @@ export const REGISTRY = {
   touch: { seam: "consume", gate: "touch" },
   backdrop: { seam: "sample", gate: "backdrop" },
   gait: { seam: "tick", gate: "gait" },
+  render3d: { seam: "sample", gate: "render3d" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },
