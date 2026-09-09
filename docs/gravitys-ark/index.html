@@ -27,6 +27,8 @@
   #zoom button { min-width: 44px; width: 44px; height: 40px; padding: 0; font-size: 16px; }
   #zoom #seedB { width: auto; min-width: 60px; padding: 0 10px; font-size: 11px; letter-spacing: 0.12em; }
   #gv { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
+  #gStick { position: fixed; left: 18px; bottom: max(70px, calc(env(safe-area-inset-bottom) + 62px)); width: 108px; height: 108px; border-radius: 50%; border: 1.5px solid rgba(233,237,242,.35); background: rgba(7,9,13,.25); touch-action: none; }
+  #gNub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: rgba(233,237,242,.5); }
 </style>
 </head>
 <body>
@@ -41,7 +43,8 @@
 <div id="gatePane" class="pane" style="display:none; left: 12px; top: 40%; transform: translateY(-50%); pointer-events: auto; max-width: 46vw;"><div id="gateBody"></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px;"><button id="tollB">PAY TOLL</button><button id="passB">PASS</button><button id="sellSpare">SELL SPARE</button><button id="sellScrapF">SELL SCRAP</button><button id="sellPeople">SELL PEOPLE</button><button id="sellHer">SELL HER</button></div></div>
 <div id="zoom"><button id="zoomOut">−</button><button id="zoomIn">+</button><button id="pause">II</button><button id="seedB">SEED</button></div>
 <div id="holdBtns" style="display:none; position: fixed; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); display: none; grid-template-columns: repeat(2, minmax(92px, 1fr)); gap: 6px;"><button id="hRepairWalker">REPAIR WALKER</button><button id="hRepair">REPAIR</button><button id="hFight">FIGHT</button><button id="hIdle">IDLE</button><button id="hWall">WALL 300</button><button id="hGun">GUN 600</button><button id="hFire">FIRE</button><button id="hTakeoff">TAKE OFF</button></div>
-<div id="groundBtns" style="display:none; position: fixed; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); grid-template-columns: repeat(2, minmax(92px, 1fr)); gap: 6px;"><button id="gKind">GUN</button><button id="gWall">WALL</button><button id="gFix">FIX</button><button id="gFight">FIGHT</button><button id="gSound">SOUND ON</button><button id="gTakeoff">TAKE OFF</button></div>
+<div id="groundBtns" style="display:none; position: fixed; right: 12px; bottom: max(16px, env(safe-area-inset-bottom)); grid-template-columns: repeat(2, minmax(92px, 1fr)); gap: 6px;"><button id="gKind">GUN</button><button id="gWall">WALL</button><button id="gFix">FIX</button><button id="gRepairWalker">REPAIR WALKER</button><button id="gFight">FIGHT</button><button id="gHold">HOLD</button><button id="gFire">FIRE</button><button id="gSound">SOUND ON</button><button id="gTakeoff">TAKE OFF</button></div>
+<div id="gStick" style="display:none"><div id="gNub"></div></div>
 <div id="btns">
   <button id="land">LAND</button>
   <button id="takeoff">TAKE OFF</button>

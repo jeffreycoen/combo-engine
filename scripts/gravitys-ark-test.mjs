@@ -18,7 +18,7 @@ import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFi
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
 import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER } from "../src/games/gravitys-ark/ground.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -1148,6 +1148,34 @@ const ticks = (H, n) => { const evs = []; for (let i = 0; i < n; i++) evs.push(.
   const wall = groundOrder(A, "wall", s0.x - 6, s0.z + 8, { x: s0.x + 6, z: s0.z + 8 });
   check("ark: a WALL order gives her squad coldsnap's build line, section by section",
     wall.ok && wall.sections > 0 && !!herSq._build && herSq._build.kind === "walls" && herSq._build.rows.length === wall.sections && herSq.order === "build" && A.her.act === "wall");
+}
+
+{ // 45. ark: the walker lies wrecked at the crash and stands once her seconds at the wreck run down, coldsnap's own mech on her side, and twin raisings agree
+  // 46. ark: FIGHT with the walker up takes it through coldsnap's possession door, the stick feeds its commands, and HOLD gives it back
+  // 47. ark: the walker down comes back as its event, her act ends, and the possession is released
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const mk = () => { const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 10); fieldCrew(G, []); wreckWalker(G); return G; };
+  const raise = (G) => { const r = groundOrder(G, "repairWalker"); const b = herBody(G); b.pos.x = G.walker.spot.x + 1; b.pos.z = G.walker.spot.z; const ev = stepHer(G, r.seconds); return { r, ev }; };
+  const A = mk(), B = mk();
+  const wrecked = !!A.walker && A.walker.wrecked && !walkerAlive(A) && A.walker.mech === null;
+  const ra = raise(A), rb = raise(B);
+  const hull = A.walker.mech ? A.walker.mech.hull : null;
+  check("ark: the walker lies wrecked at the crash and stands once her seconds at the wreck run down, coldsnap's own mech on her side, and twin raisings agree",
+    wrecked && ra.r.ok && ra.r.seconds === WALKER.repair && A.her.act === "hold" && ra.ev.some((e) => e.k === "walkerUp") && walkerAlive(A) && hull.team === 1 && A.walker.mech.s === WALKER.s
+    && A.world.mechs.includes(A.walker.mech) && rb.ev.some((e) => e.k === "walkerUp") && JSON.stringify([hull.pos.x, hull.pos.y, hull.pos.z]) === JSON.stringify([B.walker.mech.hull.pos.x, B.walker.mech.hull.pos.y, B.walker.mech.hull.pos.z]));
+  const fight = groundOrder(A, "fight");
+  setStick(A, 0.8, 0, 0.5);
+  A.input.feedMech(A.walker.mech, 1 / 120);
+  const driven = A.walker.mech.state.cmdT.f === 0.8 && A.walker.mech.state.headingT === 0.5;
+  const possessed = fight.ok && fight.walker === true && A.input.possess && A.input.possess.kind === "mech" && A.input.possess.id === hull.id && A.her.act === "walker" && A.her.squad.holdFire === true && A.walker.possessed === true;
+  const hold = groundOrder(A, "hold");
+  check("ark: FIGHT with the walker up takes it through coldsnap's possession door, the stick feeds its commands, and HOLD gives it back",
+    possessed && driven && hold.ok && A.input.possess === null && A.input.feedMech === null && A.walker.possessed === false && A.her.act === "hold" && A.her.squad.holdFire === false);
+  groundOrder(A, "fight");
+  hull.alive = false; hull.hp = 0;
+  const down = stepHer(A, 1 / 120);
+  check("ark: the walker down comes back as its event, her act ends, and the possession is released",
+    down.some((e) => e.k === "walkerDown") && !walkerAlive(A) && A.walker.alive === false && A.input.possess === null && A.her.act === "hold");
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

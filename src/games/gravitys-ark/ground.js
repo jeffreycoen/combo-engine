@@ -3,8 +3,8 @@
 // its brain, its books and its bell, its build law for guns. This file is the
 // ark's layer over that engine and nothing more: the boot from the ark's own
 // world seed, the one purse the hold's scrap feeds, the hull as bodies on
-// welds, her and the hands as troopers, the orders, the take-off. The page's
-// ground screen draws it. Every number here is PROPOSED.
+// welds, her and the hands as troopers, her walker, the orders, the take-off.
+// The page's ground screen draws it. Every number here is PROPOSED.
 import { bootWar, tickWar, defaultTickInput, runHash, serializeRun } from "../../depot/api.js";
 import { buildSnapshotOf } from "../../depot/tick.js";
 import { buildEmitters } from "../../depot/boot.js";
@@ -20,6 +20,8 @@ import { spawnSquadMembers } from "../../depot/state.js";
 import { INFANTRY_ARMS } from "../../depot/specs.js";
 import { startBuildLine, stepBuildLine } from "../../depot/buildlines.js";
 import { stampBag } from "../../depot/boot.js";
+import { buildMech, mechCommand } from "../../engine/mech.js";
+import { MECH } from "../../depot/specs.js";
 
 // kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's
 // scrap. heldSteps and heldStep: territory steps run at the boot, so the crash
@@ -55,7 +57,7 @@ export function makeGround(seed, w, scrapKg, opts) {
   // the build-line driver: her squad lays walls along a two-point line by coldsnap's own law, paid from the one purse
   const buildCtx = { objG, recomputeFlow, stampBag: (b, side) => stampBag(war.grid, b, side), setMines: () => {} };
   input.stepBuildLine = (sq) => stepBuildLine(world, war.grid, war.field, war.T, run, sq, buildCtx, (text) => say("toast", { text }), war.map);
-  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [] };
+  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], walker: null, stick: { f: 0, l: 0, h: null } };
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
@@ -128,6 +130,47 @@ export function fieldCrew(G, crew) {
   return G.her;
 }
 
+// WALKER: hers, coldsnap's own mech at coldsnap's own scale, 5.4 m tall, two and a
+// half troopers; it lies wrecked beside the hull at the crash until she repairs it.
+// repair: her seconds at the wreck; spotX, spotZ: the wreck's spot from the bridge, in
+// metres; s: the scale. PROPOSED.
+export const WALKER = { s: 1, repair: 10, spotX: 0, spotZ: -8 };
+
+// wreckWalker(G): the walker lies wrecked at its spot; nothing stands until she repairs it.
+export function wreckWalker(G) {
+  const s0 = G.hull ? G.hull.slots[0] : { x: G.run.focus.x, z: G.run.focus.z };
+  G.walker = { mech: null, spot: { x: s0.x + WALKER.spotX, z: s0.z + WALKER.spotZ }, wrecked: true, alive: false, possessed: false };
+  return G.walker;
+}
+
+// raiseWalker(G): the repair's mechanism: coldsnap's mech built at the wreck's spot on the player's side, hers.
+export function raiseWalker(G) {
+  const W = G.walker;
+  if (!W || W.mech) return null;
+  const m = buildMech(G.world, { x: W.spot.x, z: W.spot.z, yaw: 0, team: 1, hp: MECH.hp, s: WALKER.s });
+  m.thrustersOn = true; m.thrustAssist = true; m.hull.maxHp = MECH.hp;
+  W.mech = m; W.wrecked = false; W.alive = true;
+  return m;
+}
+
+// walkerAlive(G): the walker stands and lives.
+export function walkerAlive(G) { const W = G.walker; return !!(W && W.mech && W.mech.hull.alive); }
+
+// setStick(G, f, l, h): the page's stick for the possessed walker: travel and lateral as fractions, heading in radians or null.
+export function setStick(G, f, l, h) { G.stick.f = f; G.stick.l = l; G.stick.h = h; }
+
+// takeWalker / leaveWalker: she takes the walker through coldsnap's own possession door; the stick feeds its commands
+function takeWalker(G) {
+  const W = G.walker;
+  G.input.possess = { kind: "mech", id: W.mech.hull.id };
+  G.input.feedMech = (m) => { const s = G.stick; mechCommand(m, { travel: s.f, lateral: s.l, heading: s.h }); };
+  W.possessed = true;
+}
+function leaveWalker(G) {
+  G.input.possess = null; G.input.feedMech = null; G.input.fireHeld = false;
+  if (G.walker) G.walker.possessed = false;
+}
+
 // herBody(G): her living body, or null.
 export function herBody(G) {
   const id = G.her && G.her.squad.memberIds[0];
@@ -143,7 +186,15 @@ export function stepHer(G, dt) {
   if (!her) return out;
   const b = herBody(G);
   const rest = () => { her.act = "hold"; her.target = null; her.squad.holdFire = false; if (her.squad.order === "move") { her.squad.order = "defend"; her.squad.dest = null; } };
-  if (!b) { if (her.alive) { her.alive = false; out.push({ k: "herDead", t: G.world.t }); } }
+  const W = G.walker;
+  if (W && W.alive && !(W.mech && W.mech.hull.alive)) { W.alive = false; out.push({ k: "walkerDown", t: G.world.t }); if (W.possessed) leaveWalker(G); if (her.act === "walker") rest(); }
+  if (!b) { if (her.alive) { her.alive = false; out.push({ k: "herDead", t: G.world.t }); if (W && W.possessed) leaveWalker(G); } }
+  else if (her.act === "repairWalker" && W) {
+    if (Math.hypot(W.spot.x - b.pos.x, W.spot.z - b.pos.z) <= HER.reach + 2) {
+      her.actT -= dt;
+      if (her.actT <= 0) { raiseWalker(G); out.push({ k: "walkerUp", t: G.world.t }); rest(); }
+    }
+  }
   else if (her.act === "fix" && her.target != null) {
     const m = G.hull.bodies[her.target];
     if (!m.alive) rest();
@@ -220,15 +271,38 @@ export function order(G, kind, x, z, which) {
     G.events.push({ k: "fix", t: G.world.t, module: G.hull.list[best].t, seconds: G.her.actT });
     return { ok: true, target: best, seconds: G.her.actT };
   }
-  if (kind === "fight") {   // she fights: she stands where she is and her sidearm answers
+  if (kind === "fight") {   // she fights: in the walker when it stands, else where she is with her sidearm
     const b = herBody(G);
     if (!b) return { ok: false, reason: "she is dead" };
     const sq = G.her.squad;
-    sq.order = "defend"; sq.dest = null; sq._build = null; sq.holdFire = false;
-    G.her.act = "fight"; G.her.target = null; G.her.actT = 0;
+    sq.order = "defend"; sq.dest = null; sq._build = null;
+    if (walkerAlive(G)) { takeWalker(G); sq.holdFire = true; G.her.act = "walker"; G.her.target = null; G.her.actT = 0; G.events.push({ k: "walkerTaken", t: G.world.t }); return { ok: true, walker: true }; }
+    sq.holdFire = false; G.her.act = "fight"; G.her.target = null; G.her.actT = 0;
     G.events.push({ k: "fightHer", t: G.world.t });
+    return { ok: true, walker: false };
+  }
+  if (kind === "hold") {   // she stands down: out of the walker, her fire free, where she is
+    const b = herBody(G);
+    if (!b) return { ok: false, reason: "she is dead" };
+    if (G.walker && G.walker.possessed) leaveWalker(G);
+    const sq = G.her.squad;
+    sq.order = "defend"; sq.dest = null; sq._build = null; sq.holdFire = false;
+    G.her.act = "hold"; G.her.target = null; G.her.actT = 0;
     return { ok: true };
   }
+  if (kind === "repairWalker") {   // she raises the walker: she walks to the wreck and her seconds run down there
+    const b = herBody(G);
+    if (!b) return { ok: false, reason: "she is dead" };
+    if (!G.walker) return { ok: false, reason: "no walker here" };
+    if (walkerAlive(G)) return { ok: false, reason: "the walker stands" };
+    if (G.walker.possessed) leaveWalker(G);
+    const sq = G.her.squad;
+    sq.order = "move"; sq.dest = { x: G.walker.spot.x, z: G.walker.spot.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
+    G.her.act = "repairWalker"; G.her.target = null; G.her.actT = WALKER.repair;
+    G.events.push({ k: "repairWalker", t: G.world.t, seconds: WALKER.repair });
+    return { ok: true, seconds: WALKER.repair };
+  }
+  if (kind === "fire") { G.input.fireHeld = !!x; return { ok: true }; }
   if (kind === "wall") {   // she lays a wall from (x, z) to which, by coldsnap's build line, one purse
     const b = herBody(G);
     if (!b) return { ok: false, reason: "she is dead" };
@@ -276,8 +350,9 @@ export function summary(G) {
   const H = G.hull, alive = H ? H.bodies.filter((b) => b.alive).length : 0;
   const modules = H ? { total: H.bodies.length, alive, loose: looseModules(G).length } : null;
   const her = G.her ? { alive: !!herBody(G), act: G.her.act, actT: G.her.actT } : null;
+  const walker = G.walker ? { wrecked: !G.walker.mech, alive: walkerAlive(G), hp: G.walker.mech ? G.walker.mech.hull.hp : 0, possessed: G.walker.possessed } : null;
   const hands = { alive: G.hands.filter((h) => h.alive).length, total: G.hands.length };
-  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules, her, hands,
+  return { t: world.t, bell: run.bell, bellIn: Math.max(0, run.bellAt - world.t), scrap: run.resources, scrapKg: run.resources * G.dials.kgPerScrap, foes, guns, modules, her, hands, walker,
     standing: H ? alive / H.bodies.length : (run.depotStanding == null ? 1 : run.depotStanding), lost: !!(H && !H.bodies[0].alive), warOver: !!run.gameOver };
 }
 

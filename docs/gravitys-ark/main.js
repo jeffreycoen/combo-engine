@@ -57,7 +57,7 @@ const holdRng = simStream((seed + 4) >>> 0), OPENING_CRASH = 30;   // the openin
 let hold = null, view = "space", fieldTap = null;
 // phase 0.1.1: the ground on coldsnap, behind ?ground=1 until the hold is whole; the old hold stays the default until then
 const groundOn = q.has("ground");
-const GS = makeGroundScreen({ canvas: "gv", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
+const GS = makeGroundScreen({ canvas: "gv", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
 function enterGround(v) { view = "ground"; fieldTap = null; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 // leaveGround(g): the seam up, after the road has let the ship go: the purse back as kilograms, the modules lost gone from the build list
 function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
