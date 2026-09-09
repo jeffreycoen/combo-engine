@@ -144,3 +144,10 @@ Do not push. Do not touch main.
 ## Report
 
 Read-confirmation first (each file, its line count). One line of outcome. Then bullets: both gate outputs whole; the diff summary (`git diff --stat $(git merge-base HEAD main)`); the commit hash on your branch; every nonconformity as its own labeled bullet. Fixture seeds: the two rolled seeds; no seed is special.
+
+## The report's gate lines
+
+- `node scripts/gravitys-ark-test.mjs` in the worktree over the stand-ins: seeds 651279552 and 1866729076 (twin seeds 2855663043 and 80313664); 6 PASS lines, `gravitys-ark-test: 6 PASS / 0 FAIL`, exit 0, twice, and 25 more rolled runs clean. At the landing, joined after the twelve landed checks over the real galaxy: `gravitys-ark-test: 18 PASS / 0 FAIL`, twice.
+- Bracket at the landing: gravitys-ark, market, escrow, builder, ledger, every tail PASS.
+- Branch commit 8a383a8 on phase/0.0.106-stations, landed by squash into main; the gate joined by the orchestrator's helper, the stand-ins replaced by the galaxy's own maker and names.
+- Nonconformities the agent named, each a reading where the brief was silent: the contract's wording; check 14 rolls among stations with more than four people, the hire law refusing at a pool of one; fuel trades in 1 to 500 kg and one module per purchase; a wage interval long enough to top a purse of 10; check 15 stands alone on the hull; a second rolled seed for the twin checks, printed on its own line. None moved a law.
