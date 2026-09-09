@@ -73,3 +73,13 @@ Every hash below is its scratch copy's own after the edit. Every gate count is t
 - The eight hash lines in the task print OK.
 
 Suggested model for tasks 1 and 2: Sonnet 5 — every file is in the plan; nothing is designed.
+
+## Acceptance
+
+Five findings from the owner's playtest of the landed ground, seed 690303455, each returned with its finding; the fixes are planned next, in this order.
+
+- scr-ground: returned, the screen is crowded: the space panes and the title stay drawn over the ground pane, and the log runs under the nine-button cluster. Fix: a ground layout of its own in the screen file; the space panes hidden on the ground; the buttons in short rows with the log above them.
+- ark-ground: returned, she died the moment the walker stood, 70.9 s on the log: the walker was built around her at the wreck's spot and the engine's ejection slam killed her. Fix: she is moved clear of the walker's footprint before it is built, or the walker is built only where coldsnap's own 4.5 m room check passes.
+- ark-ground: returned, the ship is a ship for ants: 1.6 m modules from the ark's scale table, carried unchanged; nothing fits in them, least of all a 5.4 m walker. Fix: one ground scale for a module, about 10 m by the mass factor of 250 or the size the owner names, one number in the hull dials; a mech bay kind sized to hold the walker.
+- ark-ground: returned, the ship looks nothing like a ship: coldsnap's drawing draws every module as a grey stone. Fix: deadweight's hangar drawing lifted into coldsnap's drawing door, SHAPED from the demo's own lines: the prism per kind with its footprint and height, the glyph and letter on the top face, the station colour, struts as beams, the welds drawn as joints, the balance mark, at the ground's scale.
+- scr-space: returned, space looks nothing like coldsnap: the ark's 2-D warped grid, deadweight's drawing, by this phase's decision that space stays 2-D. Fix: space drawn in coldsnap's way, one lit scene with the ship as bodies and the worlds in their pits; a phase of its own and the largest of the five.
