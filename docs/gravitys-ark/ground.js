@@ -1,12 +1,14 @@
 // GRAVITY'S ARK — ground.js: the ground's screen, phase 0.1.1. Coldsnap's
 // drawing on its own canvas, its sound, the camera, the taps, the pane, the
 // buttons; the hull crashes onto the ground at entry, she and the hands take
-// the field, and her walker lies wrecked until she raises it. The main file
-// takes only the hookup lines.
+// the field, and her walker lies wrecked until she raises it. The ship's look is
+// hull-look.js's; the main file takes only the hookup lines.
 import { makeRenderer, makeGameAudio } from "../../src/depot/api.js";
 import { TOWER_SPECS } from "../../src/depot/specs.js";
-import { makeGround, crashHull, fieldCrew, wreckWalker, setStick, order, tick, summary, price, GUNS } from "../../src/games/gravitys-ark/ground.js";
+import { makeGround, crashHull, fieldCrew, wreckWalker, setStick, order, tick, summary, price, GUNS, looseModules } from "../../src/games/gravitys-ark/ground.js";
+import { derive } from "../../src/games/gravitys-ark/stations.js";
 import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
+import { makeHullLook } from "./hull-look.js";
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
@@ -15,7 +17,7 @@ export function makeGroundScreen(ids, hooks) {
   const $ = (id) => document.getElementById(id);
   const gv = $(ids.canvas);
   const say = (line) => { if (hooks && hooks.log) hooks.log(line); };
-  let G = null, R = null, A = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false, mode = "gun", wallStart = null;
+  let G = null, R = null, A = null, look = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false, mode = "gun", wallStart = null;
   const kind = () => GUNS[gunI];
 
   // a screen point to the ground: a point on the camera's near plane plus the view
@@ -39,12 +41,14 @@ export function makeGroundScreen(ids, hooks) {
     mode = "gun"; wallStart = null; held.clear(); stickVec = { x: 0, z: 0 }; setNub(0, 0);
     gv.style.display = "block"; document.body.classList.add("ground");
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
+    const dv = derive(hull), cell = 1.7;   // the ship's balance point on its own grid, the builder's cell as makeHull sets it
+    look = makeHullLook(R.scene, G.hull, { balance: { gx: dv.cx / cell, gy: dv.cy / cell }, groundY: G.war.field.heightAt(G.site.x, G.site.z) });
     A = makeGameAudio(); A.setMuted(muted);
-    const f = G.run.focus; focus = { x: f.x, y: f.y, z: f.z }; aim = { x: f.x, z: f.z }; zoom = 1;
+    const f = G.site; focus = { x: f.x, y: G.war.field.heightAt(f.x, f.z), z: f.z }; aim = { x: f.x, z: f.z }; zoom = 0.6; R.setZoom(zoom);   // the camera opens on the bridge, wide enough for the hull, PROPOSED
     A.setListener(focus.x, focus.z, 60);
     say("on the ground at " + w.id + ": " + fmt(scrapKg) + " kg of scrap is " + fmt(G.run.resources) + " scrap here");
   }
-  function leave() { if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; document.body.classList.remove("ground"); G = null; }
+  function leave() { if (look) { look.dispose(); look = null; } if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; document.body.classList.remove("ground"); G = null; }
   function step(dt) {
     if (!G) return null;
     const r = tick(G, dt);
@@ -94,7 +98,7 @@ export function makeGroundScreen(ids, hooks) {
     const mag = Math.min(1, Math.hypot(vx, vz));
     setStick(G, mag, 0, mag > 0.1 ? Math.atan2(vx, vz) : null);
   }
-  function draw(dt) { if (!G || !R) return; feedStick(); if (A) A.tick(G.world, dt); const s = summary(G); if (s.walker && s.walker.possessed && G.walker.mech) { const h = G.walker.mech.hull; focus = { x: h.pos.x, y: h.pos.y, z: h.pos.z }; } R.render(dt, focus, aim); }
+  function draw(dt) { if (!G || !R) return; feedStick(); if (A) A.tick(G.world, dt); const s = summary(G); if (s.walker && s.walker.possessed && G.walker.mech) { const h = G.walker.mech.hull; focus = { x: h.pos.x, y: h.pos.y, z: h.pos.z }; } if (look) look.update(looseModules(G)); R.render(dt, focus, aim); }
   function pane() {
     if (!G) return "";
     const s = summary(G);

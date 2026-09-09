@@ -202,7 +202,7 @@
      "verdict": "ok",
      "pass": 5,
      "fail": 0,
-     "seeds": "seeds {\"kit\":568647129}",
+     "seeds": "seeds {\"kit\":928026302}",
      "checks": [
       "PASS determinism: twin sim streams from one rolled seed are identical for 5000 draws",
       "PASS determinism: effects draws never move the sim's sequence",
@@ -368,7 +368,7 @@
      "verdict": "ok",
      "pass": 12,
      "fail": 0,
-     "seeds": "seeds {\"world\":307737957}",
+     "seeds": "seeds {\"world\":159481037}",
      "checks": [
       "PASS escrow: the bounty is the other station's spot, margined, treasury-capped, refused under 200",
       "PASS escrow: posting moves credits into escrow, none minted, none burned",
@@ -429,7 +429,7 @@
      "verdict": "ok",
      "pass": 14,
      "fail": 0,
-     "seeds": "seeds {\"builder\":4021824278}",
+     "seeds": "seeds {\"builder\":3272100942}",
      "checks": [
       "PASS contract accepts the demo spec",
       "PASS contract rejects junk (2 problems named)",
@@ -496,7 +496,7 @@
      "verdict": "ok",
      "pass": 14,
      "fail": 0,
-     "seeds": "seeds {\"field\":75281825}",
+     "seeds": "seeds {\"field\":720846113}",
      "checks": [
       "PASS wells: 3000 rolled field reads run twin with the demo's own text",
       "PASS wells: a made well is at rest with the demo's shape",
@@ -575,7 +575,7 @@
      "verdict": "ok",
      "pass": 20,
      "fail": 0,
-     "seeds": "seeds {\"grapple\":1982310392}",
+     "seeds": "seeds {\"grapple\":1613494544}",
      "checks": [
       "PASS cast: the head leaves 2.2 ahead at 34 plus ship velocity, state fly",
       "PASS recoil: the ship pays J = 0.15 x 34 = 5.1 — velocity -J/M, spin -arm J/I",
@@ -645,7 +645,7 @@
      "verdict": "ok",
      "pass": 13,
      "fail": 0,
-     "seeds": "seeds {\"aim\":2011325}",
+     "seeds": "seeds {\"aim\":830325212}",
      "checks": [
       "PASS aim: frozen() is true while armed, false after cancel and after commit",
       "PASS aim: commit emits the demo's tape-action shape per kind, and null when unarmed",
@@ -707,7 +707,7 @@
      "verdict": "ok",
      "pass": 5,
      "fail": 0,
-     "seeds": "seeds {\"render2d\":741499521}",
+     "seeds": "seeds {\"render2d\":383544708}",
      "checks": [
       "PASS render2d: a point at the camera's own x,y projects to VCX, VCY plus its own pot dip",
       "PASS render2d: the warp grows monotonically toward a well, fades far out, and stays inside the formula's clamp",
@@ -1234,9 +1234,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1284,9 +1284,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1333,9 +1334,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1383,9 +1384,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1457,6 +1459,7 @@
     "present": true,
     "missing": [],
     "importedBy": [
+     "docs/gravitys-ark/ground.js",
      "docs/gravitys-ark/main.js",
      "src/games/gravitys-ark/gate.js",
      "src/games/gravitys-ark/ground.js",
@@ -1483,9 +1486,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1533,9 +1536,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1584,9 +1588,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1634,9 +1638,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1683,9 +1688,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1733,9 +1738,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1777,9 +1783,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1827,9 +1833,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1871,9 +1878,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1921,9 +1928,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1999,7 +2007,7 @@
      "verdict": "ok",
      "pass": 16,
      "fail": 0,
-     "seeds": "seeds {\"rig\":686852898}",
+     "seeds": "seeds {\"rig\":912303794}",
      "checks": [
       "PASS the table names 17 links: 3 core + 7 per side",
       "PASS the assembled MK1 weighs exactly 8140 kg — the demo's own title chip",
@@ -2018,7 +2026,7 @@
       "PASS rig: scale 1 assembles the landed rig exactly",
       "PASS rig: at a rolled scale every quantity scales by its power"
      ],
-     "seconds": 1.4,
+     "seconds": 1.5,
      "tail": "rig-test PASS"
     }
    }
@@ -2150,7 +2158,8 @@
     "present": true,
     "missing": [],
     "importedBy": [
-     "docs/gravitys-ark/ground.js"
+     "docs/gravitys-ark/ground.js",
+     "docs/gravitys-ark/hull-look.js"
     ],
     "imports": [
      "src/depot/api.js",
@@ -2170,8 +2179,8 @@
     ],
     "wired": true,
     "exports": {
-     "total": 28,
-     "exercised": 18,
+     "total": 30,
+     "exercised": 20,
      "untested": [
       "GUNS",
       "clearBox",
@@ -2189,9 +2198,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -2239,9 +2248,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -2287,6 +2297,7 @@
     "missing": [],
     "importedBy": [
      "docs/gravitys-ark/ground.js",
+     "docs/gravitys-ark/hull-look.js",
      "docs/gravitys-ark/main.js",
      "src/games/gravitys-ark/gate.js",
      "src/games/gravitys-ark/wrecks.js"
@@ -2311,8 +2322,8 @@
     ],
     "wired": true,
     "exports": {
-     "total": 51,
-     "exercised": 36,
+     "total": 53,
+     "exercised": 38,
      "untested": [
       "GUNS",
       "PART_ORDER",
@@ -2335,9 +2346,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 47,
+     "pass": 48,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1607129965}",
+     "seeds": "seeds {\"gravitys-ark\":3516139037}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -2385,9 +2396,10 @@
       "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
       "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
       "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+      "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+      "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
      ],
-     "seconds": 13,
+     "seconds": 13.6,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -2569,10 +2581,11 @@
    "group": "Screens",
    "name": "the ground screen",
    "files": [
-    "docs/gravitys-ark/ground.js"
+    "docs/gravitys-ark/ground.js",
+    "docs/gravitys-ark/hull-look.js"
    ],
-   "phase": "0.1.1",
-   "does": "The coldsnap renderer with the hold's rail, in its own file.",
+   "phase": "0.1.2",
+   "does": "The coldsnap renderer with the hold's rail, in its own file; the ship's look in hull-look.js, deadweight's shapes, glyphs, and colours as solid shapes in coldsnap's scene.",
    "serves": [
     "bay",
     "hold"
@@ -2585,17 +2598,23 @@
      "docs/gravitys-ark/main.js"
     ],
     "imports": [
+     "docs/gravitys-ark/three",
      "src/depot/api.js",
      "src/depot/specs.js",
      "src/games/gravitys-ark/ground.js",
+     "src/games/gravitys-ark/stations.js",
+     "src/graphics/renderer.js",
      "src/modules/pagekit/pagekit.js"
     ],
     "wired": true,
     "exports": {
-     "total": 1,
+     "total": 4,
      "exercised": 0,
      "untested": [
-      "makeGroundScreen"
+      "OLETTER",
+      "ORIGIN",
+      "makeGroundScreen",
+      "makeHullLook"
      ]
     }
    }
@@ -4392,10 +4411,10 @@
    "plan": "take",
    "phaseOf": "ark-spine",
    "mech": {
-    "file": "current",
+    "file": "differs",
     "hashHead": "0174cfe63173",
     "hashOld": "5c7d2d9b6dd4",
-    "hashTree": "0174cfe63173"
+    "hashTree": "0db618e8c5b8"
    }
   },
   {
@@ -4870,11 +4889,12 @@
    "source": "coldsnap",
    "group": "The drawing",
    "name": "The drawing",
-   "does": "3 files at 111b9cb: 3 current",
+   "does": "3 files at 111b9cb: 2 current, 1 changed here",
    "files": [],
    "count": 3,
    "fileStates": {
-    "current": 3
+    "current": 2,
+    "differs": 1
    },
    "serves": [
     "bay",
@@ -4887,7 +4907,7 @@
    "phaseOf": "ark-spine",
    "isRollup": true,
    "mech": {
-    "file": "current"
+    "file": "differs"
    }
   },
   {
@@ -6002,7 +6022,7 @@
    "name": "the findings",
    "file": "docs/plans/phase-0.1.2-the-findings.md",
    "status": "DISPATCHED",
-   "line": "Status: DISPATCHED. Task 3 landed, commit stamped below, 2026-09-09; task 4 is planned next.",
+   "line": "Status: DISPATCHED. Task 4 landed, commit stamped below, 2026-09-09; task 5 is planned next.",
    "acceptance": []
   }
  ],
@@ -6015,7 +6035,7 @@
    "fail": 0,
    "seeds": "seed 1  seconds 90 (10800 steps)  worldHash 1713367543  runHash 2888190349",
    "checks": [],
-   "seconds": 115.4,
+   "seconds": 108.3,
    "tail": "seed 1  seconds 90 (10800 steps)  worldHash 1713367543  runHash 2888190349"
   },
   "combat": {
@@ -6074,7 +6094,7 @@
    "verdict": "ok",
    "pass": 14,
    "fail": 0,
-   "seeds": "seeds {\"builder\":4021824278}",
+   "seeds": "seeds {\"builder\":3272100942}",
    "checks": [
     "PASS contract accepts the demo spec",
     "PASS contract rejects junk (2 problems named)",
@@ -6121,7 +6141,7 @@
    "verdict": "ok",
    "pass": 12,
    "fail": 0,
-   "seeds": "seeds {\"weldstress\":2619048536}",
+   "seeds": "seeds {\"weldstress\":3595493273}",
    "checks": [
     "PASS smaller sides: engine weld carries 6 kg, pod weld 3 kg",
     "PASS load law at 1 u/s2: 54 and 27 (mass x 9)",
@@ -6166,7 +6186,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"physics-pb\":3729439993}",
+   "seeds": "seeds {\"physics-pb\":3504913482}",
    "checks": [
     "PASS box inertia is exact: 12 kg, 1x2x3 m -> diag 13, 10, 5",
     "PASS compound of two 1 kg points 2 m apart: mass 2, com centered, parallel-axis 2 kg m2",
@@ -6194,7 +6214,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"rig\":686852898}",
+   "seeds": "seeds {\"rig\":912303794}",
    "checks": [
     "PASS the table names 17 links: 3 core + 7 per side",
     "PASS the assembled MK1 weighs exactly 8140 kg — the demo's own title chip",
@@ -6213,7 +6233,7 @@
     "PASS rig: scale 1 assembles the landed rig exactly",
     "PASS rig: at a rolled scale every quantity scales by its power"
    ],
-   "seconds": 1.4,
+   "seconds": 1.5,
    "tail": "rig-test PASS"
   },
   "solids": {
@@ -6222,7 +6242,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"solids\":2092370880}",
+   "seeds": "seeds {\"solids\":912899920}",
    "checks": [
     "PASS box entry: unit box from x=-10 enters at 9.5, exits at 10.5, normal (-1,0,0)",
     "PASS box miss: the same ray two units up finds nothing",
@@ -6250,7 +6270,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"ballistics\":1722670240}",
+   "seeds": "seeds {\"ballistics\":1427376125}",
    "checks": [
     "PASS tables: 10 media, 7 rounds, indexes and precomputed areas hold",
     "PASS mulberry32: seed 1 opens with 0.6270739405881613",
@@ -6331,7 +6351,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"voxel\":2786825698}",
+   "seeds": "seeds {\"voxel\":1069005193}",
    "checks": [
     "PASS voxelize: the wall becomes a 9 x 17 x 2 field of 306 cells, cell sizes s/n",
     "PASS halving cap: a 10-cube at target size halves down to 22 x 22 x 22 = 10648, under MAX_PER_PRIM",
@@ -6363,7 +6383,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"support\":406711710}",
+   "seeds": "seeds {\"support\":1659020204}",
    "checks": [
     "PASS primBox: centre plus and minus half size, both corners",
     "PASS restsOn: the deck rests on the post; a box beside it does not; a spanning wall bears too",
@@ -6391,7 +6411,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"grapple\":1982310392}",
+   "seeds": "seeds {\"grapple\":1613494544}",
    "checks": [
     "PASS cast: the head leaves 2.2 ahead at 34 plus ship velocity, state fly",
     "PASS recoil: the ship pays J = 0.15 x 34 = 5.1 — velocity -J/M, spin -arm J/I",
@@ -6447,7 +6467,7 @@
     "PASS a real blast breaks his footing: the hp ledger drops past floorDmg and the floor owns him",
     "PASS the will stands him up: floored for the dialed 1.6 seconds, then upright, alive, yaw-only"
    ],
-   "seconds": 89.6,
+   "seconds": 87.9,
    "tail": "old-master-test PASS"
   },
   "frostline": {
@@ -6456,7 +6476,7 @@
    "verdict": "ok",
    "pass": 63,
    "fail": 0,
-   "seeds": "seeds {\"mission\":360675045,\"valley1\":637732135,\"valley2\":382052972,\"valley3\":148561345,\"cover\":856131745,\"fire\":207789633,\"purse\":807681814,\"board1\":244085046,\"",
+   "seeds": "seeds {\"mission\":724661529,\"valley1\":3775688,\"valley2\":365798579,\"valley3\":63325560,\"cover\":141710449,\"fire\":676983070,\"purse\":829088731,\"board1\":569055546,\"boa",
    "checks": [
     "PASS mission: a rolled valley boots — three squads, eight friendlies, four blockers, neither side done",
     "PASS mission: nothing is known at boot",
@@ -6522,7 +6542,7 @@
     "PASS hunter: one man fields on his own row",
     "PASS hunter: the twin sidearms pull on his own trigger law"
    ],
-   "seconds": 11.8,
+   "seconds": 11.2,
    "tail": "frostline-test PASS"
   },
   "escrow": {
@@ -6531,7 +6551,7 @@
    "verdict": "ok",
    "pass": 12,
    "fail": 0,
-   "seeds": "seeds {\"world\":307737957}",
+   "seeds": "seeds {\"world\":159481037}",
    "checks": [
     "PASS escrow: the bounty is the other station's spot, margined, treasury-capped, refused under 200",
     "PASS escrow: posting moves credits into escrow, none minted, none burned",
@@ -6555,7 +6575,7 @@
    "verdict": "ok",
    "pass": 14,
    "fail": 0,
-   "seeds": "seeds {\"field\":75281825}",
+   "seeds": "seeds {\"field\":720846113}",
    "checks": [
     "PASS wells: 3000 rolled field reads run twin with the demo's own text",
     "PASS wells: a made well is at rest with the demo's shape",
@@ -6581,7 +6601,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"kit\":568647129}",
+   "seeds": "seeds {\"kit\":928026302}",
    "checks": [
     "PASS determinism: twin sim streams from one rolled seed are identical for 5000 draws",
     "PASS determinism: effects draws never move the sim's sequence",
@@ -6598,7 +6618,7 @@
    "verdict": "ok",
    "pass": 6,
    "fail": 0,
-   "seeds": "seeds {\"tables\":522086589}",
+   "seeds": "seeds {\"tables\":999336879}",
    "checks": [
     "PASS contract: two hundred rolled clean tables report nothing",
     "PASS contract: every planted defect is reported, all in one pass, none extra",
@@ -6616,7 +6636,7 @@
    "verdict": "ok",
    "pass": 3,
    "fail": 0,
-   "seeds": "seeds {\"badge\":810534687}",
+   "seeds": "seeds {\"badge\":147247077}",
    "checks": [
     "PASS badge: twin boots of one rolled seed show one number",
     "PASS badge: a different valley shows a different number",
@@ -6631,7 +6651,7 @@
    "verdict": "ok",
    "pass": 8,
    "fail": 0,
-   "seeds": "seeds {\"events\":82140934}",
+   "seeds": "seeds {\"events\":634565482}",
    "checks": [
     "PASS receipts: three hundred rolled ticks — every known event carries its own numbers",
     "PASS receipts: an unknown event still gets an honest line with its numbers",
@@ -6651,7 +6671,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"touch\":52811379}",
+   "seeds": "seeds {\"touch\":837408621}",
    "checks": [
     "PASS pagekit: three hundred rolled taps under the slop all land at their own point",
     "PASS pagekit: a drag past the slop is no tap",
@@ -6668,7 +6688,7 @@
    "verdict": "ok",
    "pass": 11,
    "fail": 0,
-   "seeds": "seeds {\"world\":209486294}",
+   "seeds": "seeds {\"world\":48802343}",
    "checks": [
     "PASS describe: a bad description names every problem in one pass — type, floor, and the stranger",
     "PASS describe: the door refuses whole — no seed, no world",
@@ -6682,7 +6702,7 @@
     "PASS describe: an omitted spec field keeps its specs.js default; an omitted table keeps the whole table",
     "PASS describe: an attached module is reachable and functional on its own surface, grouped by seam"
    ],
-   "seconds": 5.6,
+   "seconds": 5.2,
    "tail": "describe-test PASS"
   },
   "registry": {
@@ -6723,7 +6743,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"loads\":569743646}",
+   "seeds": "seeds {\"loads\":995439311}",
    "checks": [
     "PASS envelope: two thousand rolled loads — the root-of-squares over four terms, exact",
     "PASS envelope: compression never tears — any crushing load reads zero",
@@ -6740,7 +6760,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"torque\":112796950}",
+   "seeds": "seeds {\"torque\":618437141}",
    "checks": [
     "PASS actuator: five hundred rolled commands — the clamp holds at the ceiling and saturation tells the truth",
     "PASS actuator: the servo obeys the same ceiling — finite torque at any rolled error",
@@ -6757,7 +6777,7 @@
    "verdict": "ok",
    "pass": 4,
    "fail": 0,
-   "seeds": "seeds {\"loads\":646243904}",
+   "seeds": "seeds {\"loads\":805953543}",
    "checks": [
     "PASS telemetry: three hundred rolled welds — every row is the solver's own numbers, field for field",
     "PASS telemetry: a hinge row carries its angle and its saturation flag",
@@ -6773,7 +6793,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"hits\":724815088}",
+   "seeds": "seeds {\"hits\":325745519}",
    "checks": [
     "PASS opponent: the lethal line holds through every part — over kills, under never",
     "PASS opponent: knockdown by impulse — a part's own drop through its own carry puts a man down, alive",
@@ -6795,7 +6815,7 @@
    "verdict": "ok",
    "pass": 9,
    "fail": 0,
-   "seeds": "seeds {\"scenes\":628027266}",
+   "seeds": "seeds {\"scenes\":133475880}",
    "checks": [
     "PASS senses: sight holds inside the view range and dies past it, any rolled bearing",
     "PASS senses: the cone is the stated width — a hair inside sees, a hair outside never",
@@ -6816,7 +6836,7 @@
    "verdict": "ok",
    "pass": 13,
    "fail": 0,
-   "seeds": "seeds {\"aim\":2011325}",
+   "seeds": "seeds {\"aim\":830325212}",
    "checks": [
     "PASS aim: frozen() is true while armed, false after cancel and after commit",
     "PASS aim: commit emits the demo's tape-action shape per kind, and null when unarmed",
@@ -6841,7 +6861,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"render2d\":741499521}",
+   "seeds": "seeds {\"render2d\":383544708}",
    "checks": [
     "PASS render2d: a point at the camera's own x,y projects to VCX, VCY plus its own pot dip",
     "PASS render2d: the warp grows monotonically toward a well, fades far out, and stays inside the formula's clamp",
@@ -6858,7 +6878,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"legik\":814062861}",
+   "seeds": "seeds {\"legik\":801998723}",
    "checks": [
     "PASS legik: legFK of legIK returns the target within 1e-9 at rolled reachable targets",
     "PASS legik: an unreachable target reports reach at least 1 and the solved leg spans maxExtend times the full length",
@@ -6877,7 +6897,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"presets\":960172830}",
+   "seeds": "seeds {\"presets\":595427299}",
    "checks": [
     "PASS presets: at a rolled multiplier set every hinge's tauMax, kp, kd, and limits and every body's inertia scale exactly, and invI is the inverse of the scaled ",
     "PASS presets: the verified preset changes nothing",
@@ -6896,7 +6916,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"disc\":3933194086}",
+   "seeds": "seeds {\"disc\":2428879056}",
    "checks": [
     "PASS disc: at rolled drags the height is the clamped sum of dy times the source's gain",
     "PASS disc: groundHit's point lies on the plane and on the ray at rolled rays, and a ray parallel to the plane gives null",
@@ -6915,7 +6935,7 @@
    "verdict": "ok",
    "pass": 8,
    "fail": 0,
-   "seeds": "seeds {\"greybox\":836228423}",
+   "seeds": "seeds {\"greybox\":763005183}",
    "checks": [
     "PASS greybox: a stair of rolled steps rises steps times step and runs steps times tread",
     "PASS greybox: a building of rolled floors stands floors times floor tall, and a door is door tall",
@@ -6935,7 +6955,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"cues\":70624820}",
+   "seeds": "seeds {\"cues\":37788010}",
    "checks": [
     "PASS cues: every cue's notes, durations, and offsets are the demo's own",
     "PASS cues: a rolled t0 shifts every note by t0 and offsets never run backward",
@@ -6954,7 +6974,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"selection\":1387371908}",
+   "seeds": "seeds {\"selection\":643480069}",
    "checks": [
     "PASS selection: bracket size and arm are exact at rolled scales, and the mothership's shape squeezes to 0.15",
     "PASS selection: the bar colour's two branches switch at 0.5 and each is monotone",
@@ -6976,7 +6996,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"touch\":2452197013}",
+   "seeds": "seeds {\"touch\":2056045362}",
    "checks": [
     "PASS touch: a press held past the long-press dial opens the disc and one under it selects",
     "PASS touch: two taps inside the double-tap window open the disc with an auto move, outside it they do not",
@@ -6998,7 +7018,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"backdrop\":623646305}",
+   "seeds": "seeds {\"backdrop\":751300915}",
    "checks": [
     "PASS: backdrop: twin backdrops from one rolled seed are identical",
     "PASS: backdrop: the counts are exact per flag",
@@ -7020,7 +7040,7 @@
    "verdict": "ok",
    "pass": 11,
    "fail": 0,
-   "seeds": "seeds {\"gait\":285950387}",
+   "seeds": "seeds {\"gait\":109022802}",
    "checks": [
     "PASS gait: Posture.apply writes each leg's five hinge targets equal to legIK's angles at a rolled pelvis and feet",
     "PASS gait: BalanceController.update on a synthetic support state writes every feed-forward torque inside the law's bound and the stance targets, and airborne wr",
@@ -7043,7 +7063,7 @@
    "verdict": "ok",
    "pass": 19,
    "fail": 0,
-   "seeds": "seeds {\"render3d\":82505959}",
+   "seeds": "seeds {\"render3d\":4166913743}",
    "checks": [
     "PASS render3d: buildMesh of one plain box yields 12 triangles and 12 edge quads, and a panelled box tints deterministically",
     "PASS render3d: bakeLampLight lights nothing behind a wall and lights the facing side in the open",
@@ -7074,7 +7094,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"yard\":1535936124}",
+   "seeds": "seeds {\"yard\":302830527}",
    "checks": [
     "PASS yard: twin runs from one rolled seed end with one state hash",
     "PASS yard: replay from seed plus tape reproduces the hash",
@@ -7091,9 +7111,9 @@
    "name": "gravitys-ark",
    "script": "scripts/gravitys-ark-test.mjs",
    "verdict": "ok",
-   "pass": 47,
+   "pass": 48,
    "fail": 0,
-   "seeds": "seeds {\"gravitys-ark\":1607129965}",
+   "seeds": "seeds {\"gravitys-ark\":3516139037}",
    "checks": [
     "PASS ark: twin galaxies from one rolled seed are identical",
     "PASS ark: the layout laws hold at rolled seeds",
@@ -7141,9 +7161,10 @@
     "PASS ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
     "PASS ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
     "PASS ark: the hull lands at the ground's scale on the site line, axis-aligned and inside the rim, the bridge the homeland's centre, its footprints blocking the ",
-    "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and "
+    "PASS ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and ",
+    "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru"
    ],
-   "seconds": 13,
+   "seconds": 13.6,
    "tail": "gravitys-ark-test PASS"
   },
   "parts": {
@@ -7178,7 +7199,7 @@
    "verdict": "ok",
    "pass": 6,
    "fail": 0,
-   "seeds": "seeds {\"world\":204804,\"war\":204804}",
+   "seeds": "seeds {\"world\":376708,\"war\":376708}",
    "checks": [
     "PASS spine: the first body of a world is body 1, in every world",
     "PASS spine: ids are dense within a world — the third body is body 3 and the next would be 4",
@@ -7187,7 +7208,7 @@
     "PASS spine: twin boots from one rolled seed hash the same run",
     "PASS spine: the enemy roster carries the same member ids in both boots"
    ],
-   "seconds": 1.9,
+   "seconds": 2.1,
    "tail": "spine-test PASS"
   }
  },
@@ -7660,6 +7681,10 @@
     "to": "ark-mechbay"
    },
    {
+    "from": "scr-ground",
+    "to": "cs-drawing"
+   },
+   {
     "from": "ark-page",
     "to": "ark-card"
    },
@@ -7782,10 +7807,10 @@
   ]
  },
  "meta": {
-  "commit": "118b6c9",
-  "builtAt": "2026-09-09 22:04",
+  "commit": "eaccb9f",
+  "builtAt": "2026-09-09 22:14",
   "gatesRun": 50,
-  "gateSeconds": 248.9,
-  "buildSeconds": 249.3
+  "gateSeconds": 240,
+  "buildSeconds": 240.4
  }
 }

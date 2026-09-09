@@ -63,16 +63,37 @@ export function makeGround(seed, w, scrapKg, opts) {
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
-// kilogram lands as this many ground kilograms. box and pitch: a module's half size
-// and the grid step, in metres: 250 times the mass is 6.3 times the length, so the
-// 1.6 m box of the seam's table lands as 10 m on a 10.7 m pitch. lift: how far above
+// kilogram lands as this many ground kilograms. pitch: the grid step in metres: 250
+// times the mass is 6.3 times the length, so the seam's 1.7 m pitch lands as 10.7 m.
+// unit: one of deadweight's drawing units on the ground, the pitch over the demo's cell
+// of four, so every kind's footprint and height is the demo's own. lift: how far above
 // the ground a module is set. crashStop: the crash's stop time; the arrival speed over
 // it is the deceleration. slideFrac: how far a loose module slides, in metres per metre
 // a second of arrival speed. moduleHp: a module's hit points. site: how far from the
 // depot's spot the bridge lands, along the line to the map's centre snapped to the
 // nearest axis; the hull's own gx axis runs on along that line, away from the depot,
 // and its gy axis across it, so the whole hull stands beyond the bridge, clear of the depot.
-export const HULL_DIALS = { kgPerKg: 250, box: 5, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26 };
+export const HULL_DIALS = { kgPerKg: 250, unit: 2.675, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26 };
+
+// SHAPE: deadweight's silhouette per kind, half width along the ship's own gx, half depth
+// along gy, and full height, in the demo's units, its lines 989 to 991; a strut is a beam
+// along its connections, its lines 973 to 977; the mech bay is the ark's own, a cell wide and
+// tall enough for the walker. PROPOSED at the ground's scale through HULL_DIALS.unit.
+export const SHAPE = { bridge: [1.45, 1.45, 2.0], engine: [1.9, 1.6, 1.15], pod: [1.7, 1.7, 1.8], tank: [1.6, 1.35, 0.9], shield: [1.4, 1.4, 1.35], mount: [1.55, 1.3, 1.0], rcs: [1.15, 1.15, 1.05], rack: [1.7, 1.7, 1.5], grapple: [1.7, 1.7, 1.5], strut: [2.0, 0.6, 0.7], mechbay: [2.0, 2.0, 2.6] };
+
+// shapeOf(m, list, axis, unit): a module's half sizes in the world: the demo's shape at the
+// ground's scale, its gx side laid along the site line and its gy side across it; a strut
+// turns to lie along its connections, and along the line when it has none.
+export function shapeOf(m, list, axis, unit) {
+  let [w, d, h] = SHAPE[m.t] || [1.7, 1.7, 1.5];
+  if (m.t === "strut") {
+    let along = list.some((o) => Math.abs(o.gx - m.gx) === 1 && o.gy === m.gy);
+    if (!along && !list.some((o) => o.gx === m.gx && Math.abs(o.gy - m.gy) === 1)) along = true;
+    if (!along) [w, d] = [d, w];
+  }
+  const a = w * unit, c = d * unit, hy = h * unit / 2;
+  return axis.u.x !== 0 ? { hx: a, hz: c, hy } : { hx: c, hz: a, hy };
+}
 
 // crashHull(G, hull, v, opts): the hull's modules become bodies at the crash site,
 // set down at rest and asleep as coldsnap's masonry is, welded to their grid
@@ -96,8 +117,8 @@ export function crashHull(G, hull, v, opts) {
   const slots = list.map((m) => ({ x: site.x + u.x * m.gx * d.pitch + r.x * m.gy * d.pitch, z: site.z + u.z * m.gx * d.pitch + r.z * m.gy * d.pitch }));
   const bodies = list.map((m, i) => {
     const loose = !keep.has(i);
-    const x = slots[i].x + (loose ? u.x * slide : 0), z = slots[i].z + (loose ? u.z * slide : 0);
-    const b = addBody(world, { kind: "chunk", team: 1, mass: MODULES[m.t].kg * d.kgPerKg, hx: d.box, hy: d.box, hz: d.box, x, y: war.field.heightAt(x, z) + d.box + d.lift, z, hp: d.moduleHp, friction: 0.65, restitution: 0.02 });
+    const x = slots[i].x + (loose ? u.x * slide : 0), z = slots[i].z + (loose ? u.z * slide : 0), sh = shapeOf(m, list, { u, r }, d.unit);
+    const b = addBody(world, { kind: "chunk", team: 1, mass: MODULES[m.t].kg * d.kgPerKg, hx: sh.hx, hy: sh.hy, hz: sh.hz, x, y: war.field.heightAt(x, z) + sh.hy + d.lift, z, hp: d.moduleHp, friction: 0.65, restitution: 0.02 });
     b.sleeping = true; b.town = "hull"; b.module = m.t; b.maxHp = d.moduleHp; b.tint = loose ? "timber" : "wall";
     return b;
   });
@@ -149,7 +170,7 @@ export function installHer() { SQUAD_SPECS.her = { ...HER.squad }; INFANTRY_ARMS
 export function fieldCrew(G, crew) {
   installHer();
   const { run, world } = G, H = G.hull, d = HER;
-  const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z }, r = H ? H.axis.r : { x: 0, z: 1 }, off = (H ? H.dials.box : 0) + d.standOff;   // across the site line, on the bridge's free side, off its face
+  const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z }, r = H ? H.axis.r : { x: 0, z: 1 }, off = (H ? (r.x !== 0 ? H.bodies[0].hx : H.bodies[0].hz) : 0) + d.standOff;   // across the site line, on the bridge's free side, off its face
   const squad = makeSquad(run.nextSquadId++, "her", 1, at.x - r.x * off, at.z - r.z * off);
   spawnSquadMembers(world, squad); run.squads.push(squad);
   const names = (crew || []).map((h) => h.name), hands = [];
@@ -186,7 +207,7 @@ function bayDoor(G) {
 
 // walkerSpot(G): where the walker lies and stands: off the bay's open face, wherever the bay lies now.
 export function walkerSpot(G) {
-  const H = G.hull, bay = H.bodies[H.bay], s = bayDoor(G), k = H.dials.box + WALKER.door;
+  const H = G.hull, bay = H.bodies[H.bay], s = bayDoor(G), k = (s.x !== 0 ? bay.hx : bay.hz) + WALKER.door;
   return { x: bay.pos.x + s.x * k, z: bay.pos.z + s.z * k };
 }
 
@@ -349,7 +370,7 @@ export function weldBack(G, i) {
   const H = G.hull, d = H.dials, b = H.bodies[i];
   if (!b || !b.alive) return 0;
   const s = H.slots[i];
-  b.pos.x = s.x; b.pos.z = s.z; b.pos.y = G.war.field.heightAt(s.x, s.z) + d.box + d.lift;
+  b.pos.x = s.x; b.pos.z = s.z; b.pos.y = G.war.field.heightAt(s.x, s.z) + b.hy + d.lift;
   b.v.x = 0; b.v.y = 0; b.v.z = 0; b.w.x = 0; b.w.y = 0; b.w.z = 0; b.sleeping = true; b.tint = "wall";
   clearBox(G, b); stampHull(G);
   const j = joined(G);   // only a neighbour joined to the bridge takes a weld; a loose neighbour gets its own weld-back

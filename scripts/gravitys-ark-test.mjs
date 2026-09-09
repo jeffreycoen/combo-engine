@@ -17,7 +17,7 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf } from "../src/games/gravitys-ark/ground.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -1070,7 +1070,7 @@ function rollArkFields(type, i, nWorlds) {
   const fight = groundOrder(A, "fight");
   check("ark: FIX sends her to the nearest loose module with her fire held, the weld-back lands when her seconds run down within reach, and FIGHT frees her fire",
     sent && welded && fight.ok && herSq.holdFire === false && herSq.order === "defend" && A.her.act === "fight");
-  const s0 = A.hull.slots[0], ax = A.hull.axis, wz = A.hull.dials.box + 14;   // a line across the site line, well off the bridge's free side, clear of every module
+  const s0 = A.hull.slots[0], ax = A.hull.axis, wz = (ax.r.x !== 0 ? A.hull.bodies[0].hx : A.hull.bodies[0].hz) + 14;   // a line across the site line, well off the bridge's free side, clear of every module
   const wall = groundOrder(A, "wall", s0.x - ax.r.x * wz - ax.u.x * 6, s0.z - ax.r.z * wz - ax.u.z * 6, { x: s0.x - ax.r.x * wz + ax.u.x * 6, z: s0.z - ax.r.z * wz + ax.u.z * 6 });
   check("ark: a WALL order gives her squad coldsnap's build line, section by section",
     wall.ok && wall.sections > 0 && !!herSq._build && herSq._build.kind === "walls" && herSq._build.rows.length === wall.sections && herSq.order === "build" && A.her.act === "wall");
@@ -1135,7 +1135,7 @@ function rollArkFields(type, i, nWorlds) {
   const mk = (list) => { const G = makeGround(gSeed, w, 900); const H = crashHull(G, makeHull(list), 5); return { G, H }; };
   const A = mk(STARTER_HULL), B = mk(STARTER_HULL), f = A.G.run.focus, d = HULL_DIALS;
   const bridge = A.H.bodies[0], engine = A.H.bodies[1], bay = A.H.list.findIndex((m) => m.t === "mechbay");
-  const scale = A.H.bodies.every((b) => b.hx === d.box && b.hy === d.box && b.hz === d.box && b.mass === MODULES[b.module].kg * d.kgPerKg);
+  const scale = A.H.bodies.every((b, i) => { const sh = shapeOf(A.H.list[i], A.H.list, A.H.axis, d.unit); return b.hx === sh.hx && b.hy === sh.hy && b.hz === sh.hz && b.mass === MODULES[b.module].kg * d.kgPerKg; });
   const onLine = Math.abs(Math.hypot(bridge.pos.x - f.x, bridge.pos.z - f.z) - d.site) < 1e-9 && Math.abs(Math.hypot(engine.pos.x - bridge.pos.x, engine.pos.z - bridge.pos.z) - d.pitch) < 1e-9
     && (A.H.axis.u.x === 0 || A.H.axis.u.z === 0) && Math.hypot(engine.pos.x - f.x, engine.pos.z - f.z) < d.site;
   const inRim = A.H.bodies.every((b) => A.G.world.inRim(b.pos.x, b.pos.z));
@@ -1147,7 +1147,8 @@ function rollArkFields(type, i, nWorlds) {
     scale && onLine && inRim && centred && stamped && !onHull.ok && twin);
   fieldCrew(A.G, []);
   const W = wreckWalker(A.G), bayB = A.H.bodies[bay];
-  const atDoor = !!W && W.bay === bay && Math.abs(Math.max(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) - (d.box + WALKER.door)) < 1e-9 && Math.min(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) < 1e-9;
+  const doorHalf = !!W && (Math.abs(W.spot.x - bayB.pos.x) > 1e-9 ? bayB.hx : bayB.hz);
+  const atDoor = !!W && W.bay === bay && Math.abs(Math.max(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) - (doorHalf + WALKER.door)) < 1e-9 && Math.min(Math.abs(W.spot.x - bayB.pos.x), Math.abs(W.spot.z - bayB.pos.z)) < 1e-9;
   const none = mk(STARTER_HULL.filter((m) => m.t !== "mechbay")); fieldCrew(none.G, []);
   const noBay = wreckWalker(none.G) === null && none.G.walker === null && !groundOrder(none.G, "repairWalker").ok;
   const lostHull = makeHull(STARTER_HULL); lostHull.walkerLost = true;
@@ -1162,6 +1163,17 @@ function rollArkFields(type, i, nWorlds) {
   const brings = install(bought, "mechbay", 1, 1) === true && bought.walkerLost === false;
   check("ark: the walker rides in the mech bay: wrecked at the bay's door with a bay aboard, absent without one or once lost, lost at TAKE OFF when it is down, and a new bay brings one",
     atDoor && noBay && wasLost && rested && r.ok && up && down.ok && down.walkerLost === true && brings);
+}
+
+{ // 52. ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a strut a beam turned along its connections
+  const ax = { u: { x: 0, z: -1 }, r: { x: 1, z: 0 } }, unit = HULL_DIALS.unit;
+  const list = [{ t: "bridge", gx: 0, gy: 0 }, { t: "strut", gx: 1, gy: 0 }, { t: "strut", gx: 0, gy: 1 }, { t: "mechbay", gx: -1, gy: 0 }];
+  const b = shapeOf(list[0], list, ax, unit), sAlong = shapeOf(list[1], list, ax, unit), sAcross = shapeOf(list[2], list, ax, unit), bay = shapeOf(list[3], list, ax, unit);
+  const distinct = new Set(Object.keys(SHAPE).map((t) => SHAPE[t].join(","))).size;
+  const near = (a, c) => Math.abs(a - c) < 1e-9;
+  check("ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a strut a beam turned along its connections",
+    near(unit, HULL_DIALS.pitch / 4) && near(b.hz, 1.45 * unit) && near(b.hx, 1.45 * unit) && near(b.hy, unit) && near(sAlong.hz, 2.0 * unit) && near(sAlong.hx, 0.6 * unit)
+    && near(sAcross.hx, 2.0 * unit) && near(sAcross.hz, 0.6 * unit) && bay.hy * 2 > 5.4 && near(bay.hx, 2.0 * unit) && distinct >= 8 && Object.keys(MODULES).every((t) => !!SHAPE[t]));
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
