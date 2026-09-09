@@ -1,6 +1,6 @@
 # Phase 0.1.1 — the hold on coldsnap
 
-Status: SERVED. Task 0.1.1-1 served for review on 2026-09-09; no task dispatched.
+Status: DISPATCHED. Task 0.1.1-1 approved 2026-09-09 and dispatched to Sonnet 5.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 Frames 1 and 2, the bay and the hold, move onto coldsnap's engine, whole. The crash world is one of coldsnap's own war maps, made from the galaxy's seed; the war on it is coldsnap's whole, its attacker with its brain, its books, and its bell; its guns and walls are placed by its build law; its drawing and its sound are the ground's. Over that engine sits the ark's own layer: the hull as bodies on broken welds, her as one trooper with her own row, the hands as troopers, the walker at twice a trooper's height, the one purse the hold's scrap feeds, and TAKE OFF when every surviving module is welded. The ark's own hold from batch-ark-1 retires when the last task lands.
