@@ -1,6 +1,6 @@
 # Phase 0.0.98 — backdrop: the space backdrop and effects kit
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `0f29393`, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The space backdrop and effects kit: starfield, nebulae, trails, beams, explosion rings". Source: the fleet demo, read-only, lines 524 to 599, 653 to 789, 1047 to 1069, 1559 to 1607, 1650 to 1659. The module yields plain lists and numbers for stars, nebulae, the core, dust, trails, rings, beams, and explosions; a renderer turns each into draw calls.
