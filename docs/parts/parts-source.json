@@ -1122,7 +1122,11 @@
    "source": "ark",
    "group": "Screens",
    "name": "the space screen",
-   "does": "Deadweight's flight and drawing under the ark's rail, in its own file.",
+   "files": [
+    "docs/gravitys-ark/space.js"
+   ],
+   "phase": "0.1.2",
+   "does": "Deadweight's drawing under the ark's rail, in its own file: the grid and the pits, faceted planets, the sun and the hole, the gate, the ship as prisms with plumes, the coast line, wrecks and pirates, the ship panel, the map.",
    "serves": [
     "ring",
     "star",

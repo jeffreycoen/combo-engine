@@ -1176,6 +1176,14 @@ function rollArkFields(type, i, nWorlds) {
     && near(sAcross.hx, 2.0 * unit) && near(sAcross.hz, 0.6 * unit) && bay.hy * 2 > 5.4 && near(bay.hx, 2.0 * unit) && distinct >= 8 && Object.keys(MODULES).every((t) => !!SHAPE[t]));
 }
 
+{ // 53. ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself
+  const read = (f) => readFileSync(f, "utf8");
+  const main = read("docs/gravitys-ark/main.js"), space = read("docs/gravitys-ark/space.js"), look = read("docs/gravitys-ark/hull-look.js"), gscreen = read("docs/gravitys-ark/ground.js");
+  check("ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
+    /export function makeSpaceScreen\(/.test(space) && main.includes('from "./space.js"') && !/function drawDisc\(|drawWrecks\(|makeRender2d|prismAt\(/.test(main)
+    && /export function makeHullLook\(/.test(look) && gscreen.includes('from "./hull-look.js"') && /export function makeGroundScreen\(/.test(gscreen) && main.includes('from "./ground.js"'));
+}
+
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
 console.log("gravitys-ark-test PASS");

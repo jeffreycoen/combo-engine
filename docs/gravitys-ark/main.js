@@ -5,7 +5,7 @@
 // (?seed=N) makes the same galaxy for anyone.
 import { makeGalaxy } from "../../src/games/gravitys-ark/galaxy.js";
 import { makeRoad, dvAvailable } from "../../src/games/gravitys-ark/road.js";
-import { makeRender2d } from "../../src/modules/render2d/render2d.js";
+import { makeSpaceScreen } from "./space.js";
 import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 import { makeStations, makePurse, listings, hire, dock, buy, sell, makeHull, derive, STARTER_HULL, stepStations, carryPeople, deliverPeople } from "../../src/games/gravitys-ark/stations.js";
 import { rollPerson } from "../../src/games/gravitys-ark/galaxy.js";
@@ -69,77 +69,22 @@ const $ = (id) => document.getElementById(id);
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 const ZOOMS = [0.0015, 0.003, 0.006, 0.012, 0.024];
 let zi = 1, paused = false, burning = false, aimMode = "gate", aimDrag = [1, 0], dragStart = null;
-const C30 = Math.cos(Math.PI / 6), S30 = 0.5;
-
-// the grid's wells: the same bodies the road flies, with draw radii the funnels can be seen by
-const R = makeRender2d({ ctx, wells: [], deep: 1300, gridR: 44, gridSp: 5000, cam: { x: ship.x, y: ship.y, z: ZOOMS[zi], rot: 0 },
-  pal: { net: "80,96,122", grav: "62,100,232" } });
-function gridWells() {
-  const list = [{ x: star.x, y: star.y, mu: state.hole.mu, r: 20000 + (state.hole.born ? state.hole.edge : 0), name: "sun" }];
-  for (const w of galaxy.worlds) if (w.state === "alive") list.push({ x: w.x, y: w.y, mu: w.mu, r: 8000, name: "world" });
-  return list;
-}
-
-const CLIMATE_COL = { SNOW: "#dfe8f2", ASH: "#8d8a86", MUD: "#8a6a3f", ROCK: "#a09484", WOOD: "#4f8a4a" };
-const STAR_COL = ["#fff6dc", "#ffd27a", "#ff9a4a", "#ff5a3a", "#c8302a"];   // whiter to redder, one step per takeoff
+// the space screen: deadweight's drawing over the ark's space, in its own file; the page keeps the camera, the panes, and the controls
+const SS = makeSpaceScreen(cv, ctx, { cam: { x: ship.x, y: ship.y, z: ZOOMS[zi], rot: 0 } }), R = SS.surface;
 function W() { return cv.width / DPR; } function H() { return cv.height / DPR; }
-function resize() { cv.width = Math.floor(innerWidth * DPR); cv.height = Math.floor(innerHeight * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); R.resize(W(), H()); }
+function resize() { cv.width = Math.floor(innerWidth * DPR); cv.height = Math.floor(innerHeight * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); SS.resize(W(), H()); }
 addEventListener("resize", resize); resize();
 
 function aimVector() {
   if (aimMode === "gate") { const dx = galaxy.gate.x - ship.x, dy = galaxy.gate.y - ship.y, l = Math.hypot(dx, dy) || 1; return [dx / l, dy / l]; }
   return aimDrag;
 }
-// a screen drag to a world direction: the iso projection's own axes, inverted
-function screenToWorldDir(sx, sy) {
-  const z = R.cam.z, a = sx / (C30 * z), b = sy / (S30 * z);   // a = x - y, b = x + y
-  const x = (a + b) / 2, y = (b - a) / 2, l = Math.hypot(x, y) || 1;
-  return [x / l, y / l];
-}
-
-function drawDisc(px, py, r, fill, stroke) {
-  ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
-  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
-  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
-}
-function label(px, py, text, col) { ctx.fillStyle = col || "rgba(233,237,242,.8)"; ctx.font = "500 10px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.fillText(text, px, py); }
-
+// draw(): the ground's screen while the ground is up, else the space screen from one snapshot of the page's state
 function draw() {
   if (view === "ground") { GS.draw(frameDt); return; }
-  const z = R.cam.z;
-  ctx.fillStyle = "#07090d"; ctx.fillRect(0, 0, W(), H());
-  R.wells = gridWells(); R.cam.x = ship.x; R.cam.y = ship.y; R.frame(W(), H());
-  R.drawGrid();
-  // the lanes
-  ctx.strokeStyle = "rgba(233,237,242,.10)"; ctx.lineWidth = 1;
-  for (const [a, b] of galaxy.lanes) { const A = galaxy.worlds[a], B = galaxy.worlds[b]; const p = R.project(A.x, A.y, 0), r2 = R.project(B.x, B.y, 0);
-    ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(r2[0], r2[1]); ctx.stroke(); }
-  // the pit: the star until the collapse, then the hole and its edge
-  const sp = R.project(star.x, star.y, 0);
-  if (!state.hole.born) drawDisc(sp[0], sp[1], Math.max(6, star.r * z), STAR_COL[Math.min(4, state.takeoffs)], null);
-  else { drawDisc(sp[0], sp[1], Math.max(5, star.r * z), "#000", "rgba(233,237,242,.5)");
-    ctx.strokeStyle = "rgba(200,48,42,.55)"; ctx.setLineDash([4, 6]); ctx.beginPath();
-    for (let k = 0; k <= 72; k++) { const a = k / 72 * Math.PI * 2, e = state.hole.edge; const p = R.project(star.x + Math.cos(a) * e, star.y + Math.sin(a) * e, 0); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
-    ctx.stroke(); ctx.setLineDash([]); }
-  // the worlds in their pits, the stations, the gate
-  const edge = state.hole.born ? road.edgeFor({ dry: ship.dry, fuel: ship.fuel }).index : -1;
-  for (const w of galaxy.worlds) {
-    const p = R.project(w.x, w.y, 0), gone = w.state !== "alive";
-    drawDisc(p[0], p[1], Math.max(4, w.r * z), gone ? "#1a1c22" : CLIMATE_COL[w.climate], gone ? "rgba(233,237,242,.15)" : "rgba(233,237,242,.35)");
-    if (!gone) drawDisc(p[0], p[1], Math.max(4, w.r * z) + 4, null, "rgba(233,178,92,.45)");
-    if (z >= 0.003) label(p[0], p[1] + Math.max(4, w.r * z) + 14, (gone ? "gone " : "") + w.id + " " + w.climate.toLowerCase() + (w.holder ? " " + w.holder : ""), gone ? "rgba(233,237,242,.35)" : undefined);
-    if (w.i === edge) label(p[0], p[1] - Math.max(4, w.r * z) - 8, "EDGE", "#ff5a3a");
-  }
-  const gp = R.project(galaxy.gate.x, galaxy.gate.y, 0);
-  ctx.strokeStyle = "#a9e0ac"; ctx.lineWidth = 1.5; ctx.strokeRect(gp[0] - 7, gp[1] - 7, 14, 14); label(gp[0], gp[1] + 20, "GATE", "#a9e0ac");
-  // the ship and its aim
-  const s = R.project(ship.x, ship.y, 0), v = Math.hypot(ship.vx, ship.vy);
-  const hd = v > 1e-6 ? [ship.vx / v, ship.vy / v] : aimVector();
-  const h1 = R.project(ship.x + hd[0] * 9 / z, ship.y + hd[1] * 9 / z, 0), h2 = R.project(ship.x - hd[1] * 5 / z, ship.y + hd[0] * 5 / z, 0), h3 = R.project(ship.x + hd[1] * 5 / z, ship.y - hd[0] * 5 / z, 0);
-  ctx.fillStyle = ship.alive ? "#e9edf2" : "#c8302a"; ctx.beginPath(); ctx.moveTo(h1[0], h1[1]); ctx.lineTo(h2[0], h2[1]); ctx.lineTo(h3[0], h3[1]); ctx.closePath(); ctx.fill();
-  const av = aimVector(), ap = R.project(ship.x + av[0] * 40 / z, ship.y + av[1] * 40 / z, 0);
-  ctx.strokeStyle = burning ? "#e9b25c" : "rgba(233,178,92,.5)"; ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(ap[0], ap[1]); ctx.stroke();
-  drawWrecks();
+  const dv = derive(hull), cell = 1.7, v = Math.hypot(ship.vx, ship.vy), hd = v > 1e-6 ? [ship.vx / v, ship.vy / v] : aimVector();
+  SS.draw(frameDt, { galaxy, star, ship, state, hull, hullHp, wrecks, pirates: P.list, grapple: gr.g, burning, aim: aimVector(), heading: Math.atan2(hd[1], hd[0]), balance: { gx: dv.cx / cell, gy: dv.cy / cell },
+    edge: state.hole.born ? road.edgeFor({ dry: ship.dry, fuel: ship.fuel }).index : -1, takeoffs: state.takeoffs, t: state.t, flyWells: road.wells() });
 }
 
 // the panes: the ship's numbers, the clocks, the log
@@ -185,7 +130,7 @@ $("pause").onclick = () => { paused = !paused; };
 $("again").onclick = () => { location.search = "?seed=" + ((Math.random() * 0xffffffff) >>> 0); };
 cv.addEventListener("pointerdown", (e) => { dragStart = [e.clientX, e.clientY]; });
 cv.addEventListener("pointermove", (e) => { if (!dragStart) return; const dx = e.clientX - dragStart[0], dy = e.clientY - dragStart[1];
-  if (Math.hypot(dx, dy) > 12) { aimDrag = screenToWorldDir(dx, dy); aimMode = "drag"; } });
+  if (Math.hypot(dx, dy) > 12) { aimDrag = SS.screenToWorldDir(dx, dy); aimMode = "drag"; } });
 cv.addEventListener("pointerup", () => { dragStart = null; });
 makeGestures(cv, { pinch: (k) => { R.cam.z = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], R.cam.z * (k || 1))); } });
 addEventListener("keydown", (e) => {
@@ -240,15 +185,6 @@ $("takePeople").onclick = () => { const sid = stationHere(); if (!sid) return; c
 $("deliver").onclick = () => { const sid = stationHere(); if (!sid) return; const ct = openContractHere(sid); if (!ct) return; const pay = deliverPeople(S, ct, hull, purse); if (pay) state.events.push({ k: "delivered people for " + fmt(pay), t: state.t }); };
 
 // the wreck field, the rope, and the pirates on the canvas; the cast, the pay, the hire-out
-const WRECK_COL = { scrap: "#9aa3ad", crate: "#e9b25c", module: "#7fd1e0", hull: "#5c6470" };
-function drawWrecks() {
-  const z = R.cam.z;
-  for (const w of wrecks) { if (w.taken) continue; const p = R.project(w.x, w.y, 0); ctx.fillStyle = WRECK_COL[w.kind] || "#fff"; ctx.fillRect(p[0] - 2, p[1] - 2, 4, 4); }
-  if (gr.g) { const s = R.project(ship.x, ship.y, 0), h = R.project(gr.g.x, gr.g.y, 0); ctx.strokeStyle = "#e9edf2"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(h[0], h[1]); ctx.stroke(); }
-  for (const p of P.list) { if (!p.alive) continue; const q = R.project(p.x, p.y, 0); ctx.fillStyle = "#c8302a"; ctx.beginPath(); ctx.moveTo(q[0], q[1] - 5); ctx.lineTo(q[0] - 4, q[1] + 4); ctx.lineTo(q[0] + 4, q[1] + 4); ctx.closePath(); ctx.fill();
-    if (p.demand) { const s = R.project(ship.x, ship.y, 0); ctx.strokeStyle = "#c8302a"; ctx.beginPath(); ctx.arc(s[0], s[1], 14, 0, Math.PI * 2); ctx.stroke(); } }
-  void z;
-}
 $("castB").onclick = () => { if (ship.landed !== null || gr.g) return; const w = nearestWreck(); if (!w) { state.events.push({ k: "no wreck within " + ROPE.RANGE + " m", t: state.t }); return; } cast(gr, ship, ship.dry + ship.fuel, w, WRECK_DIALS); state.events.push({ k: "cast at " + w.kind, t: state.t }); };
 $("payB").onclick = () => { const p = lockedPirate(); if (!p) return; const takes = pay(P, p, hull, her); state.events.push({ k: "paid with " + takes, t: state.t }); logAdd("pay", { takes }); };
 $("hireOut").onclick = () => { const sid = stationHere(); if (!sid) return; const w = galaxy.worlds[ship.landed]; if (S.stations[sid].faction !== "charter") { state.events.push({ k: "only the Charter hires her out", t: state.t }); return; } const ct = hireOut(S.book, S.stations, sid, { x: w.x, y: w.y }, state.hole, her, state.t, PRICE_DIALS); if (ct) state.events.push({ k: "she went to work, escrow " + fmt(ct.escrow) + " for " + PRICE_DIALS.hireDuration + " s", t: state.t }); };
