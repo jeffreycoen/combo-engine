@@ -53,6 +53,7 @@ const GATES = {
   "cues": ["scripts/cues-test.mjs"],
   "selection": ["scripts/selection-test.mjs"],
   "touch": ["scripts/touch-test.mjs"],
+  "backdrop": ["scripts/backdrop-test.mjs"],
 };
 const name = process.argv[2];
 if (!GATES[name]) {
