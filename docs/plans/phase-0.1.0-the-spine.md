@@ -1,7 +1,7 @@
 # Phase 0.1.0 — the spine: coldsnap at 111b9cb
 
-Status: DISPATCHED. Approved 2026-09-09; task 0.1.0-1 dispatched to Sonnet 5.
-<!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Bracket: eleven gates at their recorded counts; the parts build 49 gates, every verdict ok. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
+Status: SERVED. Amended and served for review on 2026-09-09; the first dispatch stopped at step 7 on the old-master gate, and the tree stands mid-lift until the amended task runs.
+<!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Bracket: eleven gates at their recorded counts and the spine gate green; the parts build 50 gates, every verdict ok. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The first phase of the build of GRAVITY'S ARK, frame by frame in the player's order. Frames 1 and 2, the bay and the hold, stand on coldsnap's engine, and nothing of them is built until the engine is current. Coldsnap's taken files come in whole from the local checkout at `/home/batman/coldsnap`, commit `111b9cb`, replacing the copies this tree took at `82b5524`. Head brings the walker's leap with its gas store, piston, aimed nozzles, and braked landing; the jeep on springs; real tanks with hull-borne launch loads, twist and pinch; the order chain, the roster, and the credit trail; and coldsnap's own housekeeping, where the order layer, the placement layer, the harness, the palette, and the styles walked out of the shell into plain files. Fifty-five commits.
 
@@ -11,7 +11,7 @@ Checklist item served: a new box under "From coldsnap (the spine)" in the README
 
 Two kinds, nothing shaped.
 
-**VERBATIM, 23 files.** Each is written from the checkout by `git show` and must match its hash. Fifteen replace copies that were behind head, seven are new here from the recorded take list, and one, `src/ui/theme.js`, is the one file outside that list: the walker's readout imports it, and it is 44 lines of colors and a font with no imports of its own. Five more files already match head and are asserted, not written.
+**VERBATIM, 23 files written, 21 kept verbatim.** Each is written from the checkout by `git show` and must match its hash. Fifteen replace copies that were behind head, seven are new here from the recorded take list, and one, `src/ui/theme.js`, is the one file outside that list: the walker's readout imports it, and it is 44 lines of colors and a font with no imports of its own. Five more files already match head and are asserted, not written. Two of the written files, the engine core and the walker, then take the listed substitutions below and end as VERBATIM MATH.
 
 | hash | file |
 |---|---|
@@ -40,6 +40,23 @@ Two kinds, nothing shaped.
 | 1d5a821755afc336 | src/ui/theme.js |
 
 Already at head, asserted: `src/depot/api.js` b9a9ce120ec7c53a, `src/depot/infocards.js` c199e3d3bc1446ff, `src/platform/autosave.js` 16a138aefefb4ea5, `src/platform/keymap.js` b81cc1e4790757bf, `src/platform/storage.js` 1a4bf92a5ea45905.
+
+**VERBATIM MATH, 2 engine files.** The checkout is never written, so the engine's one defect is fixed here as a listed difference. Head's engine numbers every body from a counter at line 160 of core.js that lives as long as the process, and every walker from a second counter at line 519 of mech.js; a world made from a seed knows nothing of either, so the second world booted in a process numbers its bodies from where the first left off. The world hash reads positions, life, projectile count, and time, never ids, so every gate at home is green; but the run record names the enemy's engineers by their member ids, and two boots from one seed in one process hash two runs. Measured on head's engine: two boots of seed 1, ten idle seconds each, one world hash both times, run hashes 3699178626 and 2243315202, the member ids 4411, 4412 against 8826, 8827 the only difference. After the substitutions the counters live on the world, set to one when the world is made; every boot numbers as the first boot of a process does at home. The save writes no counter, restore makes its bodies through the same door, and the pages make a new renderer with every boot, so nothing keyed by id outlives a world. Seven lines, and only these:
+
+1. core.js: the line `let BODY_ID = 1;` is removed.
+2. core.js: `export function makeBody(o) {` → `export function makeBody(o, id) {`
+3. core.js: `    id: BODY_ID++, kind: o.kind || "prop", …` → `    id, kind: o.kind || "prop", …`
+4. core.js, in makeWorld: `bisonId: 0, volleySeq: 1, killCount: 0, seq: 0,` → the same line with `nextId: 1, nextMechId: 1,` appended.
+5. core.js, addBody: `const b = makeBody(o);` → `const id = world.nextId || 1; world.nextId = id + 1; const b = makeBody(o, id);`, and its trailing comment says the id and the sequence are both the world's own.
+6. mech.js: the line `let MECH_ID = 1;` is removed.
+7. mech.js, in buildMech: `id: MECH_ID++,` → `id: mechId,`, with `const mechId = world.nextMechId || 1; world.nextMechId = mechId + 1;` the line above the object.
+
+| hash | file |
+|---|---|
+| eda9db9bb687307a | src/engine/core.js |
+| c9ed940fd02671a7 | src/engine/mech.js |
+
+The law is held by a new gate, spine, `scripts/spine-test.mjs`, six checks at a rolled seed printed first: every world's first body is body 1 and its ids are dense; every world's first walker is walker 1; two boots from one seed in one process hash the same world, the same run, and the same enemy member ids. Hash b3f7781653ee20f0; registered after the parts line of the gate table, gate.mjs at 162dd125f744fff4.
 
 **VERBATIM MATH, 16 module files.** Seventeen depot systems live in modules here behind three-line front doors, and the front doors stay. Sixteen of the module files become head's depot file with two substitutions and nothing else. The substitution rule, applied in this order: every `from "../` becomes `from "../../`; every `from "./` becomes `from "../../depot/`. Applied to the old commit's files, this rule reproduces every one of the sixteen module files in the tree today byte for byte, so the rule is the carve-out's own rule. At head it touches exactly these nineteen lines:
 
@@ -102,6 +119,7 @@ Wind, intel, lists, orient, route, sight, and territory import nothing and chang
 
 - In place, whole, one task. Head's engine and head's depot agree with each other and not with the old copies, so a partial refresh is a mismatched spine. Every game and every gate in this tree runs on head after this landing.
 - Two gate checks change, in `scripts/old-master-test.mjs`, because they pin four hashes that are one seed's own output at the old engine and the standing orders forbid such pins: "the world hash with the master in it holds its pin" and "the run hash holds its pin" become the same two hashes compared against a twin boot; "the world pins" in the live-war check becomes a twin run landing the same world. The count stays 21. The gate's seed 1 stays as it is; it is not this phase's subject.
+- The engine's two id counters move onto the world, in the lifted copies here, the one listed difference from the checkout in the engine. The first dispatch found the leak: old-master 18 PASS / 3 FAIL, every red check a run hash compared across twin boots in one process. With the counters the world's own, twin boots are twins in every hash; the spine gate holds the law at a rolled seed, and every later refresh carries the seven substituted lines.
 - The README's status sentence quotes the api gate's two hashes at seed 1 over 90 seconds. Those move with the engine and are not computable from the checkout; the landing re-records them from its own run, and the report names the old and new numbers as a re-pin.
 - The parts source moves `src/ui/theme.js` into the walker's bench group, so the page shows why the file is here.
 - No plan document in coldsnap is read or changed. Nothing in the checkout is touched.
@@ -112,16 +130,16 @@ This phase adds no screen and changes no button, spend, or displayed number. Pho
 
 - **The two pages that load the depot through api.js**, under `docs/frostline` and `docs/play`, load head's engine, drawing, and systems. The bare `three` import in the renderer resolves through each page's import map, unchanged.
 - **The ark's page** under `docs/gravitys-ark` reaches the engine core through the determinism module and nothing else of the spine; its gate is in the build.
-- **The parts page.** After the build, 48 files stand at coldsnap's paths: 28 read current, the seventeen front doors and the two carried files read changed here, and the version mark reads behind. The page is republished after the landing.
+- **The parts page.** After the build, 48 files stand at coldsnap's paths: 26 read current; the seventeen front doors, the two carried files, and the two engine files read changed here; the version mark reads behind. The page is republished after the landing.
 
 ## Acceptance arithmetic for the phase
 
-Every hash above was computed from the checkout at `111b9cb` and from the three carried files assembled in scratch. Every gate count below is the count last recorded in the parts table at commit `313ca84`. The agent's run at landing is the proof; a moved number is a finding.
+Every hash above was computed from the checkout at `111b9cb` and from the three carried files and the two engine files assembled in scratch; the spine gate's hash is its scratch copy's. Every gate count below is the count last recorded in the parts table at commit `313ca84`. The agent's run at landing is the proof; a moved number is a finding.
 
-- The bracket, asserted green in step 1 and again after the lift: combat `ALL PASS` (7 checks); accuracy `11/11`; contract 6; ledger 9; market 8; determinism 5; frostline 63; old-master 21; manifest 3; parts 14; api prints `seed 1  seconds 90 (10800 steps)  worldHash <W>  runHash <R>` and exits 0, where W and R are 3367709165 and 2717846799 before the lift and the landing's own numbers after it.
+- The bracket, asserted green in step 1 and again after the lift: combat `ALL PASS` (7 checks); accuracy `11/11`; contract 6; ledger 9; market 8; determinism 5; frostline 63; old-master 21; manifest 3; parts 14; spine, new, 6 at a rolled seed; api prints `seed 1  seconds 90 (10800 steps)  worldHash <W>  runHash <R>` and exits 0, where W and R are 3367709165 and 2717846799 before the lift and the landing's own numbers after it.
 - Coldsnap's own gate log at home holds combat 7 PASS and accuracy 11/11 at head; those two scripts are byte-identical here, so the numbers are the same numbers.
-- The parts build: `node scripts/parts.mjs --gates all` names 49 gates and every verdict in `docs/parts/parts.json` is ok.
-- The fifty-two hash lines in the task print OK.
+- The parts build: `node scripts/parts.mjs --gates all` names 50 gates and every verdict in `docs/parts/parts.json` is ok.
+- The fifty-seven hash lines in the task print OK.
 
 ## Tasks
 

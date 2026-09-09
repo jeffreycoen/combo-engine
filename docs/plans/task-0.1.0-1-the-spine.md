@@ -1,6 +1,6 @@
 # Task 0.1.0-1 — the spine
 
-One job: write coldsnap's taken files from the checkout at `111b9cb`, sixteen module files through the substitution rule, and three carried files with their added lines; move theme.js into the bench group of the parts source; turn three pinned hashes in the old-master gate into laws; run the bracket; close the records; build the parts page; commit and push. Every file is a copy checked by hash or an edit at an anchor that occurs once. Write exactly what is written, run the listed gates, report. You design nothing.
+One job: restore the tree from the stopped first run; write coldsnap's taken files from the checkout at `111b9cb`, sixteen module files through the substitution rule, and three carried files with their added lines; move theme.js into the bench group of the parts source; turn three pinned hashes in the old-master gate into laws; move the engine's two id counters onto the world in the lifted copies and add the spine gate that holds that law; run the bracket; close the records; build the parts page; commit and push. Every file is a copy checked by hash or an edit at an anchor that occurs once. Write exactly what is written, run the listed gates, report. You design nothing.
 
 Suggested model: Sonnet 5.
 
@@ -14,7 +14,19 @@ Source: the coldsnap checkout at `/home/batman/coldsnap`, commit `111b9cb`, read
 
 Run from `/home/batman/combo-engine`. A failed assert, a wrong required value, or a FAILED hash line stops the task: report the step and its verbatim output, run nothing further. Never edit a file to make a hash match.
 
-1. Assert the ground: the tracked tree clean, the checkout holding the commit, the version at 0.0.112, the three new folders absent, the five files already at head, the three files this task edits at their current hashes.
+0. Restore the tree. The first run stopped at step 7 with steps 2 to 6 applied. Put every tracked file back to the commit and remove the eight files the lift added, and nothing else: the three untracked demo files at the root stay.
+
+```sh
+git checkout -- src scripts docs/parts README.md package.json
+rm -f src/depot/hooks.js src/depot/orders.js src/depot/palette.js src/depot/placement.js src/depot/styles.js
+rm -rf src/aar src/game src/ui
+git status --short | grep -v "^??" | wc -l
+git status --short | grep "^??" | grep -cE "src/|scripts/|docs/"
+```
+
+Required: `0`, `0`.
+
+1. Assert the ground: the tracked tree clean, the checkout holding the commit, the version at 0.0.112, the three new folders absent, the five files already at head, the four files this task edits at their current hashes.
 
 ```sh
 git status --short | grep -v "^??" | wc -l
@@ -30,10 +42,11 @@ b81cc1e4790757bf src/platform/keymap.js
 c61509c9aeeadf47 scripts/old-master-test.mjs
 af69018fb34cefe9 docs/parts/parts-source.json
 4f57d693a57e84f5 README.md
+faf9426ef9bc15da scripts/gate.mjs
 GROUND
 ```
 
-Required: `0`, `commit`, `1`, `0`, then eight OK lines.
+Required: `0`, `commit`, `1`, `0`, then nine OK lines.
 
 Then the bracket, green as recorded. Each command's last line must be the value beside it. The api gate runs about two minutes; do not stop it.
 
@@ -187,7 +200,96 @@ node --check scripts/old-master-test.mjs && echo "syntax ok"
 test "$(sha256sum scripts/old-master-test.mjs | cut -c1-16)" = "07910e89a9c90a86" && echo OK old-master-test.mjs || echo FAILED old-master-test.mjs
 ```
 
-7. Run the bracket on the lifted tree. Required last lines are the same as step 1 for the first ten gates. The api gate's last line must begin `seed 1  seconds 90 (10800 steps)  worldHash ` and the command must exit 0; its two numbers are new, and they are recorded in step 8 and reported. Any FAIL, any other last line, stops the task here.
+6a. Move the engine's two id counters onto the world, in the lifted copies here. This is the one listed difference from the checkout in the engine: world-making sets both counts to one, body-making and walker-making take the world's next number. Both files must pass a syntax check and both hash lines must print OK.
+
+```sh
+python3 - <<'SPINE_EOF_6A'
+def edit(p, reps):
+    s = open(p, encoding="utf-8").read()
+    for old, new in reps:
+        assert s.count(old) == 1, (p, old[:60])
+        s = s.replace(old, new)
+    open(p, "w", encoding="utf-8").write(s)
+edit("src/engine/core.js", [
+("let BODY_ID = 1;\n", ""),
+("export function makeBody(o) {\n", "export function makeBody(o, id) {\n"),
+('    id: BODY_ID++, kind: o.kind || "prop", team: o.team || 0, tag: o.tag || "",\n', '    id, kind: o.kind || "prop", team: o.team || 0, tag: o.tag || "",\n'),
+("    bisonId: 0, volleySeq: 1, killCount: 0, seq: 0,\n", "    bisonId: 0, volleySeq: 1, killCount: 0, seq: 0, nextId: 1, nextMechId: 1,\n"),
+("export function addBody(world, o) { const b = makeBody(o); b.seq = world.seq++; world.bodies.push(b); world.byId.set(b.id, b); return b; } // seq is world-local (unlike the module-global id) so parity-keyed AI stays deterministic across rebuilds\n",
+ "export function addBody(world, o) { const id = world.nextId || 1; world.nextId = id + 1; const b = makeBody(o, id); b.seq = world.seq++; world.bodies.push(b); world.byId.set(b.id, b); return b; } // the id and the seq are both the world's own: every world numbers from one, so two boots from one seed are twins in every record that names a body\n"),
+])
+edit("src/engine/mech.js", [
+("let MECH_ID = 1;\n", ""),
+("  const mech = {\n    id: MECH_ID++, s, joints: [], links: [], legs: {}, _contacts: [],\n",
+ "  const mechId = world.nextMechId || 1; world.nextMechId = mechId + 1; // the world's own count, like body ids\n  const mech = {\n    id: mechId, s, joints: [], links: [], legs: {}, _contacts: [],\n"),
+])
+print("the counters are the world's own")
+SPINE_EOF_6A
+node --check src/engine/core.js && echo "syntax ok core.js"
+node --check src/engine/mech.js && echo "syntax ok mech.js"
+test "$(sha256sum src/engine/core.js | cut -c1-16)" = "eda9db9bb687307a" && echo OK src/engine/core.js || echo FAILED src/engine/core.js
+test "$(sha256sum src/engine/mech.js | cut -c1-16)" = "c9ed940fd02671a7" && echo OK src/engine/mech.js || echo FAILED src/engine/mech.js
+```
+
+6b. Write the spine gate, exactly, and register it after the parts line of the gate table. The gate file must pass a syntax check; both hash lines must print OK.
+
+```sh
+cat > scripts/spine-test.mjs <<'SPINE_EOF_6B'
+// COMBO-ENGINE — spine-test: laws over the coldsnap engine this tree carries
+// with listed differences from the checkout. The one difference today: a
+// world numbers its own bodies and walkers from one, so two boots from one
+// seed in one process are twins in every hash, the run record included.
+// NO HARDWIRED SEEDS: the seeds roll fresh each run and print; rerun with
+// SEED=<n> in the environment.
+import { makeWorld, addBody, worldHash } from "../src/engine/core.js";
+import { buildMech } from "../src/engine/mech.js";
+import { bootWar, runHash } from "../src/depot/api.js";
+
+let pass = 0, fail = 0;
+const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
+const SEED = process.env.SEED ? +process.env.SEED : Math.floor(Math.random() * 1e6) + 1;
+console.log("seeds " + JSON.stringify({ world: SEED, war: SEED }));
+
+const flat = { heightAt: () => 0, dirty: false, carve: () => {}, normalAt: (x, z, o) => { o.x = 0; o.y = 1; o.z = 0; return o; } };
+const box = { kind: "prop", team: 0, mass: 10, hx: 0.5, hy: 0.5, hz: 0.5, x: 0, y: 0.5, z: 0 };
+
+// 1. every world numbers its bodies from one, densely
+{
+  const w1 = makeWorld({ field: flat, seed: SEED }), w2 = makeWorld({ field: flat, seed: SEED + 1 });
+  const a1 = addBody(w1, box), a2 = addBody(w1, box), a3 = addBody(w1, box), b1 = addBody(w2, box);
+  check("spine: the first body of a world is body 1, in every world", a1.id === 1 && b1.id === 1);
+  check("spine: ids are dense within a world — the third body is body 3 and the next would be 4", a2.id === 2 && a3.id === 3 && w1.nextId === 4);
+}
+// 2. every world numbers its walkers from one
+{
+  const w1 = makeWorld({ field: flat, seed: SEED }), w2 = makeWorld({ field: flat, seed: SEED });
+  const m1 = buildMech(w1, { x: 0, z: 0, yaw: 0, team: 1 }), m2 = buildMech(w2, { x: 0, z: 0, yaw: 0, team: 1 });
+  check("spine: the first walker of a world is walker 1, in every world", m1.id === 1 && m2.id === 1);
+}
+// 3. twin boots from one rolled seed in one process: one world hash, one run hash, the enemy roster's member ids the same
+{
+  const A = bootWar({ seed: SEED }), B = bootWar({ seed: SEED });
+  check("spine: twin boots from one rolled seed hash the same world", worldHash(A.world) === worldHash(B.world));
+  check("spine: twin boots from one rolled seed hash the same run", runHash(A.run) === runHash(B.run));
+  const ids = (w) => JSON.stringify(w.run.foeSquads.map((s) => s.memberIds));
+  check("spine: the enemy roster carries the same member ids in both boots", ids(A) === ids(B));
+}
+console.log(`spine-test: ${pass} PASS / ${fail} FAIL`);
+console.log(fail ? "spine-test FAIL" : "spine-test PASS");
+process.exit(fail ? 1 : 0);
+SPINE_EOF_6B
+node --check scripts/spine-test.mjs && echo "syntax ok spine-test.mjs"
+test "$(sha256sum scripts/spine-test.mjs | cut -c1-16)" = "b3f7781653ee20f0" && echo OK scripts/spine-test.mjs || echo FAILED scripts/spine-test.mjs
+python3 - <<'SPINE_EOF_6C'
+p = "scripts/gate.mjs"; s = open(p, encoding="utf-8").read()
+old = '  "parts": ["scripts/parts-test.mjs"],\n'
+assert s.count(old) == 1, "parts line"
+open(p, "w", encoding="utf-8").write(s.replace(old, old + '  "spine": ["scripts/spine-test.mjs"],\n'))
+SPINE_EOF_6C
+test "$(sha256sum scripts/gate.mjs | cut -c1-16)" = "162dd125f744fff4" && echo OK scripts/gate.mjs || echo FAILED scripts/gate.mjs
+```
+
+7. Run the bracket on the lifted tree, with the spine gate. Required last lines are the same as step 1 for the first ten gates; the spine gate's last line must be `spine-test PASS`. The api gate's last line must begin `seed 1  seconds 90 (10800 steps)  worldHash ` and the command must exit 0; its two numbers are new, and they are recorded in step 8 and reported. Any FAIL, any other last line, stops the task here.
 
 ```sh
 node scripts/gate.mjs combat | tail -1
@@ -200,6 +302,7 @@ node scripts/gate.mjs frostline | tail -1
 node scripts/gate.mjs old-master | tail -1
 node scripts/gate.mjs manifest | tail -1
 node scripts/gate.mjs parts | tail -1
+node scripts/gate.mjs spine | tail -1
 node scripts/gate.mjs api | tail -1
 ```
 
@@ -222,11 +325,11 @@ assert s.count(old) == 1, "housekeeping note"
 s = s.replace(old, old + " From 0.1.0 those module files hold coldsnap's code at 111b9cb, the import paths the only difference; specs carries five added lines, listed in that phase's plan.")
 old = "The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799)."
 assert s.count(old) == 1, "status sentence"
-s = s.replace(old, "The coldsnap engine stands at coldsnap commit `111b9cb`: 48 files at its paths, 28 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, two carrying added lines listed in the 0.1.0 plan, and the version mark left as it was; `node scripts/gate.mjs api` prints worldHash " + W + ", runHash " + R + ".")
+s = s.replace(old, "The coldsnap engine stands at coldsnap commit `111b9cb`: 48 files at its paths, 26 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, four carrying listed differences from the 0.1.0 plan, and the version mark left as it was; `node scripts/gate.mjs api` prints worldHash " + W + ", runHash " + R + ".")
 open(rd, "w", encoding="utf-8").write(s)
 ph = "docs/plans/phase-0.1.0-the-spine.md"; s = open(ph, encoding="utf-8").read()
 assert len(re.findall(r"^Status: (?:PLANNED|SERVED|APPROVED|DISPATCHED)\b[^\n]*$", s, re.M)) == 1, "phase status anchor"
-open(ph, "w", encoding="utf-8").write(re.sub(r"^Status: (?:PLANNED|SERVED|APPROVED|DISPATCHED)\b[^\n]*$", "Status: LANDED, commit stamped below, 2026-09-09. Bracket: eleven gates at their recorded counts; the parts build 49 gates, every verdict ok.", s, count=1, flags=re.M))
+open(ph, "w", encoding="utf-8").write(re.sub(r"^Status: (?:PLANNED|SERVED|APPROVED|DISPATCHED)\b[^\n]*$", "Status: LANDED, commit stamped below, 2026-09-09. Bracket: eleven gates at their recorded counts and the spine gate green; the parts build 50 gates, every verdict ok.", s, count=1, flags=re.M))
 print("records closed; api worldHash " + W + " runHash " + R)
 SPINE_EOF_8
 grep -c '"version": "0.1.0"' package.json
@@ -237,7 +340,7 @@ grep -c '^Status: LANDED' docs/plans/phase-0.1.0-the-spine.md
 
 Required: `1`, `1`, `0`, `1`.
 
-9. Build the parts table and the page with every gate. About four minutes; do not stop it. The count line must name 49 gates, the build must end with a `wrote docs/parts/parts.json` line, and the verdict check must print `49 gates, 0 not ok`. Any gate not ok stops the task here.
+9. Build the parts table and the page with every gate. About four minutes; do not stop it. The count line must name 50 gates, the build must end with a `wrote docs/parts/parts.json` line, and the verdict check must print `50 gates, 0 not ok`. Any gate not ok stops the task here.
 
 ```sh
 node scripts/parts.mjs --gates all
@@ -247,11 +350,11 @@ node -e 'const t=require("./docs/parts/parts.json");const bad=Object.values(t.ga
 10. Commit and push the landing, then stamp the real hash in a second small commit. Never amend after stamping.
 
 ```sh
-git add src/engine src/graphics src/platform src/depot src/aar src/game src/ui src/modules scripts/old-master-test.mjs docs/parts README.md package.json docs/plans
-git commit -m "phase 0.1.0 — the spine: coldsnap at 111b9cb, every taken file by hash, the carved modules refreshed, three carried files, the era opens
+git add src/engine src/graphics src/platform src/depot src/aar src/game src/ui src/modules scripts/old-master-test.mjs scripts/spine-test.mjs scripts/gate.mjs docs/parts README.md package.json docs/plans
+git commit -m "phase 0.1.0 — the spine: coldsnap at 111b9cb by hash, the carved modules refreshed, the world's own ids, the era opens
 
-Twenty-three files verbatim, sixteen module files through the substitution rule, three files with their added lines at anchors; theme.js with the walker's readout; three pinned hashes in the old-master gate turned into laws.
-Bracket of eleven gates at their recorded counts; the parts build over 49 gates, every verdict ok.
+Twenty-three files from the checkout, sixteen module files through the substitution rule, three files with their added lines at anchors, the engine's two id counters moved onto the world in its two files; theme.js with the walker's readout; three pinned hashes in the old-master gate turned into laws; the spine gate holds the world's-own-ids law.
+Bracket of eleven gates at their recorded counts, the spine gate green; the parts build over 50 gates, every verdict ok.
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01QSq3kZC3Bk9SC5RwnqYUfs"
@@ -267,15 +370,16 @@ git push origin main
 
 ## Acceptance
 
-- Step 1: the four values and eight OK lines; the eleven recorded last lines.
-- Steps 2 through 6: forty-four OK lines in all, and `syntax ok` in step 6.
-- Step 7: the first ten last lines unchanged from step 1; the api line with its new numbers, exit 0.
+- Step 0: `0`, `0`.
+- Step 1: the four values and nine OK lines; the eleven recorded last lines.
+- Steps 2 through 6b: forty-eight OK lines in all, and `syntax ok` four times, in steps 6, 6a, and 6b.
+- Step 7: the first ten last lines unchanged from step 1; `spine-test PASS`; the api line with its new numbers, exit 0.
 - Step 8: the four counts `1`, `1`, `0`, `1`.
-- Step 9: the count line names 49 gates; `49 gates, 0 not ok`.
+- Step 9: the count line names 50 gates; `50 gates, 0 not ok`.
 - Step 10: push accepted by origin; the stamp commit pushed.
 
 After the landing the orchestrator republishes the page from `docs/parts/parts.html` to its fixed address and names it in the landing report.
 
 ## Report
 
-Read-confirmation first, then one line of outcome, then bullets: every last line from steps 1 and 7 verbatim; every OK line; the api gate's old and new numbers as a labeled re-pin; the parts build's count line verbatim and the verdict line; both commit hashes; the push results. Every nonconformity its own labeled bullet. Fixture seeds: the seeds lines printed by the frostline, contract, determinism, and parts gates in step 7, and the gravitys-ark seeds line from `docs/parts/parts.json`; no seed is special.
+Read-confirmation first, then one line of outcome, then bullets: every last line from steps 1 and 7 verbatim; every OK line; the api gate's old and new numbers as a labeled re-pin; the parts build's count line verbatim and the verdict line; both commit hashes; the push results. Every nonconformity its own labeled bullet. Fixture seeds: the seeds lines printed by the frostline, contract, determinism, parts, and spine gates in step 7, and the gravitys-ark seeds line from `docs/parts/parts.json`; no seed is special.
