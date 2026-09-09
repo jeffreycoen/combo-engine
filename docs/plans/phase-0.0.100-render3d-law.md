@@ -1,6 +1,6 @@
 # Phase 0.0.100 — render3d, first half: the law
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 11 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `e12f764`, 2026-09-08. Gate: 11 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 11 PASS / 0 FAIL; bracket unmoved. -->
 
 The first of two phases for the checklist box "The 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris"; the box flips at the second. Source: the shooting-range demo, read-only, the lines the task names. This half holds the math and the data; the next half draws it to the screen.
