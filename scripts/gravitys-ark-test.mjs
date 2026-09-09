@@ -17,7 +17,8 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary, fellTrees } from "../src/games/gravitys-ark/ground.js";
+import { addBody } from "../src/engine/core.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -1007,10 +1008,11 @@ function rollArkFields(type, i, nWorlds) {
   const g = makeGalaxy(gSeed), w = g.worlds[0];
   const kg = 500 + Math.floor(rng() * 1000);
   const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);
+  crashHull(A, makeHull(STARTER_HULL), 5); crashHull(B, makeHull(STARTER_HULL), 5);   // the ground is the ship's: held ground grows from its flag
   const purse0 = A.run.resources;   // read before the first tick: the ground pays by the tick
   groundTick(A, 1 / 120); groundTick(B, 1 / 120);
   check("ark: the ground boots on coldsnap from the galaxy's seed, and twin boots are twins in every hash", A.seed === B.seed && A.run.started === true && groundHash(A) === groundHash(B));
-  const purse1 = A.run.resources, f = A.run.focus;
+  const purse1 = A.run.resources, f = { x: A.site.x - A.hull.axis.r.x * 18, z: A.site.z - A.hull.axis.r.z * 18 };   // the crew's side of the bridge: held ground, clear of the hull
   let placed = null;
   for (let dz = -8; dz <= 8 && !placed; dz += 2) for (let dx = -8; dx <= 8 && !placed; dx += 2) { const r = groundOrder(A, "gun", f.x + dx, f.z + dz, "mg"); if (r.ok) placed = r; }
   const guns = A.world.bodies.filter((b) => b.alive && b.kind === "tower" && b.team === 1).length;
@@ -1194,6 +1196,34 @@ function rollArkFields(type, i, nWorlds) {
   check("ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
     !!hb && hb.hp === hp && hb.maxHp === hp && hp > 58 && G.guards.length === HER.guards && G.guards.every((sq) => sq.type === "rifles" && sq.team === 1 && sq.order === "defend")
     && men.length === HER.guards * SQUAD_SPECS.rifles.n && men.every((u) => u && u.alive && u.team === 1 && clear(u)) && clear(hb) && s.guards.alive === men.length && s.guards.total === men.length && s.hands.total === 1);
+}
+
+{ // 55. ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the trees along it felled
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const N = makeGround(gSeed, w, 900);   // the bare ground: the heights before any crash
+  const G = makeGround(gSeed, w, 900), H = crashHull(G, makeHull(STARTER_HULL), 10);
+  const noTown = G.war.town.length === 0 && !G.world.bodies.some((b) => b.kind === "chunk" && b.town && b.town !== "hull") && G.war.census.length === 0;
+  const flag = G.world.bodies.find((b) => b.kind === "flag" && b.team === 1);
+  const flagUp = !!flag && Math.abs(flag.pos.x - H.site.x) < 1e-9 && Math.abs(flag.pos.z - H.site.z) < 1e-9 && flag.pos.y > H.bodies[0].pos.y + H.bodies[0].hy;
+  const objective = G.war.map.OBJ_POS.x === H.site.x && G.war.map.OBJ_POS.z === H.site.z && G.objG.gx === G.war.grid.worldToGrid(H.site.x, H.site.z).gx;
+  const u = H.axis.u, r = H.axis.r, d = H.dials;
+  const behind = (t, a) => ({ x: H.site.x - u.x * t + r.x * a, z: H.site.z - u.z * t + r.z * a });
+  const deep = behind(d.gougeDeep, 0), rim = behind(d.gougeLen + 4, 0), side = behind(d.gougeDeep, d.gougeHalf + 3);
+  const lower = (p) => N.war.field.heightAt(p.x, p.z) - G.war.field.heightAt(p.x, p.z);
+  const gouged = lower(deep) > d.gougeDepth * 0.8 && Math.abs(lower(rim)) < 1e-6 && Math.abs(lower(side)) < 1e-6 && G.war.field.dirty === true;
+  const trees = G.world.bodies.filter((b) => b.kind === "tree"), deadBefore = trees.filter((b) => !b.alive).length;
+  const stood = H.felled === deadBefore && trees.every((b) => b.alive ? b.R[4] > 0.9 : b.R[4] < 0.2);
+  const spot = behind(d.gougeDeep, 2), tree = addBody(G.world, { kind: "tree", team: 0, mass: 260, hx: 0.28, hy: 1.6, hz: 0.28, x: spot.x, y: G.war.field.heightAt(spot.x, spot.z) + 1.62, z: spot.z, hp: 70, friction: 0.5 });
+  const before = { x: tree.pos.x, z: tree.pos.z }, fell = fellTrees(G.world, G.war.field, H.site, u, r, d);   // one tree planted in the gouge, then the felling called on its own
+  const felled = stood && fell === 1 && !tree.alive && tree.R[4] < 0.2 && Math.abs(tree.R[3] - u.x) < 1e-6 && Math.abs(tree.R[5] - u.z) < 1e-6
+    && Math.abs((tree.pos.x - before.x) - u.x * tree.hy) < 1e-9 && Math.abs((tree.pos.z - before.z) - u.z * tree.hy) < 1e-9 && tree.sleeping === true;
+  let nearGun = null;   // held ground grows from the ship's flag, 36 m out, coldsnap's own law: a gun goes on the crew's side within it, none beyond it
+  for (let dz = -6; dz <= 6 && !nearGun; dz += 2) for (let dx = -6; dx <= 6 && !nearGun; dx += 2) { const q = groundOrder(G, "gun", H.site.x - r.x * 25 + dx, H.site.z - r.z * 25 + dz, "mg"); if (q.ok) nearGun = q; }
+  const farGun = groundOrder(G, "gun", H.site.x - r.x * 70, H.site.z - r.z * 70, "mg");
+  const held = !!nearGun && !farGun.ok;
+  const r1 = groundTick(G, 1 / 120);
+  check("ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the trees along it felled",
+    noTown && flagUp && objective && gouged && felled && held && !G.run.gameOver && !!r1);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

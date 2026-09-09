@@ -24,10 +24,10 @@ import { buildMech, mechCommand } from "../../engine/mech.js";
 import { MECH } from "../../depot/specs.js";
 
 // kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's
-// scrap. heldSteps and heldStep: territory steps run at the boot, so the crash
-// site is the player's ground from the first frame; the war's own clock takes it
-// from there. All PROPOSED.
-export const GROUND_DIALS = { kgPerScrap: 10, heldSteps: 4, heldStep: 0.25 };
+// scrap. heldSteps and heldStep: territory steps run at the crash, once the ship
+// flies its flag, so the ground around it is the player's from the first frame; the
+// war's own clock takes it from there. All PROPOSED.
+export const GROUND_DIALS = { kgPerScrap: 10, heldSteps: 8, heldStep: 0.25 };
 export const GUNS = TOWER_ORDER.slice();
 
 // groundSeed(seed, w): one seed per world of the galaxy, from the galaxy's own seed.
@@ -37,7 +37,7 @@ export function groundSeed(seed, w) { return (seed + 7919 * (w.i + 1)) >>> 0; }
 // starts at once, the attacker's opening already fielded by coldsnap's own muster.
 export function makeGround(seed, w, scrapKg, opts) {
   const d = { ...GROUND_DIALS, ...(opts && opts.dials) };
-  const war = bootWar({ seed: groundSeed(seed, w) });
+  const war = bootWar({ seed: groundSeed(seed, w), town: false });   // no town: the ark's ground has only the ship to defend
   const run = war.run, world = war.world;
   run.started = true;
   run.resources = Math.floor(scrapKg / d.kgPerScrap);
@@ -59,7 +59,7 @@ export function makeGround(seed, w, scrapKg, opts) {
   // the build-line driver: her squad lays walls along a two-point line by coldsnap's own law, paid from the one purse
   const buildCtx = { objG, recomputeFlow, stampBag: (b, side) => stampBag(war.grid, b, side), setMines: () => {} };
   input.stepBuildLine = (sq) => stepBuildLine(world, war.grid, war.field, war.T, run, sq, buildCtx, (text) => say("toast", { text }), war.map);
-  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], guards: [], walker: null, stick: { f: 0, l: 0, h: null }, site, recomputeFlow };
+  return { seed: groundSeed(seed, w), war, run, world, input, events, cues, placement, dials: d, scrapKgIn: scrapKg, her: null, hands: [], guards: [], walker: null, stick: { f: 0, l: 0, h: null }, site, objG, recomputeFlow };
 }
 
 // HULL_DIALS, the seam's numbers and the crash law, all PROPOSED. kgPerKg: a space
@@ -73,7 +73,11 @@ export function makeGround(seed, w, scrapKg, opts) {
 // depot's spot the bridge lands, along the line to the map's centre snapped to the
 // nearest axis; the hull's own gx axis runs on along that line, away from the depot,
 // and its gy axis across it, so the whole hull stands beyond the bridge, clear of the depot.
-export const HULL_DIALS = { kgPerKg: 250, unit: 2.675, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26 };
+// flagUp: how high over the bridge's roof the ship's flag flies. The gouge: the crash's
+// mark behind the hull along the line it came in on, gougeLen metres long, deepest
+// gougeDeep metres behind the bridge, gougeHalf metres to either side, gougeDepth metres
+// deep at the deepest; the trees within treeReach metres of its edge are felled along it.
+export const HULL_DIALS = { kgPerKg: 250, unit: 2.675, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26, flagUp: 1.5, gougeLen: 45, gougeDeep: 12, gougeHalf: 8, gougeDepth: 2.5, treeReach: 2 };
 
 // SHAPE: deadweight's silhouette per kind, half width along the ship's own gx, half depth
 // along gy, and full height, in the demo's units, its lines 989 to 991; a strut is a beam
@@ -112,9 +116,10 @@ export function crashHull(G, hull, v, opts) {
   const slide = d.slideFrac * v;
   // the site line: from the depot's spot toward the map's centre, snapped to the nearest axis; u runs on along it away from the depot, r across it
   const u = Math.abs(f.x) >= Math.abs(f.z) ? { x: -Math.sign(f.x) || -1, z: 0 } : { x: 0, z: -Math.sign(f.z) || -1 };
-  const r = { x: -u.z, z: u.x };
   const site = { x: f.x + u.x * d.site, z: f.z + u.z * d.site };
+  let r = { x: -u.z, z: u.x }; if (r.x * site.x + r.z * site.z < 0) r = { x: -r.x, z: -r.z };   // across the line, turned so the crew's side faces the map's centre and their ground stays inside the rim
   const slots = list.map((m) => ({ x: site.x + u.x * m.gx * d.pitch + r.x * m.gy * d.pitch, z: site.z + u.z * m.gx * d.pitch + r.z * m.gy * d.pitch }));
+  gougeGround(war.field, site, u, d);   // the ground takes the crash's mark first, so the modules sit in it
   const bodies = list.map((m, i) => {
     const loose = !keep.has(i);
     const x = slots[i].x + (loose ? u.x * slide : 0), z = slots[i].z + (loose ? u.z * slide : 0), sh = shapeOf(m, list, { u, r }, d.unit);
@@ -126,8 +131,65 @@ export function crashHull(G, hull, v, opts) {
   for (const w of held) if (keep.has(w.a) && keep.has(w.b)) welds.push({ a: w.a, b: w.b, weld: addWeld(world, bodies[w.a], bodies[w.b], w.strength * d.kgPerKg) });
   G.site.x = site.x; G.site.z = site.z;   // the bridge is the homeland's centre for coldsnap's placement radius
   G.hull = { list, builder: hull.builder, bodies, slots, welds, v, a, broken: [...broken], loose: list.map((m, i) => i).filter((i) => !keep.has(i)), dials: d, axis: { u, r }, site, walkerLost: !!hull.walkerLost, bay: -1, stamped: [] };
+  // the ship flies its flag: coldsnap's own emitter body, as its depot's is made at sim.js line 432, over the bridge's roof; the ground around the ship is the player's
+  const flag = addBody(world, { kind: "flag", team: 1, mass: 0, hx: 0.05, hy: 0.05, hz: 0.05, x: site.x, y: bodies[0].pos.y + bodies[0].hy + d.flagUp, z: site.z });
+  flag.sleeping = true; flag.flagPole = true; flag.town = "hull"; G.hull.flag = flag;
+  // the ship is the objective: the attacker's mark and the paths' end move to the bridge
+  war.map.OBJ_POS.x = site.x; war.map.OBJ_POS.z = site.z;
+  const og = war.grid.worldToGrid(site.x, site.z); G.objG.gx = og.gx; G.objG.gz = og.gz;
+  G.hull.felled = fellTrees(world, war.field, site, u, r, d);
+  for (let i = 0; i < G.dials.heldSteps; i++) stepTerritory(war.T, buildEmitters(world, war.map), G.dials.heldStep);
   stampHull(G);
   return G.hull;
+}
+
+// gougeGround(F, site, u, d): the crash's mark: the ground lowered along the line the ship came
+// in on, from under the hull back toward where it came from, deepest gougeDeep metres behind
+// the bridge and shallowing to nothing at gougeLen, in a trough gougeHalf metres to either side
+// with a rounded floor; the terrain marks itself dirty and redraws.
+export function gougeGround(F, site, u, d) {
+  let n = 0;
+  for (let j = 0; j < F.n; j++) for (let i = 0; i < F.n; i++) {
+    const x = i * F.cs - F.half, z = j * F.cs - F.half;
+    const t = (site.x - x) * u.x + (site.z - z) * u.z, a = Math.abs((x - site.x) * -u.z + (z - site.z) * u.x);
+    if (t < 0 || t > d.gougeLen || a > d.gougeHalf) continue;
+    const s = t < d.gougeDeep ? t / d.gougeDeep : (d.gougeLen - t) / (d.gougeLen - d.gougeDeep);
+    F.h[F.idx(i, j)] -= d.gougeDepth * s * (1 - (a / d.gougeHalf) ** 2); n++;
+  }
+  F.dirty = true;
+  return n;
+}
+
+// qToR(q, R): a body's basis from its turn, coldsnap's own, core.js lines 54 to 65, copied here because the engine keeps it private.
+function qToR(q, R) {
+  const x = q.x, y = q.y, z = q.z, w = q.w;
+  const x2 = x + x, y2 = y + y, z2 = z + z;
+  const xx = x * x2, xy = x * y2, xz = x * z2;
+  const yy = y * y2, yz = y * z2, zz = z * z2;
+  const wx = w * x2, wy = w * y2, wz = w * z2;
+  R[0] = 1 - (yy + zz); R[1] = xy + wz; R[2] = xz - wy;
+  R[3] = xy - wz; R[4] = 1 - (xx + zz); R[5] = yz + wx;
+  R[6] = xz + wy; R[7] = yz - wx; R[8] = 1 - (xx + yy);
+  return R;
+}
+
+// fellTrees(world, F, site, u, r, d): every tree standing in the gouge or within treeReach of its edge
+// is felled along the line the ship came in on: dead, laid flat with its crown toward the ship, asleep
+// on the gouged ground. Returns how many fell.
+export function fellTrees(world, F, site, u, r, d) {
+  let n = 0;
+  const k = { x: u.z, z: -u.x }, sn = Math.sin(Math.PI / 4), cs = Math.cos(Math.PI / 4);   // the turn that lays a trunk's up along u
+  for (const b of world.bodies) {
+    if (b.kind !== "tree" || !b.alive) continue;
+    const t = (site.x - b.pos.x) * u.x + (site.z - b.pos.z) * u.z, a = Math.abs((b.pos.x - site.x) * r.x + (b.pos.z - site.z) * r.z);
+    if (t < 0 || t > d.gougeLen || a > d.gougeHalf + d.treeReach) continue;
+    b.alive = false; b.hp = 0;
+    b.q.x = k.x * sn; b.q.y = 0; b.q.z = k.z * sn; b.q.w = cs; qToR(b.q, b.R);
+    b.pos.x += u.x * b.hy; b.pos.z += u.z * b.hy; b.pos.y = F.heightAt(b.pos.x, b.pos.z) + b.hx + 0.05;
+    b.v.x = 0; b.v.y = 0; b.v.z = 0; b.w.x = 0; b.w.y = 0; b.w.z = 0; b.sleeping = true;
+    n++;
+  }
+  return n;
 }
 
 // stampHull(G): the hull's footprints in coldsnap's grid: every cell whose centre lies under a

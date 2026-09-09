@@ -240,7 +240,7 @@ export function bootWar(opts = {}) {
       }
     }
   } else {
-    town = buildTown(world, grid, field, map);
+    town = opts.town === false ? [] : buildTown(world, grid, field, map);   // the ark boots its ground without the town: a listed difference from the checkout (phase 0.1.3)
     // Structural loss (Task 5): the depot's own chunk lattice IS its health
     // bar — census taken once here (ids + home world positions), read back
     // at ~1Hz via stepDepotCensus below against world.byId (live pos/alive).
