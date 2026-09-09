@@ -44,6 +44,7 @@ export const REGISTRY = {
   selection: { seam: "consume", gate: "selection" },
   touch: { seam: "consume", gate: "touch" },
   backdrop: { seam: "sample", gate: "backdrop" },
+  gait: { seam: "tick", gate: "gait" },
   // carved depot organs, behind their front doors
   sight: { seam: "sample", gate: null },
   wind: { seam: "sample", gate: null },

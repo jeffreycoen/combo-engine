@@ -63,7 +63,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] Torque-limited joint actuators with finite stiffness
 - [x] The rig table: a whole machine as data, mirrored per side, assembled from the table
 - [x] Leg inverse kinematics
-- [ ] The balance controller and the walking planner
+- [x] The balance controller and the walking planner
 - [x] Labeled-cheat presets: every relaxed rule named, with its measured consequence
 - [x] Per-joint load telemetry as an engine output
 
@@ -168,6 +168,7 @@ Serving checklist items:
 - [x] selection — the selection and feedback layer: brackets, health ramps, order lines, formation links — 0.0.94
 - [x] touch — the touch commands: the right mouse button, solved for a phone — 0.0.97
 - [x] backdrop — the space backdrop and effects kit: starfield, nebulae, trails, beams, explosion rings — 0.0.98
+- [x] gait — the balance controller and the walking planner — 0.0.99
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
