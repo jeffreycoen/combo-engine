@@ -1,6 +1,6 @@
 # Phase 0.0.112 — the parts page
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 14 PASS / 0 FAIL; manifest 3 PASS / 0 FAIL with its two new roots.
+Status: LANDED, commit `313ca84`, 2026-09-09. Gate: 14 PASS / 0 FAIL; manifest 3 PASS / 0 FAIL with its two new roots.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 14 PASS / 0 FAIL; manifest 3 PASS / 0 FAIL with its two new roots. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The first phase of the order that builds GRAVITY'S ARK from both games whole. Before any module moves, the page that tracks every module: a generator that builds one table from the record, a page that draws it four ways, and a store the owner writes feedback and verdicts into. With it, the seed export on every screen of the game page, so a finding starts as one paste. The table lists every coldsnap source file at commit 111b9cb against the tree, every deadweight system lifted or not, the ark's own layer, and the story's gaps, with the evidence measured for each: hashes, exports, imports, gate runs with their seeds, and the phase document's status word. Every later landing regenerates the table and republishes the page, by the standing order added on 2026-09-09.
