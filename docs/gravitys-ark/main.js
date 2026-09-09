@@ -50,7 +50,7 @@ function logRoadEvents() { for (; seenEvents < state.events.length; seenEvents++
 const PAGE_LINES = { ...ARK_LINES, land: (e) => `landed on ${e.id} at ${Math.round(e.v)} m/s`, crash: (e) => `crashed on ${e.id} at ${Math.round(e.v)} m/s`, takeoff: (e) => `took off from ${e.id}`, swallow: (e) => `the hole took ${e.id}` };
 function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, crew, end); $("cardBody").textContent = [c.ending.toUpperCase(), "", "hull: " + c.manifest.hull.join(" "), "hands: " + (c.manifest.hands.join(", ") || "none"), "scrap " + fmt(c.manifest.scrap) + " kg, spares " + (c.manifest.spares.join(" ") || "none") + ", people " + c.manifest.people, "the hole ate: " + (c.eaten.join(" ") || "nothing"), "", "the galaxy named you " + c.name, "", ...log.lines(PAGE_LINES).slice(-12)].join("\n"); $("card").style.display = "block"; }
 // phase 0.0.110's page step: the hold, the ground frames, on the same canvas
-const holdRng = simStream((seed + 4) >>> 0), OPENING_CRASH = 12;   // the opening: the hull down at 12 m/s on the plague world, PROPOSED
+const holdRng = simStream((seed + 4) >>> 0), OPENING_CRASH = 30;   // the opening: the hull down at 30 m/s on the plague world, the engine off its weld, PROPOSED
 let hold = null, view = "space", fieldTap = null;
 function enterHold(v) { hold = makeHold(hull, crew, v, holdRng); view = "hold"; fieldTap = null; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 function leaveHold() { view = "space"; hold = null; }

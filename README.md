@@ -130,7 +130,12 @@ You are a ship; she is a mechanic who can fix anything; a star dies behind you a
 - **One seed makes everything:** `?seed=N` in the address gives the same galaxy to anyone: eight to twelve worlds on a road from the pit to the gate, each with its radius, gravity, climate, ring, holder, and station; the collapse count; the toll and the gate's bill; names for people, women and men.
 - **The road:** the ship flies under the wells law over every world and the pit; burns spend fuel as mass; a hull that reaches a surface lands by the band, the descent burn killing up to the escape speed, a crash to 22.5 m/s over it, death above; the collapse fires on the seeded takeoff; the hole grows on a schedule computable before launch and eats worlds in distance order; the edge is the nearest world your hull can still leave.
 - **The page:** the galaxy on the warped grid with the worlds in their pits, the ship, the clocks, LAND, TAKE OFF, and a burn aimed at the gate or by a drag; phone and desktop.
-- **The gate:** `node scripts/gate.mjs gravitys-ark`.
+- **The ring's business:** every station keeps pools for scrap, fuel, people, and modules on the market's law, dearer nearer the pit; hands hired by name from the seed at a rising price; wages due at every dock; the build screen on the builder; the far ring's starving stations post the contract to move people on the escrow.
+- **The wrecks and the price:** the collapse shell shoves every body and tests the hull's welds; wreck fields fall to the pit; the grappler reels them in on the grapple module's rope; the Wreckers roost, chase, lock, and demand her or the cargo; pay or outrun; the Authority's bounty; the Charter's hire-out.
+- **The gate and the card:** shut until she pays its bill in time, scrap, and modules by seed; the toll to the Authority; the Fitters buy at the gate; passing names its ending; a lost ship wakes ahead of the edge in debt or the road ends; the log on the receipts module and the card with the galaxy's name.
+- **The ground:** the game opens on the crash world with the hull on broken welds and the walker dead; the Grip step out of the ring in waves that never stop; she fights or she fixes, never both; walls and guns in scrap; the mast's lob; the boss walker; TAKE OFF needs every surviving module welded.
+- **The walker at scale:** a scale option across the rig, the balance controller, and the leg lengths with one scaling law, proven at rolled scales; at the ruled scale 0.607 the stance does not hold by the law (a foot leaves the ground at 7.42 s, zero breaks), so her walker ships at trooper scale, marked.
+- **The gate:** `node scripts/gate.mjs gravitys-ark`, 38 checks at rolled seeds.
 
 ## The extracted modules
 

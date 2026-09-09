@@ -1,6 +1,6 @@
 # Batch order: GRAVITY'S ARK, the first road
 
-Status: ACTIVE. Written 2026-09-08 on the owner's word to plan and dispatch through the night; the record below fills at each landing.
+Status: COMPLETE, 2026-09-09. Every phase landed in number order through the night; the closing self-test on the final tree: all 48 gates PASS. The page is live at the link. The night log, `ark-night-1.md`, holds every issue and its fix.
 
 The game from the design document "GRAVITY'S ARK — Design Document, 2026-09-08": you are a ship; she is a mechanic who can fix anything; a star dies behind you and becomes a black hole that eats the galaxy one world at a time; a gate at the far end is the only way out, broken, and she is the only one who can fix it. Nine frames. This order builds the first road: the space frames end to end with their machinery, then the ground frames, on the engine's landed parts, in the game's own folder, deployed after every landing.
 
@@ -100,6 +100,10 @@ The document marks BUILT what is not in this repository: the landing band, the h
 - [x] 0.0.111 the walker's stance
 
 ## Gaps
+
+- The walker's stance at the ruled scale does not hold by the phase's law: zero breaks, the pelvis inside the band, a foot off the ground at 7.42 s. The scale option and its laws are landed; her walker ships at trooper scale, marked. The next knob is the phase document's: the feet's contact and the ankle strategy at scale.
+- The page's own numbers, PROPOSED: the hull's hit points 1,000 against the pirates' shots; the opening arrival 30 m/s; the draw radii of the pits.
+- The stations' business runs on every world; the design's plague world with no market is not yet distinguished.
 
 - Every number in the scale table is a design choice, PROPOSED, until the owner rules or a measurement replaces it.
 - The star's stages on the page, the collapse's held shot, and the sound are look and sound: the owner's, at the page.
