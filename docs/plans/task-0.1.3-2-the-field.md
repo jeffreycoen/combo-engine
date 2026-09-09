@@ -1,6 +1,8 @@
 # Task 0.1.3-2 — the field
 
-One job: the field is the ship's. The war boots without coldsnap's town; the ship flies its own flag over the bridge, so the ground around it is the player's to build on; the attacker's objective and the paths' end move to the bridge; placement reaches 60 m from the bridge; the crash gouges the ground back along the line the ship came in on and fells the trees along it. Two doors open in coldsnap's files, each one line and a listed difference: the boot skips the town when asked, and the placement radius takes the ark's own number. One check joins the ark's gate and one is re-taught, named below. Every edit is an anchored replacement checked by hash; write exactly what is written, run the listed gates, report. You design nothing.
+One job: the field is the ship's. The war boots without coldsnap's town; the ship flies its own flag over the bridge, so the ground around it is the player's to build on by coldsnap's own law, held 36 m out from the flag and 9 m more from every gun; the attacker's objective and the paths' end move to the bridge; the crash gouges the ground back along the line the ship came in on and fells the trees along it. One door opens in coldsnap's files, one line and a listed difference: the boot skips the town when asked. One check joins the ark's gate and one is re-taught, named below. Every edit is an anchored replacement checked by hash; write exactly what is written, run the listed gates, report. You design nothing.
+
+Amended once: the first run's check asked for a placement radius the tap door never reads, so the radius option is gone and the felling is proved on a tree planted in the gouge; and the hull's across axis now turns so the crew's side faces the map's centre, since on some maps it faced off the rim.
 
 Suggested model: Sonnet 5.
 
@@ -14,22 +16,21 @@ No demo file is read or written. Nothing under `/home/batman/coldsnap` is read, 
 
 Run from `/home/batman/combo-engine`. A failed assert, a wrong required value, or a FAILED hash line stops the task: report the step and its verbatim output, run nothing further. Never edit a file to make a hash match.
 
-1. Assert the ground: the tracked files clean at task 1's landing, the five files this task edits at their landed hashes. The gates were recorded green at that landing and are not run again here.
+1. Assert the ground: the tracked files clean at task 1's landing, the four files this task edits at their landed hashes. The gates were recorded green at that landing and are not run again here.
 
 ```sh
 git status --short | grep -v "^??" | wc -l
 while read -r hash path; do test "$(sha256sum "$path" | cut -c1-16)" = "$hash" && echo "OK $path" || echo "FAILED $path"; done <<'GROUND'
 19a6d48d0fbf5742 src/games/gravitys-ark/ground.js
 e1c453b452d63aaa src/depot/boot.js
-48506941ea78d47f src/depot/placement.js
 82b1b00952d862e3 scripts/gravitys-ark-test.mjs
 1bfbbbc8930f40d7 README.md
 GROUND
 ```
 
-Required: `0`, five OK lines.
+Required: `0`, four OK lines.
 
-2. The ark's ground layer: the boot without the town, the placement radius, the ship's flag, the objective at the bridge, the gouge, the felled trees, the held steps at the crash. Syntax check; the hash line must print OK.
+2. The ark's ground layer: the boot without the town, the crew's side turned toward the map's centre, the ship's flag, the objective at the bridge, the gouge, the felled trees, the held steps at the crash. Syntax check; the hash line must print OK.
 
 ```sh
 python3 - <<'ARK_EOF_2'
@@ -41,12 +42,13 @@ def edit(p, reps):
     open(p, "w", encoding="utf-8").write(s)
 edit("src/games/gravitys-ark/ground.js", [
 ("// kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's\n// scrap. heldSteps and heldStep: territory steps run at the boot, so the crash\n// site is the player's ground from the first frame; the war's own clock takes it\n// from there. All PROPOSED.\nexport const GROUND_DIALS = { kgPerScrap: 10, heldSteps: 4, heldStep: 0.25 };\n",
- "// kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's\n// scrap. heldSteps and heldStep: territory steps run at the crash, once the ship\n// flies its flag, so the ground around it is the player's from the first frame; the\n// war's own clock takes it from there. homelandR: how far from the bridge coldsnap's\n// placement reaches, the ark's own radius through the placement's option. All PROPOSED.\nexport const GROUND_DIALS = { kgPerScrap: 10, heldSteps: 8, heldStep: 0.25, homelandR: 60 };\n"),
+ "// kgPerScrap: the seam's rate between the ark's scrap in kilograms and coldsnap's\n// scrap. heldSteps and heldStep: territory steps run at the crash, once the ship\n// flies its flag, so the ground around it is the player's from the first frame; the\n// war's own clock takes it from there. All PROPOSED.\nexport const GROUND_DIALS = { kgPerScrap: 10, heldSteps: 8, heldStep: 0.25 };\n"),
 ("  const war = bootWar({ seed: groundSeed(seed, w) });\n", "  const war = bootWar({ seed: groundSeed(seed, w), town: false });   // no town: the ark's ground has only the ship to defend\n"),
-("depotP: site, recomputeFlow });\n", "depotP: site, homelandR: d.homelandR, recomputeFlow });\n"),
 ("stick: { f: 0, l: 0, h: null }, site, recomputeFlow };\n", "stick: { f: 0, l: 0, h: null }, site, objG, recomputeFlow };\n"),
 ("// nearest axis; the hull's own gx axis runs on along that line, away from the depot,\n// and its gy axis across it, so the whole hull stands beyond the bridge, clear of the depot.\nexport const HULL_DIALS = { kgPerKg: 250, unit: 2.675, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26 };\n",
  "// nearest axis; the hull's own gx axis runs on along that line, away from the depot,\n// and its gy axis across it, so the whole hull stands beyond the bridge, clear of the depot.\n// flagUp: how high over the bridge's roof the ship's flag flies. The gouge: the crash's\n// mark behind the hull along the line it came in on, gougeLen metres long, deepest\n// gougeDeep metres behind the bridge, gougeHalf metres to either side, gougeDepth metres\n// deep at the deepest; the trees within treeReach metres of its edge are felled along it.\nexport const HULL_DIALS = { kgPerKg: 250, unit: 2.675, pitch: 10.7, lift: 0.02, crashStop: 0.3, slideFrac: 0.6, moduleHp: 400, site: 26, flagUp: 1.5, gougeLen: 45, gougeDeep: 12, gougeHalf: 8, gougeDepth: 2.5, treeReach: 2 };\n"),
+("  const r = { x: -u.z, z: u.x };\n  const site = { x: f.x + u.x * d.site, z: f.z + u.z * d.site };\n",
+ "  const site = { x: f.x + u.x * d.site, z: f.z + u.z * d.site };\n  let r = { x: -u.z, z: u.x }; if (r.x * site.x + r.z * site.z < 0) r = { x: -r.x, z: -r.z };   // across the line, turned so the crew's side faces the map's centre and their ground stays inside the rim\n"),
 ("  const slots = list.map((m) => ({ x: site.x + u.x * m.gx * d.pitch + r.x * m.gy * d.pitch, z: site.z + u.z * m.gx * d.pitch + r.z * m.gy * d.pitch }));\n  const bodies = list.map((m, i) => {\n",
  "  const slots = list.map((m) => ({ x: site.x + u.x * m.gx * d.pitch + r.x * m.gy * d.pitch, z: site.z + u.z * m.gx * d.pitch + r.z * m.gy * d.pitch }));\n  gougeGround(war.field, site, u, d);   // the ground takes the crash's mark first, so the modules sit in it\n  const bodies = list.map((m, i) => {\n"),
 ("  stampHull(G);\n  return G.hull;\n}\n",
@@ -54,10 +56,10 @@ edit("src/games/gravitys-ark/ground.js", [
 ])
 ARK_EOF_2
 node --check src/games/gravitys-ark/ground.js && echo "syntax ok ground.js"
-test "$(sha256sum src/games/gravitys-ark/ground.js | cut -c1-16)" = "d74736311d317c5e" && echo OK src/games/gravitys-ark/ground.js || echo FAILED src/games/gravitys-ark/ground.js
+test "$(sha256sum src/games/gravitys-ark/ground.js | cut -c1-16)" = "c8357573072316bc" && echo OK src/games/gravitys-ark/ground.js || echo FAILED src/games/gravitys-ark/ground.js
 ```
 
-3. The two doors in coldsnap's files, one line each, the listed differences: the boot skips the town when asked; the placement radius takes the ark's own number. Syntax checks; both hash lines must print OK.
+3. The one door in coldsnap's files, one line, the listed difference: the boot skips the town when asked. Syntax check; the hash line must print OK.
 
 ```sh
 python3 - <<'ARK_EOF_3'
@@ -68,12 +70,9 @@ def edit(p, reps):
         s = s.replace(old, new)
     open(p, "w", encoding="utf-8").write(s)
 edit("src/depot/boot.js", [("    town = buildTown(world, grid, field, map);\n", "    town = opts.town === false ? [] : buildTown(world, grid, field, map);   // the ark boots its ground without the town: a listed difference from the checkout (phase 0.1.3)\n")])
-edit("src/depot/placement.js", [("      const HOMELAND_R = 36; // provisional (F5)\n", "      const HOMELAND_R = ctx.homelandR || 36; // provisional (F5); the ark passes its own radius: a listed difference from the checkout (phase 0.1.3)\n")])
 ARK_EOF_3
 node --check src/depot/boot.js && echo "syntax ok boot.js"
-node --check src/depot/placement.js && echo "syntax ok placement.js"
 test "$(sha256sum src/depot/boot.js | cut -c1-16)" = "4c1822d04727da60" && echo OK src/depot/boot.js || echo FAILED src/depot/boot.js
-test "$(sha256sum src/depot/placement.js | cut -c1-16)" = "95a48574a0384259" && echo OK src/depot/placement.js || echo FAILED src/depot/placement.js
 ```
 
 4. The ark's gate: the purse check is re-taught to a ground that carries the ship, since held ground now grows from the ship's flag, its gun placed on the crew's side of the bridge; one check joins at the end. Syntax check; the hash line must print OK.
@@ -90,9 +89,12 @@ edit([
 ("  const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);\n", "  const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);\n  crashHull(A, makeHull(STARTER_HULL), 5); crashHull(B, makeHull(STARTER_HULL), 5);   // the ground is the ship's: held ground grows from its flag\n"),
 ("  const purse1 = A.run.resources, f = A.run.focus;\n", "  const purse1 = A.run.resources, f = { x: A.site.x - A.hull.axis.r.x * 18, z: A.site.z - A.hull.axis.r.z * 18 };   // the crew's side of the bridge: held ground, clear of the hull\n"),
 ])
+imp = "setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary } from \"../src/games/gravitys-ark/ground.js\";\n"
+assert s.count(imp) == 1, "ground import"
+s = s.replace(imp, "setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary, fellTrees } from \"../src/games/gravitys-ark/ground.js\";\nimport { addBody } from \"../src/engine/core.js\";\n")
 anchor = "console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);\n"
 assert s.count(anchor) == 1, "tail anchor"
-block = '''{ // 55. ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, placement to the ark's own radius, the gouge behind the hull, the trees along it felled
+block = '''{ // 55. ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the trees along it felled
   const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
   const N = makeGround(gSeed, w, 900);   // the bare ground: the heights before any crash
   const G = makeGround(gSeed, w, 900), H = crashHull(G, makeHull(STARTER_HULL), 10);
@@ -105,16 +107,19 @@ block = '''{ // 55. ark: the field is the ship's: no town, the ship's flag the e
   const deep = behind(d.gougeDeep, 0), rim = behind(d.gougeLen + 4, 0), side = behind(d.gougeDeep, d.gougeHalf + 3);
   const lower = (p) => N.war.field.heightAt(p.x, p.z) - G.war.field.heightAt(p.x, p.z);
   const gouged = lower(deep) > d.gougeDepth * 0.8 && Math.abs(lower(rim)) < 1e-6 && Math.abs(lower(side)) < 1e-6 && G.war.field.dirty === true;
-  const where = (b) => ({ t: (H.site.x - b.pos.x) * u.x + (H.site.z - b.pos.z) * u.z, a: Math.abs((b.pos.x - H.site.x) * r.x + (b.pos.z - H.site.z) * r.z) });
-  const trees = G.world.bodies.filter((b) => b.kind === "tree");
-  const near = trees.filter((b) => { const q = where(b); return q.t >= -b.hy - 0.1 && q.t <= d.gougeLen && q.a <= d.gougeHalf + d.treeReach; });
-  const far = trees.filter((b) => { const q = where(b); return q.t < -3 || q.t > d.gougeLen + 3 || q.a > d.gougeHalf + d.treeReach + 3; });
-  const felled = near.every((b) => !b.alive && b.R[4] < 0.2) && far.every((b) => b.alive && b.R[4] > 0.9) && H.felled === trees.filter((b) => !b.alive).length;
-  const nearGun = groundOrder(G, "gun", H.site.x - r.x * 25, H.site.z - r.z * 25, "mg"), farGun = groundOrder(G, "gun", H.site.x - r.x * 70, H.site.z - r.z * 70, "mg");
-  const radius = nearGun.ok && !farGun.ok && /TOO FAR/i.test(String(farGun.reason));
+  const trees = G.world.bodies.filter((b) => b.kind === "tree"), deadBefore = trees.filter((b) => !b.alive).length;
+  const stood = H.felled === deadBefore && trees.every((b) => b.alive ? b.R[4] > 0.9 : b.R[4] < 0.2);
+  const spot = behind(d.gougeDeep, 2), tree = addBody(G.world, { kind: "tree", team: 0, mass: 260, hx: 0.28, hy: 1.6, hz: 0.28, x: spot.x, y: G.war.field.heightAt(spot.x, spot.z) + 1.62, z: spot.z, hp: 70, friction: 0.5 });
+  const before = { x: tree.pos.x, z: tree.pos.z }, fell = fellTrees(G.world, G.war.field, H.site, u, r, d);   // one tree planted in the gouge, then the felling called on its own
+  const felled = stood && fell === 1 && !tree.alive && tree.R[4] < 0.2 && Math.abs(tree.R[3] - u.x) < 1e-6 && Math.abs(tree.R[5] - u.z) < 1e-6
+    && Math.abs((tree.pos.x - before.x) - u.x * tree.hy) < 1e-9 && Math.abs((tree.pos.z - before.z) - u.z * tree.hy) < 1e-9 && tree.sleeping === true;
+  let nearGun = null;   // held ground grows from the ship's flag, 36 m out, coldsnap's own law: a gun goes on the crew's side within it, none beyond it
+  for (let dz = -6; dz <= 6 && !nearGun; dz += 2) for (let dx = -6; dx <= 6 && !nearGun; dx += 2) { const q = groundOrder(G, "gun", H.site.x - r.x * 25 + dx, H.site.z - r.z * 25 + dz, "mg"); if (q.ok) nearGun = q; }
+  const farGun = groundOrder(G, "gun", H.site.x - r.x * 70, H.site.z - r.z * 70, "mg");
+  const held = !!nearGun && !farGun.ok;
   const r1 = groundTick(G, 1 / 120);
-  check("ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, placement to the ark's own radius, the gouge behind the hull, the trees along it felled",
-    noTown && flagUp && objective && gouged && felled && radius && !G.run.gameOver && !!r1);
+  check("ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the trees along it felled",
+    noTown && flagUp && objective && gouged && felled && held && !G.run.gameOver && !!r1);
 }
 
 '''
@@ -122,10 +127,10 @@ s = s.replace(anchor, block + anchor)
 open(p, "w", encoding="utf-8").write(s)
 ARK_EOF_4
 node --check scripts/gravitys-ark-test.mjs && echo "syntax ok gate"
-test "$(sha256sum scripts/gravitys-ark-test.mjs | cut -c1-16)" = "282cfe7d2abbcc3f" && echo OK scripts/gravitys-ark-test.mjs || echo FAILED scripts/gravitys-ark-test.mjs
+test "$(sha256sum scripts/gravitys-ark-test.mjs | cut -c1-16)" = "3a9ae130d853eac4" && echo OK scripts/gravitys-ark-test.mjs || echo FAILED scripts/gravitys-ark-test.mjs
 ```
 
-5. The record that rides the landing: the README's ground line says the field as built and its engine line counts the two new listed differences. The hash line must print OK.
+5. The record that rides the landing: the README's ground line says the field as built and its engine line counts the new listed difference. The hash line must print OK.
 
 ```sh
 python3 - <<'ARK_EOF_5'
@@ -137,12 +142,12 @@ def edit(p, reps):
     open(p, "w", encoding="utf-8").write(s)
 edit("README.md", [
 ("the footprints block coldsnap's grid, so guns, walls, and paths go around them. Each kind wears",
- "the footprints block coldsnap's grid, so guns, walls, and paths go around them. The war boots without coldsnap's town; the ship flies its own flag, so the ground around it is the player's to build on, within 60 m of the bridge; the attacker marches on the bridge; the crash gouges the ground 45 m back along the line the ship came in on, 2.5 m deep at the deepest, and fells the trees along it. Each kind wears"),
+ "the footprints block coldsnap's grid, so guns, walls, and paths go around them. The war boots without coldsnap's town; the ship flies its own flag, so the ground around it is the player's to build on, held 36 m out from the flag and 9 m more from every gun, coldsnap's own law; the attacker marches on the bridge; the crash gouges the ground 45 m back along the line the ship came in on, 2.5 m deep at the deepest, and fells the trees along it. Each kind wears"),
 ("25 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, four carrying listed differences from the 0.1.0 plan and one from the 0.1.2 plan, the drawing's scene opened as a door,",
- "23 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, four carrying listed differences from the 0.1.0 plan and three from the 0.1.2 and 0.1.3 plans, the drawing's scene opened as a door, the war booting without its town, and the placement radius as an option,"),
+ "24 matching the checkout by hash, 17 front doors whose code sits in modules at the same commit, four carrying listed differences from the 0.1.0 plan and two from the 0.1.2 and 0.1.3 plans, the drawing's scene opened as a door and the war booting without its town,"),
 ])
 ARK_EOF_5
-test "$(sha256sum README.md | cut -c1-16)" = "bf670e0a89f4c4ef" && echo OK README.md || echo FAILED README.md
+test "$(sha256sum README.md | cut -c1-16)" = "f7adabbd93079fa9" && echo OK README.md || echo FAILED README.md
 ```
 
 6. Run the ark's gate. It must print 51 PASS lines, one more than the recorded 50, then `gravitys-ark-test: 51 PASS / 0 FAIL`, then `gravitys-ark-test PASS`. Any FAIL stops the task here.
@@ -174,10 +179,10 @@ Required: `2`, a count line naming 50 gates, `50 gates, 0 not ok`, `gravitys-ark
 8. Commit and push the landing, then stamp the real hash into the status line and the task row in a second small commit. Never amend after stamping.
 
 ```sh
-git add src/games/gravitys-ark/ground.js src/depot/boot.js src/depot/placement.js scripts/gravitys-ark-test.mjs README.md docs/parts docs/plans
-git commit -m "phase 0.1.3 task 2 — the field: no town, the ship's flag, the bridge the objective, placement to 60 m, the crash's gouge, the trees felled along it
+git add src/games/gravitys-ark/ground.js src/depot/boot.js scripts/gravitys-ark-test.mjs README.md docs/parts docs/plans
+git commit -m "phase 0.1.3 task 2 — the field: no town, the ship's flag, the bridge the objective, held ground from the flag, the crash's gouge, the trees felled along it
 
-Two listed differences: the boot skips the town when asked; the placement radius takes the ark's own number.
+One listed difference: the boot skips the town when asked.
 gravitys-ark-test 51 PASS / 0 FAIL; the parts build over 50 gates, every verdict ok.
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
@@ -194,8 +199,8 @@ git push origin main
 
 ## Acceptance
 
-- Step 1: `0`, five OK lines.
-- Steps 2 through 5: five OK lines, `syntax ok` four times.
+- Step 1: `0`, four OK lines.
+- Steps 2 through 5: four OK lines, `syntax ok` three times.
 - Step 6: `gravitys-ark-test: 51 PASS / 0 FAIL`, `gravitys-ark-test PASS`, a seeds line.
 - Step 7: `2`; the count line names 50 gates; `50 gates, 0 not ok`; `gravitys-ark 51 PASS / 0 FAIL;` with its seeds.
 - Step 8: push accepted by origin; the stamp commit pushed.
