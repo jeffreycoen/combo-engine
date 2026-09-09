@@ -453,7 +453,7 @@ const newHull = () => ({ builder: newBuilder(), list: STARTER_HULL.slice(), scra
   const list19 = hull19.list;
   const result = shellOnHull(hull19, star, ship19, WRECK_DIALS);
   const ws = hull19.builder.weldsOf(list19);
-  const loads = weldLoads(hull19.builder, MODULES, list19, ws, result.a);
+  const loads = weldLoads(hull19.builder, MODULES, list19, ws, result.a, 1);   // re-taught with the module: the load factor 1 at the order's scale
   const broken = breaking(loads, ws);
   const ws2 = ws.filter((w, k) => !broken.includes(k));
   const split = splitByRoot(hull19.builder, list19, ws2, 0);

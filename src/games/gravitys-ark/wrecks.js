@@ -40,7 +40,7 @@ export function shellOnHull(hull, star, ship, d) {
   const dist = Math.hypot(ship.x - star.x, ship.y - star.y);
   const a = shellDv(dist, d) / d.shellT;
   const ws = hull.builder.weldsOf(hull.list);
-  const loads = weldLoads(hull.builder, MODULES, hull.list, ws, a);
+  const loads = weldLoads(hull.builder, MODULES, hull.list, ws, a, 1);   // amended in the page step: at the order's scale a load is mass times acceleration in newtons, the factor 1
   const broken = breaking(loads, ws);
   if (!broken.length) return { shed: [], kept: hull.list, a };
   const ws2 = ws.filter((w, k) => !broken.includes(k));

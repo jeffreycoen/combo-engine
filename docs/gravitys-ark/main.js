@@ -10,6 +10,9 @@ import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 import { makeStations, makePurse, listings, hire, dock, buy, sell, makeHull, derive, STARTER_HULL, stepStations, carryPeople, deliverPeople } from "../../src/games/gravitys-ark/stations.js";
 import { rollPerson } from "../../src/games/gravitys-ark/galaxy.js";
 import { simStream } from "../../src/modules/determinism/determinism.js";
+import { MODULES } from "../../src/games/gravitys-ark/stations.js";
+import { WRECK_DIALS, ROPE, shell, shellOnHull, shedToWrecks, makeField, stepWrecks, makeGrappler, cast, stepGrappler, take } from "../../src/games/gravitys-ark/wrecks.js";
+import { PRICE_DIALS, makePirates, stepPirates, pay, cargoValue, hireOut, herReturns } from "../../src/games/gravitys-ark/price.js";
 
 const q = new URLSearchParams(location.search);
 const seed = q.has("seed") ? (parseInt(q.get("seed"), 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
@@ -20,7 +23,21 @@ const ship = road.ship, state = road.state, star = galaxy.star;
 const S = makeStations(galaxy); S.rollPerson = rollPerson;
 const purse = makePurse(20000, 0), hull = makeHull(STARTER_HULL), crew = [], nameRng = simStream((seed + 1) >>> 0);
 const PERSON_KG = 80;
-function hullMass() { return derive(hull).m + hull.scrap + PERSON_KG * (crew.length + hull.cargo.people); }
+function hullMass() { return derive(hull).m + hull.scrap + hull.spares.reduce((a, k) => a + MODULES[k].kg, 0) + PERSON_KG * (crew.length + hull.cargo.people); }
+// phases 0.0.107 and 0.0.108's page step: the wreck field and the grappler, the pirates and her price
+const fieldRng = simStream((seed + 2) >>> 0), pirateRng = simStream((seed + 3) >>> 0);
+let wrecks = [], collapsed = false, hullHp = 1000;
+const gr = makeGrappler(ship), P = makePirates(galaxy, pirateRng), her = { taken: false, away: null, sold: false };
+function ringOf() { const n = road.nearest(); return n ? n.w.ring : 2; }
+function onCollapse() {
+  collapsed = true; const body = { x: ship.x, y: ship.y, vx: ship.vx, vy: ship.vy, mass: ship.dry + ship.fuel };
+  if (ship.landed === null) { shell([body], star, WRECK_DIALS); ship.vx = body.vx; ship.vy = body.vy; }
+  const r = shellOnHull(hull, star, ship, WRECK_DIALS);
+  if (r.shed.length) { wrecks.push(...shedToWrecks(r.shed, ship, fieldRng)); state.events.push({ k: "shell shed " + r.shed.map((m) => m.t).join(" "), t: state.t }); }
+  wrecks.push(...makeField(star, fieldRng, WRECK_DIALS));
+}
+function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
+function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }
 function stationHere() { return ship.landed !== null ? galaxy.worlds[ship.landed].id : null; }
 function openContractHere(sid) { return S.book.list.find((c) => c.open && c.part === "people" && c.at === sid) || null; }
 
@@ -98,6 +115,7 @@ function draw() {
   ctx.fillStyle = ship.alive ? "#e9edf2" : "#c8302a"; ctx.beginPath(); ctx.moveTo(h1[0], h1[1]); ctx.lineTo(h2[0], h2[1]); ctx.lineTo(h3[0], h3[1]); ctx.closePath(); ctx.fill();
   const av = aimVector(), ap = R.project(ship.x + av[0] * 40 / z, ship.y + av[1] * 40 / z, 0);
   ctx.strokeStyle = burning ? "#e9b25c" : "rgba(233,178,92,.5)"; ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(ap[0], ap[1]); ctx.stroke();
+  drawWrecks();
 }
 
 // the panes: the ship's numbers, the clocks, the log
@@ -108,6 +126,8 @@ function hud() {
     "seed " + seed,
     "fuel " + fmt(ship.fuel) + " kg   mass " + fmt(ship.dry + ship.fuel) + " kg   credits " + fmt(purse.credits) + (purse.debt ? "   debt " + fmt(purse.debt) : ""),
     "dv " + fmt(dvAvailable(ship, road.dials.ve)) + " m/s   speed " + fmt(Math.hypot(ship.vx, ship.vy), 1) + " m/s",
+    "hull " + fmt(hullHp) + "   scrap " + fmt(hull.scrap) + " kg   spares " + (hull.spares.length ? hull.spares.join(" ") : "none") + (her.taken ? "   SHE IS TAKEN" : her.away ? "   she is away" : ""),
+    (() => { const p = lockedPirate(); return p ? "LOCK: they want " + p.demand.takes + " for ¢" + fmt(p.demand.demand) : ""; })(),
     w ? "landed " + w.id + " " + w.climate.toLowerCase() + (w.holder ? " " + w.holder : "") : (ship.alive ? "in flight" : "SHIP LOST"),
   ].join("\n");
   const lines = ["t " + fmt(state.t, 1) + " s"];
@@ -121,6 +141,7 @@ function hud() {
   $("clocks").textContent = lines.join("\n");
   $("log").textContent = state.events.slice(-6).map((e) => "t=" + fmt(e.t, 1) + " " + e.k + (e.i !== undefined ? " " + galaxy.worlds[e.i].id : "") + (e.v !== undefined ? " " + fmt(e.v, 1) + " m/s" : "")).join("\n");
   $("land").disabled = ship.landed !== null || !ship.alive; $("takeoff").disabled = ship.landed === null || !ship.alive; $("burn").disabled = ship.landed !== null || !ship.alive;
+  $("castB").disabled = ship.landed !== null || !!gr.g || !ship.alive; $("payB").disabled = !lockedPirate(); $("hireOut").disabled = ship.landed === null || !!her.away || her.taken;
   $("burn").classList.toggle("on", burning); $("aim").textContent = aimMode === "gate" ? "AIM: GATE" : "AIM: DRAG"; $("pause").classList.toggle("on", paused);
   if (!ship.alive && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. The card of the crossing lands in a later phase."; $("card").style.display = "block"; }
 }
@@ -153,7 +174,12 @@ addEventListener("keyup", (e) => { if (e.key === " ") burning = false; });
 const DT = 1 / 60; let last = performance.now(), acc = 0;
 function frame(now) {
   acc += Math.min(0.05, (now - last) / 1000); last = now;
-  while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); } stepStations(S, DT); ship.dry = hullMass(); } acc -= DT; }
+  while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); } stepStations(S, DT); ship.dry = hullMass();
+      if (state.hole.born && !collapsed) onCollapse();
+      stepWrecks(wrecks, road.wells(), DT);
+      const got = stepGrappler(gr, ship, ship.dry + ship.fuel, road.wells(), DT, WRECK_DIALS); if (got && got.taken) { const kind = take(hull, purse, got.taken); state.events.push({ k: "took " + kind + " " + fmt(got.taken.mass) + " kg", t: state.t }); }
+      for (const ev of stepPirates(P, ship, ringOf(), cargoValue(hull, 2), DT)) { if (ev.k === "lock") state.events.push({ k: "LOCK: they want " + ev.demand.takes + " (¢" + fmt(ev.demand.demand) + ")", t: state.t }); if (ev.k === "shot") { hullHp -= ev.damage; state.events.push({ k: "hit for " + ev.damage, t: state.t }); if (hullHp <= 0 && ship.alive) { ship.alive = false; state.events.push({ k: "death", t: state.t, v: 0 }); } } if (ev.k === "outrun") state.events.push({ k: "outran the lock", t: state.t }); }
+      const pay0 = herReturns(S.stations, her, purse, state.t, S.book.dials); if (pay0) state.events.push({ k: "she is back, paid " + fmt(pay0), t: state.t }); } acc -= DT; }
   draw(); hud(); dockPane();
   requestAnimationFrame(frame);
 }
@@ -182,3 +208,17 @@ $("sellScrap").onclick = () => { const sid = stationHere(); if (!sid || hull.scr
 $("hireHand").onclick = () => { const sid = stationHere(); if (!sid) return; const h = hire(S, sid, purse, nameRng, state.t); if (h) { crew.push(h); state.events.push({ k: "hired " + h.name, t: state.t }); } };
 $("takePeople").onclick = () => { const sid = stationHere(); if (!sid) return; const cost = carryPeople(S, sid, hull, purse, 1); if (cost !== null) state.events.push({ k: "took 1 person aboard for " + fmt(cost), t: state.t }); };
 $("deliver").onclick = () => { const sid = stationHere(); if (!sid) return; const ct = openContractHere(sid); if (!ct) return; const pay = deliverPeople(S, ct, hull, purse); if (pay) state.events.push({ k: "delivered people for " + fmt(pay), t: state.t }); };
+
+// the wreck field, the rope, and the pirates on the canvas; the cast, the pay, the hire-out
+const WRECK_COL = { scrap: "#9aa3ad", crate: "#e9b25c", module: "#7fd1e0", hull: "#5c6470" };
+function drawWrecks() {
+  const z = R.cam.z;
+  for (const w of wrecks) { if (w.taken) continue; const p = R.project(w.x, w.y, 0); ctx.fillStyle = WRECK_COL[w.kind] || "#fff"; ctx.fillRect(p[0] - 2, p[1] - 2, 4, 4); }
+  if (gr.g) { const s = R.project(ship.x, ship.y, 0), h = R.project(gr.g.x, gr.g.y, 0); ctx.strokeStyle = "#e9edf2"; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(h[0], h[1]); ctx.stroke(); }
+  for (const p of P.list) { if (!p.alive) continue; const q = R.project(p.x, p.y, 0); ctx.fillStyle = "#c8302a"; ctx.beginPath(); ctx.moveTo(q[0], q[1] - 5); ctx.lineTo(q[0] - 4, q[1] + 4); ctx.lineTo(q[0] + 4, q[1] + 4); ctx.closePath(); ctx.fill();
+    if (p.demand) { const s = R.project(ship.x, ship.y, 0); ctx.strokeStyle = "#c8302a"; ctx.beginPath(); ctx.arc(s[0], s[1], 14, 0, Math.PI * 2); ctx.stroke(); } }
+  void z;
+}
+$("castB").onclick = () => { if (ship.landed !== null || gr.g) return; const w = nearestWreck(); if (!w) { state.events.push({ k: "no wreck within " + ROPE.RANGE + " m", t: state.t }); return; } cast(gr, ship, ship.dry + ship.fuel, w, WRECK_DIALS); state.events.push({ k: "cast at " + w.kind, t: state.t }); };
+$("payB").onclick = () => { const p = lockedPirate(); if (!p) return; const takes = pay(P, p, hull, her); state.events.push({ k: "paid with " + takes, t: state.t }); };
+$("hireOut").onclick = () => { const sid = stationHere(); if (!sid) return; const w = galaxy.worlds[ship.landed]; if (S.stations[sid].faction !== "charter") { state.events.push({ k: "only the Charter hires her out", t: state.t }); return; } const ct = hireOut(S.book, S.stations, sid, { x: w.x, y: w.y }, state.hole, her, state.t, PRICE_DIALS); if (ct) state.events.push({ k: "she went to work, escrow " + fmt(ct.escrow) + " for " + PRICE_DIALS.hireDuration + " s", t: state.t }); };
