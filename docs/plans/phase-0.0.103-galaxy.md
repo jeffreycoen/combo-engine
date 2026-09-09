@@ -1,6 +1,6 @@
 # Phase 0.0.103 — galaxy: one seed makes everything
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 5 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `5286f0b`, 2026-09-09. Gate: 5 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 5 PASS / 0 FAIL; bracket unmoved. -->
 
 The first phase of GRAVITY'S ARK under the order batch-ark-1: the galaxy as data from one seed, frames 3 and 5 of the design document. Eight to twelve worlds on a road from the pit to the gate, each with its radius, gravity, climate, ring, holder, and station; the star at the pit; the gate with its toll and repair bill; the collapse count; names for people from the seed, women and men. A later phase draws these worlds on the warped grid, in their pits, and flies the ship by these same numbers.
