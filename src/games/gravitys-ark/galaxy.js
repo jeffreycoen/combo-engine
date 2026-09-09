@@ -12,7 +12,7 @@ export const FAMILY = ["Aske", "Brandt", "Corvin", "Dahl", "Ekholm", "Falk", "Gr
 
 // muFor(g, R, soft): the mu that makes the wells law's pull at distance R
 // equal to g. Wells law: mu / (r^2 + soft^2)^1.65.
-export function muFor(g, R, soft) { return g * Math.pow(R * R + soft * soft, 1.65); }
+export function muFor(g, R, soft) { return g * Math.pow(R * R + soft * soft, 1.65) / R; }   // amended in 0.0.105: the wells pull is mu times the distance over the power
 
 // personName(rng, sex): a first name from the sex's table, a family name
 // from FAMILY, the first name drawn first.

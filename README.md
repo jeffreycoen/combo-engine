@@ -123,6 +123,15 @@ A fan-fiction tactics campaign in the clone-war shape, live at `docs/frostline/`
 - **The purse remembers.** Kills pay bounties win or lose; contracts pay their posted price; the shop sells squads, medics, and the hunter — one armored man, twin sidearms, a 35-meter jetpack line, one of a kind. The men persist between contracts and the dead stay dead until replaced at the table's own split price. Purse, roster, heat, and casualties ride the browser's storage with a reset.
 - **The gate:** `node scripts/gate.mjs frostline` — one-call asserts grouped by area, seconds to run; long-run truths are the owner's playtest at the page, by standing ruling.
 
+## GRAVITY'S ARK — the first road
+
+You are a ship; she is a mechanic who can fix anything; a star dies behind you and becomes a black hole that eats the galaxy one world at a time; a gate at the far end is the only way out. Live at `docs/gravitys-ark/` on the published pages, built under `docs/plans/batch-ark-1.md`; every claim below is checkable at the page and in `scripts/gravitys-ark-test.mjs`. Every number is PROPOSED in that order's scale table until the owner rules.
+
+- **One seed makes everything:** `?seed=N` in the address gives the same galaxy to anyone: eight to twelve worlds on a road from the pit to the gate, each with its radius, gravity, climate, ring, holder, and station; the collapse count; the toll and the gate's bill; names for people, women and men.
+- **The road:** the ship flies under the wells law over every world and the pit; burns spend fuel as mass; a hull that reaches a surface lands by the band, the descent burn killing up to the escape speed, a crash to 22.5 m/s over it, death above; the collapse fires on the seeded takeoff; the hole grows on a schedule computable before launch and eats worlds in distance order; the edge is the nearest world your hull can still leave.
+- **The page:** the galaxy on the warped grid with the worlds in their pits, the ship, the clocks, LAND, TAKE OFF, and a burn aimed at the gate or by a drag; phone and desktop.
+- **The gate:** `node scripts/gate.mjs gravitys-ark`.
+
 ## The extracted modules
 
 Every module in `src/modules/`, the checklist item it serves, and the phase that landed it. Each has a headless gate in `scripts/gate.mjs`. The checklist governs extraction; this list carries the progress, flipped in each landing.

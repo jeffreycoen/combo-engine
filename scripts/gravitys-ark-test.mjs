@@ -3,7 +3,7 @@
 // identity, the layout laws, the name draws, the galaxy contract, the
 // import fence.
 import { makeGalaxy, checkGalaxy, rollPerson, FACTIONS, WOMEN, MEN, FAMILY } from "../src/games/gravitys-ark/galaxy.js";
-import { makeRoad, STARTER } from "../src/games/gravitys-ark/road.js";
+import { makeRoad, STARTER, escapeSpeed } from "../src/games/gravitys-ark/road.js";
 import { simStream } from "../src/modules/determinism/determinism.js";
 import { readFileSync } from "node:fs";
 
@@ -49,7 +49,7 @@ const rng = mulberry32(SEED);
       if (Math.abs(w.y) > d.yHalf) ok = false;
       if (w.r < d.rMin || w.r > d.rMax) ok = false;
       if (w.g < d.gMin || w.g > d.gMax) ok = false;
-      const pull = w.mu / Math.pow(w.r * w.r + w.soft * w.soft, 1.65);
+      const pull = w.mu * w.r / Math.pow(w.r * w.r + w.soft * w.soft, 1.65);   // re-taught in 0.0.105: the wells pull carries the distance
       if (Math.abs(pull - w.g) > Math.abs(w.g) * 1e-9) ok = false;
       if (w.ring !== Math.floor(3 * i / gal.n)) ok = false;
       if (w.ring === 2 && w.holder !== "authority") ok = false;
@@ -185,12 +185,12 @@ const rollSeed = () => (rng() * 0xffffffff) >>> 0;
     roadF.ship.x = w.x; roadF.ship.y = w.y + w.r + 20;
     let v;
     do { v = rng() * 30; } while (Math.abs(v - 7.5) < 1e-6 || Math.abs(v - 22.5) < 1e-6);
-    roadF.ship.vx = 0; roadF.ship.vy = -v;
+    roadF.ship.vx = 0; roadF.ship.vy = -(v + escapeSpeed(w));   // re-taught in 0.0.105: the band is the excess over the descent burn
     const res = roadF.land();
     if (v < 7.5) {
       if (!(res.ok === true && res.crash === false)) ok = false;
     } else if (v < 22.5) {
-      if (!(res.ok === true && res.crash === true && Math.abs(res.load - v) < 1e-9)) ok = false;
+      if (!(res.ok === true && res.crash === true && Math.abs(res.load - v) < 1e-6)) ok = false;
     } else {
       if (!(res.ok === false && res.reason === "death" && roadF.ship.alive === false)) ok = false;
     }
@@ -210,6 +210,23 @@ const rollSeed = () => (rng() * 0xffffffff) >>> 0;
   const needsOk = allNeeds.every(nv => Number.isFinite(nv) && nv > 0);
   const ok = light.index <= heavy.index && empty.index === galaxyG.n && needsOk;
   check("ark: the edge moves nearer for a heavier hull", ok);
+}
+
+{ // 12. ark: a hull that reaches a surface lands by the band and never passes through (added in 0.0.105)
+  let ok = true;
+  for (let iter = 0; iter < 20 && ok; iter++) {
+    const gal = makeGalaxy(rollSeed()), rd = makeRoad(gal), w = gal.worlds[Math.floor(rng() * gal.n)];
+    rd.ship.landed = null; rd.ship.x = w.x; rd.ship.y = w.y + w.r + 50; rd.ship.vx = 0; rd.ship.vy = 0;
+    let steps = 0; while (rd.ship.landed === null && rd.ship.alive && steps++ < 20000) rd.tick(1 / 60);
+    const ev = rd.state.events[rd.state.events.length - 1];
+    if (!(rd.ship.landed === w.i && ev && ev.k === "land" && Math.abs(rd.ship.y - (w.y + w.r)) < 1e-9)) ok = false;
+    const rd2 = makeRoad(gal); rd2.ship.landed = null; rd2.ship.x = w.x; rd2.ship.y = w.y + w.r + 3000; rd2.ship.vx = 0; rd2.ship.vy = -(escapeSpeed(w) + 30);
+    steps = 0; while (rd2.ship.landed === null && rd2.ship.alive && steps++ < 20000) rd2.tick(1 / 60);
+    if (!(rd2.ship.alive === false && rd2.ship.landed === null)) ok = false;
+    const rd3 = makeRoad(gal); const t0 = rd3.takeoff(); const v0 = Math.hypot(rd3.ship.vx, rd3.ship.vy);
+    if (!(t0.ok && v0 >= escapeSpeed(gal.worlds[0]))) ok = false;
+  }
+  check("ark: a hull that reaches a surface lands by the band and never passes through", ok);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

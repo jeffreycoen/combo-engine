@@ -1,3 +1,6 @@
+// Amended in phase 0.0.105 (the page step): a hull that reaches a surface lands by
+// the band and never passes through; the descent burn kills up to the escape
+// speed and the band is the excess; a takeoff leaves at the escape speed outward.
 // MODULE of the game GRAVITY'S ARK: road, the order's phase 0.0.104, frames
 // 4 and 5 headless, every number PROPOSED from the order's scale table, the
 // wells law the engine's own, no randomness.
@@ -46,6 +49,9 @@ export function makeRoad(galaxy, opts) {
           ship.alive = false;
           const ev = { k: "fell", t: state.t };
           state.events.push(ev); events.push(ev);
+        } else {
+          const n = this.nearest();
+          if (n && n.dist <= 0) { const r = this.land(); const ev = state.events[state.events.length - 1]; if (r && ev) events.push(ev); }
         }
       }
       if (state.hole.born) {
@@ -80,7 +86,7 @@ export function makeRoad(galaxy, opts) {
       if (ship.landed !== null || !ship.alive) return { ok: false, reason: "state" };
       const n = this.nearest();
       if (!n || n.dist > d.landR) return { ok: false, reason: "far" };
-      const v = Math.hypot(ship.vx, ship.vy);
+      const v = Math.max(0, Math.hypot(ship.vx, ship.vy) - escapeSpeed(n.w));   // the descent burn kills up to the escape speed; the band is the excess
       if (v > d.crashV) {
         ship.alive = false;
         const ev = { k: "death", t: state.t, v };
@@ -103,7 +109,7 @@ export function makeRoad(galaxy, opts) {
       const need = fuelForDv(ship, escapeSpeed(w), d.ve);
       if (ship.fuel < need) return { ok: false, reason: "fuel" };
       ship.fuel -= need; state.spent += need; state.takeoffs += 1;
-      ship.landed = null; ship.x = w.x; ship.y = w.y + w.r + d.launchGap; ship.vx = d.launchV; ship.vy = 0;
+      ship.landed = null; ship.x = w.x; ship.y = w.y + w.r + d.launchGap; ship.vx = d.launchV; ship.vy = escapeSpeed(w);
       const ev = { k: "takeoff", i: w.i, t: state.t };
       state.events.push(ev);
       if (state.takeoffs === galaxy.collapseAt && !state.hole.born) this.collapse();
@@ -126,7 +132,7 @@ export function makeRoad(galaxy, opts) {
       const dv = dvAvailable(hull, d.ve);
       const needs = galaxy.worlds.map((w, idx) => {
         const dist = Math.hypot(w.x, w.y);
-        const pull = state.hole.mu / Math.pow(dist * dist + star.soft * star.soft, 1.65);
+        const pull = state.hole.mu * dist / Math.pow(dist * dist + star.soft * star.soft, 1.65);   // amended in 0.0.105: the wells pull carries the distance
         const next = galaxy.worlds[idx + 1];
         const lane = next ? Math.hypot(next.x - w.x, next.y - w.y) : Math.hypot(galaxy.gate.x - w.x, galaxy.gate.y - w.y);
         return escapeSpeed(w) + Math.sqrt(2 * pull * lane);
