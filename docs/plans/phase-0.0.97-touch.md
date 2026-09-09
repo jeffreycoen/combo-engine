@@ -1,6 +1,6 @@
 # Phase 0.0.97 — touch: the touch commands
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `6cec92a`, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The touch commands: the right mouse button, solved for a phone". Source: the fleet demo, read-only, lines 153, 1097 to 1162, 1170 to 1196. The module turns mouse, wheel, key, and finger events into orders, camera moves, box and disc actions, and selection requests; the page binds the events, hands in what lies under the pointer, applies the intents, and keeps the hit tests, the timers, and the drawing.
