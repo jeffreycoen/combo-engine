@@ -1,0 +1,1354 @@
+{
+ "title": "GRAVITY'S ARK, the parts",
+ "coldsnap": {
+  "checkout": "/home/batman/coldsnap",
+  "commit": "111b9cb",
+  "treeCommit": "82b5524"
+ },
+ "frames": [
+  {
+   "id": "bay",
+   "n": 1,
+   "name": "The bay",
+   "see": "Your hull in pieces on a plague world under a star too big for the sky. A walker with dead actuators. The engineer, with a torch."
+  },
+  {
+   "id": "hold",
+   "n": 2,
+   "name": "The hold",
+   "see": "Every wave she fights or she fixes, never both. You leave when the hull is whole and the waves are still coming."
+  },
+  {
+   "id": "ring",
+   "n": 3,
+   "name": "The ring under the star",
+   "see": "Two or three worlds of ordinary business while the star swells and reddens and nothing names it."
+  },
+  {
+   "id": "star",
+   "n": 4,
+   "name": "The star",
+   "see": "On a takeoff it goes. A shell shoves everything outward. The light is gone, the pit is still there, and it starts to grow."
+  },
+  {
+   "id": "road",
+   "n": 5,
+   "name": "The road",
+   "see": "Eight to twelve worlds, the whole map known, the gate marked, and an edge that is wherever your engines lose to the pull."
+  },
+  {
+   "id": "wrecks",
+   "n": 6,
+   "name": "The wrecks",
+   "see": "Everything the shell threw out is falling back in, and the grappler eats it. Your ship is built from it."
+  },
+  {
+   "id": "price",
+   "n": 7,
+   "name": "The price",
+   "see": "Every station lists a price for her. A pirate demands her or your cargo, whichever is worth more."
+  },
+  {
+   "id": "gate",
+   "n": 8,
+   "name": "The gate",
+   "see": "Shut until she fixes it, with time, scrap, and modules. Then pay the toll and pass. Cannot pay? Sell your ship to the Fitters, module by module."
+  },
+  {
+   "id": "card",
+   "n": 9,
+   "name": "The card",
+   "see": "What came through, what the hole ate, and the name the galaxy gave you."
+  }
+ ],
+ "gaps": [
+  {
+   "id": "g-mechbay",
+   "name": "The mech bay",
+   "what": "The walker rides only if a mech bay module is welded: it carries the rig's mass, sets the walker beside the hull at landing, boards it at takeoff."
+  },
+  {
+   "id": "g-engineer",
+   "name": "The engineer as one figure",
+   "what": "Her price and hire-out in space, her body on the ground, fight or fix: one state on both sides of the seam."
+  },
+  {
+   "id": "g-gate-seed",
+   "name": "The gate by seed",
+   "what": "Working with a high toll, broken, blockaded, or both, rolled by the seed; the blockade reuses the pirates with the holder's coin."
+  },
+  {
+   "id": "g-save",
+   "name": "A save of the whole run",
+   "what": "The road, the registry of worlds, the log, and the ground as one saved run."
+  },
+  {
+   "id": "g-dialogue",
+   "name": "Dialogue as data and the ship computer",
+   "what": "Lines as speaker, trigger, condition, text; the ship's own flat voice reading instruments and records."
+  },
+  {
+   "id": "g-star-frame",
+   "name": "The star in every frame",
+   "what": "A camera law that keeps MORS in frame, bigger and redder per landing, and holds the shot at the collapse."
+  },
+  {
+   "id": "g-ground-light",
+   "name": "The ground's light",
+   "what": "The one light from the star reddening per landing, the shadows lengthening."
+  },
+  {
+   "id": "g-hands",
+   "name": "The hands' words",
+   "what": "A hand unpaid walks, the home line when the hole takes her world, the card's list of who did not come through."
+  },
+  {
+   "id": "g-tramps",
+   "name": "Tramps that leave",
+   "what": "Plain bodies on a burn schedule leaving the near stations for the gate, never coming back."
+  },
+  {
+   "id": "g-plague",
+   "name": "The plague world",
+   "what": "No market, the Grip's ground; the galaxy carries the world's kind."
+  },
+  {
+   "id": "g-scrub",
+   "name": "The scrub as a listing line",
+   "what": "A clawed hull carries the Grip; a station scrubs it for a price on the listing."
+  },
+  {
+   "id": "g-weapons",
+   "name": "Weapons on the hull",
+   "what": "The slug driver, the rack, the shield, from deadweight's lift, so a blockade can be fought and the sold module kinds do something."
+  },
+  {
+   "id": "g-storyteller",
+   "name": "The storyteller",
+   "what": "A seeded pacer with a quiet dial at zero; may delay a wave, never shrinks one, never touches the hole."
+  },
+  {
+   "id": "g-walker-scale",
+   "name": "The walker at the ruled scale",
+   "what": "Twice a trooper's height, standing. Open on coldsnap's bench."
+  },
+  {
+   "id": "g-sound",
+   "name": "Sound",
+   "what": "Coldsnap's procedural engine on the ground; nothing in space yet."
+  },
+  {
+   "id": "g-onboarding",
+   "name": "Onboarding",
+   "what": "The first minute explained; the ship computer's lines are the candidate."
+  }
+ ],
+ "coldsnapGroups": [
+  {
+   "id": "cs-engine",
+   "name": "The engine",
+   "match": [
+    "src/engine/"
+   ],
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-drawing",
+   "name": "The drawing",
+   "match": [
+    "src/graphics/"
+   ],
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "closes": [
+    "g-ground-light"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-war",
+   "name": "The war's systems",
+   "match": [
+    "src/depot/"
+   ],
+   "exclude": [
+    ".jsx"
+   ],
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-platform",
+   "name": "The platform",
+   "match": [
+    "src/platform/"
+   ],
+   "serves": [
+    "hold"
+   ],
+   "closes": [
+    "g-sound",
+    "g-save"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-mech-bench",
+   "name": "The walker's bench",
+   "match": [
+    "src/game/mechReadout.js"
+   ],
+   "serves": [
+    "hold"
+   ],
+   "closes": [
+    "g-walker-scale"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-report",
+   "name": "The after-action report",
+   "match": [
+    "src/aar/"
+   ],
+   "serves": [
+    "card"
+   ],
+   "plan": "take"
+  },
+  {
+   "id": "cs-superseded",
+   "name": "The pre-fork drawing, superseded",
+   "match": [
+    "src/render/"
+   ],
+   "plan": "leave"
+  },
+  {
+   "id": "cs-screens",
+   "name": "Screens, rebuilt in the page's own way",
+   "match": [
+    "src/depot/",
+    "src/ui/",
+    "src/game/",
+    "src/main.jsx"
+   ],
+   "only": [
+    ".jsx"
+   ],
+   "plan": "leave"
+  },
+  {
+   "id": "cs-ui",
+   "name": "Screen helpers, left with the screens",
+   "match": [
+    "src/ui/"
+   ],
+   "plan": "leave"
+  },
+  {
+   "id": "cs-campaign",
+   "name": "The campaign pipeline, unused by the frames",
+   "match": [
+    "src/game/scenario.js",
+    "src/game/predicate.js",
+    "src/game/scenarios/",
+    "src/game/runner/"
+   ],
+   "plan": "leave"
+  },
+  {
+   "id": "cs-frozen-demo",
+   "name": "The frozen demo the golden gate reads",
+   "match": [
+    "src/demo/"
+   ],
+   "plan": "decide"
+  },
+  {
+   "id": "cs-version",
+   "name": "The version mark",
+   "match": [
+    "src/version.js"
+   ],
+   "plan": "leave"
+  }
+ ],
+ "parts": [
+  {
+   "id": "dw-determinism",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "determinism",
+   "does": "The seeded stream and the state hash.",
+   "module": "determinism",
+   "gate": "determinism",
+   "serves": [
+    "bay",
+    "hold",
+    "ring",
+    "star",
+    "road",
+    "wrecks",
+    "price",
+    "gate",
+    "card"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-market",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "market",
+   "does": "Pools whose price moves with every trade.",
+   "module": "market",
+   "gate": "market",
+   "serves": [
+    "ring",
+    "price"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-ledger",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "ledger",
+   "does": "Every unit declared at genesis, audited to zero drift.",
+   "module": "ledger",
+   "gate": "ledger",
+   "serves": [
+    "ring",
+    "wrecks"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-escrow",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "escrow",
+   "does": "Contracts with escrow, rescues, the Authority's pay.",
+   "module": "escrow",
+   "gate": "escrow",
+   "serves": [
+    "ring",
+    "price"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-builder",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "builder",
+   "does": "Ports, welds, mass and thrust, connectivity, rotate, remove.",
+   "module": "builder",
+   "gate": "builder",
+   "serves": [
+    "wrecks"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-wells",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "wells",
+   "does": "The field, the pair's orbit, the stop prediction.",
+   "module": "wells",
+   "gate": "wells",
+   "serves": [
+    "star",
+    "road"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-grapple",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "grapple",
+   "does": "Cast, bite, reel, yank, snap.",
+   "module": "grapple",
+   "gate": "grapple",
+   "serves": [
+    "wrecks"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-aim",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "aim",
+   "does": "Frozen-time aiming: the cone, the shot prediction.",
+   "module": "aim",
+   "gate": "aim",
+   "serves": [
+    "wrecks",
+    "price"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-render2d",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "render2d",
+   "does": "The projection, the warp, the gravity-warped grid.",
+   "module": "render2d",
+   "gate": "render2d",
+   "serves": [
+    "ring",
+    "star",
+    "road"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-tape",
+   "source": "deadweight",
+   "group": "Lifted",
+   "name": "tape",
+   "does": "Every action with its tick; the replay is the save.",
+   "module": "tape",
+   "gate": "tape",
+   "serves": [
+    "road",
+    "card"
+   ],
+   "closes": [
+    "g-save"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "dw-world",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the world's extras",
+   "does": "The nebula's drag, the gusher as a repelling well, the comet, the rocks that fall in and feed the eaten mass, the boundary, the frontier that replaces the dead, the sun's heat and kill radius.",
+   "demoFns": [
+    "makeWorld",
+    "inNeb",
+    "accel"
+   ],
+   "serves": [
+    "road",
+    "star"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-flight",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the flight",
+   "does": "The ship as a rigid body: thrust at each mount, torque off the balance point, the thruster quads, fuel as mass, the wells, the kill radii, the boundary, docking; the mass books; dock, undock, launch, the ship rebuilt from the build list; death, respawn on debt, the run's end; the rating mode.",
+   "demoFns": [
+    "stepWorld",
+    "stepFlight",
+    "holdKg",
+    "holdCap",
+    "totalM",
+    "rebuildShipAt",
+    "dock",
+    "undock",
+    "launch",
+    "syncBuild",
+    "die",
+    "respawn",
+    "finish"
+   ],
+   "serves": [
+    "star",
+    "road"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-welds",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "welds in flight",
+   "does": "Load from thrust and impact, breaking, the ship splitting, shed modules becoming wreckage.",
+   "demoFns": [
+    "breakWeld",
+    "shedModule",
+    "fracture"
+   ],
+   "serves": [
+    "star",
+    "wrecks"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-hangar",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the hangar",
+   "does": "The parts tray priced from the docked pools, tap to place, rotate, remove, blueprints, the module card, the build drawn with couplers and the balance mark, the hull gallery, the wallet, FLY.",
+   "demoFns": [
+    "trayInit",
+    "setSel",
+    "screenToCell",
+    "modCard",
+    "drawPartThumb",
+    "drawHangar",
+    "hullStats",
+    "hullSil",
+    "hullsShow",
+    "bpCost",
+    "loadBlueprint"
+   ],
+   "serves": [
+    "wrecks"
+   ],
+   "closes": [
+    "g-weapons"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-weapons",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "weapons",
+   "does": "The slug driver with recoil at its mount, the rack's four birds, lead and intercept, the shield that drinks fuel, dust and burn effects.",
+   "demoFns": [
+    "fireSlug",
+    "stepSlugs",
+    "fireMissile",
+    "fireMissileAt",
+    "stepMissiles",
+    "interceptAng",
+    "aimCandidates",
+    "cycleAimTarget"
+   ],
+   "serves": [
+    "price"
+   ],
+   "closes": [
+    "g-weapons"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-salvage",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "salvage",
+   "does": "Scavenging a wreck into the hold, hot goods fenced at a cut, salvage sold by station rate, the hold dumped under a lock.",
+   "demoFns": [
+    "nearWreck",
+    "nearWreckStub",
+    "scavenge",
+    "dumpHold"
+   ],
+   "serves": [
+    "wrecks"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-fabric",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the fabric",
+   "does": "Every mass as one list for the rope and the shell; bodies tied by the rope pull both ways.",
+   "demoFns": [
+    "collectBodies",
+    "grapFabricAttach",
+    "stepFabric"
+   ],
+   "serves": [
+    "wrecks",
+    "star"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-sling",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the sling planner",
+   "does": "A planned burn at a chosen point on the swing, committed in frozen time.",
+   "demoFns": [
+    "stepPlan",
+    "doSling"
+   ],
+   "serves": [
+    "road"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-tramps",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "tramps",
+   "does": "The arbitrage brain, their mass and value, death and respawn from the frontier, derelicts that become tows.",
+   "demoFns": [
+    "trampBrain",
+    "trampMass",
+    "stepTramps",
+    "trampValue",
+    "playerValue",
+    "trampDie",
+    "trampRespawn"
+   ],
+   "serves": [
+    "ring",
+    "road"
+   ],
+   "closes": [
+    "g-tramps"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-pirates",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "pirates",
+   "does": "Roost, mark the richest, chase, lock, demand, fire, cool; paying; the Authority's purse and the bounty.",
+   "demoFns": [
+    "stepPirates",
+    "pirateDemand",
+    "pirateHit",
+    "payPirate"
+   ],
+   "serves": [
+    "price"
+   ],
+   "closes": [
+    "g-gate-seed"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-scene",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the scene drawing",
+   "does": "Box prisms, module glyphs and letters, bodies wearing their station of origin, shadows, couplers, the balance mark, faceted planets in their pits, the sun and its kill ring, the hole, the field rings, tramps, the line, pirates, wreckage, crates, stations, the gate, the plumes, weld seams tinted by load, the coast line, the ship panel, the minimap.",
+   "demoFns": [
+    "prismAt",
+    "setTheme",
+    "glyphCanvas",
+    "glyphSVG",
+    "drawModule",
+    "shadow",
+    "drawCoupler",
+    "comSym",
+    "planet",
+    "label",
+    "drawWorld",
+    "drawShipFlight",
+    "lerpCol",
+    "drawStatus",
+    "minimap"
+   ],
+   "serves": [
+    "ring",
+    "star",
+    "road",
+    "wrecks",
+    "price",
+    "gate"
+   ],
+   "closes": [
+    "g-star-frame"
+   ],
+   "plan": "lift"
+  },
+  {
+   "id": "dw-page",
+   "source": "deadweight",
+   "group": "Not lifted",
+   "name": "the page's loop and rail",
+   "does": "The fixed step, the camera follow with burn shake and auto-zoom near wells, the rail, the flight readout, the intro card, the report, the badge, the theme switch.",
+   "demoFns": [
+    "loop",
+    "fit",
+    "chrome",
+    "selftest",
+    "reportErr"
+   ],
+   "serves": [
+    "ring",
+    "star",
+    "road",
+    "wrecks",
+    "price",
+    "gate",
+    "card"
+   ],
+   "plan": "screens"
+  },
+  {
+   "id": "ark-galaxy",
+   "source": "ark",
+   "group": "Keep",
+   "name": "galaxy",
+   "does": "One seed makes the worlds with radius, gravity, climate, ring, holder, station, and hands; the gate with toll and bill; the collapse count; names, women and men.",
+   "files": [
+    "src/games/gravitys-ark/galaxy.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.103",
+   "serves": [
+    "ring",
+    "road"
+   ],
+   "closes": [
+    "g-plague",
+    "g-gate-seed"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-road",
+   "source": "ark",
+   "group": "Retire",
+   "name": "road",
+   "does": "The point ship under the wells law; the hole's mass steps, the schedule ahead, the edge per hull move into the ark's layer.",
+   "files": [
+    "src/games/gravitys-ark/road.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.104",
+   "serves": [
+    "star",
+    "road"
+   ],
+   "plan": "retire"
+  },
+  {
+   "id": "ark-page",
+   "source": "ark",
+   "group": "Split",
+   "name": "the page",
+   "does": "One file holding every screen today; to be split, one file per screen, the main file keeping the hookups.",
+   "files": [
+    "docs/gravitys-ark/main.js",
+    "docs/gravitys-ark/index.html"
+   ],
+   "phase": "0.0.105",
+   "serves": [
+    "bay",
+    "hold",
+    "ring",
+    "star",
+    "road",
+    "wrecks",
+    "price",
+    "gate",
+    "card"
+   ],
+   "plan": "split"
+  },
+  {
+   "id": "ark-stations",
+   "source": "ark",
+   "group": "Keep",
+   "name": "stations",
+   "does": "Hands by name at a rising price, wages due at dock, debt, the people contract, carry and deliver; on top of deadweight's markets.",
+   "files": [
+    "src/games/gravitys-ark/stations.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.106",
+   "serves": [
+    "ring"
+   ],
+   "closes": [
+    "g-hands",
+    "g-scrub"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-wrecks",
+   "source": "ark",
+   "group": "Retire",
+   "name": "wrecks",
+   "does": "The shell, the field, the grappler at real scale; deadweight's wreckage and grapple take over.",
+   "files": [
+    "src/games/gravitys-ark/wrecks.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.107",
+   "serves": [
+    "star",
+    "wrecks"
+   ],
+   "plan": "retire"
+  },
+  {
+   "id": "ark-price",
+   "source": "ark",
+   "group": "Keep",
+   "name": "price",
+   "does": "Her price by ring, the factions' listings, the hire-out, the bounty's purse; the lock joins deadweight's pirates demanding her or the cargo.",
+   "files": [
+    "src/games/gravitys-ark/price.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.108",
+   "serves": [
+    "price"
+   ],
+   "closes": [
+    "g-engineer"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-gate",
+   "source": "ark",
+   "group": "Keep",
+   "name": "gate",
+   "does": "The bill only she pays, the toll, the Fitters, passing, respawn ahead of the edge, the endings.",
+   "files": [
+    "src/games/gravitys-ark/gate.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.109",
+   "serves": [
+    "gate"
+   ],
+   "closes": [
+    "g-gate-seed"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-card",
+   "source": "ark",
+   "group": "Keep",
+   "name": "card",
+   "does": "The log on receipts, the card with the manifest and the galaxy's name.",
+   "files": [
+    "src/games/gravitys-ark/card.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.109",
+   "serves": [
+    "card"
+   ],
+   "closes": [
+    "g-hands"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-hold",
+   "source": "ark",
+   "group": "Retire",
+   "name": "hold",
+   "does": "The flat field: waves, claws, repair, walls and guns, the mast, the boss; the ground moves to coldsnap.",
+   "files": [
+    "src/games/gravitys-ark/hold.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.0.110",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "plan": "retire"
+  },
+  {
+   "id": "ark-walker-scale",
+   "source": "ark",
+   "group": "Keep",
+   "name": "the scale option",
+   "does": "One scaling law across the rig, the balance controller, and the leg lengths; the stance at 0.607 does not hold.",
+   "files": [
+    "src/modules/rig/rig.js",
+    "src/modules/gait/gait.js"
+   ],
+   "gate": "rig",
+   "phase": "0.0.111",
+   "serves": [
+    "hold"
+   ],
+   "closes": [
+    "g-walker-scale"
+   ],
+   "plan": "keep"
+  },
+  {
+   "id": "ark-parts-page",
+   "source": "ark",
+   "group": "Tooling",
+   "name": "the parts page",
+   "does": "This page: the generator, the table, the views, the feedback store.",
+   "files": [
+    "scripts/parts.mjs",
+    "docs/parts/views.js",
+    "docs/parts/template.html",
+    "docs/parts/parts-source.json"
+   ],
+   "gate": "parts",
+   "phase": "0.0.112",
+   "plan": "new"
+  },
+  {
+   "id": "ark-spine",
+   "source": "ark",
+   "group": "New",
+   "name": "the spine refresh",
+   "does": "Coldsnap's plain files at 111b9cb into the tree, verbatim by hash.",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-seam",
+   "source": "ark",
+   "group": "New",
+   "name": "the seam",
+   "does": "The hull down as bodies with the factor, the status back up, one clock.",
+   "serves": [
+    "bay",
+    "hold",
+    "star",
+    "road"
+   ],
+   "closes": [
+    "g-engineer"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-ground",
+   "source": "ark",
+   "group": "New",
+   "name": "the ground on coldsnap",
+   "does": "The crash as welds, the Grip in waves, repair with drag, walls and guns, the walker with the leap, the boss, men by name, the engineer on foot, infection, the registry.",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "closes": [
+    "g-engineer",
+    "g-plague",
+    "g-scrub"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-gate-seed",
+   "source": "ark",
+   "group": "New",
+   "name": "the gate by seed",
+   "does": "State, holder, toll, bill on the galaxy; the blockade on the pirates.",
+   "serves": [
+    "gate"
+   ],
+   "closes": [
+    "g-gate-seed"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-mechbay",
+   "source": "ark",
+   "group": "New",
+   "name": "the mech bay",
+   "does": "The walker rides only if a mech bay is welded.",
+   "serves": [
+    "bay",
+    "wrecks"
+   ],
+   "closes": [
+    "g-mechbay"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-save",
+   "source": "ark",
+   "group": "New",
+   "name": "the save",
+   "does": "The whole run as one saved thing.",
+   "serves": [
+    "card"
+   ],
+   "closes": [
+    "g-save"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-dialogue",
+   "source": "ark",
+   "group": "New",
+   "name": "dialogue and the ship computer",
+   "does": "Lines as data; the ship's flat voice.",
+   "serves": [
+    "bay",
+    "hold",
+    "ring",
+    "star",
+    "road",
+    "price",
+    "gate",
+    "card"
+   ],
+   "closes": [
+    "g-dialogue",
+    "g-onboarding"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-camera",
+   "source": "ark",
+   "group": "New",
+   "name": "the camera law",
+   "does": "The star in every frame; the held shot.",
+   "serves": [
+    "ring",
+    "star"
+   ],
+   "closes": [
+    "g-star-frame"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-ground-light",
+   "source": "ark",
+   "group": "New",
+   "name": "the ground's light",
+   "does": "One light from the star, reddening per landing.",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "closes": [
+    "g-ground-light"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-hands",
+   "source": "ark",
+   "group": "New",
+   "name": "the hands' words",
+   "does": "The walk when unpaid, the home line, the card's dead.",
+   "serves": [
+    "ring",
+    "card"
+   ],
+   "closes": [
+    "g-hands"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-tramps-leave",
+   "source": "ark",
+   "group": "New",
+   "name": "tramps that leave",
+   "does": "The exodus as a brain change on deadweight's tramps.",
+   "serves": [
+    "ring"
+   ],
+   "closes": [
+    "g-tramps"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "ark-storyteller",
+   "source": "ark",
+   "group": "New",
+   "name": "the storyteller",
+   "does": "The seeded pacer, quiet at zero.",
+   "serves": [
+    "hold",
+    "price"
+   ],
+   "closes": [
+    "g-storyteller"
+   ],
+   "plan": "later"
+  },
+  {
+   "id": "ark-sound",
+   "source": "ark",
+   "group": "New",
+   "name": "sound",
+   "does": "Coldsnap's engine on the ground.",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "closes": [
+    "g-sound"
+   ],
+   "plan": "later"
+  },
+  {
+   "id": "scr-space",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the space screen",
+   "does": "Deadweight's flight and drawing under the ark's rail, in its own file.",
+   "serves": [
+    "ring",
+    "star",
+    "road",
+    "wrecks",
+    "price"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "scr-hangar",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the hangar screen",
+   "does": "The build screen at a dock, in its own file.",
+   "serves": [
+    "wrecks"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "scr-ground",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the ground screen",
+   "does": "The coldsnap renderer with the hold's rail, in its own file.",
+   "serves": [
+    "bay",
+    "hold"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "scr-dock",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the dock pane",
+   "does": "Listings, the purse, hands, the people contract, in its own file.",
+   "serves": [
+    "ring",
+    "price"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "scr-gate",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the gate pane",
+   "does": "The bill, the toll, the Fitters' stall, in its own file.",
+   "serves": [
+    "gate"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "scr-card",
+   "source": "ark",
+   "group": "Screens",
+   "name": "the card",
+   "does": "The manifest, the dead, the eaten, the name, in its own file.",
+   "serves": [
+    "card"
+   ],
+   "plan": "new"
+  },
+  {
+   "id": "dec-gate-hidden",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the gate's state hidden until the rumour or arrival",
+   "does": "The map shows the gate; its state is the one thing the map does not show. Lean: hidden.",
+   "serves": [
+    "road",
+    "gate"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-run-blockade",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "running a blockade under fire",
+   "does": "Allowed, as the lock law already lets a hull outrun. Lean: allowed.",
+   "serves": [
+    "gate"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-unbacked-kinds",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the five unbacked module kinds withheld",
+   "does": "Mounts, racks, shields, thrusters, and the mech bay leave every listing until their mechanism lands. Lean: withheld.",
+   "serves": [
+    "ring",
+    "wrecks"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-fitters-machines",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the Fitters as machines",
+   "does": "They buy scrap, spares, modules, and her, never people; the button that sells people at the gate goes. Lean: machines.",
+   "serves": [
+    "gate",
+    "price"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-infection",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "infection",
+   "does": "A clawed hull carries the Grip, a landing marks the world, the dead rise there, a station scrubs for a price. Lean: in.",
+   "serves": [
+    "bay",
+    "hold",
+    "ring"
+   ],
+   "closes": [
+    "g-scrub",
+    "g-plague"
+   ],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-tramps-when",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "tramps, this order or later",
+   "does": "Plain bodies on a burn schedule leaving the near stations. Lean: later.",
+   "serves": [
+    "ring"
+   ],
+   "closes": [
+    "g-tramps"
+   ],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-storyteller-when",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the storyteller, later",
+   "does": "The seeded pacer with a quiet dial at zero. Lean: later.",
+   "serves": [
+    "hold"
+   ],
+   "closes": [
+    "g-storyteller"
+   ],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-militia-levy",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the Militia's levy",
+   "does": "One hand per dock at its stations unless a levy is paid. Lean: in.",
+   "serves": [
+    "ring",
+    "price"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "dec-star-name",
+   "source": "ark",
+   "group": "Decisions on the shelf",
+   "name": "the star's name",
+   "does": "Named for death. MORS proposed; HEL and THANATOS the alternatives.",
+   "serves": [
+    "ring",
+    "star"
+   ],
+   "closes": [],
+   "plan": "decide"
+  },
+  {
+   "id": "pro-charter-rumour",
+   "source": "ark",
+   "group": "Proposed on the shelf",
+   "name": "the Charter's rumour",
+   "does": "A listing line that shows the gate's state and bill before you reach it, for a price.",
+   "serves": [
+    "ring",
+    "gate"
+   ],
+   "closes": [],
+   "plan": "new"
+  },
+  {
+   "id": "pro-places-by-role",
+   "source": "ark",
+   "group": "Proposed on the shelf",
+   "name": "places by role",
+   "does": "No fixed names: the ash world under the Militia, the Charter's step, the Wreckers' roost. Role words for climates, holders, and stations.",
+   "serves": [
+    "road",
+    "ring"
+   ],
+   "closes": [],
+   "plan": "new"
+  },
+  {
+   "id": "pro-first-line",
+   "source": "ark",
+   "group": "Proposed on the shelf",
+   "name": "the first line in the log",
+   "does": "The walker's driver's name, and he walks in the first wave.",
+   "serves": [
+    "bay"
+   ],
+   "closes": [],
+   "plan": "new"
+  }
+ ],
+ "feedbackKinds": [
+  "wrong status",
+  "not wired",
+  "missing part",
+  "priority",
+  "playtest finding",
+  "a number",
+  "a word",
+  "a decision"
+ ]
+}

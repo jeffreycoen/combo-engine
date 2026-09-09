@@ -17,12 +17,14 @@ import { listingsFor } from "../../src/games/gravitys-ark/price.js";
 import { makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as passGate, respawn, GATE_DIALS } from "../../src/games/gravitys-ark/gate.js";
 import { makeLog, logFromJSON, buildCard, ARK_LINES } from "../../src/games/gravitys-ark/card.js";
 import { makeHold, order as holdOrder, tick as holdTick, summary as holdSummary } from "../../src/games/gravitys-ark/hold.js";
+import { wireSeed } from "./seed.js";
 
 const q = new URLSearchParams(location.search);
 const seed = q.has("seed") ? (parseInt(q.get("seed"), 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
 const galaxy = makeGalaxy(seed);
 const road = makeRoad(galaxy);
 const ship = road.ship, state = road.state, star = galaxy.star;
+wireSeed(seed, { buttons: ["seedB", "seedCard"], log: (line) => state.events.push({ k: line, t: state.t }) });   // the seed export, one button on every screen: the fixed cluster and the card
 // phase 0.0.106's page step: the stations, the purse, the hull, the crew
 const S = makeStations(galaxy); S.rollPerson = rollPerson;
 const purse = makePurse(20000, 0), hull = makeHull(STARTER_HULL), crew = [], nameRng = simStream((seed + 1) >>> 0);

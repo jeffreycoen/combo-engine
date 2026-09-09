@@ -1,7 +1,7 @@
 # Phase 0.0.N — <the organ, plainly named>
 
 Status: PLANNED. No task dispatched.
-<!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: <count> PASS / 0 FAIL; prior gates unmoved. -->
+<!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: <count> PASS / 0 FAIL; prior gates unmoved. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 <One paragraph: what the organ is, what it does, and its source — demo file and line range, plus any of the demo's own self-test lines used as known numbers.>
 

@@ -4,7 +4,7 @@
 // byte-identical and any drift is a diff.
 import fs from "node:fs";
 import path from "node:path";
-const ROOTS = ["src", "docs/frostline", "docs/play"];
+const ROOTS = ["src", "docs/frostline", "docs/play", "docs/gravitys-ark", "docs/parts"];
 export function manifest(rootDir) {
   const edges = [];
   const walk = (d) => {

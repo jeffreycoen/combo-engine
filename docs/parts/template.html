@@ -1,0 +1,189 @@
+<title>The Ark's Parts</title>
+<style>
+  :root { color-scheme: light; --bg: #f5f4f0; --panel: #fdfdfb; --ink: #1d222b; --ink2: #4d5560; --ink3: #8b93a0; --line: rgba(29,34,43,.14); --accent: #8a5a10; --link: #3a62c4;
+    --c-accepted: #0d366b; --c-landed: #184f95; --c-progress: #2a78d6; --c-paper: #6da7ec; --c-returned: #ec835a; --c-ghost: transparent; --good: #0ca30c; --bad: #d03b3b; --focus: #3a62c4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --bg: #0d1117; --panel: #161b23; --ink: #e9edf2; --ink2: #96a0b2; --ink3: #6b7686; --line: rgba(230,235,245,.14); --accent: #e9b25c; --link: #8fb0ff;
+    --c-accepted: #184f95; --c-landed: #256abf; --c-progress: #5598e7; --c-paper: #9ec5f4; --focus: #e9b25c; } }
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #0d1117; --panel: #161b23; --ink: #e9edf2; --ink2: #96a0b2; --ink3: #6b7686; --line: rgba(230,235,245,.14); --accent: #e9b25c; --link: #8fb0ff;
+    --c-accepted: #184f95; --c-landed: #256abf; --c-progress: #5598e7; --c-paper: #9ec5f4; --focus: #e9b25c; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  code, .stamp, .badge, .k, .chip, .ev dt, .lh, .nt, .gcount { font-family: ui-monospace, Menlo, Consolas, monospace; }
+  a { color: var(--link); } a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 16px 12px 48px; }
+  header h1 { font-size: 20px; letter-spacing: .18em; text-transform: uppercase; margin: 0 0 2px; font-weight: 600; }
+  header .sub { color: var(--ink2); margin: 0 0 10px; max-width: 65ch; }
+  .stamp { font-size: 12px; color: var(--ink3); margin: 0 0 8px; }
+  .meter { display: flex; gap: 2px; height: 10px; border-radius: 4px; overflow: hidden; background: transparent; margin: 6px 0 4px; }
+  .seg { display: block; min-width: 3px; } .seg:first-child { border-radius: 4px 0 0 4px; } .seg:last-child { border-radius: 0 4px 4px 0; }
+  .seg-accepted { background: var(--c-accepted); } .seg-landed { background: var(--c-landed); } .seg-progress { background: var(--c-progress); } .seg-paper { background: var(--c-paper); }
+  .seg-returned { background: var(--c-returned); } .seg-ghost, .seg-empty { background: transparent; box-shadow: inset 0 0 0 1px var(--ink3); }
+  .meter-text { font-size: 12px; color: var(--ink2); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .k::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .k-accepted::before { background: var(--c-accepted); } .k-landed::before { background: var(--c-landed); } .k-progress::before { background: var(--c-progress); } .k-paper::before { background: var(--c-paper); }
+  .k-returned::before { background: var(--c-returned); } .k-ghost::before { box-shadow: inset 0 0 0 1px var(--ink3); }
+  .banner { margin: 12px 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--panel); } .banner.quiet { color: var(--ink2); border-left-color: var(--ink3); }
+  .strip { margin: 12px 0; padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; } .strip.empty { color: var(--ink2); }
+  .strip h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; margin: 0 0 6px; color: var(--accent); }
+  .strip ul { list-style: none; margin: 6px 0 0; padding: 0; } .strip li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 4px 0; border-top: 1px solid var(--line); }
+  .acts { margin-left: auto; display: flex; gap: 6px; } .verdict { font-size: 12px; color: var(--ink2); }
+  button { font: inherit; font-size: 12px; padding: 5px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+  button.accept, button.accept-all { border-color: var(--good); } button.return { border-color: var(--c-returned); } button[type=submit] { border-color: var(--accent); }
+  nav.tabs { display: flex; gap: 6px; margin: 14px 0 10px; flex-wrap: wrap; position: sticky; top: 0; background: var(--bg); padding: 6px 0; z-index: 2; }
+  nav.tabs button[aria-selected="true"] { background: var(--panel); border-color: var(--accent); color: var(--accent); }
+  .view[hidden] { display: none; }
+  section.frame { margin: 18px 0 8px; } section.frame h2 { font-size: 16px; margin: 0; text-wrap: balance; } .fn { color: var(--accent); margin-right: 6px; } .see { color: var(--ink2); margin: 2px 0 4px; max-width: 65ch; }
+  details.group { margin: 8px 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; } details.group > summary { padding: 8px 12px; cursor: pointer; list-style: none; display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 10px; }
+  details.group > summary::-webkit-details-marker { display: none; } details.group > summary .meter, details.group > summary .meter-text { grid-column: 1 / -1; }
+  .gname { font-weight: 600; } .gcount { color: var(--ink3); font-size: 12px; }
+  .rows { border-top: 1px solid var(--line); }
+  details.part { border-top: 1px solid var(--line); } details.part:first-child { border-top: 0; }
+  details.part > summary { padding: 8px 12px; cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(120px, 1fr) auto; column-gap: 10px; row-gap: 3px; align-items: center; }
+  details.part > summary::-webkit-details-marker { display: none; }
+  .name { font-weight: 600; } .does { grid-column: 1 / -1; color: var(--ink2); font-size: 13px; } .badges { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; }
+  .badge { font-size: 11px; padding: 1px 6px; border-radius: 4px; border: 1px solid var(--line); color: var(--ink2); } .badge-bad { border-color: var(--bad); color: var(--bad); }
+  .chip { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; justify-self: end; }
+  .chip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+  .chip-accepted i { background: var(--c-accepted); } .chip-landed i { background: var(--c-landed); } .chip-progress i { background: var(--c-progress); } .chip-paper i { background: var(--c-paper); } .chip-returned i { background: var(--c-returned); } .chip-ghost i { box-shadow: inset 0 0 0 1px var(--ink3); }
+  .body { padding: 4px 12px 12px; }
+  .ev { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0 0 10px; font-size: 13px; } .ev dt { color: var(--ink3); font-size: 12px; } .ev dd { margin: 0; overflow-wrap: anywhere; }
+  .checks { margin: 0; padding-left: 18px; font-size: 12px; } .checks li.bad { color: var(--bad); }
+  form.fb { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border-top: 1px dashed var(--line); padding-top: 8px; } form.fb label { grid-column: 1 / -1; font-size: 12px; color: var(--ink2); }
+  form.fb textarea { grid-column: 1 / -1; } form.fb select, form.fb input, form.fb textarea { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .fb-status { font-size: 12px; color: var(--ink2); align-self: center; }
+  label.img { grid-column: 1 / -1; font-size: 12px; color: var(--ink2); display: flex; gap: 8px; align-items: center; } label.img input { font-size: 12px; }
+  img.thumb { display: block; max-width: 240px; max-height: 160px; margin-top: 4px; border: 1px solid var(--line); border-radius: 4px; }
+  form.ret { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px 0 4px; } form.ret textarea { grid-column: 1 / -1; } form.ret .acts { grid-column: 1 / -1; margin-left: 0; }
+  form.ret textarea, form.ret input { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+  .graph-wrap, .matrix-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+  svg.graph { display: block; } .nb { stroke: var(--line); stroke-width: 1; } .nb-accepted { fill: var(--c-accepted); } .nb-landed { fill: var(--c-landed); } .nb-progress { fill: var(--c-progress); } .nb-paper { fill: var(--c-paper); } .nb-returned { fill: var(--c-returned); } .nb-ghost { fill: var(--panel); stroke: var(--ink3); }
+  .node.gate-green .nb { stroke: var(--good); stroke-width: 2; } .node.gate-red .nb { stroke: var(--bad); stroke-width: 2; }
+  .nt { font-size: 11px; fill: var(--ink); } .nb-accepted + .nt, .nb-landed + .nt { fill: #ffffff; } .lh { font-size: 11px; fill: var(--ink3); letter-spacing: .1em; text-transform: uppercase; } .edge { fill: none; stroke: var(--ink3); stroke-opacity: .45; stroke-width: 1; }
+  .node { cursor: pointer; }
+  table.matrix { border-collapse: collapse; font-size: 12px; } .matrix th, .matrix td { border: 1px solid var(--line); padding: 3px 6px; text-align: center; } .matrix th.ph, .matrix th[scope=row] { text-align: left; white-space: nowrap; }
+  .matrix th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); max-height: 160px; font-weight: 500; } .matrix th.gap span { color: var(--accent); }
+  .matrix td.on { color: transparent; } .matrix td.on-accepted { background: var(--c-accepted); } .matrix td.on-landed { background: var(--c-landed); } .matrix td.on-progress { background: var(--c-progress); } .matrix td.on-paper { background: var(--c-paper); } .matrix td.on-returned { background: var(--c-returned); } .matrix td.on-ghost { box-shadow: inset 0 0 0 1px var(--ink3); }
+  .legend { color: var(--ink2); font-size: 12px; max-width: 65ch; }
+  .sent { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); } .sent h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: var(--ink2); }
+  .sent ul { list-style: none; padding: 0; margin: 0; font-size: 13px; } .sent li { padding: 4px 0; border-top: 1px solid var(--line); } .sent time { color: var(--ink3); font-size: 12px; margin-right: 8px; }
+  @media (min-width: 900px) { form.fb { grid-template-columns: 1fr 1fr auto; } form.fb textarea { grid-column: 1 / 3; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<main>
+  <header>
+    <h1>The Ark's Parts</h1>
+    <p class="sub">Every part from coldsnap and deadweight, the ark's own layer, and what the story still lacks. Every status here was measured in the repository at build time; nothing is typed by hand.</p>
+    <div id="hdr"></div>
+  </header>
+  <div id="banner"></div>
+  <div id="strip"></div>
+  <nav class="tabs" role="tablist" aria-label="views">
+    <button role="tab" data-view="frame" aria-selected="true">By frame</button>
+    <button role="tab" data-view="source" aria-selected="false">By source</button>
+    <button role="tab" data-view="graph" aria-selected="false">Dependencies</button>
+    <button role="tab" data-view="matrix" aria-selected="false">Matrix</button>
+  </nav>
+  <div id="view-frame" class="view" role="tabpanel"></div>
+  <div id="view-source" class="view" role="tabpanel" hidden></div>
+  <div id="view-graph" class="view" role="tabpanel" hidden></div>
+  <div id="view-matrix" class="view" role="tabpanel" hidden></div>
+  <section class="sent" id="general">
+    <h2>General feedback</h2>
+    <form class="fb" data-part="general"><label>Anything not tied to one part</label>
+      <select name="kind"><option>missing part</option><option>priority</option><option>playtest finding</option><option>a number</option><option>a word</option><option>a decision</option><option>wrong status</option><option>not wired</option></select>
+      <input name="seed" placeholder="seed, or paste the game's address">
+      <textarea name="text" rows="3" placeholder="what you saw, what you want" required></textarea>
+      <label class="img"><input type="file" name="image" accept="image/*"><span>Add a screenshot, kept under 180 KB</span></label>
+      <button type="submit">Send</button><span class="fb-status" aria-live="polite"></span></form>
+  </section>
+  <section class="sent" id="sentbox"><h2>Sent from this page</h2><ul id="sent"><li>The store has not answered yet.</li></ul></section>
+</main>
+<script>
+const TABLE = /*__DATA__*/null;
+/*__VIEWS__*/
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const R = renderAll(TABLE);
+  $("hdr").innerHTML = R.header; $("banner").innerHTML = R.banner; $("strip").innerHTML = R.strip;
+  $("view-frame").innerHTML = R.byFrame; $("view-source").innerHTML = R.bySource; $("view-graph").innerHTML = R.graph; $("view-matrix").innerHTML = R.matrix;
+  const tabs = document.querySelectorAll("nav.tabs button");
+  function show(view) { tabs.forEach((b) => b.setAttribute("aria-selected", String(b.dataset.view === view))); ["frame", "source", "graph", "matrix"].forEach((v) => { $("view-" + v).hidden = v !== view; }); try { localStorage.setItem("parts-view", view); } catch (e) {} }
+  tabs.forEach((b) => b.addEventListener("click", () => show(b.dataset.view)));
+  let v0 = "frame"; try { v0 = localStorage.getItem("parts-view") || "frame"; } catch (e) {} show(v0);
+  function goto(partId) { show("source"); const el = $("s-part-" + partId); if (el) { el.open = true; el.scrollIntoView({ block: "start" }); el.querySelector("summary").focus(); } }
+  document.addEventListener("click", (e) => { const a = e.target.closest("[data-goto]"); if (a) { e.preventDefault(); goto(a.dataset.goto); return; } const n = e.target.closest(".node"); if (n) goto(n.dataset.part); });
+
+  // The store: feedback and verdicts. Rendered without it; lit up when it answers.
+  let db = null;
+  const stamp = () => new Date().toISOString();
+  const IMAGE_CAP = 180 * 1024;   // a screenshot rides inside its entry; the store's own cap is 256 KB per document
+  function setStatus(form, text) { const s = form.querySelector(".fb-status"); if (s) s.textContent = text; }
+  // parseSeed: a bare number, or the game's address with ?seed=N in it
+  function parseSeed(v) { const m = String(v || "").match(/[?&]seed=(\d+)/); if (m) return m[1]; const d = String(v || "").trim(); return d || null; }
+  // shrink: a picked image to a JPEG data URL under the cap, narrowing and then lowering quality until it fits
+  async function shrink(file) {
+    const url = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    let w = Math.min(img.width, 900), q = 0.72;
+    for (let k = 0; k < 10; k++) {
+      const c = document.createElement("canvas"), sc = w / img.width; c.width = Math.max(1, Math.round(img.width * sc)); c.height = Math.max(1, Math.round(img.height * sc));
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      const out = c.toDataURL("image/jpeg", q); if (out.length <= IMAGE_CAP) return out;
+      if (q > 0.45) q -= 0.1; else w = Math.round(w * 0.75);
+    }
+    return null;
+  }
+  async function entryFrom(form, kind) {
+    const doc = { part: form.dataset.part, kind, seed: parseSeed(form.seed.value), text: form.text.value.trim(), t: stamp(), build: TABLE.meta.commit };
+    const f = form.image && form.image.files && form.image.files[0];
+    if (f) { setStatus(form, "Shrinking the image…"); const image = await shrink(f); if (!image) { setStatus(form, "The image would not fit under 180 KB even reduced; send it in the session instead."); return null; } doc.image = image; }
+    return doc;
+  }
+  function keepUnsent(doc) { try { const q = JSON.parse(localStorage.getItem("parts-unsent") || "[]"); q.push(doc); localStorage.setItem("parts-unsent", JSON.stringify(q)); } catch (x) {} }
+  function clearForm(form) { form.text.value = ""; form.seed.value = ""; if (form.image) form.image.value = ""; }
+  document.addEventListener("submit", async (e) => {
+    const fb = e.target.closest("form.fb"), ret = e.target.closest("form.ret"); if (!fb && !ret) return; e.preventDefault();
+    const form = fb || ret;
+    if (!form.text.value.trim()) return;
+    const doc = await entryFrom(form, fb ? form.kind.value : "returned"); if (!doc) return;
+    if (!db) { keepUnsent(doc); setStatus(form, ret ? "The store is off in this view; a return cannot be recorded here. The finding is kept on this device." : "The store is off in this view; kept on this device only."); return; }
+    setStatus(form, "Sending…");
+    try {
+      await db.collection("feedback").add(doc);
+      if (ret) await db.collection("acceptance").add({ part: form.dataset.part, phase: form.dataset.phase, verdict: "returned", finding: doc.text, seed: doc.seed, t: doc.t, build: doc.build });
+      clearForm(form); setStatus(form, ret ? "Returned." : "Sent."); if (ret) form.hidden = true;
+    } catch (err) { setStatus(form, "Not sent: " + (err && err.code || "error") + ". Try again."); }
+  });
+  async function accept(partId, phase) {
+    if (!db) { alert("The store is off in this view; verdicts cannot be recorded here."); return; }
+    try { await db.collection("acceptance").add({ part: partId, phase, verdict: "accepted", finding: null, t: stamp(), build: TABLE.meta.commit }); }
+    catch (err) { alert("Not recorded: " + (err && err.code || "error")); }
+  }
+  document.addEventListener("click", (e) => {
+    const cancel = e.target.closest("form.ret button.cancel"); if (cancel) { e.preventDefault(); cancel.closest("form.ret").hidden = true; return; }
+    const b = e.target.closest("button.accept, li[data-part] > .acts > button.return, button.accept-all"); if (!b) return; e.preventDefault();
+    const li = b.closest("li[data-part]"), det = b.closest("details.ready");
+    const phase = det ? det.dataset.phase : null;
+    if (b.classList.contains("accept-all")) { det.querySelectorAll("li[data-part]").forEach((x) => accept(x.dataset.part, phase)); return; }
+    if (b.classList.contains("accept")) { accept(li.dataset.part, phase); return; }
+    const form = li.querySelector("form.ret"); form.hidden = !form.hidden; if (!form.hidden) form.text.focus();
+  });
+  function renderSent(items) {
+    const ul = $("sent"); if (!items.length) { ul.innerHTML = "<li>Nothing sent yet.</li>"; return; }
+    ul.innerHTML = items.map((d) => `<li><time>${esc((d.t || "").replace("T", " ").slice(0, 16))}</time><b>${esc(d.part || "")}</b> · ${esc(d.verdict ? d.verdict + (d.finding ? ": " + d.finding : "") : d.kind + ": " + d.text)}${d.seed ? " · seed " + esc(d.seed) : ""}${d.image && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(d.image) ? `<img class="thumb" src="${d.image}" alt="screenshot sent with this entry">` : ""}</li>`).join("");
+  }
+  function markVerdicts(items) {
+    document.querySelectorAll(".strip li[data-part] .verdict").forEach((s) => { s.textContent = ""; });
+    for (const d of items) { if (!d.verdict) continue; const li = document.querySelector('.strip li[data-part="' + CSS.escape(d.part) + '"]'); if (li) li.querySelector(".verdict").textContent = d.verdict + ", awaiting the stamp"; }
+  }
+  (async () => {
+    db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+    if (!db) { $("sent").innerHTML = "<li>The store is off in this view. Feedback is kept on this device until the page is opened where the store runs.</li>"; return; }
+    let feedback = [], verdicts = [];
+    const paint = () => { const all = feedback.concat(verdicts).sort((a, b) => (b.t || "").localeCompare(a.t || "")); renderSent(all.slice(0, 80)); markVerdicts(verdicts); };
+    db.collection("feedback").orderBy("t", "desc").limit(60).onSnapshot((snap) => { feedback = snap.docs.map((d) => d.data()); paint(); }, (err) => { $("sent").innerHTML = "<li>The store stopped answering: " + esc(err.code) + "</li>"; });
+    db.collection("acceptance").orderBy("t", "desc").limit(200).onSnapshot((snap) => { verdicts = snap.docs.map((d) => d.data()); paint(); }, () => {});
+    try { const q = JSON.parse(localStorage.getItem("parts-unsent") || "[]"); if (q.length) { for (const d of q) await db.collection("feedback").add(d); localStorage.removeItem("parts-unsent"); } } catch (x) {}
+  })();
+})();
+</script>

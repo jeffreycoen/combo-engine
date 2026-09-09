@@ -193,7 +193,7 @@ Staying in the depot by ruling, not by miss: tick, state, sim, boot, api — the
 
 ## Status
 
-The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). FROSTLINE plays live at `docs/frostline/`, mid-repair per its audit. The deadweight hangar demo rides in the tree as read-only source. The next extractions come from the checklist's unchecked boxes, harness layer first.
+The coldsnap engine has landed: 42 files, verbatim at coldsnap commit `82b5524`, proven here by the same gate numbers it prints at home (`node scripts/gate.mjs api` — worldHash 3367709165, runHash 2717846799). FROSTLINE plays live at `docs/frostline/`, mid-repair per its audit. The deadweight hangar demo rides in the tree as read-only source. The next extractions come from the checklist's unchecked boxes, harness layer first. The parts page at `docs/parts/` lists every part from coldsnap and deadweight, the ark's own layer, and the story's gaps, with the evidence measured at each landing by `node scripts/parts.mjs`; it is published for acceptance and feedback and named in every landing report.
 
 ## License
 

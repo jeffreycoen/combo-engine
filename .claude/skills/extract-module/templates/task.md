@@ -44,12 +44,12 @@ node scripts/gate.mjs <name>
 
 6. Assert the prior gates did not move (same required tails as step 1).
 
-7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit stamped below, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>.
+7. Close the records in this landing: bump `package.json` version to the phase number; in `docs/plans/phase-0.0.N-<name>.md` replace the status line with `Status: LANDED, commit stamped below, <date>. Gate: <N> PASS / 0 FAIL; prior gates unmoved.`; in `README.md` flip the earned checklist box(es) `- [ ]` to `- [x]` for <named boxes>. Then rebuild the parts table and the parts page, about four minutes since every gate runs: `node scripts/parts.mjs --gates all` must end with a `wrote docs/parts/parts.json` line; both files ride the landing commit, and the orchestrator republishes the page and names it in the landing report.
 
 8. Commit and push the landing, then stamp the real hash in a second small commit — NEVER amend after stamping (an amend rewrites the commit and makes every stamped hash stale; phase 0.0.6 proved it):
 
 ```sh
-git add src/modules/<name> scripts/<name>-test.mjs scripts/gate.mjs README.md package.json docs/plans
+git add src/modules/<name> scripts/<name>-test.mjs scripts/gate.mjs README.md package.json docs/plans docs/parts/parts.json docs/parts/parts.html
 git commit -m "phase 0.0.N — <one line>
 
 <two lines: what carried, the gate numbers>
