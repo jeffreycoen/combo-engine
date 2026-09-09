@@ -14,6 +14,24 @@ No demo file is read or written. Nothing under `/home/batman/coldsnap` is read, 
 
 Run from `/home/batman/combo-engine`. A failed assert, a wrong required value, or a FAILED hash line stops the task: report the step and its verbatim output, run nothing further. Never edit a file to make a hash match.
 
+**Resuming.** The first run stopped at step 8: the second new check read the purse after the first tick, and the ground pays by the tick. Step 6 is amended below. Steps 2 to 5 and 7 stand as applied and proven; they are not run again. Run step 0R, then step 6, then steps 8 to 10.
+
+0R. Assert the five applied files at their hashes, and put the gate file back to its committed state.
+
+```sh
+while read -r hash path; do test "$(sha256sum "$path" | cut -c1-16)" = "$hash" && echo "OK $path" || echo "FAILED $path"; done <<'STAND'
+2f01f0efd76397c4 src/games/gravitys-ark/ground.js
+c7efd469517c680f docs/gravitys-ark/ground.js
+f93f50c15a29bca9 docs/gravitys-ark/index.html
+3a37b4af977f82eb docs/gravitys-ark/main.js
+8f2d68a0a86be011 docs/parts/parts-source.json
+STAND
+git checkout -- scripts/gravitys-ark-test.mjs
+test "$(sha256sum scripts/gravitys-ark-test.mjs | cut -c1-16)" = "0aedea3b45b5a61b" && echo OK scripts/gravitys-ark-test.mjs || echo FAILED scripts/gravitys-ark-test.mjs
+```
+
+Required: six OK lines.
+
 1. Assert the ground: the tracked files clean at the 0.1.0 landing, the version at 0.1.0, the five files this task edits at their hashes, the two new files absent. The gates were recorded green at that landing and are not run again here.
 
 ```sh
@@ -269,7 +287,7 @@ node --check docs/gravitys-ark/main.js && echo "syntax ok main.js"
 test "$(sha256sum docs/gravitys-ark/main.js | cut -c1-16)" = "3a37b4af977f82eb" && echo OK docs/gravitys-ark/main.js || echo FAILED docs/gravitys-ark/main.js
 ```
 
-6. Two checks in the ark's gate: twin boots of the ground are twins in every hash after one tick; the hold's scrap is the purse, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms. Both anchors are asserted; syntax check; the hash line must print OK.
+6. Two checks in the ark's gate: twin boots of the ground are twins in every hash after one tick; the hold's scrap is the purse, read before the first tick since the ground pays by the tick, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms. Both anchors are asserted; syntax check; the hash line must print OK.
 
 ```sh
 python3 - <<'ARK_EOF_6'
@@ -278,7 +296,7 @@ reps = [
 ('import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";\n',
  'import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";\nimport { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS } from "../src/games/gravitys-ark/ground.js";\n'),
 ('console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);\n',
- '{ // 38. ark: the ground boots on coldsnap from the galaxy\'s seed, and twin boots are twins in every hash after one tick\n  // 39. ark: the hold\'s scrap is the purse, a gun at the crash site spends it by coldsnap\'s build law, and what is left comes back up in kilograms\n  const gSeed = rollSeed();\n  const g = makeGalaxy(gSeed), w = g.worlds[0];\n  const kg = 500 + Math.floor(rng() * 1000);\n  const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);\n  groundTick(A, 1 / 120); groundTick(B, 1 / 120);\n  check("ark: the ground boots on coldsnap from the galaxy\'s seed, and twin boots are twins in every hash", A.seed === B.seed && A.run.started === true && groundHash(A) === groundHash(B));\n  const purse0 = A.run.resources, f = A.run.focus;\n  let placed = null;\n  for (let dz = -8; dz <= 8 && !placed; dz += 2) for (let dx = -8; dx <= 8 && !placed; dx += 2) { const r = groundOrder(A, "gun", f.x + dx, f.z + dz, "mg"); if (r.ok) placed = r; }\n  const guns = A.world.bodies.filter((b) => b.alive && b.kind === "tower" && b.team === 1).length;\n  const up = groundOrder(A, "takeoff");\n  check("ark: the hold\'s scrap is the purse, a gun at the crash site spends it by coldsnap\'s build law, and what is left comes back up in kilograms",\n    purse0 === Math.floor(kg / GROUND_DIALS.kgPerScrap) && !!placed && placed.cost > 0 && A.run.resources === purse0 - placed.cost && guns === 1 && up.ok && up.scrapKg === A.run.resources * GROUND_DIALS.kgPerScrap);\n}\n\nconsole.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);\n'),
+ '{ // 38. ark: the ground boots on coldsnap from the galaxy\'s seed, and twin boots are twins in every hash after one tick\n  // 39. ark: the hold\'s scrap is the purse, a gun at the crash site spends it by coldsnap\'s build law, and what is left comes back up in kilograms\n  const gSeed = rollSeed();\n  const g = makeGalaxy(gSeed), w = g.worlds[0];\n  const kg = 500 + Math.floor(rng() * 1000);\n  const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);\n  const purse0 = A.run.resources;   // read before the first tick: the ground pays by the tick\n  groundTick(A, 1 / 120); groundTick(B, 1 / 120);\n  check("ark: the ground boots on coldsnap from the galaxy\'s seed, and twin boots are twins in every hash", A.seed === B.seed && A.run.started === true && groundHash(A) === groundHash(B));\n  const purse1 = A.run.resources, f = A.run.focus;\n  let placed = null;\n  for (let dz = -8; dz <= 8 && !placed; dz += 2) for (let dx = -8; dx <= 8 && !placed; dx += 2) { const r = groundOrder(A, "gun", f.x + dx, f.z + dz, "mg"); if (r.ok) placed = r; }\n  const guns = A.world.bodies.filter((b) => b.alive && b.kind === "tower" && b.team === 1).length;\n  const up = groundOrder(A, "takeoff");\n  check("ark: the hold\'s scrap is the purse, a gun at the crash site spends it by coldsnap\'s build law, and what is left comes back up in kilograms",\n    purse0 === Math.floor(kg / GROUND_DIALS.kgPerScrap) && purse1 > purse0 && !!placed && placed.cost > 0 && Math.abs(A.run.resources - (purse1 - placed.cost)) < 1e-9 && guns === 1 && up.ok && up.scrapKg === A.run.resources * GROUND_DIALS.kgPerScrap);\n}\n\nconsole.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);\n'),
 ]
 for old, new in reps:
     assert s.count(old) == 1, old[:60]
@@ -286,7 +304,7 @@ for old, new in reps:
 open(p, "w", encoding="utf-8").write(s)
 ARK_EOF_6
 node --check scripts/gravitys-ark-test.mjs && echo "syntax ok gate"
-test "$(sha256sum scripts/gravitys-ark-test.mjs | cut -c1-16)" = "ed18fedc64b92314" && echo OK scripts/gravitys-ark-test.mjs || echo FAILED scripts/gravitys-ark-test.mjs
+test "$(sha256sum scripts/gravitys-ark-test.mjs | cut -c1-16)" = "1b3b37289700fe12" && echo OK scripts/gravitys-ark-test.mjs || echo FAILED scripts/gravitys-ark-test.mjs
 ```
 
 7. The parts source: the ground part and the ground screen part gain their files and this phase. The hash line must print OK.
@@ -359,8 +377,9 @@ git push origin main
 
 ## Acceptance
 
-- Step 1: `0`, `1`, five OK lines, `0`.
-- Steps 2 through 7: six OK lines, `syntax ok` four times.
+- Step 0R, on the resume: six OK lines.
+- Step 1, on a first run: `0`, `1`, five OK lines, `0`.
+- Steps 2 through 7: six OK lines, `syntax ok` four times; on the resume, step 6 alone: one OK line and `syntax ok gate`.
 - Step 8: `gravitys-ark-test: 40 PASS / 0 FAIL`, `gravitys-ark-test PASS`, `manifest-test PASS`, `parts-test PASS`.
 - Step 9: `OK README.md`; the count line names 50 gates; `50 gates, 0 not ok`.
 - Step 10: push accepted by origin; the stamp commit pushed.
