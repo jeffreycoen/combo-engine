@@ -40,7 +40,7 @@ Phone and desktop as task 1.
 ## Tasks
 
 - 0.1.1-1 — the ground boots: coldsnap's war on the ark's page, guns by its build law, the one purse, sound, TAKE OFF. LANDED, commit `d793896`. → `task-0.1.1-1-the-ground-boots.md`
-- 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, the weld-back mechanism, TAKE OFF gated on every living module welded and naming the lost, the seam up and down. LANDED, commit stamped below. → `task-0.1.1-2-the-hull-on-the-ground.md`
+- 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, the weld-back mechanism, TAKE OFF gated on every living module welded and naming the lost, the seam up and down. LANDED, commit `ebbcd81`. → `task-0.1.1-2-the-hull-on-the-ground.md`
 - 0.1.1-3 — her and the hands: her row and her squad of one, her repair through the weld-back, the hands as troopers by name, fight or fix, walls by coldsnap's build lines. PLANNED.
 - 0.1.1-4 — the walker and the boss: coldsnap's mech at twice a trooper's height at least, dead until repaired, hers to possess; the boss on the enemy's side; the stance measured. PLANNED.
 - 0.1.1-5 — the hold retires: the flag removed, the ark's own hold file and its checks retired, the parts source and the README's claims brought to the ground as built, the version to 0.1.1. PLANNED.
