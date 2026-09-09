@@ -46,6 +46,7 @@ New file `src/games/gravitys-ark/wrecks.js`. Imports: `accel` from `../../module
 ```js
 export const WRECK_DIALS = { shellDv: 120, shellR: 60000, shellT: 2, fieldN: 12, fieldR: 40000, fieldMin: 6000, scrapMin: 200, scrapMax: 1500, crateMin: 300, crateMax: 2000, biteR: 6, takeR: GRAP.CLOSE, headKg: 15 };
 export const WRECK_KINDS = ["scrap", "crate", "module", "hull"];
+export const ROPE = { ...GRAP, SNAP: 52000, RANGE: 300, TIME: 10 };   // the grapple module's dials at the order's scale, PROPOSED: the snap threshold times 200 for masses in real kilograms, the range and the flight time for space
 ```
 
 - `export function shellDv(dist, d)`: `d.shellDv / (1 + Math.pow(dist / d.shellR, 2))`: the shove, weaker with distance.
@@ -57,8 +58,8 @@ export const WRECK_KINDS = ["scrap", "crate", "module", "hull"];
 - `export function stepWrecks(wrecks, wells, dt)`: for every wreck not taken: `[ax, ay] = accel(wells, w.x, w.y)`; `vx += ax * dt; vy += ay * dt; x += vx * dt; y += vy * dt`.
 - `export function makeGrappler(ship)`: `{ g: null, ship2d: null, target: null, hooked: null }`.
 - `export function ship2d(ship, mass)`: `{ x: ship.x, y: ship.y, vx: ship.vx, vy: ship.vy, w: 0, ang: 0, M: mass, I: mass * 4 }`.
-- `export function cast(gr, ship, mass, wreck, d)`: `gr.ship2d = ship2d(ship, mass)`; `gr.ship2d.ang = Math.atan2(wreck.y - ship.y, wreck.x - ship.x)`; `gr.g = castGrapple(gr.ship2d, ship.x, ship.y, 0)`; `gr.target = wreck`; write the recoil back: `ship.vx = gr.ship2d.vx; ship.vy = gr.ship2d.vy`. Returns `gr.g`.
-- `export function stepGrappler(gr, ship, mass, wells, dt, d)`: if no `gr.g` return null. Sync `gr.ship2d` from the ship (x, y, vx, vy, M). By state: `"fly"`: `stepFly(gr.g, (x, y) => accel(wells, x, y), ship.x, ship.y, dt)`; if the head is within `d.biteR` of the target, `bite(gr.g)` then `tapGrapple(gr.g)` (stuck to reel at once); `"rewind"`: `stepRewind(gr.g, ship.x, ship.y, dt)` and when it returns null, `gr.g = null`; `"stuck"` or `"reel"`: `stepRope(gr.g, gr.ship2d, ship.x, ship.y, gr.target, gr.target.mass, dt)`, then write the ship's velocity back from `gr.ship2d`, and if the target is within `d.takeR` of the ship, take it: `gr.target.taken = true; gr.hooked = gr.target; gr.g = null; return { taken: gr.target }`. Returns `{ state }` otherwise. Read the grapple module whole for the states and use them exactly.
+- `export function cast(gr, ship, mass, wreck, d)`: `gr.ship2d = ship2d(ship, mass)`; `gr.ship2d.ang = Math.atan2(wreck.y - ship.y, wreck.x - ship.x)`; `gr.g = castGrapple(gr.ship2d, ship.x, ship.y, 0, ROPE)`; `gr.target = wreck`; write the recoil back: `ship.vx = gr.ship2d.vx; ship.vy = gr.ship2d.vy`. Returns `gr.g`.
+- `export function stepGrappler(gr, ship, mass, wells, dt, d)`: if no `gr.g` return null. Sync `gr.ship2d` from the ship (x, y, vx, vy, M). By state: `"fly"`: `stepFly(gr.g, (x, y) => accel(wells, x, y), ship.x, ship.y, dt, ROPE)`; if the head is within `d.biteR` of the target, `bite(gr.g)` then `tapGrapple(gr.g)` (stuck to reel at once); `"rewind"`: `stepRewind(gr.g, ship.x, ship.y, dt, ROPE)` and when it returns null, `gr.g = null`; `"stuck"` or `"reel"`: `stepRope(gr.g, gr.ship2d, ship.x, ship.y, gr.target, gr.target.mass, dt, ROPE)`, then write the ship's velocity back from `gr.ship2d`, and if the target is within `d.takeR` of the ship, take it: `gr.target.taken = true; gr.hooked = gr.target; gr.g = null; return { taken: gr.target }`. Returns `{ state }` otherwise. Read the grapple module whole for the states and use them exactly.
 - `export function take(hull, purse, wreck)`: by kind: scrap `hull.scrap += wreck.mass`; module `hull.spares.push(wreck.module)`; crate `purse.credits += wreck.value` and `hull.scrap += wreck.mass`; hull `hull.scrap += wreck.mass`. Returns the kind.
 - `export function massOf(hull, wrecks)`: `hull.scrap + hull.spares.reduce((s, k) => s + MODULES[k].kg, 0) + wrecks.filter((w) => !w.taken).reduce((s, w) => s + w.mass, 0)`: the mass the ledger audits.
 - `export const WRECK_CONTRACT` and `export function checkWreck(w)`: not an object gives `wreck: not an object`; then `wreck.kind: one of scrap, crate, module, hull required`, `wreck.mass: number > 0 required`, and `wreck.<f>: finite number required` for x, y, vx, vy.
@@ -133,3 +134,14 @@ Do not push. Do not touch main.
 ## Report
 
 Read-confirmation first (each file, its line count). One line of outcome. Then bullets: both gate outputs whole; the diff summary (`git diff --stat $(git merge-base HEAD main)`); the commit hash on your branch; every nonconformity as its own labeled bullet. Fixture seeds: the two rolled seeds; no seed is special.
+
+## Amendment
+
+The grapple module's dials are the demo's, for masses of a few kilograms; at the order's scale the first taut pull on any wreck exceeds the snap threshold and the line snaps into the embedded state, so the grappler as first written could take nothing. The agent stopped on it with 4 PASS / 1 FAIL at two seeds. The module now hands a rope dials object, `ROPE`, to every grapple call: the snap threshold times 200 for real kilograms, the range 300 m, the flight time 10 s, everything else the module's own. The stand-in star in the gate carries the old mu formula; check 21 flies in an empty field, and the landing's real galaxy carries the corrected mu.
+
+## The report's gate lines
+
+- `node scripts/gravitys-ark-test.mjs` in the worktree over its own star and hull: seeds 2916966702 and 657599207 (twin seeds 786629232 and 1023486730); 5 PASS lines, `gravitys-ark-test: 5 PASS / 0 FAIL`, exit 0, twice. At the landing, joined after the eighteen landed checks: `gravitys-ark-test: 23 PASS / 0 FAIL`, twice.
+- Bracket at the landing: gravitys-ark, weldstress, grapple, wells, ledger, every tail PASS. The full self-test on the merged tree, the order's midpoint: `selftest: all 48 gates PASS`.
+- Branch commit b6a475e on phase/0.0.107-wrecks, landed by squash into main; the module's copy of the table swapped for the stations import; the gate joined by the orchestrator's helper, its copy of the table stripped.
+- Nonconformities the agent named: the grapple's demo-unit snap threshold, a brief error resolved by the amendment above with the first run stopping at 4 PASS / 1 FAIL at seeds 3515411206 and 3470155455; the stand-in star's old mu formula, moot at the landing; the contract's wording; an unread dials argument on cast. None moved a law after the amendment.

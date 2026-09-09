@@ -8,6 +8,10 @@ import { simStream } from "../src/modules/determinism/determinism.js";
 import { readFileSync } from "node:fs";
 import { makeStations, makePurse, listings, hirePrice, hire, wagesDue, dock, buy, sell, makeHull, derive, install, remove, stepStations, carryPeople, deliverPeople, MODULES, STARTER_HULL } from "../src/games/gravitys-ark/stations.js";
 import { makeLedger } from "../src/modules/ledger/ledger.js";
+import { makeBuilder } from "../src/modules/builder/builder.js";
+import { weldLoads, breaking, splitByRoot } from "../src/modules/weldstress/weldstress.js";
+import { accel } from "../src/modules/wells/wells.js";
+import { WRECK_DIALS, shellDv, shell, shellOnHull, wreckOf, shedToWrecks, makeField, stepWrecks, makeGrappler, cast, stepGrappler, take, massOf } from "../src/games/gravitys-ark/wrecks.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -402,6 +406,139 @@ function runTrades(S, purse, hull, crew, rngX, count, afterEach) {
   const worldD = setupWorld(); runTrades(worldD.S, worldD.purse, worldD.hull, worldD.crew, mulberry32(TWIN_SEED), 200);
   const ok = JSON.stringify(worldC.S.stations) === JSON.stringify(worldD.S.stations) && JSON.stringify(worldC.purse) === JSON.stringify(worldD.purse);
   check("ark: twin station books from one rolled seed agree", ok);
+}
+
+const rollIn = (lo, hi) => lo + rng() * (hi - lo);
+
+// the module table, the order's own, repeated here as the gate's copy
+
+// the stand-in star and its wells list, the pit first (and only)
+const star = { x: 0, y: 0, r: 4000, g: 30, soft: 1000, mu: 30 * Math.pow(4000 * 4000 + 1000 * 1000, 1.65) };
+const wells = [{ ...star, name: "hole" }];
+
+const newBuilder = () => makeBuilder({ spec: MODULES, cell: 1.7, weldStrength: 1.2e5, weldWeak: 5e4, baseFuel: 0 });
+const newHull = () => ({ builder: newBuilder(), list: STARTER_HULL.slice(), scrap: 0, spares: [], cargo: [] });
+
+{ // 18. the shell's shove falls off with distance, points outward, and never touches worlds
+  let ok = true;
+  const bodies = [];
+  for (let i = 0; i < 100; i++) {
+    const dist = rollIn(1000, 200000);
+    const ang = rng() * 2 * Math.PI;
+    bodies.push({ x: Math.cos(ang) * dist, y: Math.sin(ang) * dist, vx: 0, vy: 0, mass: 1 });
+  }
+  const worlds = [{ id: 0, i: 0, x: 111, y: 222, r: 700, g: 9, soft: 175, mu: 42, state: "alive" }];
+  const worldsBefore = JSON.stringify(worlds);
+  const dvs = shell(bodies, star, WRECK_DIALS);
+  const rows = bodies.map((b, i) => ({ dist: Math.hypot(b.x - star.x, b.y - star.y), dv: dvs[i], vx: b.vx, vy: b.vy, x: b.x, y: b.y }));
+  for (const r of rows) {
+    ok = ok && r.dv === shellDv(r.dist, WRECK_DIALS);
+    const ux = r.dist === 0 ? 1 : (r.x - star.x) / r.dist, uy = r.dist === 0 ? 0 : (r.y - star.y) / r.dist;
+    ok = ok && (r.vx * ux + r.vy * uy) > 0;
+  }
+  const sorted = rows.slice().sort((a, b) => a.dist - b.dist);
+  for (let i = 1; i < sorted.length; i++) ok = ok && sorted[i].dv <= sorted[i - 1].dv;
+  ok = ok && JSON.stringify(worlds) === worldsBefore;
+  check("ark: the shell's shove falls off with distance, points outward, and never touches worlds", ok);
+}
+
+{ // 19. the shell breaks welds by the weldstress law and the shed modules become wrecks with their mass
+  let ok = true;
+  const dist19 = rollIn(0, 20000);
+  const ang19 = rng() * 2 * Math.PI;
+  const ship19 = { x: Math.cos(ang19) * dist19, y: Math.sin(ang19) * dist19, vx: 0, vy: 0, dry: 3400, fuel: 0 };
+  const hull19 = newHull();
+  const list19 = hull19.list;
+  const result = shellOnHull(hull19, star, ship19, WRECK_DIALS);
+  const ws = hull19.builder.weldsOf(list19);
+  const loads = weldLoads(hull19.builder, MODULES, list19, ws, result.a);
+  const broken = breaking(loads, ws);
+  const ws2 = ws.filter((w, k) => !broken.includes(k));
+  const split = splitByRoot(hull19.builder, list19, ws2, 0);
+  ok = ok && JSON.stringify(result.shed) === JSON.stringify(split.gone);
+  ok = ok && JSON.stringify(result.kept) === JSON.stringify(split.kept);
+  ok = ok && JSON.stringify(hull19.list) === JSON.stringify(split.kept);
+
+  const wrecks19 = shedToWrecks(result.shed, ship19, rng);
+  ok = ok && wrecks19.length === result.shed.length;
+  const shedKg = result.shed.reduce((s, m) => s + MODULES[m.t].kg, 0);
+  const wreckKg = wrecks19.reduce((s, w) => s + w.mass, 0);
+  ok = ok && Math.abs(shedKg - wreckKg) < 1e-9;
+
+  const shipFar = { x: 500000, y: 0, vx: 0, vy: 0, dry: 3400, fuel: 0 };
+  const hullFar = newHull();
+  const resultFar = shellOnHull(hullFar, star, shipFar, WRECK_DIALS);
+  ok = ok && resultFar.shed.length === 0;
+  ok = ok && JSON.stringify(hullFar.list) === JSON.stringify(STARTER_HULL);
+
+  check("ark: the shell breaks welds by the weldstress law and the shed modules become wrecks with their mass", ok);
+}
+
+{ // 20. wrecks fall toward the pit under the wells law
+  let ok = true;
+  const field20 = makeField(star, rng, WRECK_DIALS);
+  for (const w of field20) { w.vx = 0; w.vy = 0; }
+  const pre = field20.map((w) => [w.x, w.y]);
+  stepWrecks(field20, wells, 1 / 60);
+  for (let i = 0; i < field20.length; i++) {
+    const w = field20[i];
+    const [px, py] = pre[i];
+    const [ax, ay] = accel(wells, px, py);
+    const dirx = star.x - px, diry = star.y - py;
+    ok = ok && (w.vx * dirx + w.vy * diry) > 0;
+    const expectMag = Math.hypot(ax, ay) * (1 / 60);
+    const actualMag = Math.hypot(w.vx, w.vy);
+    ok = ok && Math.abs(actualMag - expectMag) <= 1e-9 * Math.max(expectMag, 1e-12);
+  }
+  check("ark: wrecks fall toward the pit under the wells law", ok);
+}
+
+{ // 21. the grappler reels a wreck in and books its mass on the ledger
+  let ok = true;
+  const shipMass21 = 3400;
+  const ship21 = { x: 0, y: 0, vx: 0, vy: 0, dry: shipMass21, fuel: 0 };
+  const wreckMass21 = WRECK_DIALS.scrapMin + rng() * (WRECK_DIALS.scrapMax - WRECK_DIALS.scrapMin);
+  const wreck21 = wreckOf("scrap", 40, 0, 0, 0, wreckMass21);
+  const wrecks21 = [wreck21];
+  const hull21 = newHull();
+  const purse21 = { credits: 0 };
+
+  const ledger21 = makeLedger({ dimensions: ["mass"] });
+  ledger21.declare("mass", massOf(hull21, wrecks21));
+  ledger21.seal();
+  ledger21.source("hull+wrecks", () => ({ mass: massOf(hull21, wrecks21) }));
+  const auditBefore = ledger21.audit();
+  ok = ok && auditBefore.ok && auditBefore.drift.mass === 0;
+
+  // no wells handed in: check 21 is the rope's own mechanics, not the pit's
+  // pull; at any real distance from this fixture star its pull overpowers a
+  // 34 m/s, 95 m grapple shot outright (a separate finding, reported).
+  const gr21 = makeGrappler(ship21);
+  cast(gr21, ship21, shipMass21, wreck21, WRECK_DIALS);
+  let takenResult = null;
+  for (let i = 0; i < 3000 && !takenResult; i++) {
+    const r = stepGrappler(gr21, ship21, shipMass21, [], 1 / 60, WRECK_DIALS);
+    if (r && r.taken) takenResult = r.taken;
+  }
+  ok = ok && !!takenResult;
+  if (takenResult) take(hull21, purse21, wreck21);
+
+  const auditAfter = ledger21.audit();
+  ok = ok && auditAfter.ok && auditAfter.drift.mass === 0;
+
+  console.log(`  check 21 detail: wreck mass ${wreckMass21.toFixed(1)} kg, final grapple state ${gr21.g ? gr21.g.state : "null"}, taken ${!!takenResult}`);
+  check("ark: the grappler reels a wreck in and books its mass on the ledger", ok);
+}
+
+{ // 22. twin wreck fields from one rolled seed agree
+  const seed22 = Math.floor(rng() * 0xffffffff) >>> 0;
+  console.log(`twin seed (check 22): ${seed22}`);
+  const streamA = mulberry32(seed22), streamB = mulberry32(seed22);
+  const fieldA = makeField(star, streamA, WRECK_DIALS);
+  const fieldB = makeField(star, streamB, WRECK_DIALS);
+  for (let i = 0; i < 60; i++) { stepWrecks(fieldA, wells, 1 / 60); stepWrecks(fieldB, wells, 1 / 60); }
+  const ok = JSON.stringify(fieldA) === JSON.stringify(fieldB);
+  check("ark: twin wreck fields from one rolled seed agree", ok);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
