@@ -943,6 +943,11 @@
    "source": "ark",
    "group": "New",
    "name": "the ground on coldsnap",
+   "files": [
+    "src/games/gravitys-ark/ground.js"
+   ],
+   "gate": "gravitys-ark",
+   "phase": "0.1.1",
    "does": "The crash as welds, the Grip in waves, repair with drag, walls and guns, the walker with the leap, the boss, men by name, the engineer on foot, infection, the registry.",
    "serves": [
     "bay",
@@ -1140,6 +1145,10 @@
    "source": "ark",
    "group": "Screens",
    "name": "the ground screen",
+   "files": [
+    "docs/gravitys-ark/ground.js"
+   ],
+   "phase": "0.1.1",
    "does": "The coldsnap renderer with the hold's rail, in its own file.",
    "serves": [
     "bay",

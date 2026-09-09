@@ -18,6 +18,7 @@ import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFi
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
 import { makeHold, order, tick, summary, crashLoads, HOLD_DIALS } from "../src/games/gravitys-ark/hold.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS } from "../src/games/gravitys-ark/ground.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -1073,6 +1074,24 @@ const ticks = (H, n) => { const evs = []; for (let i = 0; i < n; i++) evs.push(.
   const v = rng() * 30, seedH = (rng() * 0xffffffff) >>> 0;
   const run = () => { const H = holdAt(v, seedH); for (let i = 0; i < 600; i++) { if (i === 30) order(H, "repairWalker"); if (i === 300) order(H, "wall", 6, 0); if (i === 400) order(H, "fire", 12, 0); tick(H, 1 / 60); } const { rng: _r, ...rest } = H; return JSON.stringify(rest); };
   check("ark: twin holds from one rolled seed agree", run() === run());
+}
+
+{ // 38. ark: the ground boots on coldsnap from the galaxy's seed, and twin boots are twins in every hash after one tick
+  // 39. ark: the hold's scrap is the purse, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms
+  const gSeed = rollSeed();
+  const g = makeGalaxy(gSeed), w = g.worlds[0];
+  const kg = 500 + Math.floor(rng() * 1000);
+  const A = makeGround(gSeed, w, kg), B = makeGround(gSeed, w, kg);
+  const purse0 = A.run.resources;   // read before the first tick: the ground pays by the tick
+  groundTick(A, 1 / 120); groundTick(B, 1 / 120);
+  check("ark: the ground boots on coldsnap from the galaxy's seed, and twin boots are twins in every hash", A.seed === B.seed && A.run.started === true && groundHash(A) === groundHash(B));
+  const purse1 = A.run.resources, f = A.run.focus;
+  let placed = null;
+  for (let dz = -8; dz <= 8 && !placed; dz += 2) for (let dx = -8; dx <= 8 && !placed; dx += 2) { const r = groundOrder(A, "gun", f.x + dx, f.z + dz, "mg"); if (r.ok) placed = r; }
+  const guns = A.world.bodies.filter((b) => b.alive && b.kind === "tower" && b.team === 1).length;
+  const up = groundOrder(A, "takeoff");
+  check("ark: the hold's scrap is the purse, a gun at the crash site spends it by coldsnap's build law, and what is left comes back up in kilograms",
+    purse0 === Math.floor(kg / GROUND_DIALS.kgPerScrap) && purse1 > purse0 && !!placed && placed.cost > 0 && Math.abs(A.run.resources - (purse1 - placed.cost)) < 1e-9 && guns === 1 && up.ok && up.scrapKg === A.run.resources * GROUND_DIALS.kgPerScrap);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

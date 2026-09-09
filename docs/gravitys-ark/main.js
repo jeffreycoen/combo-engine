@@ -18,6 +18,7 @@ import { makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as passGa
 import { makeLog, logFromJSON, buildCard, ARK_LINES } from "../../src/games/gravitys-ark/card.js";
 import { makeHold, order as holdOrder, tick as holdTick, summary as holdSummary } from "../../src/games/gravitys-ark/hold.js";
 import { wireSeed } from "./seed.js";
+import { makeGroundScreen } from "./ground.js";
 
 const q = new URLSearchParams(location.search);
 const seed = q.has("seed") ? (parseInt(q.get("seed"), 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
@@ -54,7 +55,12 @@ function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, cr
 // phase 0.0.110's page step: the hold, the ground frames, on the same canvas
 const holdRng = simStream((seed + 4) >>> 0), OPENING_CRASH = 30;   // the opening: the hull down at 30 m/s on the plague world, the engine off its weld, PROPOSED
 let hold = null, view = "space", fieldTap = null;
-function enterHold(v) { hold = makeHold(hull, crew, v, holdRng); view = "hold"; fieldTap = null; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
+// phase 0.1.1: the ground on coldsnap, behind ?ground=1 until the hold is whole; the old hold stays the default until then
+const groundOn = q.has("ground");
+const GS = makeGroundScreen({ canvas: "gv", kind: "gKind", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
+function enterGround(v) { view = "ground"; fieldTap = null; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
+function leaveGround() { const r = GS.takeoff(); if (r.ok) hull.scrap += r.scrapKg; GS.leave(); view = "space"; }
+function enterHold(v) { if (groundOn) { enterGround(v); return; } hold = makeHold(hull, crew, v, holdRng); view = "hold"; fieldTap = null; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 function leaveHold() { view = "space"; hold = null; }
 function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
 function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }
@@ -102,6 +108,7 @@ function drawDisc(px, py, r, fill, stroke) {
 function label(px, py, text, col) { ctx.fillStyle = col || "rgba(233,237,242,.8)"; ctx.font = "500 10px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.fillText(text, px, py); }
 
 function draw() {
+  if (view === "ground") { GS.draw(frameDt); return; }
   if (view === "hold" && hold) { drawHold(); return; }
   const z = R.cam.z;
   ctx.fillStyle = "#07090d"; ctx.fillRect(0, 0, W(), H());
@@ -163,7 +170,9 @@ function hud() {
   $("log").textContent = state.events.slice(-6).map((e) => "t=" + fmt(e.t, 1) + " " + e.k + (e.i !== undefined ? " " + galaxy.worlds[e.i].id : "") + (e.v !== undefined ? " " + fmt(e.v, 1) + " m/s" : "")).join("\n");
   $("land").disabled = ship.landed !== null || !ship.alive; $("takeoff").disabled = ship.landed === null || !ship.alive; $("burn").disabled = ship.landed !== null || !ship.alive;
   $("castB").disabled = ship.landed !== null || !!gr.g || !ship.alive; $("payB").disabled = !lockedPirate(); $("hireOut").disabled = ship.landed === null || !!her.away || her.taken;
-  const inHold = view === "hold" && hold; $("btns").style.display = inHold ? "none" : "grid"; $("holdBtns").style.display = inHold ? "grid" : "none"; if (inHold) { holdPane(); $("dock").style.display = "none"; }
+  const inGround = view === "ground";
+  const inHold = view === "hold" && hold; $("btns").style.display = inHold || inGround ? "none" : "grid"; $("holdBtns").style.display = inHold ? "grid" : "none"; $("groundBtns").style.display = inGround ? "grid" : "none"; if (inHold) { holdPane(); $("dock").style.display = "none"; }
+  if (inGround) { $("clocks").textContent = GS.pane(); GS.buttons(); $("dock").style.display = "none"; cv.style.display = "none"; } else cv.style.display = "block";
   $("burn").classList.toggle("on", burning); $("aim").textContent = aimMode === "gate" ? "AIM: GATE" : "AIM: DRAG"; $("pause").classList.toggle("on", paused);
   if (!ship.alive && !ending && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. WAKE at a station still ahead of the edge, in a starter hull with " + GATE_DIALS.mercyFuel + " kg of fuel, in debt."; $("wake").style.display = "inline-block"; $("card").style.display = "block"; }
 }
@@ -175,8 +184,8 @@ $("takeoff").onclick = () => { const r = road.takeoff(); if (r.ok && r.collapse)
 $("burn").onpointerdown = (e) => { burning = true; e.preventDefault(); };
 addEventListener("pointerup", () => { burning = false; });
 $("aim").onclick = () => { aimMode = aimMode === "gate" ? "drag" : "gate"; };
-$("zoomIn").onclick = () => { zi = Math.min(ZOOMS.length - 1, zi + 1); R.cam.z = ZOOMS[zi]; };
-$("zoomOut").onclick = () => { zi = Math.max(0, zi - 1); R.cam.z = ZOOMS[zi]; };
+$("zoomIn").onclick = () => { if (view === "ground") { GS.zoomIn(); return; } zi = Math.min(ZOOMS.length - 1, zi + 1); R.cam.z = ZOOMS[zi]; };
+$("zoomOut").onclick = () => { if (view === "ground") { GS.zoomOut(); return; } zi = Math.max(0, zi - 1); R.cam.z = ZOOMS[zi]; };
 $("pause").onclick = () => { paused = !paused; };
 $("again").onclick = () => { location.search = "?seed=" + ((Math.random() * 0xffffffff) >>> 0); };
 cv.addEventListener("pointerdown", (e) => { dragStart = [e.clientX, e.clientY]; });
@@ -193,10 +202,11 @@ addEventListener("keydown", (e) => {
 addEventListener("keyup", (e) => { if (e.key === " ") burning = false; });
 
 // the loop: a fixed step of 1/60 with a clamped catch-up, then the draw
-const DT = 1 / 60; let last = performance.now(), acc = 0;
+const DT = 1 / 60; let last = performance.now(), acc = 0, frameDt = 0;
 function frame(now) {
-  acc += Math.min(0.05, (now - last) / 1000); last = now;
+  frameDt = Math.min(0.05, (now - last) / 1000); acc += frameDt; last = now;
   while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); const crashEv = state.events.find((e) => e.k === "crash" && e.t === state.t); if (crashEv) enterHold(crashEv.v); }
+      if (view === "ground") { GS.step(DT / 2); GS.step(DT / 2); }   // the war steps at coldsnap's own 1/120
       if (view === "hold" && hold) holdStep(); stepStations(S, DT); ship.dry = hullMass();
       if (state.hole.born && !collapsed) onCollapse();
       stepWrecks(wrecks, road.wells(), DT);
@@ -213,8 +223,8 @@ requestAnimationFrame(frame);
 // the dock pane: the station's listings and the purse, live only when landed
 function dockPane() {
   const sid = stationHere();
-  $("dock").style.display = sid && view !== "hold" ? "block" : "none";
-  if (!sid || view === "hold") return;
+  $("dock").style.display = sid && view !== "hold" && view !== "ground" ? "block" : "none";
+  if (!sid || view === "hold" || view === "ground") return;
   const st = S.stations[sid], L = listings(S, sid), ct = openContractHere(sid), cap = derive(hull).fuelCap;
   $("dockBody").textContent = [
     sid + " station, " + st.faction,
@@ -322,5 +332,6 @@ $("hIdle").onclick = () => { holdOrder(hold, "idle"); };
 $("hWall").onclick = () => { if (fieldTap && holdOrder(hold, "wall", fieldTap.x, fieldTap.y)) state.events.push({ k: "WALL, 300 kg scrap", t: state.t }); };
 $("hGun").onclick = () => { if (fieldTap && holdOrder(hold, "gun", fieldTap.x, fieldTap.y)) state.events.push({ k: "GUN, 600 kg scrap", t: state.t }); };
 $("hFire").onclick = () => { if (fieldTap && holdOrder(hold, "fire", fieldTap.x, fieldTap.y)) state.events.push({ k: "FIRE from the mast", t: state.t }); };
+$("gTakeoff").onclick = () => { if (view !== "ground") return; const t = road.takeoff(); if (!t.ok) { state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); return; } if (t.collapse) collapseT = state.t; leaveGround(); };
 $("hTakeoff").onclick = () => { const r = holdOrder(hold, "takeoff"); if (!r.ok) { state.events.push({ k: "no takeoff: " + r.reason, t: state.t }); return; } hull.scrap += hold.scrap; const t = road.takeoff(); if (t.ok) { if (t.collapse) collapseT = state.t; leaveHold(); } else state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); };
 enterHold(OPENING_CRASH);
