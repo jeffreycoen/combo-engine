@@ -228,13 +228,13 @@ Anchors are from the three surveys, spot-checked against the demo text. Each pha
 - Laws: bracket size and arm exact at rolled scales; the ramp's two branches meet at 0.5 and each is monotone; links are exactly n minus 1 consecutive pairs; box select at rolled rectangles over projected points; the follow window at rolled click times; twin identity; the contract counts every problem.
 - Seam: sample. Size: about 130 lines. Bracket: selection, orders.
 
-### B9, grammar: the touch command grammar
+### B9, touch: the touch commands
 
-- Box: "The touch command grammar: the right mouse button, solved for a phone". Source: fleet demo 153 (the mobile flag), 1097 to 1127 (mouse down), 1128 to 1132 (mouse move), 1133 to 1142 (mouse up), 1143 to 1147 (wheel), 1148 to 1162 (keys), 1170 to 1196 (touch).
+- Box: "The touch commands: the right mouse button, solved for a phone". Source: fleet demo 153 (the mobile flag), 1097 to 1127 (mouse down), 1128 to 1132 (mouse move), 1133 to 1142 (mouse up), 1143 to 1147 (wheel), 1148 to 1162 (keys), 1170 to 1196 (touch).
 - Kind: SHAPED. The law carried as an input classifier: events in (down, move, up, wheel, key, touch start, move, end, with positions, buttons, times, and what the page found under the pointer: ground point, own unit, enemy unit) and intents out (select, toggle, box start, drag, end, order move, attack, guard, open disc, drag altitude, orbit, pan, zoom, follow, the key commands). Dials, the demo's: long press 500 ms, double tap 350 ms, box drag 5 px, orbit 0.005 mouse and 0.006 touch, pan 0.12 and 0.15, wheel 0.08 clamped 15 to 500, follow wheel 0.04 clamped 8 to 60, pinch clamped 15 to 500, pitch clamped 0.15 to 1.5, follow double click 400 ms. No DOM: the page binds events and hands them in.
 - Contract: checkGrammarDials(d): every timing and threshold over 0, every clamp a low under a high.
 - Laws, scripted sequences at rolled timings: a press held past the long-press dial opens the disc and one under it selects; two taps inside the double-tap window follow and outside it do not; a drag past the box dial boxes and under it clicks; the right button on an enemy orders attack, on a friend guard, on ground move; pinch and wheel zoom stay inside their clamps; pitch stays inside its clamp; twin identity; the contract counts every problem.
-- Seam: consume. Size: about 150 lines. Bracket: grammar, disc.
+- Seam: consume. Size: about 150 lines. Bracket: touch, disc.
 
 ### B10, backdrop: the space backdrop and effects kit
 
@@ -290,7 +290,7 @@ One headless gate wires parts from four demos by hand, the way a game would, and
 | 0.0.94 | B8 selection | harvest | small | |
 | 0.0.95 | A12 physics-pb | second pass | medium | |
 | 0.0.96 | A13 rig | second pass | medium | |
-| 0.0.97 | B9 grammar | harvest | medium | 0.0.90 |
+| 0.0.97 | B9 touch | harvest | medium | 0.0.90 |
 | 0.0.98 | B10 backdrop | harvest | medium | |
 | 0.0.99 | B3 gait | harvest | large | 0.0.77 |
 | 0.0.100 | B5 render3d law | harvest | large | 0.0.91 |
@@ -323,7 +323,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.94 selection
 - [x] 0.0.95 physics-pb
 - [x] 0.0.96 rig
-- [ ] 0.0.97 grammar
+- [x] 0.0.97 touch
 - [ ] 0.0.98 backdrop
 - [ ] 0.0.99 gait
 - [ ] 0.0.100 render3d law
@@ -339,5 +339,5 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - The physics ground is a level height, not a field. A height field is its own phase later.
 - The 3-D renderer is raw WebGL and cannot be seen headlessly. Its gate proves the mechanism on a recording stub; the look waits for a page.
 - The cue voices are data. Playing them through the coldsnap sound engine is a later ruling.
-- The grammar's hit tests stay page-side; the page tells the grammar what was under the pointer.
+- The touch module's hit tests stay page-side; the page tells it what was under the pointer.
 - The backdrop's random becomes seeded. The demo's sky was different on every load; the module's is the seed's.

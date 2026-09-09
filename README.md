@@ -95,7 +95,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] The 3-D movement disc: order movement in three dimensions with a flat pointer
 - [x] Steering behaviors: acceleration, capped turning, banking, strafe and guard orbits
 - [x] The selection and feedback layer: brackets, health ramps, order lines, formation links
-- [ ] The touch command grammar: the right mouse button, solved for a phone
+- [x] The touch commands: the right mouse button, solved for a phone
 - [ ] The space backdrop and effects kit: starfield, nebulae, trails, beams, explosion rings
 - [x] Musical cues folded into the sound engine's vocabulary
 
@@ -166,6 +166,7 @@ Serving checklist items:
 - [x] greybox — the greybox part library: stairs, facades, vehicles, figures, at true human scale — 0.0.92
 - [x] cues — musical cues folded into the sound engine's vocabulary — 0.0.93
 - [x] selection — the selection and feedback layer: brackets, health ramps, order lines, formation links — 0.0.94
+- [x] touch — the touch commands: the right mouse button, solved for a phone — 0.0.97
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 
