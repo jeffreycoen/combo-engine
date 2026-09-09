@@ -69,6 +69,7 @@ The owner directs design, reviews every plan, and is the sole playtester. His wo
 ## Verification
 
 - Test only what changed; run ONLY the gates the brief lists. No scripted playtesting, ever. The full suite rides CI.
+- A tree restored to a state the record already proved green is not tested again. A task that resumes after a stop starts at the first step that changes something.
 - **NO HARDWIRED SEEDS.** A test rolls its seeds fresh at run time and prints them; every check is a law that must hold at any seed. A pinned literal that is one seed's own output (a fixed hash, an exact price) is forbidden — twin-run identity, band checks, and self-consistency replace pinned numbers.
 - No full-gameplay runs in gates — a full mission replay is never a per-task test. Test the changed code functionally; long replays belong to CI alone.
 - The work process: the plan-writer writes the code and checks it, then hands it to Sonnet to implement and prove with the listed gates. The assistant never plays the game and never takes screenshots unless directed.
