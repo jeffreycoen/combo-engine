@@ -112,3 +112,11 @@ Read-confirmation first (each file, its line count). One line of outcome: stands
 ## Amendment
 
 The first measurement at 0.607: zero breaks, the pelvis 2.1248 to 2.0921 m, inside the band, and the right foot leaving the ground at 7.55 s, after the first 0.5 s: not a stand by the law. The agent named the gap: the design scaled the balance controller's pivot but the state estimate and the gait controller still read the full-scale pivot. The design now scales the pivot in `groundTruthState` and in `GaitController`'s own uses, and check 11 covers the floor and the estimate's ankle points. The stance is measured again on this wording. "core" in the scaling law means the spec's `links`.
+
+## The report's gate lines
+
+- `node scripts/rig-test.mjs`: seeds 722540624 and 358019720; 16 PASS lines, `rig-test: 16 PASS / 0 FAIL`, exit 0, twice; the fourteen landed checks verbatim. `node scripts/gait-test.mjs`: seeds 347137849 and 661044027; 11 PASS lines, `gait-test: 11 PASS / 0 FAIL`, exit 0, twice; the ten landed checks verbatim. Tails unmoved: legik 7, presets 7, telemetry 4.
+- The stand trial at 0.607, twice, byte-identical: breaks 0, a foot airborne at 7.42 s, the pelvis 2.1248 to 2.1000 m. Not a stand by the law; no check 17. The first attempt, before the pivot amendment: airborne at 7.55 s, the pelvis 2.1248 to 2.0921 m.
+- Bracket at the landing: rig, gait, legik, presets, telemetry, physics-pb, every tail PASS.
+- Branch commit e530aca on phase/0.0.111-walker-stance, landed by squash into main.
+- Nonconformities the agent named: the pivot gap, a brief error resolved by the amendment; check 11's name promised the floor, added by the amendment; "core" read as the spec's links; the phase document's failure slot assumed a break where the failure is a foot losing contact. By the owner's ruling the walker ships at trooper scale, marked; the scale option and its laws are landed.

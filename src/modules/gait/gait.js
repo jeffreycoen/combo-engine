@@ -48,8 +48,24 @@
 //    makeGait(rig, cfg) returning new GaitController(rig, cfg) is added.
 // 8. Added: GAIT_DIALS_CONTRACT, checkGaitDials(k), and
 //    checkBalanceDials(k), contracts with no demo source.
+//
+// Second pass, phase 0.0.111 of the order batch-ark-1. One numbered note:
+//   1. A scale option: BalanceController's cfg.scale and Posture's
+//      opts.scale (default 1, or the rig's rig.scale unless the config
+//      gives one). copLimitX and copLimitZ default to their landed values
+//      times scale; the capture-point com-height floor (landed 0.5 m)
+//      becomes 0.5 * scale, held as k.comHeightFloor; the ankle pivot
+//      becomes ANKLE_PIVOT times scale per component, held as this.ankle.
+//      Posture hands legIK the leg lengths LEG.thigh and LEG.shin times
+//      scale, so LEG is now also imported from legik. GaitController
+//      passes its rig's scale to both. groundTruthState(rig, g, scale)
+//      takes a third argument, default rig.scale ?? 1, and builds every
+//      foot's ankle point from ANKLE_PIVOT times scale; GaitController's
+//      init and its touchdown correction read the same scaled pivot off
+//      this.balance.ankle where they had called body.toWorld(ANKLE_PIVOT).
+//      At scale 1, unchanged.
 
-import { legIK } from "../legik/legik.js";
+import { legIK, LEG } from "../legik/legik.js";
 import { V, Q, vadd, vsub, vmul, qrot, qrotInv, qAxisAngle } from "../physics-pb/physics.js";
 
 // The ankle-pivot offset in the foot's own local frame, sole held flat.
@@ -61,8 +77,9 @@ export const ANKLE_PIVOT = V(-0.10, 0.15, 0);
 // consistent with the closed chain through the ground.
 
 export class Posture {
-  constructor(rig) {
+  constructor(rig, opts = {}) {
     this.rig = rig;
+    this.scale = opts.scale ?? rig?.scale ?? 1;
     this.hip = {};
     for (const s of ['L', 'R']) {
       const jp = rig.table[`hipYoke${s}`].jp;
@@ -89,7 +106,7 @@ export class Posture {
       // pelvis just rotates them; legIK is unchanged.
       const hipWorld = vadd(base, qrot(yaw, this.hip[s]));
       const d = qrotInv(yaw, vsub(feet[s], hipWorld));
-      const q = legIK(d);
+      const q = legIK(d, { thigh: LEG.thigh * this.scale, shin: LEG.shin * this.scale });
       J[`hipYoke${s}`].target = q.hipRoll;
       J[`thigh${s}`].target = q.hipPitch;
       J[`shin${s}`].target = q.knee;
@@ -110,7 +127,7 @@ export class Posture {
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 
 /* ---- StateEstimate: the only thing the controller is allowed to see ---- */
-export function groundTruthState(rig, g = 9.81) {
+export function groundTruthState(rig, g = 9.81, scale = rig.scale ?? 1) {
   let M = 0, c = V(), p = V();
   for (const b of Object.values(rig.bodies)) {
     M += b.mass;
@@ -121,6 +138,7 @@ export function groundTruthState(rig, g = 9.81) {
   const vcom = vmul(p, 1 / M);
 
   // foot contact: which feet are loaded, and where the pressure acts
+  const ankle = vmul(ANKLE_PIVOT, scale);
   const feet = {};
   for (const side of ['L', 'R']) {
     const body = rig.bodies[`foot${side}`];
@@ -129,7 +147,7 @@ export function groundTruthState(rig, g = 9.81) {
       force: F,
       cop: body.contactCop,
       contact: F > 0.02 * M * g,
-      ankle: body.toWorld(ANKLE_PIVOT),
+      ankle: body.toWorld(ankle),
     };
   }
   const loaded = ['L', 'R'].filter((s) => feet[s].contact);
@@ -160,12 +178,13 @@ export function groundTruthState(rig, g = 9.81) {
 export class BalanceController {
   constructor(rig, cfg = {}) {
     this.rig = rig;
+    const scale = cfg.scale ?? rig?.scale ?? 1;
     this.k = Object.assign({
       ankleKp: 0.03, ankleKd: 0.011,     // capture-point error (m) -> ankle angle (rad)
       ankleTrim: 0.16,                   // max ankle trim, rad
       signPitch: 1, signRoll: 1, signHip: 1,
       kCop: 0.6,             // CoP error (m) -> ankle torque, as a fraction of F
-      copLimitX: 0.36, copLimitZ: 0.24,  // CoP travel from the ankle pivot, m (foot geometry)
+      copLimitX: 0.36 * scale, copLimitZ: 0.24 * scale,  // CoP travel from the ankle pivot, m (foot geometry)
       hipStrategy: 0.0,                  // rad of hip trim per m of capture-point excess
       lateralShift: 0.0,                 // rad of hip roll per m of lateral capture error
       capture: 1.6,
@@ -176,7 +195,10 @@ export class BalanceController {
       comHeightTarget: null,
       kneeKp: 1.4, kneeKd: 0.10,
       gravity: 9.81,
+      scale,
+      comHeightFloor: 0.5 * scale,       // capture-point com-height floor, m
     }, cfg);
+    this.ankle = vmul(ANKLE_PIVOT, this.k.scale);
     this.stance = { hip: -9 * Math.PI / 180, knee: 18 * Math.PI / 180, ankle: -9 * Math.PI / 180 };
     // All joints stay in position mode. Balance is applied as small angle trims on top
     // of a stance that is known to hold statically; commanding ankle TORQUE directly
@@ -192,7 +214,7 @@ export class BalanceController {
     }
 
     // --- capture point (LIPM): where the COM will come to rest if we do nothing ---
-    const hCom = Math.max(0.5, st.com.y);
+    const hCom = Math.max(this.k.comHeightFloor, st.com.y);
     const w0 = Math.sqrt(this.k.gravity / hCom);
     const xiX = st.com.x + st.comVel.x / w0;
     const xiZ = st.com.z + st.comVel.z / w0;
@@ -416,8 +438,8 @@ export class GaitController {
       tSS: 0.90, tDS: 0.50,
       enabled: true,
     }, cfg);
-    this.posture = new Posture(rig);
-    this.balance = new BalanceController(rig, Object.assign({ hipKp: 0, hipKd: 0, gravity: this.k.gravity }, cfg.balance || {}));
+    this.posture = new Posture(rig, { scale: rig.scale });
+    this.balance = new BalanceController(rig, Object.assign({ hipKp: 0, hipKd: 0, gravity: this.k.gravity, scale: rig.scale }, cfg.balance || {}));
     this.t = 0;
     this.state = 'INIT';
     this.debug = {};
@@ -455,8 +477,8 @@ export class GaitController {
     this.pelvisStart = V(r.bodies.pelvis.x.x, r.bodies.pelvis.x.y, r.bodies.pelvis.x.z);
     this.pelvisY = this.pelvisStart.y - this.k.pelvisDrop;
     this.plant = {
-      L: r.bodies.footL.toWorld(ANKLE_PIVOT),
-      R: r.bodies.footR.toWorld(ANKLE_PIVOT),
+      L: r.bodies.footL.toWorld(this.balance.ankle),
+      R: r.bodies.footR.toWorld(this.balance.ankle),
     };
     this.comToPelvis = vsub(this.pelvisStart, st.com);   // constant offset, held through the walk
     // Nominal lateral footprint. Without commanding this, each landing inherits the
@@ -562,7 +584,7 @@ export class GaitController {
       // the commanded amount desynchronises the plan from reality and the error compounds
       // every step. Take the MEASURED landing position and replan the remainder.
       const w2 = this.swingPrev;
-      const land = this.rig.bodies[`foot${w2}`].toWorld(ANKLE_PIVOT);
+      const land = this.rig.bodies[`foot${w2}`].toWorld(this.balance.ankle);
       // sagittal from measurement so travel stays honest, lateral pinned to nominal
       // The foot lands roughly 0.1 m inboard of command every step. Correcting only the
       // commanded target cannot overcome that, so also pull the RECORDED print back

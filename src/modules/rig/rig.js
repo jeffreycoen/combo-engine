@@ -28,6 +28,15 @@ import { V, vadd, vsub, vmul, vnorm, vcross, Q, qmul, qrot, qAxisAngle,
 //      opts.footClearance keeps its meaning through the pairs default.
 //   5. RIG_SPEC_CONTRACT names the spec's shape; checkRigSpec(spec) returns
 //      every problem in one pass, empty when clean.
+//
+// Third pass, phase 0.0.111 of the order batch-ark-1. One numbered note:
+//   1. A scale option: scaledSpec(spec, s) and assembleMech's opts.scale
+//      (default 1). Every length (dim, jp, jc) times s; every mass times
+//      s^3 (inertia follows through the builders, s^5); every hinge's
+//      tauMax times s^4, kp and kd following as already derived; every
+//      mount limit's tension and shear times s^2, bend and torsion times
+//      s^3; targetHeight times s; range, angle0, and every other field
+//      untouched. At s 1 the rig is the landed rig exactly.
 
 
 const D = Math.PI / 180;
@@ -124,14 +133,48 @@ function perpTo(axis) {
   return vnorm(vcross(a, t));
 }
 
+/* One row (a core link or a limbChain row) scaled by s under the phase 0.0.111 law.
+   dim, jp, jc times s; mass times s^3; tauMax times s^4; lim.tension and lim.shear
+   times s^2; lim.bend and lim.torsion times s^3. axis and range are copied, not
+   scaled -- angles and dimensionless fields are untouched. */
+function scaleRow(L, s) {
+  const out = { ...L };
+  if (L.dim) out.dim = L.dim.map((v) => v * s);
+  if (L.jp) out.jp = L.jp.map((v) => v * s);
+  if (L.jc) out.jc = L.jc.map((v) => v * s);
+  if (L.axis) out.axis = [...L.axis];
+  if (L.range) out.range = [...L.range];
+  if (L.mass !== undefined) out.mass = L.mass * s ** 3;
+  if (L.tauMax !== undefined) out.tauMax = L.tauMax * s ** 4;
+  if (L.lim) {
+    out.lim = { ...L.lim };
+    if (L.lim.tension !== undefined) out.lim.tension = L.lim.tension * s ** 2;
+    if (L.lim.shear !== undefined) out.lim.shear = L.lim.shear * s ** 2;
+    if (L.lim.bend !== undefined) out.lim.bend = L.lim.bend * s ** 3;
+    if (L.lim.torsion !== undefined) out.lim.torsion = L.lim.torsion * s ** 3;
+  }
+  return out;
+}
+
+/* scaledSpec(spec, s) -> a deep copy of spec with the phase 0.0.111 scaling law
+   applied to every core (links) and limbChain row, and to targetHeight. At s 1
+   the copy equals spec exactly. */
+function scaledSpec(spec, s) {
+  const links = {};
+  for (const [name, L] of Object.entries(spec.links)) links[name] = scaleRow(L, s);
+  const limbChain = spec.limbChain.map((row) => scaleRow(row, s));
+  return { ...spec, links, limbChain, targetHeight: spec.targetHeight * s };
+}
+
 /* Assemble the rig into `world`. rootPos places the pelvis COM.
    Returns { bodies, joints, welds, byName } with joints keyed by child link name. */
 function assembleMech(world, opts = {}) {
-  const spec = opts.spec || MECH_SPEC;
+  const scale = opts.scale ?? 1;
+  const spec = scaledSpec(opts.spec ?? MECH_SPEC, scale);
   const table = buildLinkTable(spec);
   const footLinks = opts.footLinks || ['footL', 'footR'];
   const hipLinks = opts.hipLinks || ['hipYokeL', 'hipYokeR'];
-  const pairs = opts.pairs || [['footL', 'footR', opts.footClearance ?? 0.04], ['shinL', 'shinR', 0.02]];
+  const pairs = opts.pairs || [['footL', 'footR', opts.footClearance ?? (0.04 * scale)], ['shinL', 'shinR', 0.02 * scale]];
   // geometry overrides for design sweeps
   if (opts.footWidth) for (const name of footLinks) table[name].dim[2] = opts.footWidth;
   if (opts.hipOffset) for (const name of hipLinks) table[name].jp[2] = Math.sign(table[name].jp[2]) * opts.hipOffset;
@@ -198,7 +241,7 @@ function assembleMech(world, opts = {}) {
   // prevents it, and the walk drifts inward far enough to need it.
   for (const [a, b, margin] of pairs) world.addPair(new PairCollision({ a: bodies[a], b: bodies[b], margin }));
 
-  return { bodies, joints, welds, table, spec };
+  return { bodies, joints, welds, table, spec, scale };
 }
 
 /* Drop the rig so the lowest point of either foot sits exactly on y = 0. */
@@ -285,4 +328,4 @@ export function checkRigSpec(spec) {
 }
 
 // COMBO-ENGINE export block — see the import note above.
-export { MECH_SPEC, sideChain, buildLinkTable, perpTo, assembleMech, groundRig, comAnkleOffset, rigStats };
+export { MECH_SPEC, sideChain, buildLinkTable, perpTo, scaledSpec, assembleMech, groundRig, comAnkleOffset, rigStats };

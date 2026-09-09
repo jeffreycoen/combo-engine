@@ -132,6 +132,58 @@ check("design-sweep overrides land: footWidth 0.55 and hipOffset 0.42 reach the 
   check("rig: the module imports only from its own folder or a sibling module", ok);
 }
 
+// 15. scale 1 assembles the landed rig exactly
+{
+  const w1 = new World({}); const rig1 = assembleMech(w1, { scale: 1 });
+  const w2 = new World({}); const rig2 = assembleMech(w2, {});
+  const s1 = rigStats(rig1), s2 = rigStats(rig2);
+  let ok = s1.mass === s2.mass && s1.height === s2.height && s1.top === s2.top && s1.bottom === s2.bottom &&
+           s1.com.x === s2.com.x && s1.com.y === s2.com.y && s1.com.z === s2.com.z;
+  for (const name of Object.keys(rig1.bodies)) {
+    const b1 = rig1.bodies[name], b2 = rig2.bodies[name];
+    if (!(b1.mass === b2.mass && b1.dim.x === b2.dim.x && b1.dim.y === b2.dim.y && b1.dim.z === b2.dim.z)) ok = false;
+  }
+  for (const name of Object.keys(rig1.joints)) {
+    const j1 = rig1.joints[name], j2 = rig2.joints[name];
+    if (!(j1.tauMax === j2.tauMax && j1.kp === j2.kp && j1.kd === j2.kd &&
+          j1.lim.tension === j2.lim.tension && j1.lim.shear === j2.lim.shear &&
+          j1.lim.bend === j2.lim.bend && j1.lim.torsion === j2.lim.torsion)) ok = false;
+  }
+  check("rig: scale 1 assembles the landed rig exactly", ok);
+}
+
+// 16. at a rolled scale every quantity scales by its power
+{
+  const relOk = (a, b, tol) => Math.abs(a - b) <= tol * Math.abs(b);
+  let ok = true;
+  for (let i = 0; i < 20 && ok; i++) {
+    const s = 0.3 + rnd() * 1.2;
+    const w1 = new World({}); const rig1 = assembleMech(w1, {});
+    const ws = new World({}); const rigs = assembleMech(ws, { scale: s });
+    for (const name of Object.keys(rig1.bodies)) {
+      const b1 = rig1.bodies[name], bs = rigs.bodies[name];
+      if (!relOk(bs.dim.x, b1.dim.x * s, 1e-9) || !relOk(bs.dim.y, b1.dim.y * s, 1e-9) || !relOk(bs.dim.z, b1.dim.z * s, 1e-9)) ok = false;
+      if (!relOk(bs.mass, b1.mass * s ** 3, 1e-9)) ok = false;
+    }
+    for (const name of Object.keys(rig1.joints)) {
+      const j1 = rig1.joints[name], js = rigs.joints[name];
+      if (!relOk(js.tauMax, j1.tauMax * s ** 4, 1e-9)) ok = false;
+      if (!relOk(js.kp, j1.kp * s ** 4, 1e-9)) ok = false;
+      if (!relOk(js.kd, j1.kd * s ** 4, 1e-9)) ok = false;
+      if (!relOk(js.lim.tension, j1.lim.tension * s ** 2, 1e-9)) ok = false;
+      if (!relOk(js.lim.shear, j1.lim.shear * s ** 2, 1e-9)) ok = false;
+      if (!relOk(js.lim.bend, j1.lim.bend * s ** 3, 1e-9)) ok = false;
+      if (!relOk(js.lim.torsion, j1.lim.torsion * s ** 3, 1e-9)) ok = false;
+    }
+    const stats1 = rigStats(rig1), statss = rigStats(rigs);
+    const mass1 = Object.values(rig1.bodies).reduce((a, b) => a + b.mass, 0);
+    const masss = Object.values(rigs.bodies).reduce((a, b) => a + b.mass, 0);
+    if (!relOk(masss, mass1 * s ** 3, 1e-9)) ok = false;
+    if (!relOk(statss.height, stats1.height * s, 1e-6)) ok = false;
+  }
+  check("rig: at a rolled scale every quantity scales by its power", ok);
+}
+
 console.log(`rig-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
 console.log("rig-test PASS");

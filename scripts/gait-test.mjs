@@ -6,7 +6,7 @@ import {
   Posture, groundTruthState, BalanceController, DCMPlan, COMTracker, buildPhases,
   GaitController, makeGait, ANKLE_PIVOT, checkGaitDials, checkBalanceDials,
 } from "../src/modules/gait/gait.js";
-import { legIK } from "../src/modules/legik/legik.js";
+import { legIK, LEG } from "../src/modules/legik/legik.js";
 import { V, vadd, vsub, World } from "../src/modules/physics-pb/physics.js";
 import { assembleMech, groundRig, rigStats } from "../src/modules/rig/rig.js";
 import fs from "node:fs";
@@ -264,6 +264,58 @@ const rolledPhaseOpts = () => ({
   const specs = [...src.matchAll(/import[^\n]*from\s*["']([^"']+)["']/g)].map((m) => m[1]);
   const ok = specs.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
   check("gait: the module imports only from its own folder or a sibling module", ok);
+}
+
+// 11. the controller's limits, pivot, and floor scale with the rig; groundTruthState's
+// ankle points scale; Posture hands legIK scaled lengths
+{
+  const relOk = (a, b, tol) => Math.abs(a - b) <= tol * Math.max(1, Math.abs(b));
+  let ok = true;
+  for (let i = 0; i < 20 && ok; i++) {
+    const s = 0.3 + rnd() * 1.2;
+    const { rig } = build();
+    const wS = new World({}); const rigScaled = assembleMech(wS, { scale: s });
+    const balCfg = new BalanceController(rig, { scale: s });
+    const balRig = new BalanceController(rigScaled);
+    if (!relOk(balCfg.k.copLimitX, 0.36 * s, 1e-12)) ok = false;
+    if (!relOk(balCfg.k.copLimitZ, 0.24 * s, 1e-12)) ok = false;
+    if (!relOk(balCfg.k.comHeightFloor, 0.5 * s, 1e-12)) ok = false;
+    if (!relOk(balCfg.ankle.x, ANKLE_PIVOT.x * s, 1e-12)) ok = false;
+    if (!relOk(balCfg.ankle.y, ANKLE_PIVOT.y * s, 1e-12)) ok = false;
+    if (balCfg.ankle.z !== ANKLE_PIVOT.z * s) ok = false;
+    if (!(balRig.k.copLimitX === balCfg.k.copLimitX && balRig.k.copLimitZ === balCfg.k.copLimitZ &&
+          balRig.k.comHeightFloor === balCfg.k.comHeightFloor &&
+          balRig.ankle.x === balCfg.ankle.x && balRig.ankle.y === balCfg.ankle.y && balRig.ankle.z === balCfg.ankle.z)) ok = false;
+
+    const stScaled = groundTruthState(rigScaled, 9.81);
+    for (const side of ['L', 'R']) {
+      const want = rigScaled.bodies[`foot${side}`].toWorld(V(ANKLE_PIVOT.x * s, ANKLE_PIVOT.y * s, ANKLE_PIVOT.z * s));
+      if (!relOk(stScaled.feet[side].ankle.x, want.x, 1e-9)) ok = false;
+      if (!relOk(stScaled.feet[side].ankle.y, want.y, 1e-9)) ok = false;
+      if (!relOk(stScaled.feet[side].ankle.z, want.z, 1e-9)) ok = false;
+    }
+
+    const posture = new Posture(rig, { scale: s });
+    const pelvis = V(rnd() * 0.4 - 0.2, rig.bodies.pelvis.x.y, rnd() * 0.4 - 0.2);
+    const ankleL = rig.bodies.footL.toWorld(ANKLE_PIVOT), ankleR = rig.bodies.footR.toWorld(ANKLE_PIVOT);
+    const feet = {
+      L: V(ankleL.x + (rnd() * 0.3 - 0.15), ankleL.y, ankleL.z + (rnd() * 0.3 - 0.15)),
+      R: V(ankleR.x + (rnd() * 0.3 - 0.15), ankleR.y, ankleR.z + (rnd() * 0.3 - 0.15)),
+    };
+    posture.apply(pelvis, feet);
+    for (const side of ['L', 'R']) {
+      const hipWorld = vadd(pelvis, posture.hip[side]);
+      const d = vsub(feet[side], hipWorld);
+      const want = legIK(d, { thigh: LEG.thigh * s, shin: LEG.shin * s });
+      const J = rig.joints;
+      if (J[`hipYoke${side}`].target !== want.hipRoll) ok = false;
+      if (J[`thigh${side}`].target !== want.hipPitch) ok = false;
+      if (J[`shin${side}`].target !== want.knee) ok = false;
+      if (J[`ankleYoke${side}`].target !== want.anklePitch) ok = false;
+      if (J[`foot${side}`].target !== want.ankleRoll) ok = false;
+    }
+  }
+  check("gait: the controller's limits, pivot, and floor scale with the rig", ok);
 }
 
 console.log(`gait-test: ${pass} PASS / ${fail} FAIL`);
