@@ -1,6 +1,6 @@
 # Phase 0.0.102 — the yard: the combination proof
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 7 PASS / 0 FAIL; the full self-test all gates PASS.
+Status: LANDED, commit `7e15b39`, 2026-09-08. Gate: 7 PASS / 0 FAIL; the full self-test all gates PASS.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 7 PASS / 0 FAIL; the full self-test all gates PASS. -->
 
 The closing phase of the general parts order. One headless gate wires ten parts from four demos by hand: fleet units fly a course over a greybox floor; rounds fired through a handed material table carve voxels and settle the pile; a ledger audits every round; every order rides a tape; the state hash is the proof. No module ships; no page ships.
