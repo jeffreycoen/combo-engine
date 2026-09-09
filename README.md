@@ -76,7 +76,7 @@ What moves into the engine, from where it was proven. Unchecked boxes are the ro
 - [x] The non-lethal opponent model: per-part thresholds, knockdown by impulse, a lethal line that fails the mission
 - [x] Opponent senses and cover reasoning
 - [x] The greybox part library: stairs, facades, vehicles, figures, at true human scale
-- [ ] The 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris
+- [x] The 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris
 
 ### From the space-hauler demo
 
@@ -169,6 +169,7 @@ Serving checklist items:
 - [x] touch — the touch commands: the right mouse button, solved for a phone — 0.0.97
 - [x] backdrop — the space backdrop and effects kit: starfield, nebulae, trails, beams, explosion rings — 0.0.98
 - [x] gait — the balance controller and the walking planner — 0.0.99
+- [x] render3d — the 3-D lit renderer: shadows, baked lamps, sky, finishing pass, edge outlines, instanced debris — 0.0.100 and 0.0.101
 
 Engine housekeeping — depot code moved into module files behind unchanged front doors, no capability added, no checklist item claimed (phases 0.0.40–0.0.57): sight, wind, lists, orient, route, territory, intel, fog, mines, economy, cards, transports, specs, ai, save, accuracy, mapgen.
 

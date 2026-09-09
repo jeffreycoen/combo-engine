@@ -327,7 +327,7 @@ The full self-test runs after 0.0.96, after 0.0.101, and after 0.0.102.
 - [x] 0.0.98 backdrop
 - [x] 0.0.99 gait
 - [x] 0.0.100 render3d law
-- [ ] 0.0.101 render3d draw
+- [x] 0.0.101 render3d draw
 - [ ] 0.0.102 the yard
 
 ## Gaps, said plainly

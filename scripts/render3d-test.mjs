@@ -1,11 +1,15 @@
-// COMBO-ENGINE — render3d-test: the render3d module's gate. Eleven checks,
-// rolled seed. Tests functionality only: arithmetic, arrays, contracts, the
-// import list. No WebGL, no canvas, no DOM, no timed simulation.
+// COMBO-ENGINE — render3d-test: the render3d module's gate. Nineteen
+// checks, rolled seed: the eleven landed checks (1-11, verbatim) on the
+// law half, then a recording stub WebGL context and eight checks (12-19)
+// on the draw half. Tests functionality only: arithmetic, arrays,
+// contracts, call logs, the import list. No real WebGL, no canvas, no DOM,
+// no timed simulation.
 import fs from "node:fs";
 import { mulberry32 } from "../src/modules/ballistics/ballistics.js";
 import { makeBox } from "../src/modules/solids/solids.js";
 import { makeVoxWorld } from "../src/modules/voxel/voxel.js";
 import * as R from "../src/modules/render3d/render3d.js";
+import { makeRender3d, checkRenderDials } from "../src/modules/render3d/draw.js";
 
 let pass = 0, fail = 0;
 const check = (name, ok) => { if (ok) { pass++; console.log("PASS " + name); } else { fail++; console.log("FAIL " + name); } };
@@ -296,6 +300,289 @@ const pal = R.paletteOf("nightfall");
   const specifiers = [...src.matchAll(/^import\s.*?\sfrom\s+["']([^"']+)["']/gm)].map((m) => m[1]);
   const ok = specifiers.length > 0 && specifiers.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
   check("render3d: the module imports only from its own folder or a sibling module", ok);
+}
+
+// ---- the recording stub context (12+) ----
+// Every WebGL method the draw half calls records its name and its
+// arguments into gl.log and returns what the demo expects, the way the
+// 2-D renderer's gate records its canvas (render2d-test.mjs makeStubCtx).
+// gl._counts, gl._programCalls, gl._drawArraysCalls, and gl._instancedCalls
+// give the checks below precise, string-parsing-free answers.
+const GL_CONSTANTS = [
+  "ARRAY_BUFFER", "BLEND", "CLAMP_TO_EDGE", "COLOR_ATTACHMENT0", "COLOR_BUFFER_BIT",
+  "COMPILE_STATUS", "DEPTH_ATTACHMENT", "DEPTH_BUFFER_BIT", "DEPTH_COMPONENT16", "DEPTH_TEST",
+  "DYNAMIC_DRAW", "FLOAT", "FRAGMENT_SHADER", "FRAMEBUFFER", "FRAMEBUFFER_COMPLETE",
+  "LINEAR", "LINES", "LINK_STATUS", "MAX_FRAGMENT_UNIFORM_VECTORS", "MAX_VARYING_VECTORS",
+  "NEAREST", "ONE", "POINTS", "RENDERBUFFER", "RGBA",
+  "SRC_ALPHA", "STATIC_DRAW", "TEXTURE0", "TEXTURE1", "TEXTURE2",
+  "TEXTURE_2D", "TEXTURE_MAG_FILTER", "TEXTURE_MIN_FILTER", "TEXTURE_WRAP_S", "TEXTURE_WRAP_T",
+  "TRIANGLES", "UNSIGNED_BYTE", "VERTEX_SHADER",
+];
+
+function makeStubGL() {
+  const log = [];
+  const counts = {};
+  let nextId = 1;
+  const bump = (name) => { counts[name] = (counts[name] || 0) + 1; };
+  const handle = (kind) => ({ __kind: kind, __id: nextId++ });
+  function fmt(v) {
+    if (v === null || v === undefined) return String(v);
+    if (typeof v === "object") {
+      if (v.__kind) return v.__kind + "#" + v.__id;
+      if (ArrayBuffer.isView(v)) return "[" + Array.from(v).join(",") + "]";
+      if (Array.isArray(v)) return "[" + v.map(fmt).join(",") + "]";
+      return JSON.stringify(v);
+    }
+    return String(v);
+  }
+  function rec(name, ret) {
+    return (...args) => {
+      bump(name);
+      log.push(name + "(" + args.map(fmt).join(",") + ")");
+      return typeof ret === "function" ? ret(...args) : ret;
+    };
+  }
+
+  const gl = {};
+  for (const name of GL_CONSTANTS) gl[name] = nextId++;
+
+  gl.createShader = rec("createShader", () => handle("shader"));
+  gl.createProgram = rec("createProgram", () => handle("program"));
+  gl.createBuffer = rec("createBuffer", () => handle("buffer"));
+  gl.createTexture = rec("createTexture", () => handle("texture"));
+  gl.createFramebuffer = rec("createFramebuffer", () => handle("framebuffer"));
+  gl.createRenderbuffer = rec("createRenderbuffer", () => handle("renderbuffer"));
+
+  gl.getShaderParameter = rec("getShaderParameter", () => true);
+  gl.getProgramParameter = rec("getProgramParameter", () => true);
+  gl.getShaderInfoLog = rec("getShaderInfoLog", () => "");
+  gl.getProgramInfoLog = rec("getProgramInfoLog", () => "");
+
+  const uniformLocs = new Map();
+  gl.getUniformLocation = rec("getUniformLocation", (prog, name) => {
+    const key = (prog ? prog.__id : 0) + "|" + name;
+    if (!uniformLocs.has(key)) uniformLocs.set(key, handle("uniformLoc"));
+    return uniformLocs.get(key);
+  });
+
+  const attribLocs = new Map();
+  let nextAttrib = 0;
+  gl.getAttribLocation = rec("getAttribLocation", (prog, name) => {
+    if (!attribLocs.has(name)) attribLocs.set(name, nextAttrib++);
+    return attribLocs.get(name);
+  });
+
+  gl.checkFramebufferStatus = rec("checkFramebufferStatus", () => gl.FRAMEBUFFER_COMPLETE);
+  gl.getParameter = rec("getParameter", () => 256);
+
+  let currentProgram = null;
+  const programCalls = [];
+  gl.useProgram = (p) => {
+    currentProgram = p; programCalls.push(p); bump("useProgram");
+    log.push("useProgram(" + fmt(p) + ")");
+  };
+
+  const drawArraysCalls = [];
+  gl.drawArrays = (...args) => {
+    drawArraysCalls.push({ prog: currentProgram, args });
+    bump("drawArrays");
+    log.push("drawArrays(" + args.map(fmt).join(",") + ")");
+  };
+
+  const instancedCalls = [];
+  const extStub = {
+    vertexAttribDivisorANGLE: rec("vertexAttribDivisorANGLE", undefined),
+    drawArraysInstancedANGLE: (...args) => {
+      instancedCalls.push({ prog: currentProgram, count: args[3] });
+      bump("drawArraysInstancedANGLE");
+      log.push("drawArraysInstancedANGLE(" + args.map(fmt).join(",") + ")");
+    },
+  };
+  gl.getExtension = rec("getExtension", (name) => (name === "ANGLE_instanced_arrays" ? extStub : null));
+
+  [
+    "shaderSource", "compileShader", "attachShader", "linkProgram",
+    "bindBuffer", "bufferData", "bufferSubData",
+    "bindTexture", "texImage2D", "texParameteri",
+    "bindRenderbuffer", "renderbufferStorage",
+    "bindFramebuffer", "framebufferTexture2D", "framebufferRenderbuffer",
+    "viewport", "clearColor", "clear", "enable", "disable",
+    "uniformMatrix4fv", "uniform1f", "uniform1i", "uniform2f",
+    "uniform3fv", "uniform4f", "uniform4fv",
+    "enableVertexAttribArray", "disableVertexAttribArray", "vertexAttribPointer",
+    "activeTexture", "blendFunc", "depthMask", "lineWidth",
+  ].forEach((name) => { gl[name] = rec(name, undefined); });
+
+  gl.log = log;
+  gl._counts = counts;
+  gl._programCalls = programCalls;
+  gl._drawArraysCalls = drawArraysCalls;
+  gl._instancedCalls = instancedCalls;
+  return gl;
+}
+
+// a rolled-point level of three structural boxes plus one ghost box,
+// shared by checks 13-15.
+function rolledDrawLevel() {
+  return [
+    { id: "b0", p: "concrete", m: 0, c: [roll(-6, 6), 0.5, roll(-6, 6)], s: [1, 1, 1] },
+    { id: "b1", p: "concrete", m: 0, c: [roll(-6, 6), 0.5, roll(-6, 6)], s: [1, 1, 1] },
+    { id: "b2", p: "concrete", m: 0, c: [roll(-6, 6), 0.5, roll(-6, 6)], s: [1, 1, 1] },
+    { id: "g0", p: "steel", m: 0, c: [roll(-6, 6), 0.5, roll(-6, 6)], s: [0.5, 0.5, 0.5], ghost: 1 },
+  ];
+}
+
+// 12. init compiles the twelve programs and builds the shadow target.
+{
+  const gl = makeStubGL();
+  const surface = makeRender3d({ gl });
+  surface.init();
+  const c = gl._counts;
+  const ok = c.createProgram === 12 && c.createShader === 24 && c.createTexture === 1 &&
+    c.createRenderbuffer === 1 && c.createFramebuffer === 1 && surface.shadOn === 1;
+  check("render3d draw: init compiles the twelve programs and builds the shadow target on a recording stub", ok);
+}
+
+// 13. one frame issues the passes in the stated order with draw calls
+// equal to the sets present.
+{
+  const gl = makeStubGL();
+  const surface = makeRender3d({ gl });
+  surface.init();
+  const afterInit = { ...gl._counts };
+  surface.resize(640, 480);
+  surface.setLevel(rolledDrawLevel());
+  surface.rebuildDynamic();
+  surface.frame(1.5);
+
+  const expectedProgs = [
+    surface.progD, surface.progSky, surface.progS, surface.progEdge,
+    surface.progS, surface.progEdge, surface.progF,
+    surface.progBright, surface.progBlur, surface.progBlur, surface.progRays, surface.progComp,
+  ];
+  const seq = gl._programCalls;
+  const seqOk = seq.length === expectedProgs.length && seq.every((p, i) => p === expectedProgs[i]);
+  const drawOk = gl._drawArraysCalls.length === 12;
+  const texSince = (gl._counts.createTexture || 0) - (afterInit.createTexture || 0);
+  const fbSince = (gl._counts.createFramebuffer || 0) - (afterInit.createFramebuffer || 0);
+  const postOk = texSince === 4 && fbSince === 4;
+
+  check("render3d draw: one frame issues the passes in the stated order with draw calls equal to the sets present",
+    seqOk && drawOk && postOk);
+}
+
+// 14. twin frames on twin stubs record identical call logs.
+{
+  const level = rolledDrawLevel();
+  function run() {
+    const gl = makeStubGL();
+    const surface = makeRender3d({ gl });
+    surface.init();
+    surface.resize(320, 240);
+    surface.setLevel(level.map((p) => ({ ...p, c: p.c.slice(), s: p.s.slice() })));
+    surface.rebuildDynamic();
+    surface.frame(2.25);
+    return gl.log;
+  }
+  const logA = run(), logB = run();
+  check("render3d draw: twin frames on twin stubs record identical call logs", JSON.stringify(logA) === JSON.stringify(logB));
+}
+
+// 15. the outline branch draws when its dial is on and not when off.
+{
+  const level = [{ id: "b0", p: "concrete", m: 0, c: [0, 0.5, 0], s: [1, 1, 1] }];
+  function run(dials) {
+    const gl = makeStubGL();
+    const surface = makeRender3d({ gl, dials });
+    surface.init();
+    surface.resize(320, 240);
+    surface.setLevel(level.map((p) => ({ ...p, c: p.c.slice(), s: p.s.slice() })));
+    surface.rebuildDynamic();
+    surface.frame(0.5);
+    return { gl, surface };
+  }
+  const off = run({ outline: 0 });
+  const on = run({});
+
+  const offOk = off.surface.progEdge === null &&
+    off.gl._drawArraysCalls.some((c) => c.args[0] === off.gl.LINES && c.prog === off.surface.progF);
+  const onOk = on.surface.progEdge !== null &&
+    on.gl._programCalls.includes(on.surface.progEdge) &&
+    !on.gl._drawArraysCalls.some((c) => c.args[0] === on.gl.LINES);
+
+  check("render3d draw: the outline branch draws when its dial is on and not when off", offOk && onOk);
+}
+
+// 16. instances draw when a voxel world is set.
+{
+  const gl = makeStubGL();
+  const surface = makeRender3d({ gl });
+  surface.init();
+  surface.resize(320, 240);
+
+  const vox = makeVoxWorld({ rng: mulberry32(Math.floor(rng() * 0x100000000)), sizes: { rock: 0.6 }, defSize: 0.6 });
+  const pr = { c: [0, 1.5, 0], s: [3, 3, 3], p: "rock", m: 0 };
+  vox.damage(pr, pr.c[0], pr.c[1], pr.c[2], 800, 0, 0, 0);
+  const pr2 = { c: [10, 1, 0], s: [1, 1, 1], p: "wood", m: 1 };
+  vox.dropPrimAsCluster(pr2);
+  surface.setVoxels(vox);
+  surface.packInstances(() => [1, 1, 1]);
+  const nInstD = surface.nInstD;
+
+  surface.frame(0.75);
+
+  const framePass = gl._instancedCalls.some((c) => c.count === nInstD && c.prog === surface.progI);
+  const shadowPass = gl._instancedCalls.some((c) => c.count === nInstD && c.prog === surface.progDI);
+
+  check("render3d draw: instances draw when a voxel world is set",
+    vox.dyn.length > 0 && nInstD > 0 && framePass && shadowPass);
+}
+
+// 17. patchAt splits a prim into at most six rest boxes and a patch, hides
+// the original, and queues a rebuild.
+{
+  const gl = makeStubGL();
+  const surface = makeRender3d({ gl });
+  surface.init();
+  const pr = { id: "wall", p: "concrete", m: 0, c: [0, 1.5, 0], s: [4, 3, 4] };
+  surface.setLevel([pr]);
+  const before = surface.level.length;
+  const x = pr.c[0] - pr.s[0] / 2 + roll(0, pr.s[0]);
+  const y = pr.c[1] - pr.s[1] / 2 + roll(0, pr.s[1]);
+  const z = pr.c[2] - pr.s[2] / 2 + roll(0, pr.s[2]);
+  surface.patchAt(pr, x, y, z);
+  const grew = surface.level.length - before;
+  const growOk = grew >= 2 && grew <= 7;
+  const deadOk = pr.dead === 1;
+  const idx = surface.level.indexOf(pr);
+  const inQueueOk = surface.hideQueue.includes(idx);
+  const dirtyOk = surface.addedDirty === 1 && surface.pendingRebuild === 1;
+
+  const beforeFlush = gl._counts.bufferSubData || 0;
+  const n = surface.flushHides();
+  const afterFlush = gl._counts.bufferSubData || 0;
+  const rangesZeroed = surface.staticRanges[idx * 4 + 1] === 0 && surface.staticRanges[idx * 4 + 3] === 0;
+
+  check("render3d draw: patchAt splits a prim into at most six rest boxes and a patch, hides the original, and queues a rebuild",
+    growOk && deadOk && inQueueOk && dirtyOk && n > 0 && afterFlush > beforeFlush && rangesZeroed);
+}
+
+// 18. the contract counts every problem.
+{
+  const bad = checkRenderDials({ outline: 0, shadN: 1.5, shadHalf: 70, fogK: -1, grain: 0.028, vignette: 0.62 });
+  const gl = makeStubGL();
+  const surface = makeRender3d({ gl });
+  const clean = checkRenderDials(surface.dials);
+  const nullCase = checkRenderDials(null);
+  check("render3d draw: the contract counts every problem", bad.length === 3 && clean.length === 0 && nullCase.length === 1);
+}
+
+// 19. the draw half imports only from its own folder or a sibling module.
+{
+  const src = fs.readFileSync(new URL("../src/modules/render3d/draw.js", import.meta.url), "utf8");
+  const specifiers = [...src.matchAll(/import\s+[\s\S]*?\s+from\s+["']([^"']+)["']/g)].map((m) => m[1]);
+  const ok = specifiers.length > 0 && specifiers.every((s) => /^\.\.\/[a-z0-9-]+\//.test(s) || /^\.\//.test(s));
+  check("render3d draw: the draw half imports only from its own folder or a sibling module", ok);
 }
 
 console.log(`render3d-test: ${pass} PASS / ${fail} FAIL`);
