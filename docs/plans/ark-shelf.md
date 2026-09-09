@@ -126,3 +126,7 @@ How it lands: the galaxy module rolls state and holder with the gate. The gate m
 ## Table work for agents, on the owner's word
 
 - The role words. The log vocabulary across every event. The endings' lines. The name tables, women and men. The dialogue table, every speaker.
+
+## The civilians and the Grip's incubation
+
+A story idea set here for the design, not yet planned. Part of the ark's work is saving civilians on each world the player travels to: they come aboard as the ark's passengers. The Grip has an incubation period, so a passenger can carry it aboard unseen and show it later. When too high a share of the people in a module are sick, the player has to jettison that module, people and all, to save the rest of the ship. What counts as too high, how the sickness shows, and what a jettison costs are decisions still to be made.
