@@ -16,6 +16,7 @@ import { PRICE_DIALS, makePirates, stepPirates, pay, cargoValue, hireOut, herRet
 import { listingsFor } from "../../src/games/gravitys-ark/price.js";
 import { makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as passGate, respawn, GATE_DIALS } from "../../src/games/gravitys-ark/gate.js";
 import { makeLog, logFromJSON, buildCard, ARK_LINES } from "../../src/games/gravitys-ark/card.js";
+import { makeHold, order as holdOrder, tick as holdTick, summary as holdSummary } from "../../src/games/gravitys-ark/hold.js";
 
 const q = new URLSearchParams(location.search);
 const seed = q.has("seed") ? (parseInt(q.get("seed"), 10) >>> 0) : ((Math.random() * 0xffffffff) >>> 0);
@@ -48,6 +49,11 @@ const ROAD_TYPES = { land: "land", crash: "crash", takeoff: "takeoff", collapse:
 function logRoadEvents() { for (; seenEvents < state.events.length; seenEvents++) { const e = state.events[seenEvents]; const type = ROAD_TYPES[e.k]; if (type) logAdd(type, { i: e.i, id: e.i !== undefined ? galaxy.worlds[e.i].id : undefined, v: e.v }); } }
 const PAGE_LINES = { ...ARK_LINES, land: (e) => `landed on ${e.id} at ${Math.round(e.v)} m/s`, crash: (e) => `crashed on ${e.id} at ${Math.round(e.v)} m/s`, takeoff: (e) => `took off from ${e.id}`, swallow: (e) => `the hole took ${e.id}` };
 function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, crew, end); $("cardBody").textContent = [c.ending.toUpperCase(), "", "hull: " + c.manifest.hull.join(" "), "hands: " + (c.manifest.hands.join(", ") || "none"), "scrap " + fmt(c.manifest.scrap) + " kg, spares " + (c.manifest.spares.join(" ") || "none") + ", people " + c.manifest.people, "the hole ate: " + (c.eaten.join(" ") || "nothing"), "", "the galaxy named you " + c.name, "", ...log.lines(PAGE_LINES).slice(-12)].join("\n"); $("card").style.display = "block"; }
+// phase 0.0.110's page step: the hold, the ground frames, on the same canvas
+const holdRng = simStream((seed + 4) >>> 0), OPENING_CRASH = 12;   // the opening: the hull down at 12 m/s on the plague world, PROPOSED
+let hold = null, view = "space", fieldTap = null;
+function enterHold(v) { hold = makeHold(hull, crew, v, holdRng); view = "hold"; fieldTap = null; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
+function leaveHold() { view = "space"; hold = null; }
 function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
 function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }
 function stationHere() { return ship.landed !== null ? galaxy.worlds[ship.landed].id : null; }
@@ -94,6 +100,7 @@ function drawDisc(px, py, r, fill, stroke) {
 function label(px, py, text, col) { ctx.fillStyle = col || "rgba(233,237,242,.8)"; ctx.font = "500 10px ui-monospace, monospace"; ctx.textAlign = "center"; ctx.fillText(text, px, py); }
 
 function draw() {
+  if (view === "hold" && hold) { drawHold(); return; }
   const z = R.cam.z;
   ctx.fillStyle = "#07090d"; ctx.fillRect(0, 0, W(), H());
   R.wells = gridWells(); R.cam.x = ship.x; R.cam.y = ship.y; R.frame(W(), H());
@@ -154,13 +161,14 @@ function hud() {
   $("log").textContent = state.events.slice(-6).map((e) => "t=" + fmt(e.t, 1) + " " + e.k + (e.i !== undefined ? " " + galaxy.worlds[e.i].id : "") + (e.v !== undefined ? " " + fmt(e.v, 1) + " m/s" : "")).join("\n");
   $("land").disabled = ship.landed !== null || !ship.alive; $("takeoff").disabled = ship.landed === null || !ship.alive; $("burn").disabled = ship.landed !== null || !ship.alive;
   $("castB").disabled = ship.landed !== null || !!gr.g || !ship.alive; $("payB").disabled = !lockedPirate(); $("hireOut").disabled = ship.landed === null || !!her.away || her.taken;
+  const inHold = view === "hold" && hold; $("btns").style.display = inHold ? "none" : "grid"; $("holdBtns").style.display = inHold ? "grid" : "none"; if (inHold) { holdPane(); $("dock").style.display = "none"; }
   $("burn").classList.toggle("on", burning); $("aim").textContent = aimMode === "gate" ? "AIM: GATE" : "AIM: DRAG"; $("pause").classList.toggle("on", paused);
   if (!ship.alive && !ending && $("card").style.display !== "block") { $("cardBody").textContent = "The ship is lost at t " + fmt(state.t, 1) + " s, " + fmt(state.hole.swallowed.length) + " worlds eaten. WAKE at a station still ahead of the edge, in a starter hull with " + GATE_DIALS.mercyFuel + " kg of fuel, in debt."; $("wake").style.display = "inline-block"; $("card").style.display = "block"; }
 }
 let collapseT = 0;
 
 // the controls: buttons for the phone, keys for the desktop, a drag for the aim
-$("land").onclick = () => { const r = road.land(); if (r.ok) { if (r.crash) state.events.push({ k: "crash-load " + fmt(r.load, 1), t: state.t }); const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); } };
+$("land").onclick = () => { const r = road.land(); if (r.ok) { if (r.crash) { state.events.push({ k: "crash-load " + fmt(r.load, 1), t: state.t }); enterHold(r.load); } const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); } };
 $("takeoff").onclick = () => { const r = road.takeoff(); if (r.ok && r.collapse) collapseT = state.t; };
 $("burn").onpointerdown = (e) => { burning = true; e.preventDefault(); };
 addEventListener("pointerup", () => { burning = false; });
@@ -172,7 +180,7 @@ $("again").onclick = () => { location.search = "?seed=" + ((Math.random() * 0xff
 cv.addEventListener("pointerdown", (e) => { dragStart = [e.clientX, e.clientY]; });
 cv.addEventListener("pointermove", (e) => { if (!dragStart) return; const dx = e.clientX - dragStart[0], dy = e.clientY - dragStart[1];
   if (Math.hypot(dx, dy) > 12) { aimDrag = screenToWorldDir(dx, dy); aimMode = "drag"; } });
-cv.addEventListener("pointerup", () => { dragStart = null; });
+cv.addEventListener("pointerup", (e) => { if (dragStart && view === "hold" && Math.hypot(e.clientX - dragStart[0], e.clientY - dragStart[1]) < 12) fieldTap = { x: (e.clientX - W() / 2) / FIELD_PX, y: (e.clientY - H() / 2) / FIELD_PX }; dragStart = null; });
 makeGestures(cv, { pinch: (k) => { R.cam.z = Math.max(ZOOMS[0], Math.min(ZOOMS[ZOOMS.length - 1], R.cam.z * (k || 1))); } });
 addEventListener("keydown", (e) => {
   const k = e.key;
@@ -186,7 +194,8 @@ addEventListener("keyup", (e) => { if (e.key === " ") burning = false; });
 const DT = 1 / 60; let last = performance.now(), acc = 0;
 function frame(now) {
   acc += Math.min(0.05, (now - last) / 1000); last = now;
-  while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); } stepStations(S, DT); ship.dry = hullMass();
+  while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); const crashEv = state.events.find((e) => e.k === "crash" && e.t === state.t); if (crashEv) enterHold(crashEv.v); }
+      if (view === "hold" && hold) holdStep(); stepStations(S, DT); ship.dry = hullMass();
       if (state.hole.born && !collapsed) onCollapse();
       stepWrecks(wrecks, road.wells(), DT);
       const got = stepGrappler(gr, ship, ship.dry + ship.fuel, road.wells(), DT, WRECK_DIALS); if (got && got.taken) { const kind = take(hull, purse, got.taken); state.events.push({ k: "took " + kind + " " + fmt(got.taken.mass) + " kg", t: state.t }); }
@@ -202,8 +211,8 @@ requestAnimationFrame(frame);
 // the dock pane: the station's listings and the purse, live only when landed
 function dockPane() {
   const sid = stationHere();
-  $("dock").style.display = sid ? "block" : "none";
-  if (!sid) return;
+  $("dock").style.display = sid && view !== "hold" ? "block" : "none";
+  if (!sid || view === "hold") return;
   const st = S.stations[sid], L = listings(S, sid), ct = openContractHere(sid), cap = derive(hull).fuelCap;
   $("dockBody").textContent = [
     sid + " station, " + st.faction,
@@ -258,3 +267,58 @@ $("sellScrapF").onclick = () => { const kg = Math.floor(hull.scrap); const p = s
 $("sellPeople").onclick = () => { const n = hull.cargo.people; const p = sellToFitters(gs, hull, purse, { kind: "people", n }); if (p) { state.events.push({ k: "sold " + n + " people to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "people", price: p }); } };
 $("sellHer").onclick = () => { const price = listingsFor(ringOf(), cargoValue(hull, 2)).fitters.her; const p = sellToFitters(gs, hull, purse, { kind: "her", price }); if (p) { her.sold = true; state.events.push({ k: "sold her to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "her", price: p }); } };
 $("wake").onclick = () => { const r = respawn(galaxy, ship, state, hull, purse, gs.dials); $("wake").style.display = "none"; if (r.ending) { logAdd("pass", { ending: r.ending }); showCard(r.ending); return; } hullHp = 1000; logAdd("respawn", { world: galaxy.worlds[r.world].id, debt: r.debt }); state.events.push({ k: "woke at " + galaxy.worlds[r.world].id + " in debt " + fmt(r.debt), t: state.t }); $("card").style.display = "none"; };
+
+// the hold's screen: a flat field top-down, four pixels a metre, the bridge at the centre
+const FIELD_PX = 4;
+function fieldPt(x, y) { return [W() / 2 + x * FIELD_PX, H() / 2 + y * FIELD_PX]; }
+function holdStep() {
+  for (const e of holdTick(hold, DT)) {
+    if (e.k === "wave") state.events.push({ k: "wave " + e.n + ": " + e.count + " of the Grip", t: state.t });
+    if (e.k === "walkerUp") state.events.push({ k: "the walker stands", t: state.t });
+    if (e.k === "repaired") state.events.push({ k: "a module welded back", t: state.t });
+    if (e.k === "bossDead") state.events.push({ k: "the Militia's walker is down", t: state.t });
+    if (e.k === "herDead") { her.taken = true; state.events.push({ k: "SHE IS DEAD; the delivery is over", t: state.t }); }
+    if (e.k === "handDead") state.events.push({ k: e.name + " is dead", t: state.t });
+    if (e.k === "abandon" && ship.alive) { ship.alive = false; state.events.push({ k: "ABANDON SHIP", t: state.t }); logAdd("death", { v: 0 }); }
+  }
+}
+function drawHold() {
+  ctx.fillStyle = "#0b0f0a"; ctx.fillRect(0, 0, W(), H());
+  const c = fieldPt(0, 0), d = hold.dials;
+  ctx.strokeStyle = "rgba(233,237,242,.12)"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(c[0], c[1], d.ringR * FIELD_PX, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = "rgba(233,237,242,.06)"; for (let k = -60; k <= 60; k += 10) { const a = fieldPt(k, -60), b = fieldPt(k, 60); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); const a2 = fieldPt(-60, k), b2 = fieldPt(60, k); ctx.beginPath(); ctx.moveTo(a2[0], a2[1]); ctx.lineTo(b2[0], b2[1]); ctx.stroke(); }
+  const box = (x, y, m, fill, stroke) => { const p = fieldPt(x, y), s = m * FIELD_PX; ctx.fillStyle = fill; ctx.fillRect(p[0] - s / 2, p[1] - s / 2, s, s); if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1.5; ctx.strokeRect(p[0] - s / 2, p[1] - s / 2, s, s); } };
+  const dot = (x, y, r, fill) => { const p = fieldPt(x, y); ctx.fillStyle = fill; ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2); ctx.fill(); };
+  for (const m of hold.modules) box(m.x, m.y, 1.6, m.hp <= 0 ? "#1a1c22" : m.welded ? "#5a6b8a" : "#3d3a2a", m.hp > 0 && !m.welded ? "#e9b25c" : null);
+  for (const w of hold.walls) if (w.hp > 0) box(w.x, w.y, 1.2, "#8d8a86", null);
+  for (const g of hold.guns) if (g.hp > 0) box(g.x, g.y, 1.2, "#c97a2a", null);
+  if (!hold.walker.dead) box(hold.walker.x, hold.walker.y, 2, "#4f7fd1", null); else box(hold.walker.x, hold.walker.y, 2, "#22304a", "#4f7fd1");
+  for (const g of hold.grip) if (g.alive) dot(g.x, g.y, 3, "#6fbf73");
+  if (hold.boss && hold.boss.alive) dot(hold.boss.x, hold.boss.y, 6, "#c8302a");
+  for (const h of hold.hands) if (h.alive) dot(h.x, h.y, 2.5, "#7fd1e0");
+  if (hold.her.alive) { const px = hold.her.inWalker ? hold.walker.x : hold.her.x, py = hold.her.inWalker ? hold.walker.y : hold.her.y; dot(px, py, 3, "#ffffff"); }
+  for (const s of hold.shots) { const p = fieldPt(s.x, s.y); ctx.strokeStyle = "#e9b25c"; ctx.beginPath(); ctx.moveTo(p[0] - 5, p[1]); ctx.lineTo(p[0] + 5, p[1]); ctx.moveTo(p[0], p[1] - 5); ctx.lineTo(p[0], p[1] + 5); ctx.stroke(); }
+  if (fieldTap) { const p = fieldPt(fieldTap.x, fieldTap.y); ctx.strokeStyle = "rgba(233,178,92,.7)"; ctx.beginPath(); ctx.arc(p[0], p[1], 7, 0, Math.PI * 2); ctx.stroke(); }
+}
+function holdPane() {
+  const s = holdSummary(hold), h = hold.her, w = hold.walker;
+  $("clocks").textContent = [
+    "THE HOLD  t " + fmt(hold.t, 1) + " s   wave " + s.wave + "   next in " + fmt(Math.max(0, hold.nextWaveAt - hold.t), 0) + " s",
+    "Grip " + s.gripAlive + " alive, " + s.gripDead + " dead   scrap " + fmt(s.scrap) + " kg",
+    "she: " + (h.alive ? h.act + (h.actT > 0 && h.act !== "fight" && h.act !== "idle" ? " " + fmt(h.actT, 1) + " s" : "") : "DEAD") + "   walker " + (w.dead ? "DEAD" : fmt(w.hp) + " hp"),
+    "modules " + s.modulesAlive + " alive, " + s.loose + " loose" + (s.bossAlive ? "   THE MILITIA'S WALKER " + fmt(hold.boss.hp) : "") + (hold.abandoned ? "   ABANDON SHIP" : ""),
+    fieldTap ? "target " + fmt(fieldTap.x, 1) + ", " + fmt(fieldTap.y, 1) : "tap the field to set a target for WALL, GUN, FIRE",
+  ].join("\n");
+  $("hRepairWalker").disabled = !w.dead || !h.alive; $("hRepair").disabled = !h.alive || !hold.modules.some((m) => m.hp > 0 && !m.welded); $("hFight").disabled = w.dead || !h.alive;
+  $("hWall").disabled = !fieldTap || hold.scrap < hold.dials.wallScrap; $("hGun").disabled = !fieldTap || hold.scrap < hold.dials.gunScrap; $("hFire").disabled = !fieldTap || hold.mastT > 0;
+  $("hTakeoff").disabled = hold.abandoned || hold.modules.some((m) => m.hp > 0 && !m.welded);
+}
+$("hRepairWalker").onclick = () => { if (holdOrder(hold, "repairWalker")) state.events.push({ k: "REPAIR WALKER, " + hold.dials.repairWalker + " s", t: state.t }); };
+$("hRepair").onclick = () => { const r = holdOrder(hold, "repair"); if (r) state.events.push({ k: "REPAIR, " + fmt(r.actT, 1) + " s", t: state.t }); };
+$("hFight").onclick = () => { if (holdOrder(hold, "fight")) state.events.push({ k: "she takes the walker", t: state.t }); };
+$("hIdle").onclick = () => { holdOrder(hold, "idle"); };
+$("hWall").onclick = () => { if (fieldTap && holdOrder(hold, "wall", fieldTap.x, fieldTap.y)) state.events.push({ k: "WALL, 300 kg scrap", t: state.t }); };
+$("hGun").onclick = () => { if (fieldTap && holdOrder(hold, "gun", fieldTap.x, fieldTap.y)) state.events.push({ k: "GUN, 600 kg scrap", t: state.t }); };
+$("hFire").onclick = () => { if (fieldTap && holdOrder(hold, "fire", fieldTap.x, fieldTap.y)) state.events.push({ k: "FIRE from the mast", t: state.t }); };
+$("hTakeoff").onclick = () => { const r = holdOrder(hold, "takeoff"); if (!r.ok) { state.events.push({ k: "no takeoff: " + r.reason, t: state.t }); return; } hull.scrap += hold.scrap; const t = road.takeoff(); if (t.ok) { if (t.collapse) collapseT = state.t; leaveHold(); } else state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); };
+enterHold(OPENING_CRASH);
