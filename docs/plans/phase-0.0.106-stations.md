@@ -1,6 +1,6 @@
 # Phase 0.0.106 — stations: pools, hands, wages, listings, the build screen, the people contract
 
-Status: LANDED, commit stamped below, 2026-09-09. Gate: 18 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `e288b85`, 2026-09-09. Gate: 18 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 17 PASS / 0 FAIL; bracket unmoved. -->
 
 The fourth phase of GRAVITY'S ARK under the order batch-ark-1: frame 3, the ring's ordinary business, headless. Every station keeps pools for scrap, fuel, people, and each module kind on the market module's constant-product law, dearer nearer the pit; hands are hired from the people pool with names from the seed, women and men, at a price rising six percent per hire; wages fall due at every dock and go to debt when the purse is short; the build screen installs and removes modules on the builder's ports and derives the hull's mass and thrust; the far ring's starving stations post the contract to move people away from the star on the escrow module's law. A later page step turns these calls into buttons: buy, sell, hire, dock, and the build screen's grid.
