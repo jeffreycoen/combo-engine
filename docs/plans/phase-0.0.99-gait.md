@@ -1,6 +1,6 @@
 # Phase 0.0.99 — gait: the balance controller and the walking planner
 
-Status: LANDED, commit stamped below, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
+Status: LANDED, commit `0637400`, 2026-09-08. Gate: 10 PASS / 0 FAIL; bracket unmoved.
 <!-- At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Gate: 10 PASS / 0 FAIL; bracket unmoved. -->
 
 Serves the checklist box "The balance controller and the walking planner". Source: the mech demo, read-only, lines 1065 to 1658. It plans a walk's footsteps and balance point, then drives the legs to match, standing on legik, physics-pb, and rig.
