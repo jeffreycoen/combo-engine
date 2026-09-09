@@ -24,12 +24,24 @@ SHAPED. Coldsnap's laws are carried through its own doors, the boot, the tick, t
 - The seam's numbers stay the slice's, marked PROPOSED: 250 ground kilograms per space kilogram; modules 1.6 m boxes on a 1.7 m pitch, set down from 1.5 m; the crash nose-down and sliding.
 - The crash site is the player's ground from the first frame: four territory steps run at the boot; the war's own clock takes it from there.
 - The war steps at coldsnap's own 1/120 of a second, two steps per frame step of the page.
+- The hull's modules are coldsnap masonry, kind chunk on the player's side, set down at rest and asleep on the ground as coldsnap's own stones are; the 1.5 m drop waits for the crash as physics. Their welds carry the ship's own strengths at the seam's scale, 250 to one, so a lattice at rest holds and a blast can still break one. Which welds break at the crash is the weld-stress rule's verdict, the same rule the shell uses in space, at the arrival speed over a 0.3 s stop; a module cut off from the bridge is loose and slides 0.6 m per metre a second of arrival speed. The crash site is 14 m from the depot's spot, PROPOSED. A loose module wears the timber tint, a welded one the wall tint, so the two read apart without new drawing code.
+- TAKE OFF refuses while a living module is loose, and names the dead as lost; the bridge dead is ABANDON SHIP, the ship lost.
+
+## The walk, task 2
+
+Phone and desktop as task 1.
+
+- **The crash.** On entering the ground the hull's modules stand as bodies 14 m from the depot's spot, on the ship's own grid at a 1.7 m pitch; every module the weld-stress rule cuts off lies slid along the crash line in the timber tint. The log says how many modules are down and how many loose.
+- **The pane** gains the modules line: standing of total, loose; the hull's standing is the living modules over all of them; THE BRIDGE IS LOST when it is.
+- **TAKE OFF** asks the ground first. While a living module is loose it refuses and the log says how many; once every living module is welded to the bridge it takes off by the road's rule, the purse comes back as kilograms, the modules lost leave the build list, and the log names them.
+- **The bridge destroyed** is ABANDON SHIP: the ship is lost, the card comes up as it does for any death.
+- **Repair** has its mechanism, the weld-back, and no button yet: her act comes in task 3.
 
 ## Tasks
 
 - 0.1.1-1 — the ground boots: coldsnap's war on the ark's page, guns by its build law, the one purse, sound, TAKE OFF. LANDED, commit `d793896`. → `task-0.1.1-1-the-ground-boots.md`
-- 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, her repair, TAKE OFF gated on every surviving module welded, the seam up and down. PLANNED.
-- 0.1.1-3 — her and the hands: her row and her squad of one, the hands as troopers by name, fight or fix, walls by coldsnap's build lines. PLANNED.
+- 0.1.1-2 — the hull on the ground: modules as bodies from the ship's build list at the seam's scale, the crash pose, the welds and what breaks, the weld-back mechanism, TAKE OFF gated on every living module welded and naming the lost, the seam up and down. DISPATCHED. → `task-0.1.1-2-the-hull-on-the-ground.md`
+- 0.1.1-3 — her and the hands: her row and her squad of one, her repair through the weld-back, the hands as troopers by name, fight or fix, walls by coldsnap's build lines. PLANNED.
 - 0.1.1-4 — the walker and the boss: coldsnap's mech at twice a trooper's height at least, dead until repaired, hers to possess; the boss on the enemy's side; the stance measured. PLANNED.
 - 0.1.1-5 — the hold retires: the flag removed, the ark's own hold file and its checks retired, the parts source and the README's claims brought to the ground as built, the version to 0.1.1. PLANNED.
 
@@ -54,4 +66,10 @@ Every hash below is its scratch copy's own after the edit. Every gate count is t
 - The parts build names 50 gates and every verdict is ok.
 - The twelve hash lines in the task print OK.
 
-Suggested model for task 1: Sonnet 5 — every file is in the plan; nothing is designed.
+## Acceptance arithmetic, task 2
+
+- `node scripts/gate.mjs gravitys-ark` prints 42 PASS lines, two more than task 1's 40, then `gravitys-ark-test: 42 PASS / 0 FAIL`, then `gravitys-ark-test PASS`; manifest and parts end in their PASS lines.
+- The parts build names 50 gates and every verdict is ok.
+- The eight hash lines in the task print OK.
+
+Suggested model for tasks 1 and 2: Sonnet 5 — every file is in the plan; nothing is designed.
