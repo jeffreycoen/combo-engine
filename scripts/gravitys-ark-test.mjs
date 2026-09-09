@@ -17,7 +17,7 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff } from "../src/games/gravitys-ark/ground.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
 
@@ -1099,6 +1099,31 @@ function rollArkFields(type, i, nWorlds) {
   const down = stepHer(A, 1 / 120);
   check("ark: the walker down comes back as its event, her act ends, and the possession is released",
     down.some((e) => e.k === "walkerDown") && !walkerAlive(A) && A.walker.alive === false && A.input.possess === null && A.her.act === "hold");
+}
+
+{ // 48. ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there
+  // 49. ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 10); fieldCrew(G, [{ name: "Cato" }, { name: "Dag" }]); wreckWalker(G);
+  const spot = G.walker.spot, hb = herBody(G);
+  const inside = (b) => Math.abs(spot.x - b.pos.x) <= b.hx + WALKER.room && Math.abs(spot.z - b.pos.z) <= b.hz + WALKER.room;
+  const r = groundOrder(G, "repairWalker");
+  const stand = G.her.squad.dest, st = standOff(G, hb);
+  const standOut = !!stand && stand.x === st.x && stand.z === st.z && !inside({ pos: stand, hx: hb.hx, hz: hb.hz }) && Math.hypot(stand.x - spot.x, stand.z - spot.z) <= WALKER.reach;
+  hb.pos.x = stand.x; hb.pos.z = stand.z;   // she arrives at the stand
+  const t0 = G.her.actT, ev0 = stepHer(G, 1 / 120);
+  check("ark: REPAIR WALKER sends her to a stand just outside the walker's room, and her seconds run there",
+    r.ok && G.her.act === "repairWalker" && standOut && G.her.actT < t0 && !ev0.some((e) => e.k === "walkerUp"));
+  const hands = G.hands.map((h) => G.world.byId.get(h.id));
+  hb.pos.x = spot.x; hb.pos.z = spot.z;                                    // she stands on the spot itself
+  hands[0].pos.x = spot.x + 1; hands[0].pos.z = spot.z - 1;               // one hand inside the room
+  hands[1].pos.x = spot.x + WALKER.room + 3; hands[1].pos.z = spot.z;     // one hand outside it
+  const far = { x: hands[1].pos.x, z: hands[1].pos.z };
+  const ev = stepHer(G, G.her.actT + 1e-6);   // her seconds run out on this call: the room is cleared, the walker is built
+  const all = [hb, hands[0], hands[1]];
+  check("ark: the walker's raise moves anyone of hers still inside its room out past its edge, alive, and leaves everyone outside where they stood",
+    ev.some((e) => e.k === "walkerUp") && walkerAlive(G) && all.every((b) => b.alive && !inside(b)) && hands[1].pos.x === far.x && hands[1].pos.z === far.z
+    && [hb, hands[0]].every((b) => Math.max(Math.abs(b.pos.x - spot.x), Math.abs(b.pos.z - spot.z)) <= WALKER.room + 10));
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

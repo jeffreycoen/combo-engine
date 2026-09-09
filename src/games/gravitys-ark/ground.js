@@ -15,7 +15,7 @@ import { TOWER_SPECS, TOWER_ORDER } from "../../depot/specs.js";
 import { worldHash, addBody, addWeld } from "../../engine/core.js";
 import { weldLoads, breaking } from "../../modules/weldstress/weldstress.js";
 import { MODULES } from "./stations.js";
-import { makeSquad, SQUAD_SPECS } from "../../depot/squads.js";
+import { makeSquad, SQUAD_SPECS, clearSlot } from "../../depot/squads.js";
 import { spawnSquadMembers } from "../../depot/state.js";
 import { INFANTRY_ARMS } from "../../depot/specs.js";
 import { startBuildLine, stepBuildLine } from "../../depot/buildlines.js";
@@ -133,8 +133,10 @@ export function fieldCrew(G, crew) {
 // WALKER: hers, coldsnap's own mech at coldsnap's own scale, 5.4 m tall, two and a
 // half troopers; it lies wrecked beside the hull at the crash until she repairs it.
 // repair: her seconds at the wreck; spotX, spotZ: the wreck's spot from the bridge, in
-// metres; s: the scale. PROPOSED.
-export const WALKER = { s: 1, repair: 10, spotX: 0, spotZ: -8 };
+// metres; s: the scale. room: the room the walker needs around its spot, coldsnap's own
+// placement distance for a mech; standPad: how far past the room her stand is; reach: how
+// far from the spot her seconds still run. PROPOSED.
+export const WALKER = { s: 1, repair: 10, spotX: 0, spotZ: -8, room: 4.5, standPad: 0.5, reach: 10 };
 
 // wreckWalker(G): the walker lies wrecked at its spot; nothing stands until she repairs it.
 export function wreckWalker(G) {
@@ -143,10 +145,44 @@ export function wreckWalker(G) {
   return G.walker;
 }
 
-// raiseWalker(G): the repair's mechanism: coldsnap's mech built at the wreck's spot on the player's side, hers.
+// inRoom(G, b): coldsnap's own room rule turned around: the body's box, grown by the room, holds the spot.
+function inRoom(G, b) { const s = G.walker.spot; return Math.abs(s.x - b.pos.x) <= b.hx + WALKER.room && Math.abs(s.z - b.pos.z) <= b.hz + WALKER.room; }
+
+// standOff(G, b): where a body of hers stands for the walker's repair: just outside the room on
+// its own side of the spot, by coldsnap's clear-slot rule; if the clear point falls back inside
+// the room, farther out along the same bearing, up to three tries.
+export function standOff(G, b) {
+  const s = G.walker.spot, dx = b.pos.x - s.x, dz = b.pos.z - s.z, l = Math.hypot(dx, dz);
+  const ux = l > 1e-9 ? dx / l : 0, uz = l > 1e-9 ? dz / l : 1, m = Math.max(Math.abs(ux), Math.abs(uz));
+  let p = null;
+  for (const extra of [0, 1.5, 3]) {
+    const k = (WALKER.room + b.hx + WALKER.standPad + extra) / m;
+    p = clearSlot(G.world, s.x + ux * k, s.z + uz * k, b.hx + 0.35);
+    if (!inRoom(G, { pos: p, hx: b.hx, hz: b.hz })) return p;
+  }
+  return p;
+}
+
+// clearRoom(G): everyone of hers still inside the walker's room, her or a hand, is moved to
+// a stand just outside it before the walker is built, so no one is inside it when it stands.
+export function clearRoom(G) {
+  const moved = [];
+  if (!G.walker) return moved;
+  for (const b of G.world.bodies) {
+    if (!b.alive || b.team !== 1 || b.kind !== "unit" || !inRoom(G, b)) continue;
+    const p = standOff(G, b);
+    b.pos.x = p.x; b.pos.z = p.z; b.pos.y = G.war.field.heightAt(p.x, p.z) + b.hy + 0.02;
+    b.v.x = 0; b.v.y = 0; b.v.z = 0;
+    moved.push(b);
+  }
+  return moved;
+}
+
+// raiseWalker(G): the repair's mechanism: the room cleared, then coldsnap's mech built at the wreck's spot on the player's side, hers.
 export function raiseWalker(G) {
   const W = G.walker;
   if (!W || W.mech) return null;
+  clearRoom(G);
   const m = buildMech(G.world, { x: W.spot.x, z: W.spot.z, yaw: 0, team: 1, hp: MECH.hp, s: WALKER.s });
   m.thrustersOn = true; m.thrustAssist = true; m.hull.maxHp = MECH.hp;
   W.mech = m; W.wrecked = false; W.alive = true;
@@ -190,7 +226,7 @@ export function stepHer(G, dt) {
   if (W && W.alive && !(W.mech && W.mech.hull.alive)) { W.alive = false; out.push({ k: "walkerDown", t: G.world.t }); if (W.possessed) leaveWalker(G); if (her.act === "walker") rest(); }
   if (!b) { if (her.alive) { her.alive = false; out.push({ k: "herDead", t: G.world.t }); if (W && W.possessed) leaveWalker(G); } }
   else if (her.act === "repairWalker" && W) {
-    if (Math.hypot(W.spot.x - b.pos.x, W.spot.z - b.pos.z) <= HER.reach + 2) {
+    if (Math.hypot(W.spot.x - b.pos.x, W.spot.z - b.pos.z) <= WALKER.reach) {
       her.actT -= dt;
       if (her.actT <= 0) { raiseWalker(G); out.push({ k: "walkerUp", t: G.world.t }); rest(); }
     }
@@ -290,14 +326,15 @@ export function order(G, kind, x, z, which) {
     G.her.act = "hold"; G.her.target = null; G.her.actT = 0;
     return { ok: true };
   }
-  if (kind === "repairWalker") {   // she raises the walker: she walks to the wreck and her seconds run down there
+  if (kind === "repairWalker") {   // she raises the walker: she walks to a stand just outside its room and her seconds run down there
     const b = herBody(G);
     if (!b) return { ok: false, reason: "she is dead" };
     if (!G.walker) return { ok: false, reason: "no walker here" };
     if (walkerAlive(G)) return { ok: false, reason: "the walker stands" };
     if (G.walker.possessed) leaveWalker(G);
     const sq = G.her.squad;
-    sq.order = "move"; sq.dest = { x: G.walker.spot.x, z: G.walker.spot.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
+    const st = standOff(G, b);
+    sq.order = "move"; sq.dest = { x: st.x, z: st.z }; sq._route = null; sq._routeDest = null; sq._build = null; sq.holdFire = true;
     G.her.act = "repairWalker"; G.her.target = null; G.her.actT = WALKER.repair;
     G.events.push({ k: "repairWalker", t: G.world.t, seconds: WALKER.repair });
     return { ok: true, seconds: WALKER.repair };
