@@ -118,3 +118,10 @@ Do not push. Do not touch main.
 ## Report
 
 Read-confirmation first (each file, its line count). One line of outcome. Then bullets: both gate outputs whole; the diff summary (`git diff --stat $(git merge-base HEAD main)`); the commit hash on your branch; every nonconformity as its own labeled bullet. Fixture seeds: the two rolled seeds; no seed is special.
+
+## The report's gate lines
+
+- `node scripts/gravitys-ark-test.mjs` in the worktree over the eighteen landed checks: seeds 1676021936 and a second roll; 23 PASS lines, `gravitys-ark-test: 23 PASS / 0 FAIL`, exit 0, twice. At the landing, joined after the thirty-three landed checks: `gravitys-ark-test: 38 PASS / 0 FAIL`, twice.
+- Bracket at the landing: gravitys-ark, determinism, every tail PASS.
+- Branch commit 7a9f9ad on phase/0.0.110-hold, landed by squash into main; the gate joined by the orchestrator's helper.
+- Nonconformity: the phase's agent made no write in twenty-seven minutes after its reading and was stopped; the orchestrator wrote the module and the checks from the brief as the plan-writer's own trial. Three check defects found and fixed in that trial, none in the module: the wave check stepped by a tick count instead of the hold's clock; the claw and the act checks let the hands shoot the Grip they measured. The boss's spawn distance is asserted within one tick's walk of 44 m. The order's stream line now says the mast's arc is a plain lob.

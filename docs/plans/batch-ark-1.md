@@ -70,7 +70,7 @@ The document marks BUILT what is not in this repository: the landing band, the h
 
 ## Stream G, the ground frames
 
-- 0.0.110 the hold: `hold.js`. The crash pose, the settlement block, the Grip waves, REPAIR and REPAIR WALKER, WALL and GUN, the mast's arc through ballistics, the boss walker as a unit, TAKE OFF and ABANDON SHIP, headless on a flat field. Frames 1 and 2. Gate: the wave schedule, the claw rates, the repair times, the take-off condition, twin identity.
+- 0.0.110 the hold: `hold.js`. The crash pose, the settlement block, the Grip waves, REPAIR and REPAIR WALKER, WALL and GUN, the mast's arc as a plain lob, the boss walker as a unit, TAKE OFF and ABANDON SHIP, headless on a flat field. Frames 1 and 2. Gate: the wave schedule, the claw rates, the repair times, the take-off condition, twin identity.
 - 0.0.111 the walker's stance: the physics phase on gait and rig at the ruled scale, from the walker survey's numbers. Gate: the rig stands ten seconds at the ruled scale with zero breaks, or the phase records the failure and the walker ships at trooper scale.
 
 ## The dispatch table
@@ -96,7 +96,7 @@ The document marks BUILT what is not in this repository: the landing band, the h
 - [x] 0.0.107 wrecks
 - [x] 0.0.108 price
 - [x] 0.0.109 gate and card
-- [ ] 0.0.110 the hold
+- [x] 0.0.110 the hold
 - [ ] 0.0.111 the walker's stance
 
 ## Gaps
