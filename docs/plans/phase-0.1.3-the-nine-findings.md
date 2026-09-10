@@ -1,6 +1,6 @@
 # Phase 0.1.3 — the nine findings
 
-Status: DISPATCHED. Task 3 landed, commit `2e6febf`, 2026-09-09; task 4 is planned next.
+Status: DISPATCHED. Task 4 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The nine findings returned from the playtest of phase 0.1.2, recorded under Acceptance in `phase-0.1.2-the-findings.md`, fixed in one phase of five tasks: the opening she can survive, the field as the ship's own, the screen cut to what matters with the landing's popup, her look, and the ground that remembers its defences. Each task is planned after the one before it lands, written once for one reader. The game stays playable at every landing. Every number of the ark's own is PROPOSED.
@@ -22,7 +22,7 @@ SHAPED. The ark's own layer, new code in its own files; coldsnap's files change 
 - 0.1.3-1 — the opening: her hit points, the guard squad, the opening scrap, faster welding. LANDED, commit `358b2bf`. → `task-0.1.3-1-the-opening.md`
 - 0.1.3-2 — the field: no town, the ship as the objective, placement room, the gouge, the felled trees. LANDED, commit `513949e`. → `task-0.1.3-2-the-field.md`
 - 0.1.3-3 — the screen: three lines, two rows, and the landing's card. LANDED, commit `2e6febf`. → `task-0.1.3-3-the-screen.md`
-- 0.1.3-4 — her look: the purple jumpsuit and the brown hair. Planned after task 3 lands.
+- 0.1.3-4 — her look: the purple jumpsuit and the brown hair. DISPATCHED. → `task-0.1.3-4-her-look.md`
 - 0.1.3-5 — the ground remembers: defences abandoned and persisting. Planned after task 4 lands.
 
 Suggested model: Sonnet 5 — every edit is in the plan; nothing is designed.
@@ -73,3 +73,16 @@ Phone and desktop the same.
 - `node scripts/gravitys-ark-test.mjs` at the seed the first run failed at, 3688214285, and `node scripts/gate.mjs gravitys-ark` at a fresh seed both print 51 PASS lines, then `gravitys-ark-test: 51 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
 - The parts build at the landing runs every gate: 50 gates, every verdict ok.
 - The five hash lines in the task print OK; the three syntax checks print ok.
+
+## The walk, task 4
+
+Phone and desktop the same.
+
+- **Her look.** She wears a purple jumpsuit: coldsnap's own man drawn in her dress, a purple palette beside the android's in the drawing, three lines and a listed difference; her body carries the dress from the field. Longish brown hair: the ark's own look file draws a cap over her head and strands to her shoulders, following her position and her facing every frame; it goes when she dies. The guard and the hands wear coldsnap's own dress.
+- **Nothing else changes:** no order, spend, or number moves.
+
+## Acceptance arithmetic, task 4
+
+- `node scripts/gate.mjs gravitys-ark` prints 52 PASS lines, one more than the recorded 51, then `gravitys-ark-test: 52 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
+- The parts build names 50 gates and every verdict is ok.
+- The seven hash lines in the task print OK; the new file's hash among them.
