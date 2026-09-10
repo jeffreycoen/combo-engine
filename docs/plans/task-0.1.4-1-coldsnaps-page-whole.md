@@ -78,7 +78,7 @@ while read -r hash path; do test "$(sha256sum "$path" | cut -c1-16)" = "$hash" &
 162dd125f744fff4 scripts/gate.mjs
 48deabcbcf8d792d README.md
 GROUND
-n=0; for p in src/demo/coldsnap-proving-grounds.jsx src/depot/Crate.jsx src/depot/DepotGame.jsx src/depot/Dispatch.jsx src/depot/DraftScreen.jsx src/depot/InfoCard.jsx src/depot/pies.jsx src/depot/RadialMenu.jsx src/game/ColdsnapTD.jsx src/game/MechRange.jsx src/game/predicate.js src/game/runner/trials.js src/game/runner/Typed.jsx src/game/scenario.js src/game/scenarios src/main.jsx src/render src/ui app/coldsnap vite.config.js docs/coldsnap scripts/pages-test.mjs; do [ -e "$p" ] || n=$((n+1)); done; echo "absent $n"
+n=0; for p in src/demo/coldsnap-proving-grounds.jsx src/depot/Crate.jsx src/depot/DepotGame.jsx src/depot/Dispatch.jsx src/depot/DraftScreen.jsx src/depot/InfoCard.jsx src/depot/pies.jsx src/depot/RadialMenu.jsx src/game/ColdsnapTD.jsx src/game/MechRange.jsx src/game/predicate.js src/game/runner/trials.js src/game/runner/Typed.jsx src/game/scenario.js src/game/scenarios/proving-grounds.json src/main.jsx src/render/renderer.js src/ui/App.jsx app/coldsnap/index.html vite.config.js docs/coldsnap/index.html scripts/pages-test.mjs; do [ -e "$p" ] || n=$((n+1)); done; echo "absent $n"
 ```
 
 Required: `0`, `111b9cb`, three OK lines, `absent 22`.
