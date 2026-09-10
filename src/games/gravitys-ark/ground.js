@@ -299,15 +299,23 @@ function inRoom(G, b) { const s = G.walker.spot; return Math.abs(s.x - b.pos.x) 
 
 // standOff(G, b): where a body of hers stands for the walker's repair: just outside the room on
 // its own side of the spot, by coldsnap's clear-slot rule; if the clear point falls back inside
-// the room, farther out along the same bearing, up to three tries.
+// the room, farther out along the same bearing, up to three tries; if that side is walled by
+// the bay, out the bay's door, then across it, the same three tries each.
 export function standOff(G, b) {
-  const s = G.walker.spot, dx = b.pos.x - s.x, dz = b.pos.z - s.z, l = Math.hypot(dx, dz);
-  const ux = l > 1e-9 ? dx / l : 0, uz = l > 1e-9 ? dz / l : 1, m = Math.max(Math.abs(ux), Math.abs(uz));
+  const s = G.walker.spot, H = G.hull, bay = H && H.bay >= 0 ? H.bodies[H.bay] : null;
+  const dx = b.pos.x - s.x, dz = b.pos.z - s.z, l = Math.hypot(dx, dz);
+  const door = bay ? { x: s.x - bay.pos.x, z: s.z - bay.pos.z } : { x: 0, z: 1 }, dl = Math.hypot(door.x, door.z) || 1;
+  const bearings = [];
+  if (l > 1e-9) bearings.push({ x: dx / l, z: dz / l });
+  bearings.push({ x: door.x / dl, z: door.z / dl }, { x: -door.z / dl, z: door.x / dl }, { x: door.z / dl, z: -door.x / dl });
   let p = null;
-  for (const extra of [0, 1.5, 3]) {
-    const k = (WALKER.room + b.hx + WALKER.standPad + extra) / m;
-    p = clearSlot(G.world, s.x + ux * k, s.z + uz * k, b.hx + 0.35);
-    if (!inRoom(G, { pos: p, hx: b.hx, hz: b.hz })) return p;
+  for (const u of bearings) {
+    const m = Math.max(Math.abs(u.x), Math.abs(u.z));
+    for (const extra of [0, 1.5, 3]) {
+      const k = (WALKER.room + b.hx + WALKER.standPad + extra) / m;
+      p = clearSlot(G.world, s.x + u.x * k, s.z + u.z * k, b.hx + 0.35);
+      if (!inRoom(G, { pos: p, hx: b.hx, hz: b.hz })) return p;
+    }
   }
   return p;
 }

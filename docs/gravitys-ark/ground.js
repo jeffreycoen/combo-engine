@@ -12,12 +12,12 @@ import { makeHullLook } from "./hull-look.js";
 
 const fmt = (n, d = 0) => Number(n).toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
-// makeGroundScreen(ids, hooks): ids names the canvas, the pane, the log, the stick, and the nine buttons; hooks.log takes one line for the log.
+// makeGroundScreen(ids, hooks): ids names the canvas, the pane, the log, the stick, the landing's card and its button, and the eight buttons; hooks.log takes one line for the log.
 export function makeGroundScreen(ids, hooks) {
   const $ = (id) => document.getElementById(id);
   const gv = $(ids.canvas);
   const say = (line) => { if (hooks && hooks.log) hooks.log(line); };
-  let G = null, R = null, A = null, look = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false, mode = "gun", wallStart = null;
+  let G = null, R = null, A = null, look = null, focus = null, aim = null, zoom = 1, gunI = 1, muted = false, mode = "gun", wallStart = null, waiting = false;
   const kind = () => GUNS[gunI];
 
   // a screen point to the ground: a point on the camera's near plane plus the view
@@ -39,6 +39,10 @@ export function makeGroundScreen(ids, hooks) {
     const Wk = wreckWalker(G);
     say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + (Wk ? "; the walker lies wrecked at the bay's door" : "; no walker aboard"));
     if (G.guards.length) say(summary(G).guards.total + " riflemen stand guard");
+    // the landing's card: what happened and what she must do; the war stands still until GO
+    const s0 = summary(G);
+    $(ids.cardBody).textContent = "The crash broke " + (s0.modules ? s0.modules.loose : 0) + " of " + (s0.modules ? s0.modules.total : 0) + " modules loose" + (Wk ? " and wrecked the walker in its bay" : "") + ". Your mechanic must weld the ship back" + (Wk ? " and raise the walker" : "") + " before you can take off. " + (s0.guards.total ? s0.guards.total + " riflemen stand guard. " : "") + "The first assault comes " + fmt(s0.bellIn, 0) + " s after you go.";
+    $(ids.card).style.display = "block"; waiting = true;
     mode = "gun"; wallStart = null; held.clear(); stickVec = { x: 0, z: 0 }; setNub(0, 0);
     gv.style.display = "block"; document.body.classList.add("ground");
     R = makeRenderer(gv, G.world, { camera: "tactical", town: false, fadeDecals: true });
@@ -49,7 +53,7 @@ export function makeGroundScreen(ids, hooks) {
     A.setListener(focus.x, focus.z, 60);
     say("on the ground at " + w.id + ": " + fmt(scrapKg) + " kg of scrap is " + fmt(G.run.resources) + " scrap here");
   }
-  function leave() { if (look) { look.dispose(); look = null; } if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; document.body.classList.remove("ground"); G = null; }
+  function leave() { $(ids.card).style.display = "none"; waiting = false; if (look) { look.dispose(); look = null; } if (R) { R.dispose(); R = null; } if (A) { A.dispose(); A = null; } gv.style.display = "none"; stickEl.style.display = "none"; document.body.classList.remove("ground"); G = null; }
   function step(dt) {
     if (!G) return null;
     const r = tick(G, dt);
@@ -103,12 +107,11 @@ export function makeGroundScreen(ids, hooks) {
   function pane() {
     if (!G) return "";
     const s = summary(G);
-    return ["THE GROUND  t " + fmt(s.t, 1) + " s   assault " + s.bell + "   next in " + fmt(s.bellIn, 0) + " s",
-      "scrap " + fmt(s.scrap) + " (" + fmt(s.scrapKg) + " kg)   guns " + s.guns + "   enemy afield " + s.foes,
-      "modules " + (s.modules ? s.modules.alive + " of " + s.modules.total + " standing, " + s.modules.loose + " loose" : "none") + "   the hull stands " + fmt(s.standing * 100, 0) + "%" + (s.lost ? "   THE BRIDGE IS LOST" : ""),
-      "she: " + (s.her ? (s.her.alive ? (s.her.act === "walker" ? "in the walker" : s.her.act + (s.her.act === "fix" || s.her.act === "repairWalker" ? " " + fmt(s.her.actT, 1) + " s" : "")) : "DEAD") : "not here") + "   hands " + s.hands.alive + " of " + s.hands.total + "   guards " + s.guards.alive + " of " + s.guards.total
-        + "   walker " + (s.walker ? (s.walker.wrecked ? "wrecked" : s.walker.alive ? fmt(s.walker.hp) + " hp" : "DOWN") : "none"),
-      mode === "wall" ? (wallStart ? "tap where the wall ends" : "tap where the wall starts") : "tap the ground to place a " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap; two fingers turn and zoom"].join("\n");
+    // three lines: the purse and the clock; the hull, her, the walker, the crew; the tap
+    const her = s.her ? (s.her.alive ? (s.her.act === "walker" ? "in the walker" : s.her.act === "fix" ? "welding, " + fmt(s.her.actT, 0) + " s" : s.her.act === "repairWalker" ? "at the walker, " + fmt(s.her.actT, 0) + " s" : s.her.act === "fight" ? "fighting" : "standing by") : "DEAD") : "not here";
+    return ["scrap " + fmt(s.scrap) + "   next assault in " + fmt(s.bellIn, 0) + " s   enemy " + s.foes + (s.lost ? "   THE BRIDGE IS LOST" : ""),
+      (s.modules ? s.modules.loose + " loose of " + s.modules.total : "no hull") + "   she: " + her + "   walker " + (s.walker ? (s.walker.wrecked ? "wrecked" : s.walker.alive ? "up" : "DOWN") : "none") + "   guards " + s.guards.alive + (s.hands.total ? "   hands " + s.hands.alive : ""),
+      mode === "wall" ? (wallStart ? "tap where the wall ends" : "tap where the wall starts") : "tap the ground: " + TOWER_SPECS[kind()].label.toLowerCase() + " for " + fmt(price(G, kind())) + " scrap"].join("\n");
   }
   function buttons() {
     if (!G) return;
@@ -118,24 +121,24 @@ export function makeGroundScreen(ids, hooks) {
     $(ids.takeoff).disabled = s.lost;
     $(ids.wall).textContent = mode === "wall" ? (wallStart ? "WALL: END" : "WALL: START") : "WALL";
     $(ids.fix).disabled = !(s.her && s.her.alive && s.modules && s.modules.loose > 0);
+    const fighting = !!(s.her && s.her.alive && (s.her.act === "fight" || s.her.act === "walker"));   // one button: FIGHT sends her, HOLD stands her down
     $(ids.fight).disabled = !(s.her && s.her.alive);
-    $(ids.fight).textContent = s.walker && s.walker.alive ? "FIGHT: WALKER" : "FIGHT";
-    $(ids.repairWalker).disabled = !(s.her && s.her.alive && s.walker && !s.walker.alive);
-    $(ids.hold).disabled = !(s.her && s.her.alive);
-    $(ids.fire).disabled = !(s.walker && s.walker.possessed);
+    $(ids.fight).textContent = fighting ? "HOLD" : (s.walker && s.walker.alive ? "FIGHT: WALKER" : "FIGHT");
+    $(ids.repairWalker).style.display = s.her && s.her.alive && s.walker && !s.walker.alive ? "" : "none";   // only while the walker lies wrecked or down
+    $(ids.fire).style.display = s.walker && s.walker.possessed ? "" : "none";   // only while she is in it
     stickEl.style.display = s.walker && s.walker.possessed ? "block" : "none";
   }
   // hud(lines): the ground's own panes: the numbers at the top left, the log above the buttons, the buttons' labels and states
-  function hud(lines) { if (!G) return; $(ids.pane).textContent = pane(); $(ids.log).textContent = lines.join("\n"); buttons(); }
+  function hud(lines) { if (!G) return; $(ids.pane).textContent = pane(); $(ids.log).textContent = lines.slice(-2).join("\n"); buttons(); }
+  $(ids.go).onclick = () => { $(ids.card).style.display = "none"; waiting = false; if (A) A.ensure(); };
   $(ids.repairWalker).onclick = () => { if (!G) return; const r = order(G, "repairWalker"); if (!r.ok) say("no repair: " + r.reason); };
-  $(ids.hold).onclick = () => { if (!G) return; const r = order(G, "hold"); if (!r.ok) say("no hold: " + r.reason); };
   $(ids.fire).onpointerdown = (e) => { e.preventDefault(); if (G) order(G, "fire", true); };
   addEventListener("pointerup", () => { if (G) order(G, "fire", false); });
   addEventListener("keydown", (e) => { if (e.code === "Space" && G && G.walker && G.walker.possessed) { e.preventDefault(); order(G, "fire", true); } });
   addEventListener("keyup", (e) => { if (e.code === "Space" && G) order(G, "fire", false); });
   $(ids.wall).onclick = () => { mode = mode === "wall" ? "gun" : "wall"; wallStart = null; buttons(); };
   $(ids.fix).onclick = () => { if (!G) return; const r = order(G, "fix"); if (!r.ok) say("no fix: " + r.reason); };
-  $(ids.fight).onclick = () => { if (!G) return; const r = order(G, "fight"); if (!r.ok) say("no fight: " + r.reason); };
+  $(ids.fight).onclick = () => { if (!G) return; const s = summary(G), fighting = !!(s.her && s.her.alive && (s.her.act === "fight" || s.her.act === "walker")); const r = order(G, fighting ? "hold" : "fight"); if (!r.ok) say((fighting ? "no hold: " : "no fight: ") + r.reason); };
   $(ids.kind).onclick = () => { gunI = (gunI + 1) % GUNS.length; buttons(); };
   $(ids.sound).onclick = () => { muted = !muted; if (A) { A.ensure(); A.setMuted(muted); } buttons(); };
   makeGestures(gv, {
@@ -155,7 +158,7 @@ export function makeGroundScreen(ids, hooks) {
     twist: (a) => { if (R) R.rotateBy(a); },
   });
   addEventListener("keydown", (e) => { if (!R) return; if (e.key === "1") R.rotateBy(0.35); if (e.key === "3") R.rotateBy(-0.35); });
-  return { enter, leave, step, draw, pane, buttons, hud, active: () => !!G, lost: () => !!(G && summary(G).lost), herDead: () => !!(G && G.her && !G.her.alive),
+  return { enter, leave, step, draw, pane, buttons, hud, waiting: () => waiting, active: () => !!G, lost: () => !!(G && summary(G).lost), herDead: () => !!(G && G.her && !G.her.alive),
     zoomIn: () => { if (R) { zoom = Math.min(2.6, zoom * 1.25); R.setZoom(zoom); } },
     zoomOut: () => { if (R) { zoom = Math.max(0.5, zoom / 1.25); R.setZoom(zoom); } },
     takeoff: () => (G ? order(G, "takeoff") : { ok: false, reason: "not on the ground" }) };

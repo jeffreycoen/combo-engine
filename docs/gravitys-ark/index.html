@@ -27,15 +27,18 @@
   #zoom button { min-width: 44px; width: 44px; height: 40px; padding: 0; font-size: 16px; }
   #zoom #seedB { width: auto; min-width: 60px; padding: 0 10px; font-size: 11px; letter-spacing: 0.12em; }
   #gv { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
-  /* the ground's layout: the space panes, the space buttons, the dock, the gate, and the flat canvas hide; the pane at the top left; the buttons in three rows of three above the fixed cluster; the log and the stick above the buttons */
+  /* the ground's layout: the space panes, the space buttons, the dock, the gate, and the flat canvas hide; the pane at the top left; the buttons in two rows of four above the fixed cluster; the log and the stick above the buttons; the landing's card in the middle */
   body.ground #title, body.ground #ship, body.ground #clocks, body.ground #log, body.ground #btns, body.ground #dock, body.ground #gatePane, body.ground #cv { display: none !important; }
   #gPane { display: none; top: max(10px, env(safe-area-inset-top)); left: 12px; max-width: calc(100vw - 24px); white-space: pre-wrap; }
-  #groundBtns { position: fixed; display: none; right: 12px; bottom: max(64px, calc(env(safe-area-inset-bottom) + 56px)); width: min(420px, calc(100vw - 24px)); grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  #groundBtns { position: fixed; display: none; right: 12px; bottom: max(64px, calc(env(safe-area-inset-bottom) + 56px)); width: min(420px, calc(100vw - 24px)); grid-template-columns: repeat(4, 1fr); gap: 6px; }
   #groundBtns button { min-width: 0; padding: 10px 4px; font-size: 10px; letter-spacing: 0.06em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #gLog { display: none; right: 12px; bottom: max(196px, calc(env(safe-area-inset-bottom) + 188px)); max-width: 60vw; max-height: 22vh; overflow: hidden; color: rgba(233,237,242,.8); }
+  #gLog { display: none; right: 12px; bottom: max(150px, calc(env(safe-area-inset-bottom) + 142px)); max-width: 60vw; max-height: 22vh; overflow: hidden; color: rgba(233,237,242,.8); }
+  #gCard { display: none; left: 50%; top: 42%; transform: translate(-50%, -50%); pointer-events: auto; min-width: 240px; max-width: 86vw; padding: 14px 16px; border-radius: 12px; border: 1.5px solid rgba(233,178,92,.5); background: rgba(7,9,13,.94); font: 500 12px/1.7 system-ui, sans-serif; white-space: normal; }
+  #gCard .t { font-weight: 700; letter-spacing: 0.12em; color: #e9b25c; margin-bottom: 6px; }
+  #gCard button { margin-top: 10px; }
   body.ground #gPane, body.ground #gLog { display: block; }
   body.ground #groundBtns { display: grid; }
-  #gStick { position: fixed; left: 18px; bottom: max(196px, calc(env(safe-area-inset-bottom) + 188px)); width: 108px; height: 108px; border-radius: 50%; border: 1.5px solid rgba(233,237,242,.35); background: rgba(7,9,13,.25); touch-action: none; }
+  #gStick { position: fixed; left: 18px; bottom: max(150px, calc(env(safe-area-inset-bottom) + 142px)); width: 108px; height: 108px; border-radius: 50%; border: 1.5px solid rgba(233,237,242,.35); background: rgba(7,9,13,.25); touch-action: none; }
   #gNub { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; background: rgba(233,237,242,.5); }
 </style>
 </head>
@@ -52,8 +55,9 @@
 <div id="zoom"><button id="zoomOut">−</button><button id="zoomIn">+</button><button id="pause">II</button><button id="seedB">SEED</button></div>
 <div id="gPane" class="pane">-</div>
 <div id="gLog" class="pane"></div>
-<div id="groundBtns"><button id="gKind">GUN</button><button id="gWall">WALL</button><button id="gFix">FIX</button><button id="gFight">FIGHT</button><button id="gHold">HOLD</button><button id="gRepairWalker">REPAIR WALKER</button><button id="gFire">FIRE</button><button id="gSound">SOUND ON</button><button id="gTakeoff">TAKE OFF</button></div>
+<div id="groundBtns"><button id="gKind">GUN</button><button id="gWall">WALL</button><button id="gFix">FIX</button><button id="gTakeoff">TAKE OFF</button><button id="gFight">FIGHT</button><button id="gRepairWalker">FIX WALKER</button><button id="gFire">FIRE</button><button id="gSound">SOUND ON</button></div>
 <div id="gStick" style="display:none"><div id="gNub"></div></div>
+<div id="gCard" class="pane"><div class="t">THE SHIP IS DOWN</div><div id="gCardBody"></div><button id="gGo">GO</button></div>
 <div id="btns">
   <button id="land">LAND</button>
   <button id="takeoff">TAKE OFF</button>

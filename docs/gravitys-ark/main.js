@@ -54,7 +54,7 @@ function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, cr
 // phase 0.1.1's page step: the ground on coldsnap
 const OPENING_CRASH = 30, OPENING_SCRAP_KG = 1500;   // the opening: the hull down at 30 m/s on the plague world, the crash shaking the ship's own stores loose as scrap for the ground, PROPOSED
 let view = "space";
-const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", hold: "gHold", fire: "gFire", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
+const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", fire: "gFire", card: "gCard", cardBody: "gCardBody", go: "gGo", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
 function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 // leaveGround(g): the seam up, after the road has let the ship go: the purse back as kilograms, the modules lost gone from the build list
 function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.walkerLost) hull.walkerLost = true; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
@@ -146,7 +146,7 @@ const DT = 1 / 60; let last = performance.now(), acc = 0, frameDt = 0;
 function frame(now) {
   frameDt = Math.min(0.05, (now - last) / 1000); acc += frameDt; last = now;
   while (acc >= DT) { if (!paused && ship.alive) { if (burning) { const a = aimVector(); road.burn(a[0], a[1], DT); } const before = ship.landed; road.tick(DT); if (before === null && ship.landed !== null) { const due = dock(S, purse, crew, state.t); state.events.push({ k: "dock wages " + fmt(due), t: state.t }); logAdd("dock", { due }); const crashEv = state.events.find((e) => e.k === "crash" && e.t === state.t); if (crashEv) enterHold(crashEv.v); }
-      if (view === "ground") { GS.step(DT / 2); GS.step(DT / 2); if (ship.alive && GS.lost()) { ship.alive = false; state.events.push({ k: "ABANDON SHIP", t: state.t }); logAdd("death", { v: 0 }); } if (GS.herDead() && !her.taken) { her.taken = true; state.events.push({ k: "SHE IS DEAD; the delivery is over", t: state.t }); } }   // the war steps at coldsnap's own 1/120; the bridge lost is the ship lost; her death ends the delivery
+      if (view === "ground" && !GS.waiting()) { GS.step(DT / 2); GS.step(DT / 2); if (ship.alive && GS.lost()) { ship.alive = false; state.events.push({ k: "ABANDON SHIP", t: state.t }); logAdd("death", { v: 0 }); } if (GS.herDead() && !her.taken) { her.taken = true; state.events.push({ k: "SHE IS DEAD; the delivery is over", t: state.t }); } }   // the war steps at coldsnap's own 1/120; the bridge lost is the ship lost; her death ends the delivery
       stepStations(S, DT); ship.dry = hullMass();
       if (state.hole.born && !collapsed) onCollapse();
       stepWrecks(wrecks, road.wells(), DT);
