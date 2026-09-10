@@ -1,0 +1,194 @@
+{
+ "name": "AC-03 CONVOY INTERDICTION",
+ "terrain": {
+  "terrainSeed": 23,
+  "worldSeed": 3303,
+  "pads": [
+   {
+    "x": 0,
+    "z": -42,
+    "r": 6,
+    "h": 2.3
+   },
+   {
+    "x": 0,
+    "z": -14,
+    "r": 6,
+    "h": 2.35
+   },
+   {
+    "x": 0,
+    "z": 2,
+    "r": 7,
+    "h": 2.4
+   },
+   {
+    "x": 0,
+    "z": 18,
+    "r": 7,
+    "h": 2.45
+   },
+   {
+    "x": 0,
+    "z": 34,
+    "r": 7,
+    "h": 2.5
+   }
+  ],
+  "hills": [
+   {
+    "x": -20,
+    "z": 10,
+    "r": 12,
+    "h": 3.5
+   },
+   {
+    "x": 19,
+    "z": 26,
+    "r": 11,
+    "h": 3
+   },
+   {
+    "x": -16,
+    "z": 44,
+    "r": 10,
+    "h": 2.8
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -42,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "convoy",
+   "x0": -0.4,
+   "z0": 8.6,
+   "nx": 2,
+   "nz": 5,
+   "dx": 1.9,
+   "dz": 5.6,
+   "dress": "android"
+  },
+  {
+   "tag": "convoy",
+   "x0": -3.2,
+   "z0": 20.5,
+   "nx": 1,
+   "nz": 2,
+   "dx": 0,
+   "dz": 8,
+   "utype": "gren",
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "x": -1.5,
+   "z": 30,
+   "yaw": 0.1
+  },
+  {
+   "kind": "truck",
+   "x": 1.8,
+   "z": 24,
+   "yaw": -0.06
+  },
+  {
+   "kind": "truck",
+   "x": -1.2,
+   "z": 17,
+   "yaw": 0.12
+  },
+  {
+   "kind": "truck",
+   "x": 1.5,
+   "z": 10,
+   "yaw": -0.15
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "house",
+   "group": "house0",
+   "x": -11,
+   "z": 21,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 4
+  },
+  {
+   "type": "house",
+   "group": "house1",
+   "x": 10,
+   "z": 28,
+   "nx": 4,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "wall",
+   "x": -7,
+   "z": 12,
+   "yaw": 0.5,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 8,
+   "z": 16,
+   "yaw": -0.7,
+   "nx": 4,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -8,
+   "z": 33,
+   "yaw": 0.3,
+   "nx": 4,
+   "ny": 3,
+   "nz": 1
+  },
+  {
+   "type": "wreck",
+   "x": 13,
+   "z": 8,
+   "yaw": 2.1
+  }
+ ],
+ "budget": {
+  "bodies": 420,
+  "welds": 800
+ },
+ "contract": {
+  "wo": "AC-03",
+  "title": "CONVOY INTERDICTION",
+  "directive": "Four vehicles on Route Nine, crews aboard. Interdict the column; vehicles and crews are one line item.",
+  "commendation": "Route capacity reduced to specification.",
+  "predicate": {
+   "group": "convoy"
+  },
+  "need": 8,
+  "par": [
+   25,
+   45
+  ],
+  "subjects": "convoy",
+  "evidence": [
+   "Recovered: 37 personal effects. Disposition: incinerate.",
+   "Cargo manifest, reconstructed: foodstuffs, textiles, machine spares. Munitions: nil."
+  ],
+  "focus": {
+   "x": 0,
+   "z": 20,
+   "r": 13
+  }
+ }
+}

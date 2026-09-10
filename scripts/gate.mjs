@@ -58,6 +58,7 @@ const GATES = {
   "render3d": ["scripts/render3d-test.mjs"],
   "yard": ["scripts/yard-test.mjs"],
   "gravitys-ark": ["scripts/gravitys-ark-test.mjs"],
+  "pages": ["scripts/pages-test.mjs"],
   "parts": ["scripts/parts-test.mjs"],
   "spine": ["scripts/spine-test.mjs"],
 };

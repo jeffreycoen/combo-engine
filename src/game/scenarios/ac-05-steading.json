@@ -1,0 +1,155 @@
+{
+ "name": "AC-05 OUTBUILDING, OCCUPIED",
+ "terrain": {
+  "terrainSeed": 45,
+  "worldSeed": 3105,
+  "pads": [
+   {
+    "x": 0,
+    "z": 27,
+    "r": 15,
+    "h": 2.35
+   },
+   {
+    "x": 0,
+    "z": -46,
+    "r": 6,
+    "h": 2.3
+   }
+  ],
+  "hills": [
+   {
+    "x": -26,
+    "z": 0,
+    "r": 13,
+    "h": 3.4
+   },
+   {
+    "x": 24,
+    "z": 8,
+    "r": 11,
+    "h": 3
+   },
+   {
+    "x": 6,
+    "z": 52,
+    "r": 14,
+    "h": 3.8
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -46,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "holdout",
+   "x0": -2.7,
+   "z0": 23,
+   "nx": 4,
+   "nz": 3,
+   "dx": 1.8,
+   "dz": 1.7,
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "steading",
+   "x": 12,
+   "z": 26,
+   "yaw": 0.4
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "warehouse",
+   "x": -13,
+   "z": 30
+  },
+  {
+   "type": "keep",
+   "x": 0,
+   "z": 36,
+   "group": "granary"
+  },
+  {
+   "type": "house",
+   "group": "houseA",
+   "x": -10,
+   "z": 18,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 4
+  },
+  {
+   "type": "house",
+   "group": "houseB",
+   "x": 10,
+   "z": 20,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "wall",
+   "x": 8,
+   "z": 30,
+   "yaw": 0.2,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -4,
+   "z": 12,
+   "yaw": 1.3,
+   "nx": 4,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wreck",
+   "group": "steading",
+   "x": 14,
+   "z": 36,
+   "yaw": 2.2
+  }
+ ],
+ "budget": {
+  "bodies": 520,
+  "welds": 1150
+ },
+ "contract": {
+  "wo": "AC-05",
+  "title": "OUTBUILDING, OCCUPIED",
+  "directive": "A holdout detail occupies the steading. Collapse is the sole accepted cause; subjects resolved by other means will not be credited, and structures resolved empty complete nothing.",
+  "commendation": "Overburden performed to rating. Occupancy resolved in place.",
+  "predicate": {
+   "causes": [
+    "COLLAPSE"
+   ],
+   "group": "holdout"
+  },
+  "need": 2,
+  "par": [
+   45,
+   90
+  ],
+  "subjects": "holdout",
+  "evidence": [
+   "Structures resolved: four. Prior survey use: granary (converted to quarters), two dwellings, store. Stove in the granary found lit. Damped.",
+   "Recovered from debris: 9 maintenance journals, handwritten. Disposition: incinerate.",
+   "[margin, second hand] Copies burn. Originals keep."
+  ],
+  "focus": {
+   "x": 0,
+   "z": 25,
+   "r": 14
+  }
+ }
+}

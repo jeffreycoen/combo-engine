@@ -1,0 +1,33 @@
+{
+  "id": "ac_01",
+  "comment": "The Phase 4 gate: a contract authored purely in JSON, zero engine edits.",
+  "contract": {
+    "wo": "AC-01", "title": "CONVOY INTERDICTION",
+    "directive": "Three vehicles on the north road, crews dismounted. The road is the contract.",
+    "commendation": "Route capacity reduced to specification.",
+    "need": 3, "par": [20, 35],
+    "predicate": { "group": "convoy" },
+    "alt": null
+  },
+  "terrain": {
+    "terrainSeed": 21, "worldSeed": 3101,
+    "pads": [ { "x": 0, "z": 20, "r": 8, "h": 2.3 }, { "x": 0, "z": -30, "r": 6, "h": 2.3 } ],
+    "hills": [ { "x": -18, "z": 8, "r": 12, "h": 3.5 } ],
+    "pool": null, "freeze": false
+  },
+  "player": { "x": 0, "z": -45, "yaw": 0 },
+  "squads": [
+    { "tag": "convoy", "x0": -2.4, "z0": 23.2, "nx": 4, "nz": 1, "dx": 1.6, "dz": 1.3 }
+  ],
+  "vehicles": [
+    { "kind": "truck", "x": -3, "z": 20, "yaw": 0.2 },
+    { "kind": "truck", "x": 1.5, "z": 17, "yaw": 0.05 },
+    { "kind": "truck", "x": 4.5, "z": 22.5, "yaw": -0.3 }
+  ],
+  "prefabs": [
+    { "type": "wall", "x": 9, "z": 14, "yaw": 0.9, "nx": 4, "ny": 3, "nz": 2 },
+    { "type": "wall", "x": -8, "z": 27, "yaw": -0.4, "nx": 5, "ny": 2, "nz": 1 },
+    { "type": "house", "group": "house0", "x": -11, "z": 15, "nx": 5, "nz": 4, "doorIx": 4 }
+  ],
+  "budget": { "bodies": 400, "welds": 700 }
+}

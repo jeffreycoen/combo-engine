@@ -1,0 +1,202 @@
+{
+ "name": "AC-08 SURFACE LOAD RATING, REPEAT",
+ "terrain": {
+  "terrainSeed": 11,
+  "worldSeed": 5108,
+  "pads": [
+   {
+    "x": 0,
+    "z": -30,
+    "r": 6,
+    "h": 2.3
+   }
+  ],
+  "hills": [
+   {
+    "x": -24,
+    "z": -12,
+    "r": 13,
+    "h": 3.2
+   },
+   {
+    "x": 22,
+    "z": 28,
+    "r": 12,
+    "h": 2.6
+   },
+   {
+    "x": -18,
+    "z": 50,
+    "r": 11,
+    "h": 2.4
+   }
+  ],
+  "pool": {
+   "x0": -8,
+   "x1": 8,
+   "z0": 20,
+   "z1": 36,
+   "level": 1.1
+  },
+  "freeze": true
+ },
+ "player": {
+  "x": 0,
+  "z": -52,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "ponddrill2",
+   "x0": -3,
+   "z0": 25,
+   "nx": 3,
+   "nz": 2,
+   "dx": 3,
+   "dz": 5,
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "relic",
+   "x": -13,
+   "z": -4,
+   "yaw": 0.15
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "wreck",
+   "x": 14.5,
+   "z": 43,
+   "yaw": 0.4
+  },
+  {
+   "type": "wreck",
+   "x": 17.5,
+   "z": 39.5,
+   "yaw": 0.9
+  },
+  {
+   "type": "wreck",
+   "x": 21,
+   "z": 20,
+   "yaw": 2.3
+  },
+  {
+   "type": "wall",
+   "x": 19.5,
+   "z": 17,
+   "yaw": -0.5,
+   "nx": 4,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -15,
+   "z": 23.8,
+   "yaw": 0,
+   "nx": 5,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -15,
+   "z": 28.2,
+   "yaw": 0,
+   "nx": 5,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -17.2,
+   "z": 26,
+   "yaw": 1.5708,
+   "nx": 4,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -12.8,
+   "z": 26,
+   "yaw": 1.5708,
+   "nx": 2,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 0,
+   "z": 16,
+   "yaw": 1.5708,
+   "nx": 4,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -8,
+   "z": -33,
+   "yaw": 0.9,
+   "nx": 3,
+   "ny": 2,
+   "nz": 2
+  },
+  {
+   "type": "wall",
+   "x": 8,
+   "z": -36,
+   "yaw": -0.8,
+   "nx": 3,
+   "ny": 2,
+   "nz": 2
+  }
+ ],
+ "budget": {
+  "bodies": 175,
+  "welds": 235
+ },
+ "contract": {
+  "wo": "AC-08",
+  "title": "SURFACE LOAD RATING, REPEAT",
+  "directive": "The sheet has refrozen and a detail occupies it. Clear it; method remains unspecified.",
+  "commendation": "Sheet rating confirmed. No further orders follow.",
+  "predicate": {
+   "group": "ponddrill2"
+  },
+  "need": 3,
+  "par": [
+   12,
+   24
+  ],
+  "subjects": "ponddrill2",
+  "alt": {
+   "group": "ponddrill2",
+   "holdS": 6,
+   "par": [
+    100,
+    180
+   ]
+  },
+  "evidence": [
+   "Zone 12 register carried forward: 3 hulls, 1 vehicle (operable), 1 structure (down). No action required.",
+   "Sheet dimensions and occupancy identical to WO-07. Cross-reference approved.",
+   "Occupancy formation corresponds to WO-07 drill spacing. No drill was scheduled.",
+   "Vehicle 1 operable, key in switch. Not required. Logged.",
+   "[if ac07 fulfilled] Recovered at the rim: 1 skate, small-format. Disposition: incinerate.",
+   "[if ac07 deviated] Recovered at the rim: nil findings.",
+   "[margin, second hand] The ministry copy is shorter."
+  ],
+  "focus": {
+   "x": 0,
+   "z": 28,
+   "r": 7
+  }
+ }
+}

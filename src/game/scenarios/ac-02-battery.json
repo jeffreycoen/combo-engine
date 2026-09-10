@@ -1,0 +1,211 @@
+{
+ "name": "AC-02 BATTERY REDUCTION",
+ "terrain": {
+  "terrainSeed": 42,
+  "worldSeed": 4202,
+  "pads": [
+   {
+    "x": -17,
+    "z": 6,
+    "r": 6.5,
+    "h": 4.4
+   },
+   {
+    "x": 2,
+    "z": 24,
+    "r": 7,
+    "h": 5
+   },
+   {
+    "x": 18,
+    "z": 10,
+    "r": 6,
+    "h": 4.2
+   },
+   {
+    "x": 0,
+    "z": -16,
+    "r": 8,
+    "h": 2.3
+   }
+  ],
+  "hills": [
+   {
+    "x": -9,
+    "z": -32,
+    "r": 9,
+    "h": 2.6
+   },
+   {
+    "x": 10,
+    "z": -34,
+    "r": 9,
+    "h": 2.4
+   },
+   {
+    "x": 0,
+    "z": 44,
+    "r": 15,
+    "h": 4
+   },
+   {
+    "x": -28,
+    "z": 22,
+    "r": 10,
+    "h": 3.2
+   },
+   {
+    "x": 29,
+    "z": 20,
+    "r": 10,
+    "h": 3
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -50,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "battery",
+   "x0": -19,
+   "z0": 6.2,
+   "nx": 3,
+   "nz": 1,
+   "dx": 1.6,
+   "dz": 1.2,
+   "utype": "gren",
+   "dress": "android"
+  },
+  {
+   "tag": "battery",
+   "x0": 0.3,
+   "z0": 24.2,
+   "nx": 3,
+   "nz": 1,
+   "dx": 1.7,
+   "dz": 1.2,
+   "utype": "gren",
+   "brave": true,
+   "dress": "android"
+  },
+  {
+   "tag": "battery",
+   "x0": 16.2,
+   "z0": 10.6,
+   "nx": 3,
+   "nz": 1,
+   "dx": 1.6,
+   "dz": 1.2,
+   "utype": "gren",
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "carrier",
+   "x": 6,
+   "z": 30,
+   "yaw": 0.3
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "wall",
+   "x": -17,
+   "z": 3.6,
+   "yaw": 0,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 2,
+   "z": 21.4,
+   "yaw": 0,
+   "nx": 6,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 18,
+   "z": 7.6,
+   "yaw": 0,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -6,
+   "z": -8,
+   "yaw": 0.3,
+   "nx": 6,
+   "ny": 3,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 8,
+   "z": -4,
+   "yaw": -0.5,
+   "nx": 5,
+   "ny": 3,
+   "nz": 2
+  },
+  {
+   "type": "wreck",
+   "group": "tarped",
+   "x": -13,
+   "z": 11,
+   "yaw": 2
+  },
+  {
+   "type": "wreck",
+   "group": "tarped",
+   "x": 22.5,
+   "z": 14,
+   "yaw": 1.7
+  },
+  {
+   "type": "wreck",
+   "group": "tarped",
+   "x": 9.5,
+   "z": 26.5,
+   "yaw": 2.3
+  }
+ ],
+ "budget": {
+  "bodies": 240,
+  "welds": 420
+ },
+ "contract": {
+  "wo": "AC-02",
+  "title": "BATTERY REDUCTION",
+  "directive": "Three battery positions on the raised pads, crews of three. Reduce all three; return fire is provided for in the schedule.",
+  "commendation": "All tubes silent. Return fire within projection.",
+  "predicate": {
+   "group": "battery"
+  },
+  "need": 9,
+  "par": [
+   40,
+   75
+  ],
+  "subjects": "battery",
+  "evidence": [
+   "Expended tubes recovered: 3. Serviceable: nil.",
+   "Crew positions fitted with non-issue wind screens. Struck from inventory."
+  ],
+  "focus": {
+   "x": 0,
+   "z": -16,
+   "r": 8
+  }
+ }
+}

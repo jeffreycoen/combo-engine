@@ -1,0 +1,177 @@
+{
+ "name": "AC-06 THE CONVOY HAS STOPPED",
+ "terrain": {
+  "terrainSeed": 46,
+  "worldSeed": 3106,
+  "pads": [
+   {
+    "x": 5,
+    "z": 26,
+    "r": 11,
+    "h": 2.3
+   },
+   {
+    "x": 3,
+    "z": 4,
+    "r": 6,
+    "h": 2.28
+   },
+   {
+    "x": 2,
+    "z": -18,
+    "r": 6,
+    "h": 2.25
+   },
+   {
+    "x": 0,
+    "z": -46,
+    "r": 6,
+    "h": 2.3
+   }
+  ],
+  "hills": [
+   {
+    "x": -20,
+    "z": 10,
+    "r": 13,
+    "h": 3.4
+   },
+   {
+    "x": 22,
+    "z": 40,
+    "r": 12,
+    "h": 3.2
+   },
+   {
+    "x": -16,
+    "z": 44,
+    "r": 10,
+    "h": 2.6
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -46,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "convoy2",
+   "x0": 0.8,
+   "z0": 19.5,
+   "nx": 2,
+   "nz": 4,
+   "dx": 1.5,
+   "dz": 3.6,
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "haulage",
+   "x": 3.5,
+   "z": 20,
+   "yaw": 0.12
+  },
+  {
+   "kind": "truck",
+   "group": "haulage",
+   "x": 4.8,
+   "z": 25.8,
+   "yaw": 0.05
+  },
+  {
+   "kind": "truck",
+   "group": "haulage",
+   "x": 6.1,
+   "z": 31.5,
+   "yaw": -0.1
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "house",
+   "group": "hut",
+   "x": -7,
+   "z": 26,
+   "nx": 4,
+   "nz": 4,
+   "doorIx": 3
+  },
+  {
+   "type": "wall",
+   "x": 9,
+   "z": 22.5,
+   "yaw": 0.1,
+   "nx": 3,
+   "ny": 1,
+   "nz": 2
+  },
+  {
+   "type": "wall",
+   "x": 9.5,
+   "z": 29,
+   "yaw": 0.4,
+   "nx": 2,
+   "ny": 2,
+   "nz": 2
+  },
+  {
+   "type": "wall",
+   "x": 5,
+   "z": 40,
+   "yaw": 0.05,
+   "nx": 8,
+   "ny": 1,
+   "nz": 1
+  }
+ ],
+ "budget": {
+  "bodies": 180,
+  "welds": 380
+ },
+ "contract": {
+  "wo": "AC-06",
+  "title": "THE CONVOY HAS STOPPED",
+  "directive": "The convoy is halted at kilometre 118, crews dismounted on the shoulder. Resolve the stoppage; the vehicles are retained inventory and do not appear on this order.",
+  "commendation": "Route restored to capacity. No resistance recorded.",
+  "predicate": {
+   "group": "convoy2"
+  },
+  "need": 6,
+  "par": [
+   25,
+   50
+  ],
+  "subjects": "convoy2",
+  "alt": {
+   "group": "convoy2",
+   "holdS": 6,
+   "rect": {
+    "x0": -6,
+    "x1": 14,
+    "z0": 15,
+    "z1": 35
+   },
+   "par": [
+    45,
+    90
+   ]
+  },
+  "evidence": [
+   "Cargo manifest, recovered intact: 41 crates. Filament stock, joint assemblies small-format, machine oil, winter cloth, dry rations. Offload suspended at crate 19.",
+   "No small-format units appear on any zone register. Rations carry no bureau issue code.",
+   "Halt predates instrument dispatch. Cause of halt: not established.",
+   "[margin, second hand] Rations. Who were the rations for?",
+   "Ref. Zone 2 file: subjects departed route on approach. Filed as resistance. Schedule advanced.",
+   "[deviated] Subjects departed the route on instrument approach. Pursuit not provided for in the schedule. Cargo abandoned in place; recovery deferred."
+  ],
+  "focus": {
+   "x": 5,
+   "z": 26,
+   "r": 11
+  }
+ }
+}

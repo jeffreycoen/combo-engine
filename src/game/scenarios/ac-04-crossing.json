@@ -1,0 +1,208 @@
+{
+ "name": "AC-04 CROSSING DENIAL",
+ "terrain": {
+  "terrainSeed": 24,
+  "worldSeed": 3404,
+  "pads": [
+   {
+    "x": 0,
+    "z": -44,
+    "r": 6,
+    "h": 2.3
+   },
+   {
+    "x": 0,
+    "z": -12,
+    "r": 6,
+    "h": 2.2
+   },
+   {
+    "x": 0,
+    "z": 2,
+    "r": 6,
+    "h": 2.05
+   },
+   {
+    "x": 0,
+    "z": 15,
+    "r": 4.5,
+    "h": 1.9
+   },
+   {
+    "x": 0,
+    "z": 41,
+    "r": 4.5,
+    "h": 1.9
+   },
+   {
+    "x": -11.5,
+    "z": 28,
+    "r": 3,
+    "h": 1.7
+   },
+   {
+    "x": 11.5,
+    "z": 28,
+    "r": 3,
+    "h": 1.7
+   },
+   {
+    "x": -9.3,
+    "z": 28,
+    "r": 4.5,
+    "h": 0.95
+   },
+   {
+    "x": 9.3,
+    "z": 28,
+    "r": 4.5,
+    "h": 0.95
+   },
+   {
+    "x": 0,
+    "z": 19.3,
+    "r": 4.5,
+    "h": 0.95
+   },
+   {
+    "x": 0,
+    "z": 36.7,
+    "r": 4.5,
+    "h": 0.95
+   }
+  ],
+  "hills": [
+   {
+    "x": -19,
+    "z": 26,
+    "r": 9,
+    "h": 3
+   },
+   {
+    "x": 18,
+    "z": 6,
+    "r": 9,
+    "h": 2.6
+   },
+   {
+    "x": 0,
+    "z": 52,
+    "r": 12,
+    "h": 3
+   }
+  ],
+  "pool": {
+   "x0": -8,
+   "x1": 8,
+   "z0": 20,
+   "z1": 36,
+   "level": 1.1
+  },
+  "freeze": true
+ },
+ "player": {
+  "x": 0,
+  "z": -50,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "crossing",
+   "x0": -5,
+   "z0": 21,
+   "nx": 4,
+   "nz": 2,
+   "dx": 4,
+   "dz": 4,
+   "dress": "android"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "freight",
+   "x": 4.5,
+   "z": 43.5,
+   "yaw": 3.05
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "wall",
+   "x": 0,
+   "z": 38.5,
+   "yaw": 0,
+   "nx": 6,
+   "ny": 1,
+   "nz": 2
+  },
+  {
+   "type": "wall",
+   "x": -13,
+   "z": 33,
+   "yaw": 1.3,
+   "nx": 4,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "house",
+   "group": "hut0",
+   "x": -9.5,
+   "z": 44,
+   "nx": 4,
+   "nz": 4,
+   "doorIx": 3
+  },
+  {
+   "type": "warehouse",
+   "x": 15,
+   "z": 47
+  },
+  {
+   "type": "wreck",
+   "x": -12,
+   "z": 9,
+   "yaw": 0.9
+  }
+ ],
+ "budget": {
+  "bodies": 500,
+  "welds": 900
+ },
+ "contract": {
+  "wo": "AC-04",
+  "title": "CROSSING DENIAL",
+  "directive": "The pond carries an unregistered crossing. Clear the detail that keeps it.",
+  "commendation": "Crossing throughput recorded at zero.",
+  "predicate": {
+   "group": "crossing"
+  },
+  "need": 6,
+  "par": [
+   25,
+   45
+  ],
+  "subjects": "crossing",
+  "alt": {
+   "group": "crossing",
+   "holdS": 5,
+   "par": [
+    50,
+    100
+   ]
+  },
+  "struck": "DEMONSTRATE: APPROACH WITHOUT DISCHARGE",
+  "evidence": [
+   "Structure survey: improvised civil works, cut timber and re-laid ice. Builder of record: subject units.",
+   "Recovered at the south approach: hand tools, 11; rope, 40 m. Disposition: scrap.",
+   "Posted load rating, hand-lettered: 'TWO AT A TIME.' Removed.",
+   "[deviated] Detail dispersed. Crossing intact. Throughput at time of survey: zero. Recovery uneconomic; written off in place."
+  ],
+  "focus": {
+   "x": 0,
+   "z": 28,
+   "r": 12
+  }
+ }
+}

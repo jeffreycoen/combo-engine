@@ -1,0 +1,275 @@
+{
+ "name": "AC-01 ARMOR PLATE ACCEPTANCE",
+ "terrain": {
+  "terrainSeed": 41,
+  "worldSeed": 4101,
+  "pads": [
+   {
+    "x": 0,
+    "z": -8,
+    "r": 11,
+    "h": 2.3
+   },
+   {
+    "x": 0,
+    "z": 16,
+    "r": 11,
+    "h": 2.3
+   },
+   {
+    "x": -18,
+    "z": 30,
+    "r": 8,
+    "h": 2.4
+   }
+  ],
+  "hills": [
+   {
+    "x": 0,
+    "z": 52,
+    "r": 16,
+    "h": 4.5
+   },
+   {
+    "x": 24,
+    "z": 8,
+    "r": 10,
+    "h": 3
+   },
+   {
+    "x": -26,
+    "z": -2,
+    "r": 11,
+    "h": 2.8
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -48,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "dockcrew",
+   "x0": -21.5,
+   "z0": 36.5,
+   "nx": 3,
+   "nz": 1,
+   "dx": 1.3,
+   "dz": 1.2,
+   "dress": "human"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": -9,
+   "z": -8,
+   "yaw": 1.62
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": -3,
+   "z": -8,
+   "yaw": 1.5
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": 3,
+   "z": -8,
+   "yaw": 1.7
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": 9,
+   "z": -8,
+   "yaw": 1.55
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": -10,
+   "z": 16,
+   "yaw": 1.58
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": -4,
+   "z": 16,
+   "yaw": 1.66
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": 4,
+   "z": 16,
+   "yaw": 1.48
+  },
+  {
+   "kind": "scout",
+   "group": "plate",
+   "x": 10,
+   "z": 16,
+   "yaw": 1.6
+  },
+  {
+   "kind": "truck",
+   "group": "dockfleet",
+   "x": -13.5,
+   "z": 33.5,
+   "yaw": 1.35
+  },
+  {
+   "kind": "truck",
+   "group": "dockfleet",
+   "x": -21,
+   "z": 23.5,
+   "yaw": 0.15
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "warehouse",
+   "x": -18,
+   "z": 30
+  },
+  {
+   "type": "wall",
+   "x": -6,
+   "z": -4.5,
+   "yaw": 0,
+   "nx": 7,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 6,
+   "z": -4.5,
+   "yaw": 0,
+   "nx": 7,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -7,
+   "z": 19.5,
+   "yaw": 0,
+   "nx": 7,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 7,
+   "z": 19.5,
+   "yaw": 0,
+   "nx": 7,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -13,
+   "z": -30,
+   "yaw": 0.15,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 13,
+   "z": -30,
+   "yaw": -0.15,
+   "nx": 5,
+   "ny": 2,
+   "nz": 1
+  },
+  {
+   "type": "wreck",
+   "group": "scrap",
+   "x": 19,
+   "z": 2,
+   "yaw": 1.8
+  },
+  {
+   "type": "wreck",
+   "group": "scrap",
+   "x": 21,
+   "z": 7,
+   "yaw": 2.1
+  },
+  {
+   "type": "wreck",
+   "group": "scrap",
+   "x": 18.5,
+   "z": 12,
+   "yaw": 1.6
+  },
+  {
+   "type": "wreck",
+   "group": "scrap",
+   "x": 21,
+   "z": 17,
+   "yaw": 2.4
+  }
+ ],
+ "budget": {
+  "bodies": 520,
+  "welds": 900
+ },
+ "contract": {
+  "wo": "AC-01",
+  "title": "ARMOR PLATE ACCEPTANCE",
+  "directive": "Eight hulls are staged on the receiving racks. Six defeated by direct fire constitutes acceptance.",
+  "commendation": "Penetration performance within acceptance band.",
+  "predicate": {
+   "causes": [
+    "PROJECTILE"
+   ],
+   "group": "plate"
+  },
+  "need": 6,
+  "par": [
+   25,
+   45
+  ],
+  "subjects": "plate",
+  "evidence": [
+   "Plate stock received: 8. Defeated by direct fire per order. Residual returned to inventory.",
+   "Hull interiors swept prior to staging. Nil findings. Sweep logged.",
+   "Dock detail present throughout. No interaction logged."
+  ],
+  "focus": {
+   "x": 0,
+   "z": -8,
+   "r": 12
+  },
+  "procedure": [
+   {
+    "id": "drive",
+    "label": "DRIVE TO THE SURVEY MARKER"
+   },
+   {
+    "id": "fire",
+    "label": "FIRE, ONE ROUND"
+   },
+   {
+    "id": "mg",
+    "label": "MG, ONE BURST"
+   },
+   {
+    "id": "volley",
+    "label": "VOLLEY, ONE RACK"
+   }
+  ]
+ }
+}

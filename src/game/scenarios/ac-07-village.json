@@ -1,0 +1,266 @@
+{
+ "name": "AC-07 THE VILLAGE",
+ "terrain": {
+  "terrainSeed": 12,
+  "worldSeed": 4207,
+  "pads": [
+   {
+    "x": 0,
+    "z": 16,
+    "r": 26,
+    "h": 2.3
+   },
+   {
+    "x": 0,
+    "z": -44,
+    "r": 7,
+    "h": 2.3
+   }
+  ],
+  "hills": [
+   {
+    "x": -32,
+    "z": 2,
+    "r": 14,
+    "h": 3.4
+   },
+   {
+    "x": 31,
+    "z": 44,
+    "r": 12,
+    "h": 2.8
+   }
+  ]
+ },
+ "player": {
+  "x": 0,
+  "z": -44,
+  "yaw": 0
+ },
+ "squads": [
+  {
+   "tag": "village",
+   "x0": 10.1,
+   "z0": 2,
+   "nx": 3,
+   "nz": 1,
+   "dx": 0.9,
+   "dz": 0.9,
+   "dress": "android"
+  },
+  {
+   "tag": "village",
+   "x0": 10.1,
+   "z0": 16,
+   "nx": 3,
+   "nz": 1,
+   "dx": 0.9,
+   "dz": 0.9,
+   "dress": "android"
+  },
+  {
+   "tag": "village",
+   "x0": 10.1,
+   "z0": 30,
+   "nx": 3,
+   "nz": 1,
+   "dx": 0.9,
+   "dz": 0.9,
+   "dress": "android"
+  },
+  {
+   "tag": "village",
+   "x0": -1.5,
+   "z0": 12,
+   "nx": 2,
+   "nz": 3,
+   "dx": 1.5,
+   "dz": 2,
+   "dress": "android"
+  },
+  {
+   "tag": "village",
+   "x0": -9.8,
+   "z0": 9.8,
+   "nx": 3,
+   "nz": 1,
+   "dx": 0.8,
+   "dz": 0.8,
+   "dress": "human"
+  },
+  {
+   "tag": "village",
+   "x0": -8.4,
+   "z0": 20.2,
+   "nx": 2,
+   "nz": 1,
+   "dx": 0.8,
+   "dz": 0.8,
+   "dress": "human"
+  }
+ ],
+ "vehicles": [
+  {
+   "kind": "truck",
+   "group": "haulage",
+   "x": -4,
+   "z": -9,
+   "yaw": 0.3
+  }
+ ],
+ "prefabs": [
+  {
+   "type": "hangar",
+   "group": "fac1",
+   "x": 11,
+   "z": 2
+  },
+  {
+   "type": "hangar",
+   "group": "fac2",
+   "x": 11,
+   "z": 16
+  },
+  {
+   "type": "hangar",
+   "group": "fac3",
+   "x": 11,
+   "z": 30
+  },
+  {
+   "type": "house",
+   "group": "houseA",
+   "x": -8,
+   "z": 0,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "house",
+   "group": "houseB",
+   "x": -9,
+   "z": 10,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "house",
+   "group": "houseC",
+   "x": -8,
+   "z": 20,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "house",
+   "group": "houseD",
+   "x": -9,
+   "z": 30,
+   "nx": 5,
+   "nz": 4,
+   "doorIx": 0
+  },
+  {
+   "type": "wall",
+   "x": 5.5,
+   "z": 9,
+   "yaw": 0,
+   "nx": 2,
+   "ny": 2,
+   "nz": 2
+  },
+  {
+   "type": "wall",
+   "x": -13.5,
+   "z": 5,
+   "yaw": 1.5708,
+   "nx": 6,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -13.5,
+   "z": 25,
+   "yaw": 1.5708,
+   "nx": 6,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": -6,
+   "z": -4,
+   "yaw": 0,
+   "nx": 4,
+   "ny": 1,
+   "nz": 1
+  },
+  {
+   "type": "wall",
+   "x": 6,
+   "z": -4,
+   "yaw": 0,
+   "nx": 4,
+   "ny": 1,
+   "nz": 1
+  }
+ ],
+ "budget": {
+  "bodies": 760,
+  "welds": 1900
+ },
+ "contract": {
+  "wo": "AC-07",
+  "title": "THE VILLAGE",
+  "directive": "The settlement is on the schedule: three fabrication halls, roofs rated for removal. Bring them to grade. Occupancy is not a line item on this order.",
+  "commendation": "Occupancy resolved at the structural level.",
+  "objective": {
+   "type": "demolish",
+   "groups": [
+    "fac1",
+    "fac2",
+    "fac3"
+   ],
+   "drop": 1.6
+  },
+  "need": 3,
+  "par": [
+   60,
+   110
+  ],
+  "subjects": "village",
+  "alt": {
+   "group": "village",
+   "holdS": 6,
+   "rect": {
+    "x0": -15,
+    "x1": 16.5,
+    "z0": -3,
+    "z1": 36
+   },
+   "par": [
+    150,
+    260
+   ]
+  },
+  "evidence": [
+   "Unregistered biologicals — disposition as per units.",
+   "Recovered: 118 personal effects, 9 window boxes, 1 school bell. Disposition: incinerate. Bell: scrap.",
+   "[margin underline] 1 school bell",
+   "[margin, second hand] So that's who.",
+   "Structure 2 generator found running. Switched off. Logged.",
+   "Bench inventory, Structure 3: armature jigs, one-third scale. No corresponding requisition.",
+   "Well head posted, hand-lettered: 'DRAW SLOW — IT SANDS.' Removed.",
+   "[deviated] Settlement unoccupied at survey. Structures standing. Recovery uneconomic; written off in place."
+  ],
+  "focus": {
+   "x": 0,
+   "z": 16,
+   "r": 22
+  }
+ }
+}
