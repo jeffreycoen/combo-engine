@@ -16,7 +16,7 @@ import { worldHash, addBody, addWeld } from "../../engine/core.js";
 import { weldLoads, breaking } from "../../modules/weldstress/weldstress.js";
 import { MODULES } from "./stations.js";
 import { makeSquad, SQUAD_SPECS, clearSlot } from "../../depot/squads.js";
-import { spawnSquadMembers } from "../../depot/state.js";
+import { spawnSquadMembers, spawnWallCourses, effRange } from "../../depot/state.js";
 import { INFANTRY_ARMS } from "../../depot/specs.js";
 import { startBuildLine, stepBuildLine } from "../../depot/buildlines.js";
 import { stampBag } from "../../depot/boot.js";
@@ -430,6 +430,46 @@ export function clearBox(G, m) {
   return moved;
 }
 
+// leftBehind(G): what the ground keeps when the ship leaves: every gun standing and every wall
+// course on the ground, kind and place; abandoned, and there again on return.
+export function leftBehind(G) {
+  const towers = [], walls = [];
+  for (const b of G.world.bodies) {
+    if (!b.alive || b.team !== 1) continue;
+    if (b.kind === "tower") towers.push({ key: b.towerType, x: b.pos.x, z: b.pos.z });
+    else if (b.kind === "wall" && b.course === 0) walls.push({ x: b.pos.x, z: b.pos.z, orient: b.orient || 0 });
+  }
+  return { towers, walls };
+}
+
+// standDefences(G, left): the guns and walls a landing before left on this world stand again
+// before the war runs, made as coldsnap makes them: a tower as its placement does, placement.js
+// lines 232 to 240; a wall as its build line lays a course, buildlines.js lines 173 to 178. A cell
+// no longer free is skipped; the paths recompute once. Returns how many stood.
+export function standDefences(G, left) {
+  const out = { towers: 0, walls: 0 };
+  if (!left) return out;
+  const { world, war } = G, grid = war.grid, field = war.field;
+  const freeCell = (x, z) => { const g = grid.worldToGrid(x, z); if (!grid.inBounds(g.gx, g.gz)) return null; const cell = grid.cells[grid.idx(g.gx, g.gz)]; return cell.water || cell.ice || cell.blocked || cell.wallId ? null : { g, cell }; };
+  for (const t of left.towers || []) {
+    const spec = TOWER_SPECS[t.key], f = spec && freeCell(t.x, t.z); if (!f) continue;
+    f.cell.blocked = true;
+    const wp = grid.gridToWorld(f.g.gx, f.g.gz);
+    const b = addBody(world, { kind: "tower", team: 1, mass: 0, hx: 0.8, hy: spec.hy, hz: 0.8, x: wp.x, y: field.heightAt(wp.x, wp.z) + spec.hy, z: wp.z, hp: spec.hp });
+    b.towerType = t.key; b.flagPole = true; b.maxHp = b.hp;
+    b.effRange = effRange(world, { x: b.pos.x, y: b.pos.y + b.hy + 0.45, z: b.pos.z }, spec);
+    f.cell.wallId = b.id; f.cell.bTeam = 1; out.towers++;
+  }
+  for (const w of left.walls || []) {
+    const f = freeCell(w.x, w.z); if (!f) continue;
+    f.cell.blocked = true;
+    const b = spawnWallCourses(world, w.x, field.heightAt(w.x, w.z), w.z, w.orient, 1)[0];
+    f.cell.wallId = b.id; f.cell.bTeam = 1; out.walls++;
+  }
+  if (out.towers || out.walls) G.recomputeFlow();
+  return out;
+}
+
 // joined(G): the modules joined to the bridge through unbroken welds between living modules.
 function joined(G) {
   const H = G.hull;
@@ -543,7 +583,7 @@ export function order(G, kind, x, z, which) {
     return { ok: true, sections: sq._build.rows.length };
   }
   if (kind === "takeoff") {
-    const out = { ok: true, scrapKg: run.resources * G.dials.kgPerScrap, lost: [], keptList: null, abandoned: false, walkerLost: !!(G.walker && G.walker.mech && !G.walker.mech.hull.alive) };
+    const out = { ok: true, scrapKg: run.resources * G.dials.kgPerScrap, lost: [], keptList: null, abandoned: false, walkerLost: !!(G.walker && G.walker.mech && !G.walker.mech.hull.alive), left: leftBehind(G) };
     if (G.hull) {
       const H = G.hull;
       if (!H.bodies[0].alive) return { ok: false, reason: "the bridge is lost", abandoned: true };

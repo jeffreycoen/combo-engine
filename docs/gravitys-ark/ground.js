@@ -5,7 +5,7 @@
 // hull-look.js's; the main file takes only the hookup lines.
 import { makeRenderer, makeGameAudio } from "../../src/depot/api.js";
 import { TOWER_SPECS } from "../../src/depot/specs.js";
-import { makeGround, crashHull, fieldCrew, wreckWalker, setStick, order, tick, summary, price, GUNS, looseModules, herBody } from "../../src/games/gravitys-ark/ground.js";
+import { makeGround, crashHull, fieldCrew, wreckWalker, setStick, order, tick, summary, price, GUNS, looseModules, herBody, standDefences } from "../../src/games/gravitys-ark/ground.js";
 import { derive } from "../../src/games/gravitys-ark/stations.js";
 import { makeGestures } from "../../src/modules/pagekit/pagekit.js";
 import { makeHullLook } from "./hull-look.js";
@@ -32,7 +32,7 @@ export function makeGroundScreen(ids, hooks) {
     return { x: px + f.x * t, z: pz + f.z * t };
   }
 
-  function enter(seed, w, scrapKg, hull, v, crew) {
+  function enter(seed, w, scrapKg, hull, v, crew, left) {
     G = makeGround(seed, w, scrapKg);
     const H = crashHull(G, hull, v);
     say("the hull is down: " + H.bodies.length + " modules, " + H.loose.length + " loose");
@@ -40,6 +40,7 @@ export function makeGroundScreen(ids, hooks) {
     const Wk = wreckWalker(G);
     say("she is on the ground" + (G.hands.length ? " with " + G.hands.map((h) => h.name).join(", ") : ", alone") + (Wk ? "; the walker lies wrecked at the bay's door" : "; no walker aboard"));
     if (G.guards.length) say(summary(G).guards.total + " riflemen stand guard");
+    const stood = standDefences(G, left); if (stood.towers || stood.walls) say(stood.towers + " guns and " + stood.walls + " wall sections stand where you left them");
     // the landing's card: what happened and what she must do; the war stands still until GO
     const s0 = summary(G);
     $(ids.cardBody).textContent = "The crash broke " + (s0.modules ? s0.modules.loose : 0) + " of " + (s0.modules ? s0.modules.total : 0) + " modules loose" + (Wk ? " and wrecked the walker in its bay" : "") + ". Your mechanic must weld the ship back" + (Wk ? " and raise the walker" : "") + " before you can take off. " + (s0.guards.total ? s0.guards.total + " riflemen stand guard. " : "") + "The first assault comes " + fmt(s0.bellIn, 0) + " s after you go.";

@@ -17,7 +17,8 @@ import { makeBook } from "../src/modules/escrow/escrow.js";
 import { GATE_DIALS, ENDINGS, makeGate, atGate, need, fixGate, payToll, sellToFitters, pass as gatePass, aheadOfEdge, respawn, checkGateState } from "../src/games/gravitys-ark/gate.js";
 import { ARK_LINES, makeLog, logFromJSON, galaxyName, buildCard, checkCard } from "../src/games/gravitys-ark/card.js";
 import { receiptLog } from "../src/modules/receipts/receipts.js";
-import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary, fellTrees } from "../src/games/gravitys-ark/ground.js";
+import { makeGround, order as groundOrder, tick as groundTick, hash as groundHash, GROUND_DIALS, crashHull, looseModules, weldBack, HULL_DIALS, fieldCrew, herBody, stepHer, HER, wreckWalker, walkerAlive, setStick, WALKER, standOff, SHAPE, shapeOf, summary as groundSummary, fellTrees, leftBehind, standDefences } from "../src/games/gravitys-ark/ground.js";
+import { spawnWallCourses } from "../src/depot/state.js";
 import { addBody } from "../src/engine/core.js";
 import { SQUAD_SPECS } from "../src/depot/squads.js";
 import { INFANTRY_ARMS } from "../src/depot/specs.js";
@@ -1231,6 +1232,27 @@ function rollArkFields(type, i, nWorlds) {
   const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 10); fieldCrew(G, []);
   const hb = herBody(G), men = G.guards.flatMap((sq) => sq.memberIds.map((id) => G.world.byId.get(id)));
   check("ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart", !!hb && hb.dress === "her" && men.length > 0 && men.every((u) => u.dress === "human"));
+}
+
+{ // 57. ark: the ground remembers: the guns and walls standing at TAKE OFF are what the world keeps, and they stand again on the next landing there, coldsnap's own bodies in the same cells, twin for twin
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const mk = () => { const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 5); return G; };
+  const A = mk(), r = A.hull.axis.r;
+  let gun = null;
+  for (let dz = -6; dz <= 6 && !gun; dz += 2) for (let dx = -6; dx <= 6 && !gun; dx += 2) { const q = groundOrder(A, "gun", A.site.x - r.x * 25 + dx, A.site.z - r.z * 25 + dz, "mg"); if (q.ok) gun = q; }
+  let wp = null, wc = null;   // a free cell for a wall on the crew's side, the first the scan finds
+  for (let dz = -6; dz <= 6 && !wp; dz += 2) for (let dx = -6; dx <= 6 && !wp; dx += 2) { const p = { x: A.site.x - r.x * 15 + dx, z: A.site.z - r.z * 15 + dz }, c = A.war.grid.cellAt(p.x, p.z); if (c && !c.blocked && !c.wallId && !c.water && !c.ice) { wp = p; wc = c; } }
+  const wallOk = !!wp;
+  if (wallOk) { wc.blocked = true; const b = spawnWallCourses(A.world, wp.x, A.war.field.heightAt(wp.x, wp.z), wp.z, 1, 1)[0]; wc.wallId = b.id; wc.bTeam = 1; }   // a wall laid as the build line lays one
+  const up = groundOrder(A, "takeoff"), left = up.left;
+  const kept = up.ok && !!gun && wallOk && !!left && left.towers.length === 1 && left.towers[0].key === "mg" && left.walls.length === 1 && left.walls[0].orient === 1;
+  const B = mk(), C = mk(), sb = standDefences(B, left), sc = standDefences(C, left);
+  const tower = B.world.bodies.find((b) => b.kind === "tower" && b.team === 1), wall = B.world.bodies.find((b) => b.kind === "wall" && b.team === 1 && b.course === 0);
+  const tc = tower && B.war.grid.cellAt(tower.pos.x, tower.pos.z), wcB = wall && B.war.grid.cellAt(wall.pos.x, wall.pos.z);
+  const stood = sb.towers === 1 && sb.walls === 1 && !!tower && tower.towerType === "mg" && Math.hypot(tower.pos.x - left.towers[0].x, tower.pos.z - left.towers[0].z) < 1e-6 && !!tc && tc.blocked === true && tc.wallId === tower.id
+    && !!wall && wall.orient === 1 && Math.hypot(wall.pos.x - wp.x, wall.pos.z - wp.z) < 1e-9 && !!wcB && wcB.wallId === wall.id;
+  const twin = JSON.stringify(sb) === JSON.stringify(sc) && JSON.stringify(leftBehind(B)) === JSON.stringify(leftBehind(C)) && JSON.stringify(leftBehind(B)) === JSON.stringify(left);
+  check("ark: the ground remembers: the guns and walls standing at TAKE OFF are what the world keeps, and they stand again on the next landing there, coldsnap's own bodies in the same cells, twin for twin", kept && stood && twin);
 }
 
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);

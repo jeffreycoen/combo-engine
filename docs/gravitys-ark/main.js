@@ -54,10 +54,11 @@ function showCard(end) { ending = end; const c = buildCard(log, galaxy, hull, cr
 // phase 0.1.1's page step: the ground on coldsnap
 const OPENING_CRASH = 30, OPENING_SCRAP_KG = 1500;   // the opening: the hull down at 30 m/s on the plague world, the crash shaking the ship's own stores loose as scrap for the ground, PROPOSED
 let view = "space";
+const groundMemory = {};   // what each world keeps when the ship leaves: the guns and walls abandoned there, standing again on return
 const GS = makeGroundScreen({ canvas: "gv", pane: "gPane", log: "gLog", kind: "gKind", wall: "gWall", fix: "gFix", fight: "gFight", repairWalker: "gRepairWalker", fire: "gFire", card: "gCard", cardBody: "gCardBody", go: "gGo", stick: "gStick", nub: "gNub", sound: "gSound", takeoff: "gTakeoff" }, { log: (line) => state.events.push({ k: line, t: state.t }) });
-function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
+function enterGround(v) { view = "ground"; GS.enter(seed, galaxy.worlds[ship.landed], hull.scrap, hull, v, crew, groundMemory[galaxy.worlds[ship.landed].id]); hull.scrap = 0; state.events.push({ k: "on the ground at " + fmt(v, 1) + " m/s", t: state.t }); }
 // leaveGround(g): the seam up, after the road has let the ship go: the purse back as kilograms, the modules lost gone from the build list
-function leaveGround(g) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.walkerLost) hull.walkerLost = true; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); GS.leave(); view = "space"; }
+function leaveGround(g, wid) { hull.scrap += g.scrapKg; if (g.keptList) hull.list = g.keptList; if (g.walkerLost) hull.walkerLost = true; if (g.lost.length) state.events.push({ k: "lost on the ground: " + g.lost.join(" "), t: state.t }); if (g.left) { groundMemory[wid] = g.left; if (g.left.towers.length || g.left.walls.length) state.events.push({ k: "abandoned on " + wid + ": " + g.left.towers.length + " guns, " + g.left.walls.length + " wall sections", t: state.t }); } GS.leave(); view = "space"; }
 function enterHold(v) { enterGround(v); }
 function lockedPirate() { return P.list.find((p) => p.alive && p.demand) || null; }
 function nearestWreck() { let best = null, bd = ROPE.RANGE; for (const w of wrecks) { if (w.taken) continue; const d = Math.hypot(w.x - ship.x, w.y - ship.y); if (d < bd) { bd = d; best = w; } } return best; }
@@ -211,6 +212,6 @@ $("sellPeople").onclick = () => { const n = hull.cargo.people; const p = sellToF
 $("sellHer").onclick = () => { const price = listingsFor(ringOf(), cargoValue(hull, 2)).fitters.her; const p = sellToFitters(gs, hull, purse, { kind: "her", price }); if (p) { her.sold = true; state.events.push({ k: "sold her to the Fitters for " + fmt(p), t: state.t }); logAdd("sold", { kind: "her", price: p }); } };
 $("wake").onclick = () => { const r = respawn(galaxy, ship, state, hull, purse, gs.dials); $("wake").style.display = "none"; if (r.ending) { logAdd("pass", { ending: r.ending }); showCard(r.ending); return; } hullHp = 1000; logAdd("respawn", { world: galaxy.worlds[r.world].id, debt: r.debt }); state.events.push({ k: "woke at " + galaxy.worlds[r.world].id + " in debt " + fmt(r.debt), t: state.t }); $("card").style.display = "none"; };
 
-$("gTakeoff").onclick = () => { if (view !== "ground") return; const g = GS.takeoff(); if (!g.ok) { state.events.push({ k: "no takeoff: " + g.reason, t: state.t }); return; } const t = road.takeoff(); if (!t.ok) { state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); return; } if (t.collapse) collapseT = state.t; leaveGround(g); };
+$("gTakeoff").onclick = () => { if (view !== "ground") return; const g = GS.takeoff(); if (!g.ok) { state.events.push({ k: "no takeoff: " + g.reason, t: state.t }); return; } const wid = galaxy.worlds[ship.landed].id; const t = road.takeoff(); if (!t.ok) { state.events.push({ k: "no takeoff: " + t.reason, t: state.t }); return; } if (t.collapse) collapseT = state.t; leaveGround(g, wid); };
 hull.scrap += OPENING_SCRAP_KG; state.events.push({ k: "the crash shakes " + fmt(OPENING_SCRAP_KG) + " kg of scrap loose", t: state.t });
 enterHold(OPENING_CRASH);
