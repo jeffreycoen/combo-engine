@@ -65,9 +65,11 @@ Phone and desktop the same.
 - **The pane**, three lines: scrap and the seconds to the next assault and the enemy afield, with THE BRIDGE IS LOST when it is; how many modules are loose, what she is doing and her seconds, the walker's state, the guards and the hands standing; the tap line, the gun and its price, or the wall's two taps.
 - **The log** shows the last two lines.
 - **The buttons**, two rows of four above the fixed cluster: the gun kind with its price, WALL, FIX, TAKE OFF; FIGHT, which reads HOLD while she fights or drives the walker and stands her down; FIX WALKER, shown only while the walker lies wrecked or down; FIRE, shown only while she is in the walker; SOUND.
+- **Her stand at the walker**, amended into this task: the first run's parts build found the landed stand failing at a rolled seed, since a stand sought toward the bay lands inside its box and coldsnap's clear-slot rule falls back inside the room. The stand now tries the bay's door and across it when its own bearing is walled. Nothing the player sees changes.
 - **Nothing else changes:** every order does what it did; no spend or number moves.
 
 ## Acceptance arithmetic, task 3
 
-- No gate reads the page's files; the parts build at the landing runs every gate and is the proof: 50 gates, every verdict ok, the ark's gate at 51 PASS / 0 FAIL.
-- The four hash lines in the task print OK; both syntax checks print ok.
+- `node scripts/gravitys-ark-test.mjs` at the seed the first run failed at, 3688214285, and `node scripts/gate.mjs gravitys-ark` at a fresh seed both print 51 PASS lines, then `gravitys-ark-test: 51 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
+- The parts build at the landing runs every gate: 50 gates, every verdict ok.
+- The five hash lines in the task print OK; the three syntax checks print ok.

@@ -2,6 +2,8 @@
 
 One job: the ground's screen says what matters and the landing explains itself. The pane is three short lines; the log shows two; the buttons are two rows of four: the gun kind, WALL, FIX, TAKE OFF; FIGHT or HOLD as one button, FIX WALKER only while the walker lies wrecked or down, FIRE only while she is in it, SOUND. At the landing a card says what the crash broke and that the mechanic must fix it, with one button, GO; the war stands still until GO. No gate reads the page's files; the parts build at the landing is the proof. Every edit is an anchored replacement checked by hash; write exactly what is written, run what is listed, report. You design nothing.
 
+Amended once: the first run's parts build found the ark's gate failing at a rolled seed in a landed check, her stand at the walker's raise: with the wreck at the bay's door, a stand sought toward the bay lands inside its box and coldsnap's clear-slot rule falls back inside the room. The stand now tries the bay's door and across it when its first bearing is walled; the fix rides this task, and the gate runs here to prove it.
+
 Suggested model: Sonnet 5.
 
 Required reading, in order (confirm at the top of your report):
@@ -14,7 +16,7 @@ No demo file is read or written. Nothing under `/home/batman/coldsnap` is read, 
 
 Run from `/home/batman/combo-engine`. A failed assert, a wrong required value, or a FAILED hash line stops the task: report the step and its verbatim output, run nothing further. Never edit a file to make a hash match.
 
-1. Assert the ground: the tracked files clean at task 2's landing, the four files this task edits at their landed hashes. The gates were recorded green at that landing and are not run again here.
+1. Assert the ground: the tracked files clean at task 2's landing, the five files this task edits at their landed hashes. The gates were recorded green at that landing and are not run again here.
 
 ```sh
 git status --short | grep -v "^??" | wc -l
@@ -23,10 +25,11 @@ cb9a8f6646055159 docs/gravitys-ark/index.html
 33b929a03089bb51 docs/gravitys-ark/ground.js
 fe9fba8e96af74fd docs/gravitys-ark/main.js
 f7adabbd93079fa9 README.md
+c8357573072316bc src/games/gravitys-ark/ground.js
 GROUND
 ```
 
-Required: `0`, four OK lines.
+Required: `0`, five OK lines.
 
 2. The page's markup and style: two rows of four, the log and the stick above them, the landing's card. The hash line must print OK.
 
@@ -123,10 +126,36 @@ ARK_EOF_5
 test "$(sha256sum README.md | cut -c1-16)" = "2300f6b3272367d6" && echo OK README.md || echo FAILED README.md
 ```
 
-6. The record: the phase document's task row and status line. Then the parts build over every gate, about four minutes; it must name 50 gates and every verdict must be ok, the ark's gate among them at 51 PASS and 0 FAIL.
+6. The ark's ground layer, the amendment: her stand at the walker tries the bay's door and across it when its own bearing is walled. Syntax check; the hash line must print OK.
 
 ```sh
 python3 - <<'ARK_EOF_6'
+def edit(p, reps):
+    s = open(p, encoding="utf-8").read()
+    for old, new in reps:
+        assert s.count(old) == 1, (p, old[:70])
+        s = s.replace(old, new)
+    open(p, "w", encoding="utf-8").write(s)
+edit("src/games/gravitys-ark/ground.js", [
+("// standOff(G, b): where a body of hers stands for the walker's repair: just outside the room on\n// its own side of the spot, by coldsnap's clear-slot rule; if the clear point falls back inside\n// the room, farther out along the same bearing, up to three tries.\nexport function standOff(G, b) {\n  const s = G.walker.spot, dx = b.pos.x - s.x, dz = b.pos.z - s.z, l = Math.hypot(dx, dz);\n  const ux = l > 1e-9 ? dx / l : 0, uz = l > 1e-9 ? dz / l : 1, m = Math.max(Math.abs(ux), Math.abs(uz));\n  let p = null;\n  for (const extra of [0, 1.5, 3]) {\n    const k = (WALKER.room + b.hx + WALKER.standPad + extra) / m;\n    p = clearSlot(G.world, s.x + ux * k, s.z + uz * k, b.hx + 0.35);\n    if (!inRoom(G, { pos: p, hx: b.hx, hz: b.hz })) return p;\n  }\n  return p;\n}\n",
+ "// standOff(G, b): where a body of hers stands for the walker's repair: just outside the room on\n// its own side of the spot, by coldsnap's clear-slot rule; if the clear point falls back inside\n// the room, farther out along the same bearing, up to three tries; if that side is walled by\n// the bay, out the bay's door, then across it, the same three tries each.\nexport function standOff(G, b) {\n  const s = G.walker.spot, H = G.hull, bay = H && H.bay >= 0 ? H.bodies[H.bay] : null;\n  const dx = b.pos.x - s.x, dz = b.pos.z - s.z, l = Math.hypot(dx, dz);\n  const door = bay ? { x: s.x - bay.pos.x, z: s.z - bay.pos.z } : { x: 0, z: 1 }, dl = Math.hypot(door.x, door.z) || 1;\n  const bearings = [];\n  if (l > 1e-9) bearings.push({ x: dx / l, z: dz / l });\n  bearings.push({ x: door.x / dl, z: door.z / dl }, { x: -door.z / dl, z: door.x / dl }, { x: door.z / dl, z: -door.x / dl });\n  let p = null;\n  for (const u of bearings) {\n    const m = Math.max(Math.abs(u.x), Math.abs(u.z));\n    for (const extra of [0, 1.5, 3]) {\n      const k = (WALKER.room + b.hx + WALKER.standPad + extra) / m;\n      p = clearSlot(G.world, s.x + u.x * k, s.z + u.z * k, b.hx + 0.35);\n      if (!inRoom(G, { pos: p, hx: b.hx, hz: b.hz })) return p;\n    }\n  }\n  return p;\n}\n"),
+])
+ARK_EOF_6
+node --check src/games/gravitys-ark/ground.js && echo "syntax ok ground.js"
+test "$(sha256sum src/games/gravitys-ark/ground.js | cut -c1-16)" = "d1343049b8e3241e" && echo OK src/games/gravitys-ark/ground.js || echo FAILED src/games/gravitys-ark/ground.js
+```
+
+7. Run the ark's gate twice: once at the seed the first run failed at, once at a fresh seed. Each must print 51 PASS lines, then `gravitys-ark-test: 51 PASS / 0 FAIL`, then `gravitys-ark-test PASS`. Any FAIL stops the task here.
+
+```sh
+SEED=3688214285 node scripts/gravitys-ark-test.mjs > /tmp/ark-gate-seeded.txt; tail -2 /tmp/ark-gate-seeded.txt; grep -m1 '^seeds' /tmp/ark-gate-seeded.txt
+node scripts/gate.mjs gravitys-ark > /tmp/ark-gate.txt; tail -3 /tmp/ark-gate.txt; grep -m1 '^seeds' /tmp/ark-gate.txt
+```
+
+8. The record: the phase document's task row and status line. Then the parts build over every gate, about four minutes; it must name 50 gates and every verdict must be ok, the ark's gate among them at 51 PASS and 0 FAIL.
+
+```sh
+python3 - <<'ARK_EOF_8'
 ph = "docs/plans/phase-0.1.3-the-nine-findings.md"; s = open(ph, encoding="utf-8").read()
 old = "three lines, two rows, and the landing's card. DISPATCHED. →"
 assert s.count(old) == 1, "task row"
@@ -135,7 +164,7 @@ old2 = "Status: DISPATCHED. Task 3 dispatched."
 assert s.count(old2) == 1, "status line"
 s = s.replace(old2, "Status: DISPATCHED. Task 3 landed, commit stamped below, 2026-09-09; task 4 is planned next.")
 open(ph, "w", encoding="utf-8").write(s)
-ARK_EOF_6
+ARK_EOF_8
 grep -c "commit stamped below" docs/plans/phase-0.1.3-the-nine-findings.md
 node scripts/parts.mjs --gates all
 node -e 'const t=require("./docs/parts/parts.json");const bad=Object.values(t.gates).filter(g=>g.verdict!=="ok").map(g=>g.name);const a=t.gates["gravitys-ark"];console.log(Object.keys(t.gates).length+" gates, "+bad.length+" not ok"+(bad.length?": "+bad.join(", "):""));console.log("gravitys-ark "+a.pass+" PASS / "+a.fail+" FAIL; "+a.seeds);process.exit(bad.length||a.pass!==51?1:0)'
@@ -143,14 +172,14 @@ node -e 'const t=require("./docs/parts/parts.json");const bad=Object.values(t.ga
 
 Required: `2`, a count line naming 50 gates, `50 gates, 0 not ok`, `gravitys-ark 51 PASS / 0 FAIL;` with its seeds.
 
-7. Commit and push the landing, then stamp the real hash into the status line and the task row in a second small commit. Never amend after stamping.
+9. Commit and push the landing, then stamp the real hash into the status line and the task row in a second small commit. Never amend after stamping.
 
 ```sh
-git add docs/gravitys-ark/index.html docs/gravitys-ark/ground.js docs/gravitys-ark/main.js README.md docs/parts docs/plans
-git commit -m "phase 0.1.3 task 3 — the screen: three lines, two rows of four, FIGHT and HOLD as one, the landing's card and GO
+git add docs/gravitys-ark/index.html docs/gravitys-ark/ground.js docs/gravitys-ark/main.js README.md src/games/gravitys-ark/ground.js docs/parts docs/plans
+git commit -m "phase 0.1.3 task 3 — the screen: three lines, two rows of four, FIGHT and HOLD as one, the landing's card and GO; her stand at the walker tries the bay's door
 
 The pane says the purse, the clock, the hull, her, the walker, the crew, and the tap; the war stands still until GO.
-No gate reads the page's files; the parts build over 50 gates, every verdict ok; the ark's gate 51 PASS / 0 FAIL.
+gravitys-ark-test 51 PASS / 0 FAIL at the seed the first run failed at and at a fresh one; the parts build over 50 gates, every verdict ok.
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01QSq3kZC3Bk9SC5RwnqYUfs"
@@ -166,13 +195,14 @@ git push origin main
 
 ## Acceptance
 
-- Step 1: `0`, four OK lines.
-- Steps 2 through 5: four OK lines, `syntax ok` twice.
-- Step 6: `2`; the count line names 50 gates; `50 gates, 0 not ok`; `gravitys-ark 51 PASS / 0 FAIL;` with its seeds.
-- Step 7: push accepted by origin; the stamp commit pushed.
+- Step 1: `0`, five OK lines.
+- Steps 2 through 6: five OK lines, `syntax ok` three times.
+- Step 7: twice `gravitys-ark-test: 51 PASS / 0 FAIL` and `gravitys-ark-test PASS`, the first with the seeds line naming 3688214285, the second with its own seeds line.
+- Step 8: `2`; the count line names 50 gates; `50 gates, 0 not ok`; `gravitys-ark 51 PASS / 0 FAIL;` with its seeds.
+- Step 9: push accepted by origin; the stamp commit pushed.
 
 After the landing the orchestrator republishes the page from `docs/parts/parts.html` to its fixed address and names it, with the game's address, in the landing report.
 
 ## Report
 
-Read-confirmation first, then one line of outcome, then bullets: every OK line; the parts build's count line and the verdict line verbatim; the ark's gate line verbatim; both commit hashes; the push results. Every nonconformity its own labeled bullet, with the verbatim output. Fixture seeds: the gravitys-ark seeds from step 6's line; no seed is special.
+Read-confirmation first, then one line of outcome, then bullets: step 7's lines verbatim, both runs; every OK line; the parts build's count line and the verdict line verbatim; the ark's gate line verbatim; both commit hashes; the push results. Every nonconformity its own labeled bullet, with the verbatim output. Fixture seeds: the two seeds lines from step 7 and the one from step 8's line; the seed 3688214285 is the one the first run failed at, replayed on purpose, and no seed is special.
