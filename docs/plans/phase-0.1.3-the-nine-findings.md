@@ -100,3 +100,12 @@ Phone and desktop the same.
 - `node scripts/gate.mjs gravitys-ark` prints 53 PASS lines, one more than the recorded 52, then `gravitys-ark-test: 53 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
 - The parts build names 50 gates and every verdict is ok.
 - The six hash lines in the task print OK; the phase lands with this task and the version goes to 0.1.3.
+
+## Acceptance
+
+Three findings from the owner's playtest of the landed phase, each returned, and the owner's direction for what comes next.
+
+- ark-ground: returned, the walker fell over after she repaired it and took it. Behind it: the walker is built without the driver coldsnap's own placement gives a mech, and the stick feeds its commands raw instead of through coldsnap's own possession drive; the fall is in that seam.
+- scr-ground: returned, the troops cannot be controlled. Coldsnap's own war page carries selection and orders, a tap on a squad and a tap on the ground, and the ark's screen carries none of it; the guard and the hands are coldsnap squads with nobody to order them.
+- scr-ground: returned, nothing shows where equipment can be placed. Coldsnap's own page shows the placeable ground as a green zone while a build is armed; the ark hands its placement no drawing, so no zone is drawn.
+- The direction: the ground is to be coldsnap's whole play, its war page's own control surface, and space deadweight's whole, each with small tweaks, and the ark the bridge between them; nothing of either is to be rebuilt. The engine and its modules came over at 0.1.0; coldsnap's control surface, its war page and its panels in the checkout, did not, and the ark's screens were built in their place. That page is written for a different page maker, so it comes over as a lift of its controls onto the ark's plain page, control by control, its own words and its own laws.
