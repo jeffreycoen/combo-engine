@@ -1,6 +1,6 @@
 # Phase 0.1.4 — the two games whole
 
-Status: SERVED. Task 1 served.
+Status: DISPATCHED. Task 1 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The owner's direction after phase 0.1.3: all of coldsnap's functionality coupled with all of deadweight's, small tweaks to each, and a bridge between them; nothing rebuilt. Coldsnap's game is its own page, the war page with its start screen, its draft, selection and orders, the build menu with its green zone, the cards, the mech's piloting and readout, the sound board. Deadweight's game is the one file in this folder, its hangar, flight, stations, tramps, pirates, crates, contracts, missiles, and grapple. Both come over whole and are served as they are. The ark is the bridge between them and the tweaks inside them. The ark's own screens and its own space and ground layer, built new in batch-ark-1 and phases 0.1.1 to 0.1.3, are set aside.
@@ -19,7 +19,7 @@ VERBATIM for both pages: coldsnap's 36 page files at their own paths, deadweight
 
 ## Tasks
 
-- 0.1.4-1 — coldsnap's page whole: the 36 files, the shell, the page maker, the build into `docs/coldsnap/`, a gate over it. SERVED. → `task-0.1.4-1-coldsnaps-page-whole.md`
+- 0.1.4-1 — coldsnap's page whole: the 36 files, the shell, the page maker, the build into `docs/coldsnap/`, a gate over it. DISPATCHED. → `task-0.1.4-1-coldsnaps-page-whole.md`
 - 0.1.4-2 — deadweight's page whole: `docs/deadweight/index.html` by hash, the gate extended. Planned after task 1 lands.
 - 0.1.4-3 — the bridge: land and TAKE OFF between the two pages. Planned after task 2 lands and the owner has played both.
 - 0.1.4-4 and on — the tweaks, one per task, on the owner's word.
