@@ -38,4 +38,4 @@ Phone and desktop, coldsnap's own.
 - The 36 copied files and the two shell files print OK at their hashes.
 - `npx vite build` exits 0 and writes `docs/coldsnap/index.html` and `docs/coldsnap/assets/`.
 - `node scripts/gate.mjs pages` prints 3 PASS lines, then `pages-test: 3 PASS / 0 FAIL`, then `pages-test PASS`.
-- The parts build names 51 gates and every verdict is ok; its coldsnap file count rises from 84 to 120.
+- The parts build names 51 gates and every verdict is ok; its coldsnap rows stay the checkout's 84, and the 36 copied files read current where the record had them absent: `behind 1, current 60, differs 23`.

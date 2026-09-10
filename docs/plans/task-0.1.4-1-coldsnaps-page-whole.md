@@ -172,14 +172,14 @@ ls node_modules/react/package.json node_modules/vite/package.json node_modules/@
 
 Required: `OK package.json`, no line starting with `npm ERR`, `4`.
 
-5. The build. It must exit 0 and write the page and its assets.
+5. The build. It must exit 0 and write the page and its one script. Coldsnap's own build writes one asset file and no stylesheet, since none of its page files carries one.
 
 ```sh
 npx vite build 2>&1 | tail -6
 ls docs/coldsnap/index.html && ls docs/coldsnap/assets | head -5 && ls docs/coldsnap/assets | wc -l
 ```
 
-Required: a `built in` line from the page maker, `docs/coldsnap/index.html`, a listing of assets, a count of at least 2.
+Required: a `built in` line from the page maker, `docs/coldsnap/index.html`, one asset listed, its name `index-` then letters and digits then `.js`, a count of `1`.
 
 6. The gate over the pages, written exactly, registered, and run. It must print 3 PASS lines, then `pages-test: 3 PASS / 0 FAIL`, then `pages-test PASS`.
 
@@ -224,7 +224,7 @@ node scripts/gate.mjs pages
 
 Required: three OK lines, then the gate's 3 PASS lines, `pages-test: 3 PASS / 0 FAIL`, `pages-test PASS`.
 
-7. The record: the phase document's task row and status line. Then the parts build over every gate, about five minutes; it must name 51 gates and every verdict must be ok, and count 120 coldsnap files.
+7. The record: the phase document's task row and status line. Then the parts build over every gate, about five minutes; it must name 51 gates and every verdict must be ok. Its coldsnap rows are the checkout's 84 files at its commit, whatever stands here; what moves is their state: the 36 copied files read current, and none reads absent.
 
 ```sh
 python3 - <<'ARK_EOF_7'
@@ -240,9 +240,10 @@ ARK_EOF_7
 grep -c "commit stamped below" docs/plans/phase-0.1.4-the-two-games-whole.md
 node scripts/parts.mjs --gates all
 node -e 'const t=require("./docs/parts/parts.json");const bad=Object.values(t.gates).filter(g=>g.verdict!=="ok").map(g=>g.name);console.log(Object.keys(t.gates).length+" gates, "+bad.length+" not ok"+(bad.length?": "+bad.join(", "):""));process.exit(bad.length?1:0)'
+node -e 'const t=require("./docs/parts/parts.json");const c={};for(const p of t.parts)if(p.source==="coldsnap")c[p.mech.file]=(c[p.mech.file]||0)+1;console.log(Object.keys(c).sort().map(k=>k+" "+c[k]).join(", "))'
 ```
 
-Required: `2`, a count line naming 51 gates and 120 coldsnap files, `51 gates, 0 not ok`.
+Required: `2`, a count line naming 51 gates and 84 coldsnap files, `51 gates, 0 not ok`, then `behind 1, current 60, differs 23`.
 
 8. Commit and push the landing, then stamp the real hash into the status line and the task row in a second small commit. Never amend after stamping.
 
@@ -271,13 +272,13 @@ git push origin main
 - Step 2: 36 OK lines.
 - Step 3: four OK lines, `syntax ok setting`.
 - Step 4: `OK package.json`, an install without an `npm ERR` line, `4`.
-- Step 5: a `built in` line, the page and at least two assets.
+- Step 5: a `built in` line, the page and its one script, count `1`.
 - Step 6: three OK lines, `pages-test: 3 PASS / 0 FAIL`, `pages-test PASS`.
-- Step 7: `2`; the count line names 51 gates and 120 coldsnap files; `51 gates, 0 not ok`.
+- Step 7: `2`; the count line names 51 gates and 84 coldsnap files; `51 gates, 0 not ok`; the states `behind 1, current 60, differs 23`, the 36 copied files current where the record had them absent.
 - Step 8: push accepted by origin; the stamp commit pushed.
 
 After the landing the orchestrator republishes the parts page and names it, with the page's address https://jeffreycoen.github.io/combo-engine/docs/coldsnap/, in the landing report.
 
 ## Report
 
-Read-confirmation first, then one line of outcome, then bullets: every OK line's count per step; the build's `built in` line verbatim; the gate's three lines verbatim; the parts build's count line and the verdict line verbatim; both commit hashes; the push results. Every nonconformity its own labeled bullet, with the verbatim output. Fixture seeds: none, seedless arithmetic.
+Read-confirmation first, then one line of outcome, then bullets: every OK line's count per step; the build's `built in` line verbatim; the gate's three lines verbatim; the parts build's count line, the verdict line, and the states line verbatim; both commit hashes; the push results. Every nonconformity its own labeled bullet, with the verbatim output. Fixture seeds: none, seedless arithmetic.
