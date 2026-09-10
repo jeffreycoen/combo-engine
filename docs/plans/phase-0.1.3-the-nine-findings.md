@@ -1,6 +1,6 @@
 # Phase 0.1.3 — the nine findings
 
-Status: DISPATCHED. Task 4 landed, commit `fdbfa7b`, 2026-09-09; task 5 is planned next.
+Status: DISPATCHED. Task 5 dispatched.
 <!-- The status word is one of PLANNED, SERVED, APPROVED, DISPATCHED, LANDED, ACCEPTED, RETURNED, moved by the plan-writer at each step; the parts page reads it. The phase lands when its last task lands; each task's row below records its own landing. At landing this line becomes: Status: LANDED, commit `<hash>`, <date>. Acceptance is recorded per part under a heading "## Acceptance" as "- <part id>: accepted" or "- <part id>: returned, <finding>", on the owner's word. -->
 
 The nine findings returned from the playtest of phase 0.1.2, recorded under Acceptance in `phase-0.1.2-the-findings.md`, fixed in one phase of five tasks: the opening she can survive, the field as the ship's own, the screen cut to what matters with the landing's popup, her look, and the ground that remembers its defences. Each task is planned after the one before it lands, written once for one reader. The game stays playable at every landing. Every number of the ark's own is PROPOSED.
@@ -23,7 +23,7 @@ SHAPED. The ark's own layer, new code in its own files; coldsnap's files change 
 - 0.1.3-2 — the field: no town, the ship as the objective, placement room, the gouge, the felled trees. LANDED, commit `513949e`. → `task-0.1.3-2-the-field.md`
 - 0.1.3-3 — the screen: three lines, two rows, and the landing's card. LANDED, commit `2e6febf`. → `task-0.1.3-3-the-screen.md`
 - 0.1.3-4 — her look: the purple jumpsuit and the brown hair. LANDED, commit `fdbfa7b`. → `task-0.1.3-4-her-look.md`
-- 0.1.3-5 — the ground remembers: defences abandoned and persisting. Planned after task 4 lands.
+- 0.1.3-5 — the ground remembers: defences abandoned and persisting. DISPATCHED. → `task-0.1.3-5-the-ground-remembers.md`
 
 Suggested model: Sonnet 5 — every edit is in the plan; nothing is designed.
 
@@ -86,3 +86,17 @@ Phone and desktop the same.
 - `node scripts/gate.mjs gravitys-ark` prints 52 PASS lines, one more than the recorded 51, then `gravitys-ark-test: 52 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
 - The parts build names 50 gates and every verdict is ok.
 - The seven hash lines in the task print OK; the new file's hash among them.
+
+## The walk, task 5
+
+Phone and desktop the same.
+
+- **TAKE OFF.** With the ship away, every gun standing and every wall course on the ground is written on the world, kind and place; the log says "abandoned on w0: N guns, M wall sections". Nobody comes back for them; the purse and the modules come up as before.
+- **The next landing there.** Before the war runs, the guns and walls stand again where they stood, made as coldsnap makes them: a tower as its placement does, a wall as its build line lays one; a cell no longer free is skipped; the paths recompute. The log says "N guns and M wall sections stand where you left them"; the card comes up as before.
+- **Nothing else changes:** the memory lives with the page for the run; no order, spend, or number moves.
+
+## Acceptance arithmetic, task 5
+
+- `node scripts/gate.mjs gravitys-ark` prints 53 PASS lines, one more than the recorded 52, then `gravitys-ark-test: 53 PASS / 0 FAIL`, then `gravitys-ark-test PASS`.
+- The parts build names 50 gates and every verdict is ok.
+- The six hash lines in the task print OK; the phase lands with this task and the version goes to 0.1.3.
