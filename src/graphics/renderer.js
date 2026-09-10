@@ -965,6 +965,9 @@ export function makeRenderer(canvas, world0, opts = {}) {
   const mkPal = (o) => { const p = {}; for (const k in o) p[k] = new THREE.Color(o[k]); return p; };
   const AND_LIVE = mkPal({ dom: 0xdde3ea, sec: 0x9aa6b2, acc: 0xc0cbd6, skin: 0xeef2f6, gun: 0x2a2e34 });
   const AND_DEAD = mkPal({ dom: 0x6d747c, sec: 0x474d54, acc: 0x596069, skin: 0x8b929a, gun: 0x14171a });
+  // the ark's mechanic: a purple jumpsuit over the same part table, and a dulled purple for the dead; a listed difference from the checkout (phase 0.1.3)
+  const HER_LIVE = mkPal({ dom: 0x6a3fa0, sec: 0x3e2466, acc: 0x8b5a2b, skin: 0xd9c6a0, gun: 0x14171a });
+  const HER_DEAD = mkPal({ dom: 0x3a2a4a, sec: 0x241a30, acc: 0x4a3222, skin: 0x8a7a62, gun: 0x101314 });
   // P7.2 T6: the medic's whites — MEDIC_HEX over the con palette
   // (skin inherits), and a winter-kill grey of the same dress for the dead.
   const MED_LIVE = mkPal({ ...INFANTRY.pal.con, ...MEDIC_HEX });
@@ -2248,14 +2251,14 @@ export function makeRenderer(canvas, world0, opts = {}) {
           } else {
             writeInst(pools[pi], idx, px, py, pz, q, 0, 0, 0); // no rifle on the march either
           }
-          if (pools[pi].setColorAt) pools[pi].setColorAt(idx, fogSil ? SIL_C : (b.dress === "android" ? (b.alive ? AND_LIVE : AND_DEAD) : (b.alive ? INF_LIVE : INF_DEAD)[kitPal]).gun);
+          if (pools[pi].setColorAt) pools[pi].setColorAt(idx, fogSil ? SIL_C : (b.dress === "android" ? (b.alive ? AND_LIVE : AND_DEAD) : b.dress === "her" ? (b.alive ? HER_LIVE : HER_DEAD) : (b.alive ? INF_LIVE : INF_DEAD)[kitPal]).gun);
           continue;
         }
         writeInst(pools[pi], idx, px, py, pz, q, bpx * ksx, bpy * ksy, bpx * ksz);
         if (pools[pi].setColorAt) {
           if (fogSil) pools[pi].setColorAt(idx, SIL_C);
           else {
-            const pal = b.dress === "android" ? (b.alive ? AND_LIVE : AND_DEAD) : kitPal === "medic" ? (b.alive ? MED_LIVE : MED_DEAD) : kitPal === "davy" ? (b.alive ? DAVY_LIVE : DAVY_DEAD) : (b.alive ? INF_LIVE : INF_DEAD)[kitPal];
+            const pal = b.dress === "android" ? (b.alive ? AND_LIVE : AND_DEAD) : b.dress === "her" ? (b.alive ? HER_LIVE : HER_DEAD) : kitPal === "medic" ? (b.alive ? MED_LIVE : MED_DEAD) : kitPal === "davy" ? (b.alive ? DAVY_LIVE : DAVY_DEAD) : (b.alive ? INF_LIVE : INF_DEAD)[kitPal];
             if (hurtK > 0) { _hitC.copy(pal[propRole || p.role]).lerp(HIT_C, 0.7 * hurtK); pools[pi].setColorAt(idx, _hitC); }
             else pools[pi].setColorAt(idx, pal[propRole || p.role]);
           }

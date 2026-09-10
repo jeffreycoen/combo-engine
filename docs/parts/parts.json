@@ -202,7 +202,7 @@
      "verdict": "ok",
      "pass": 5,
      "fail": 0,
-     "seeds": "seeds {\"kit\":453017134}",
+     "seeds": "seeds {\"kit\":940716065}",
      "checks": [
       "PASS determinism: twin sim streams from one rolled seed are identical for 5000 draws",
       "PASS determinism: effects draws never move the sim's sequence",
@@ -368,7 +368,7 @@
      "verdict": "ok",
      "pass": 12,
      "fail": 0,
-     "seeds": "seeds {\"world\":847225817}",
+     "seeds": "seeds {\"world\":759767001}",
      "checks": [
       "PASS escrow: the bounty is the other station's spot, margined, treasury-capped, refused under 200",
       "PASS escrow: posting moves credits into escrow, none minted, none burned",
@@ -429,7 +429,7 @@
      "verdict": "ok",
      "pass": 14,
      "fail": 0,
-     "seeds": "seeds {\"builder\":4018251782}",
+     "seeds": "seeds {\"builder\":4101708211}",
      "checks": [
       "PASS contract accepts the demo spec",
       "PASS contract rejects junk (2 problems named)",
@@ -497,7 +497,7 @@
      "verdict": "ok",
      "pass": 14,
      "fail": 0,
-     "seeds": "seeds {\"field\":778142057}",
+     "seeds": "seeds {\"field\":902762603}",
      "checks": [
       "PASS wells: 3000 rolled field reads run twin with the demo's own text",
       "PASS wells: a made well is at rest with the demo's shape",
@@ -576,7 +576,7 @@
      "verdict": "ok",
      "pass": 20,
      "fail": 0,
-     "seeds": "seeds {\"grapple\":917475305}",
+     "seeds": "seeds {\"grapple\":1502457539}",
      "checks": [
       "PASS cast: the head leaves 2.2 ahead at 34 plus ship velocity, state fly",
       "PASS recoil: the ship pays J = 0.15 x 34 = 5.1 — velocity -J/M, spin -arm J/I",
@@ -646,7 +646,7 @@
      "verdict": "ok",
      "pass": 13,
      "fail": 0,
-     "seeds": "seeds {\"aim\":990246983}",
+     "seeds": "seeds {\"aim\":555883155}",
      "checks": [
       "PASS aim: frozen() is true while armed, false after cancel and after commit",
       "PASS aim: commit emits the demo's tape-action shape per kind, and null when unarmed",
@@ -708,7 +708,7 @@
      "verdict": "ok",
      "pass": 5,
      "fail": 0,
-     "seeds": "seeds {\"render2d\":3955932}",
+     "seeds": "seeds {\"render2d\":594990270}",
      "checks": [
       "PASS render2d: a point at the camera's own x,y projects to VCX, VCY plus its own pot dip",
       "PASS render2d: the warp grows monotonically toward a well, fades far out, and stays inside the formula's clamp",
@@ -1235,9 +1235,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1289,9 +1289,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1338,9 +1339,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1392,9 +1393,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1493,9 +1495,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1547,9 +1549,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1598,9 +1601,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1652,9 +1655,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1701,9 +1705,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1755,9 +1759,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1799,9 +1804,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1853,9 +1858,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -1897,9 +1903,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -1951,9 +1957,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -2029,7 +2036,7 @@
      "verdict": "ok",
      "pass": 16,
      "fail": 0,
-     "seeds": "seeds {\"rig\":686641963}",
+     "seeds": "seeds {\"rig\":965382040}",
      "checks": [
       "PASS the table names 17 links: 3 core + 7 per side",
       "PASS the assembled MK1 weighs exactly 8140 kg — the demo's own title chip",
@@ -2048,7 +2055,7 @@
       "PASS rig: scale 1 assembles the landed rig exactly",
       "PASS rig: at a rolled scale every quantity scales by its power"
      ],
-     "seconds": 1.3,
+     "seconds": 1.4,
      "tail": "rig-test PASS"
     }
    }
@@ -2221,9 +2228,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -2275,9 +2282,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -2373,9 +2381,9 @@
      "name": "gravitys-ark",
      "script": "scripts/gravitys-ark-test.mjs",
      "verdict": "ok",
-     "pass": 51,
+     "pass": 52,
      "fail": 0,
-     "seeds": "seeds {\"gravitys-ark\":1916684088}",
+     "seeds": "seeds {\"gravitys-ark\":2264320706}",
      "checks": [
       "PASS ark: twin galaxies from one rolled seed are identical",
       "PASS ark: the layout laws hold at rolled seeds",
@@ -2427,9 +2435,10 @@
       "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
       "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
       "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+      "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+      "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
      ],
-     "seconds": 10,
+     "seconds": 10.5,
      "tail": "gravitys-ark-test PASS"
     }
    }
@@ -2635,9 +2644,10 @@
    "name": "the ground screen",
    "files": [
     "docs/gravitys-ark/ground.js",
-    "docs/gravitys-ark/hull-look.js"
+    "docs/gravitys-ark/hull-look.js",
+    "docs/gravitys-ark/her-look.js"
    ],
-   "phase": "0.1.2",
+   "phase": "0.1.3",
    "does": "The coldsnap renderer with the hold's rail, in its own file; the ship's look in hull-look.js, deadweight's shapes, glyphs, and colours as solid shapes in coldsnap's scene.",
    "serves": [
     "bay",
@@ -2662,12 +2672,13 @@
     ],
     "wired": true,
     "exports": {
-     "total": 4,
+     "total": 5,
      "exercised": 0,
      "untested": [
       "OLETTER",
       "ORIGIN",
       "makeGroundScreen",
+      "makeHerLook",
       "makeHullLook"
      ]
     }
@@ -4468,7 +4479,7 @@
     "file": "differs",
     "hashHead": "0174cfe63173",
     "hashOld": "5c7d2d9b6dd4",
-    "hashTree": "0db618e8c5b8"
+    "hashTree": "5ed783a2524e"
    }
   },
   {
@@ -6130,7 +6141,7 @@
    "name": "the nine findings",
    "file": "docs/plans/phase-0.1.3-the-nine-findings.md",
    "status": "DISPATCHED",
-   "line": "Status: DISPATCHED. Task 3 landed, commit stamped below, 2026-09-09; task 4 is planned next.",
+   "line": "Status: DISPATCHED. Task 4 landed, commit stamped below, 2026-09-09; task 5 is planned next.",
    "acceptance": []
   }
  ],
@@ -6143,7 +6154,7 @@
    "fail": 0,
    "seeds": "seed 1  seconds 90 (10800 steps)  worldHash 1713367543  runHash 2888190349",
    "checks": [],
-   "seconds": 115.2,
+   "seconds": 101.5,
    "tail": "seed 1  seconds 90 (10800 steps)  worldHash 1713367543  runHash 2888190349"
   },
   "combat": {
@@ -6162,7 +6173,7 @@
     "PASS — windAt: deterministic for same (seed, t)",
     "PASS — A1(e): guard — without depotCombat, dirDmg spec is pure blast (not ~20 direct)  [loss=7.730672084378156]"
    ],
-   "seconds": 0.1,
+   "seconds": 0.2,
    "tail": "ALL PASS"
   },
   "accuracy": {
@@ -6202,7 +6213,7 @@
    "verdict": "ok",
    "pass": 14,
    "fail": 0,
-   "seeds": "seeds {\"builder\":4018251782}",
+   "seeds": "seeds {\"builder\":4101708211}",
    "checks": [
     "PASS contract accepts the demo spec",
     "PASS contract rejects junk (2 problems named)",
@@ -6249,7 +6260,7 @@
    "verdict": "ok",
    "pass": 12,
    "fail": 0,
-   "seeds": "seeds {\"weldstress\":2337878414}",
+   "seeds": "seeds {\"weldstress\":3086977139}",
    "checks": [
     "PASS smaller sides: engine weld carries 6 kg, pod weld 3 kg",
     "PASS load law at 1 u/s2: 54 and 27 (mass x 9)",
@@ -6294,7 +6305,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"physics-pb\":2289609861}",
+   "seeds": "seeds {\"physics-pb\":2068640850}",
    "checks": [
     "PASS box inertia is exact: 12 kg, 1x2x3 m -> diag 13, 10, 5",
     "PASS compound of two 1 kg points 2 m apart: mass 2, com centered, parallel-axis 2 kg m2",
@@ -6322,7 +6333,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"rig\":686641963}",
+   "seeds": "seeds {\"rig\":965382040}",
    "checks": [
     "PASS the table names 17 links: 3 core + 7 per side",
     "PASS the assembled MK1 weighs exactly 8140 kg — the demo's own title chip",
@@ -6341,7 +6352,7 @@
     "PASS rig: scale 1 assembles the landed rig exactly",
     "PASS rig: at a rolled scale every quantity scales by its power"
    ],
-   "seconds": 1.3,
+   "seconds": 1.4,
    "tail": "rig-test PASS"
   },
   "solids": {
@@ -6350,7 +6361,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"solids\":1051766840}",
+   "seeds": "seeds {\"solids\":582557386}",
    "checks": [
     "PASS box entry: unit box from x=-10 enters at 9.5, exits at 10.5, normal (-1,0,0)",
     "PASS box miss: the same ray two units up finds nothing",
@@ -6378,7 +6389,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"ballistics\":745829631}",
+   "seeds": "seeds {\"ballistics\":757535388}",
    "checks": [
     "PASS tables: 10 media, 7 rounds, indexes and precomputed areas hold",
     "PASS mulberry32: seed 1 opens with 0.6270739405881613",
@@ -6459,7 +6470,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"voxel\":1109218607}",
+   "seeds": "seeds {\"voxel\":1559437794}",
    "checks": [
     "PASS voxelize: the wall becomes a 9 x 17 x 2 field of 306 cells, cell sizes s/n",
     "PASS halving cap: a 10-cube at target size halves down to 22 x 22 x 22 = 10648, under MAX_PER_PRIM",
@@ -6491,7 +6502,7 @@
    "verdict": "ok",
    "pass": 16,
    "fail": 0,
-   "seeds": "seeds {\"support\":988790417}",
+   "seeds": "seeds {\"support\":1175774286}",
    "checks": [
     "PASS primBox: centre plus and minus half size, both corners",
     "PASS restsOn: the deck rests on the post; a box beside it does not; a spanning wall bears too",
@@ -6519,7 +6530,7 @@
    "verdict": "ok",
    "pass": 20,
    "fail": 0,
-   "seeds": "seeds {\"grapple\":917475305}",
+   "seeds": "seeds {\"grapple\":1502457539}",
    "checks": [
     "PASS cast: the head leaves 2.2 ahead at 34 plus ship velocity, state fly",
     "PASS recoil: the ship pays J = 0.15 x 34 = 5.1 — velocity -J/M, spin -arm J/I",
@@ -6575,7 +6586,7 @@
     "PASS a real blast breaks his footing: the hp ledger drops past floorDmg and the floor owns him",
     "PASS the will stands him up: floored for the dialed 1.6 seconds, then upright, alive, yaw-only"
    ],
-   "seconds": 84.4,
+   "seconds": 82.3,
    "tail": "old-master-test PASS"
   },
   "frostline": {
@@ -6584,7 +6595,7 @@
    "verdict": "ok",
    "pass": 63,
    "fail": 0,
-   "seeds": "seeds {\"mission\":148750749,\"valley1\":641217756,\"valley2\":119380070,\"valley3\":470723957,\"cover\":660329557,\"fire\":230916370,\"purse\":238803945,\"board1\":214523576,\"",
+   "seeds": "seeds {\"mission\":393457306,\"valley1\":603533069,\"valley2\":425560661,\"valley3\":330932692,\"cover\":540776812,\"fire\":469638782,\"purse\":322328284,\"board1\":975420930,\"",
    "checks": [
     "PASS mission: a rolled valley boots — three squads, eight friendlies, four blockers, neither side done",
     "PASS mission: nothing is known at boot",
@@ -6650,7 +6661,7 @@
     "PASS hunter: one man fields on his own row",
     "PASS hunter: the twin sidearms pull on his own trigger law"
    ],
-   "seconds": 16.3,
+   "seconds": 12.6,
    "tail": "frostline-test PASS"
   },
   "escrow": {
@@ -6659,7 +6670,7 @@
    "verdict": "ok",
    "pass": 12,
    "fail": 0,
-   "seeds": "seeds {\"world\":847225817}",
+   "seeds": "seeds {\"world\":759767001}",
    "checks": [
     "PASS escrow: the bounty is the other station's spot, margined, treasury-capped, refused under 200",
     "PASS escrow: posting moves credits into escrow, none minted, none burned",
@@ -6683,7 +6694,7 @@
    "verdict": "ok",
    "pass": 14,
    "fail": 0,
-   "seeds": "seeds {\"field\":778142057}",
+   "seeds": "seeds {\"field\":902762603}",
    "checks": [
     "PASS wells: 3000 rolled field reads run twin with the demo's own text",
     "PASS wells: a made well is at rest with the demo's shape",
@@ -6709,7 +6720,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"kit\":453017134}",
+   "seeds": "seeds {\"kit\":940716065}",
    "checks": [
     "PASS determinism: twin sim streams from one rolled seed are identical for 5000 draws",
     "PASS determinism: effects draws never move the sim's sequence",
@@ -6726,7 +6737,7 @@
    "verdict": "ok",
    "pass": 6,
    "fail": 0,
-   "seeds": "seeds {\"tables\":186305631}",
+   "seeds": "seeds {\"tables\":532500779}",
    "checks": [
     "PASS contract: two hundred rolled clean tables report nothing",
     "PASS contract: every planted defect is reported, all in one pass, none extra",
@@ -6744,7 +6755,7 @@
    "verdict": "ok",
    "pass": 3,
    "fail": 0,
-   "seeds": "seeds {\"badge\":408371743}",
+   "seeds": "seeds {\"badge\":728059412}",
    "checks": [
     "PASS badge: twin boots of one rolled seed show one number",
     "PASS badge: a different valley shows a different number",
@@ -6759,7 +6770,7 @@
    "verdict": "ok",
    "pass": 8,
    "fail": 0,
-   "seeds": "seeds {\"events\":618932746}",
+   "seeds": "seeds {\"events\":67542659}",
    "checks": [
     "PASS receipts: three hundred rolled ticks — every known event carries its own numbers",
     "PASS receipts: an unknown event still gets an honest line with its numbers",
@@ -6779,7 +6790,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"touch\":868813184}",
+   "seeds": "seeds {\"touch\":195475815}",
    "checks": [
     "PASS pagekit: three hundred rolled taps under the slop all land at their own point",
     "PASS pagekit: a drag past the slop is no tap",
@@ -6796,7 +6807,7 @@
    "verdict": "ok",
    "pass": 11,
    "fail": 0,
-   "seeds": "seeds {\"world\":594483004}",
+   "seeds": "seeds {\"world\":603077689}",
    "checks": [
     "PASS describe: a bad description names every problem in one pass — type, floor, and the stranger",
     "PASS describe: the door refuses whole — no seed, no world",
@@ -6851,7 +6862,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"loads\":207307682}",
+   "seeds": "seeds {\"loads\":501303046}",
    "checks": [
     "PASS envelope: two thousand rolled loads — the root-of-squares over four terms, exact",
     "PASS envelope: compression never tears — any crushing load reads zero",
@@ -6868,7 +6879,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"torque\":673443861}",
+   "seeds": "seeds {\"torque\":961219487}",
    "checks": [
     "PASS actuator: five hundred rolled commands — the clamp holds at the ceiling and saturation tells the truth",
     "PASS actuator: the servo obeys the same ceiling — finite torque at any rolled error",
@@ -6885,7 +6896,7 @@
    "verdict": "ok",
    "pass": 4,
    "fail": 0,
-   "seeds": "seeds {\"loads\":501841073}",
+   "seeds": "seeds {\"loads\":679733336}",
    "checks": [
     "PASS telemetry: three hundred rolled welds — every row is the solver's own numbers, field for field",
     "PASS telemetry: a hinge row carries its angle and its saturation flag",
@@ -6901,7 +6912,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"hits\":411667951}",
+   "seeds": "seeds {\"hits\":529272503}",
    "checks": [
     "PASS opponent: the lethal line holds through every part — over kills, under never",
     "PASS opponent: knockdown by impulse — a part's own drop through its own carry puts a man down, alive",
@@ -6923,7 +6934,7 @@
    "verdict": "ok",
    "pass": 9,
    "fail": 0,
-   "seeds": "seeds {\"scenes\":950392762}",
+   "seeds": "seeds {\"scenes\":850000816}",
    "checks": [
     "PASS senses: sight holds inside the view range and dies past it, any rolled bearing",
     "PASS senses: the cone is the stated width — a hair inside sees, a hair outside never",
@@ -6944,7 +6955,7 @@
    "verdict": "ok",
    "pass": 13,
    "fail": 0,
-   "seeds": "seeds {\"aim\":990246983}",
+   "seeds": "seeds {\"aim\":555883155}",
    "checks": [
     "PASS aim: frozen() is true while armed, false after cancel and after commit",
     "PASS aim: commit emits the demo's tape-action shape per kind, and null when unarmed",
@@ -6969,7 +6980,7 @@
    "verdict": "ok",
    "pass": 5,
    "fail": 0,
-   "seeds": "seeds {\"render2d\":3955932}",
+   "seeds": "seeds {\"render2d\":594990270}",
    "checks": [
     "PASS render2d: a point at the camera's own x,y projects to VCX, VCY plus its own pot dip",
     "PASS render2d: the warp grows monotonically toward a well, fades far out, and stays inside the formula's clamp",
@@ -6986,7 +6997,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"legik\":781296729}",
+   "seeds": "seeds {\"legik\":705069434}",
    "checks": [
     "PASS legik: legFK of legIK returns the target within 1e-9 at rolled reachable targets",
     "PASS legik: an unreachable target reports reach at least 1 and the solved leg spans maxExtend times the full length",
@@ -7005,7 +7016,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"presets\":688192426}",
+   "seeds": "seeds {\"presets\":271033113}",
    "checks": [
     "PASS presets: at a rolled multiplier set every hinge's tauMax, kp, kd, and limits and every body's inertia scale exactly, and invI is the inverse of the scaled ",
     "PASS presets: the verified preset changes nothing",
@@ -7024,7 +7035,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"disc\":3957868596}",
+   "seeds": "seeds {\"disc\":867937662}",
    "checks": [
     "PASS disc: at rolled drags the height is the clamped sum of dy times the source's gain",
     "PASS disc: groundHit's point lies on the plane and on the ray at rolled rays, and a ray parallel to the plane gives null",
@@ -7043,7 +7054,7 @@
    "verdict": "ok",
    "pass": 8,
    "fail": 0,
-   "seeds": "seeds {\"greybox\":884836882}",
+   "seeds": "seeds {\"greybox\":145116514}",
    "checks": [
     "PASS greybox: a stair of rolled steps rises steps times step and runs steps times tread",
     "PASS greybox: a building of rolled floors stands floors times floor tall, and a door is door tall",
@@ -7063,7 +7074,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"cues\":328084409}",
+   "seeds": "seeds {\"cues\":721243805}",
    "checks": [
     "PASS cues: every cue's notes, durations, and offsets are the demo's own",
     "PASS cues: a rolled t0 shifts every note by t0 and offsets never run backward",
@@ -7082,7 +7093,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"selection\":2286175220}",
+   "seeds": "seeds {\"selection\":1839487214}",
    "checks": [
     "PASS selection: bracket size and arm are exact at rolled scales, and the mothership's shape squeezes to 0.15",
     "PASS selection: the bar colour's two branches switch at 0.5 and each is monotone",
@@ -7104,7 +7115,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"touch\":2342512620}",
+   "seeds": "seeds {\"touch\":1885994015}",
    "checks": [
     "PASS touch: a press held past the long-press dial opens the disc and one under it selects",
     "PASS touch: two taps inside the double-tap window open the disc with an auto move, outside it they do not",
@@ -7126,7 +7137,7 @@
    "verdict": "ok",
    "pass": 10,
    "fail": 0,
-   "seeds": "seeds {\"backdrop\":885287305}",
+   "seeds": "seeds {\"backdrop\":2080281057}",
    "checks": [
     "PASS: backdrop: twin backdrops from one rolled seed are identical",
     "PASS: backdrop: the counts are exact per flag",
@@ -7148,7 +7159,7 @@
    "verdict": "ok",
    "pass": 11,
    "fail": 0,
-   "seeds": "seeds {\"gait\":948547790}",
+   "seeds": "seeds {\"gait\":842720108}",
    "checks": [
     "PASS gait: Posture.apply writes each leg's five hinge targets equal to legIK's angles at a rolled pelvis and feet",
     "PASS gait: BalanceController.update on a synthetic support state writes every feed-forward torque inside the law's bound and the stance targets, and airborne wr",
@@ -7171,7 +7182,7 @@
    "verdict": "ok",
    "pass": 19,
    "fail": 0,
-   "seeds": "seeds {\"render3d\":2485852636}",
+   "seeds": "seeds {\"render3d\":522719152}",
    "checks": [
     "PASS render3d: buildMesh of one plain box yields 12 triangles and 12 edge quads, and a panelled box tints deterministically",
     "PASS render3d: bakeLampLight lights nothing behind a wall and lights the facing side in the open",
@@ -7202,7 +7213,7 @@
    "verdict": "ok",
    "pass": 7,
    "fail": 0,
-   "seeds": "seeds {\"yard\":391241604}",
+   "seeds": "seeds {\"yard\":3360921453}",
    "checks": [
     "PASS yard: twin runs from one rolled seed end with one state hash",
     "PASS yard: replay from seed plus tape reproduces the hash",
@@ -7219,9 +7230,9 @@
    "name": "gravitys-ark",
    "script": "scripts/gravitys-ark-test.mjs",
    "verdict": "ok",
-   "pass": 51,
+   "pass": 52,
    "fail": 0,
-   "seeds": "seeds {\"gravitys-ark\":1916684088}",
+   "seeds": "seeds {\"gravitys-ark\":2264320706}",
    "checks": [
     "PASS ark: twin galaxies from one rolled seed are identical",
     "PASS ark: the layout laws hold at rolled seeds",
@@ -7273,9 +7284,10 @@
     "PASS ark: the ship's shapes on the ground are deadweight's at the ground's scale: each kind its own footprint and height, the bay taller than the walker, a stru",
     "PASS ark: the page's screens are their own files hooked into the main file, which draws nothing of space or the ground itself",
     "PASS ark: her own row carries her hit points, coldsnap's riflemen stand guard beside her at the crash and clear of every module, and the summary counts them",
-    "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the "
+    "PASS ark: the field is the ship's: no town, the ship's flag the emitter, the objective at the bridge, held ground from its flag, the gouge behind the hull, the ",
+    "PASS ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart"
    ],
-   "seconds": 10,
+   "seconds": 10.5,
    "tail": "gravitys-ark-test PASS"
   },
   "parts": {
@@ -7310,7 +7322,7 @@
    "verdict": "ok",
    "pass": 6,
    "fail": 0,
-   "seeds": "seeds {\"world\":575450,\"war\":575450}",
+   "seeds": "seeds {\"world\":593659,\"war\":593659}",
    "checks": [
     "PASS spine: the first body of a world is body 1, in every world",
     "PASS spine: ids are dense within a world — the third body is body 3 and the next would be 4",
@@ -7319,7 +7331,7 @@
     "PASS spine: twin boots from one rolled seed hash the same run",
     "PASS spine: the enemy roster carries the same member ids in both boots"
    ],
-   "seconds": 2,
+   "seconds": 1.9,
    "tail": "spine-test PASS"
   }
  },
@@ -7934,10 +7946,10 @@
   ]
  },
  "meta": {
-  "commit": "42fa4a0",
-  "builtAt": "2026-09-10 00:20",
+  "commit": "ffe02d6",
+  "builtAt": "2026-09-10 00:27",
   "gatesRun": 50,
-  "gateSeconds": 244.2,
-  "buildSeconds": 244.6
+  "gateSeconds": 225.3,
+  "buildSeconds": 225.6
  }
 }

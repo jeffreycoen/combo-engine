@@ -1226,6 +1226,13 @@ function rollArkFields(type, i, nWorlds) {
     noTown && flagUp && objective && gouged && felled && held && !G.run.gameOver && !!r1);
 }
 
+{ // 56. ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart
+  const gSeed = rollSeed(), g = makeGalaxy(gSeed), w = g.worlds[0];
+  const G = makeGround(gSeed, w, 900); crashHull(G, makeHull(STARTER_HULL), 10); fieldCrew(G, []);
+  const hb = herBody(G), men = G.guards.flatMap((sq) => sq.memberIds.map((id) => G.world.byId.get(id)));
+  check("ark: she wears her own dress and the guard wears coldsnap's, so the drawing tells them apart", !!hb && hb.dress === "her" && men.length > 0 && men.every((u) => u.dress === "human"));
+}
+
 console.log(`gravitys-ark-test: ${pass} PASS / ${fail} FAIL`);
 if (fail) process.exit(1);
 console.log("gravitys-ark-test PASS");

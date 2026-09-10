@@ -1154,9 +1154,10 @@
    "name": "the ground screen",
    "files": [
     "docs/gravitys-ark/ground.js",
-    "docs/gravitys-ark/hull-look.js"
+    "docs/gravitys-ark/hull-look.js",
+    "docs/gravitys-ark/her-look.js"
    ],
-   "phase": "0.1.2",
+   "phase": "0.1.3",
    "does": "The coldsnap renderer with the hold's rail, in its own file; the ship's look in hull-look.js, deadweight's shapes, glyphs, and colours as solid shapes in coldsnap's scene.",
    "serves": [
     "bay",

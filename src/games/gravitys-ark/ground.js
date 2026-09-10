@@ -238,6 +238,7 @@ export function fieldCrew(G, crew) {
   const at = H ? H.slots[0] : { x: run.focus.x, z: run.focus.z }, r = H ? H.axis.r : { x: 0, z: 1 }, off = (H ? (r.x !== 0 ? H.bodies[0].hx : H.bodies[0].hz) : 0) + d.standOff;   // across the site line, on the bridge's free side, off its face
   const squad = makeSquad(run.nextSquadId++, "her", 1, at.x - r.x * off, at.z - r.z * off);
   spawnSquadMembers(world, squad); run.squads.push(squad);
+  const hb = world.byId.get(squad.memberIds[0]); if (hb) hb.dress = "her";   // her own dress: the purple jumpsuit, coldsnap's own man drawn in her palette
   const guards = [];
   for (let k = 0; k < d.guards; k++) {
     const o = off + d.guardOff + 3 * k;
