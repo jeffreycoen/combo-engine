@@ -24,7 +24,7 @@ d1343049b8e3241e src/games/gravitys-ark/ground.js
 1d0171aefdd6d331 docs/gravitys-ark/ground.js
 3a9ae130d853eac4 scripts/gravitys-ark-test.mjs
 2300f6b3272367d6 README.md
-29101869bb488688 docs/parts/parts-source.json
+a5082b6db1db9435 docs/parts/parts-source.json
 GROUND
 ls docs/gravitys-ark/her-look.js 2>/dev/null || echo absent
 ```
